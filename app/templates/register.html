@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Registrar Usuário{% endblock %}
+{% block content %}
+<div class="container mt-5" style="max-width: 400px;">
+  <h2 class="mb-4">Cadastro</h2>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.username.label }}
+      {{ form.username(class_='form-control') }}
+      {% for error in form.username.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+    </div>
+    <div class="mb-3">
+      {{ form.email.label }}
+      {{ form.email(class_='form-control') }}
+      {% for error in form.email.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+    </div>
+    <div class="mb-3">
+      {{ form.password.label }}
+      {{ form.password(class_='form-control') }}
+      {% for error in form.password.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+    </div>
+    <div class="mb-3">
+      {{ form.password2.label }}
+      {{ form.password2(class_='form-control') }}
+      {% for error in form.password2.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Registrar</button>
+    <div class="mt-2 text-center">
+      <a href="{{ url_for('auth.login') }}">Já tem conta? Entrar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

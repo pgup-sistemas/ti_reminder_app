@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Login | Sistema{% endblock %}
+{% block content %}
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center" 
+     style="background-color: var(--bs-body-bg);">
+  <div class="row justify-content-center w-100">
+    <div class="col-11 col-sm-8 col-md-6 col-lg-4">
+      <div class="card border-0" style="box-shadow: 0 0.5rem 1.5rem rgba(var(--bs-body-bg-rgb), 0.15);">
+        <!-- Logo/Brand section -->
+        <div class="text-center pt-4">
+          <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Logo" height="40" class="mb-2">
+        </div>
+        
+        <!-- Card body with form -->
+        <div class="card-body px-4 py-3">
+          <h2 class="fs-5 mb-3 text-center">Acesso ao Sistema</h2>
+          
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }} py-2 small" role="alert">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+          
+          <form method="POST">
+            {{ form.hidden_tag() }}
+            
+            <div class="mb-3">
+              <label for="{{ form.username.id }}" class="form-label small">Usuário</label>
+              <div class="input-group input-group-sm shadow-sm">
+                <span class="input-group-text border-0 bg-transparent">
+                  <i class="fas fa-user text-muted"></i>
+                </span>
+                {{ form.username(class_='form-control form-control-sm border-0', placeholder='Nome de usuário', autocomplete='username') }}
+              </div>
+              {% for error in form.username.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+            
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <label for="{{ form.password.id }}" class="form-label small">Senha</label>
+                <a href="#" class="text-decoration-none small">Esqueceu?</a>
+              </div>
+              <div class="input-group input-group-sm shadow-sm">
+                <span class="input-group-text border-0 bg-transparent">
+                  <i class="fas fa-lock text-muted"></i>
+                </span>
+                {{ form.password(class_='form-control form-control-sm border-0', placeholder='Sua senha', autocomplete='current-password', id='password-field') }}
+                <button class="btn border-0 bg-transparent" type="button" id="toggle-password">
+                  <i class="fas fa-eye-slash small text-muted" id="toggle-icon"></i>
+                </button>
+              </div>
+              {% for error in form.password.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+            
+            <div class="mb-3 form-check">
+              {{ form.remember_me(class_='form-check-input') }}
+              {{ form.remember_me.label(class_='form-check-label small') }}
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 py-2 mb-3" style="box-shadow: 0 0.25rem 0.75rem rgba(var(--bs-primary-rgb), 0.15);">
+              Entrar
+            </button>
+            
+            <div class="text-center">
+              <span class="small text-muted">Novo usuário?</span>
+              <a href="{{ url_for('auth.register') }}" class="text-decoration-none small">
+                Cadastre-se
+              </a>
+            </div>
+          </form>
+        </div>
+        
+        <!-- Footer with minimal info -->
+        <div class="card-footer bg-transparent border-0 py-2 text-center">
+          <small class="text-muted">&copy; 2025 PageUp sistemas | todos os direitos reservados<br>Desenvolvido por Oézios Normando.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Toggle password visibility
+    const togglePassword = document.getElementById('toggle-password');
+    const passwordField = document.getElementById('password-field');
+    const toggleIcon = document.getElementById('toggle-icon');
+    
+    if (togglePassword && passwordField) {
+      togglePassword.addEventListener('click', function() {
+        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordField.setAttribute('type', type);
+        
+        // Toggle icon
+        toggleIcon.classList.toggle('fa-eye');
+        toggleIcon.classList.toggle('fa-eye-slash');
+      });
+    }
+  });
+</script>
+{% endblock %}
+{% endblock %}

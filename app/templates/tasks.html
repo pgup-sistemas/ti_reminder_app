@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}Lista de Tarefas{% endblock %}
+{% block content %}
+<h1>Tarefas</h1>
+<!-- Filtro e busca -->
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-2">
+    <select name="status" class="form-select">
+      <option value="">Todos status</option>
+      <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pendentes</option>
+      <option value="today" {% if status_filter == 'today' %}selected{% endif %}>Hoje</option>
+      <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>Vencidas</option>
+      <option value="done" {% if status_filter == 'done' %}selected{% endif %}>Concluídas</option>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <input type="text" name="search" class="form-control" placeholder="Buscar descrição ou responsável" value="{{ search }}">
+  </div>
+  <div class="col-md-2">
+    <input type="date" name="date" class="form-control" value="{{ date_filter }}">
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+  </div>
+  <div class="col-md-2">
+    <a href="{{ url_for('main.tasks') }}" class="btn btn-secondary w-100">Limpar</a>
+  </div>
+</form>
+<!-- Legenda dos ícones/status -->
+<div class="mb-2">
+  <span class="badge bg-danger"><i class="fas fa-exclamation-circle"></i> Vencida</span>
+  <span class="badge bg-warning text-dark"><i class="fas fa-calendar-day"></i> Hoje</span>
+  <span class="badge bg-success"><i class="fas fa-check-circle"></i> Concluída</span>
+</div>
+<!-- Formulário de Cadastro de Tarefas -->
+{% if edit_id %}
+  <div class="alert alert-warning">Editando tarefa. <a href="{{ url_for('main.tasks') }}">Cancelar edição</a></div>
+{% endif %}
+<div class="card mb-3">
+  <div class="card-body">
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      <div class="row">
+        <div class="col-md-5 mb-2">
+          {{ form.description.label }}{{ form.description(class_='form-control') }}
+          {% for error in form.description.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-2 mb-2">
+          {{ form.date.label }}{{ form.date(class_='form-control') }}
+          {% for error in form.date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-3 mb-2">
+          {{ form.responsible.label }}{{ form.responsible(class_='form-control') }}
+          {% for error in form.responsible.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-2 mb-2">
+          {{ form.sector_id.label }}{{ form.sector_id(class_='form-select') }}
+          {% for error in form.sector_id.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          <small class="text-muted">Ou cadastre um novo setor abaixo</small>
+          {{ form.new_sector(class_='form-control mt-1', placeholder='Novo setor') }}
+        </div>
+        <div class="col-md-1 mb-2 d-flex align-items-end">
+          {{ form.completed.label }}{{ form.completed(class_='form-check-input') }}
+          {% for error in form.completed.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-1 mb-2 d-flex align-items-end">
+          {% if edit_id %}
+            <button type="submit" class="btn btn-warning w-100 p-2">Atualizar</button>
+          {% else %}
+            {{ form.submit(class_='btn btn-success w-100') }}
+          {% endif %}
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<div style="max-height: 400px; overflow-y: auto;">
+<div style="max-height: 400px; overflow-y: auto;">
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Descrição</th><th>Data</th><th>Responsável</th><th>Setor</th><th>Concluída</th><th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for task in tasks %}
+    <tr class="
+      {% if task.status == 'expired' %}table-danger{% elif task.status == 'today' %}table-warning{% elif task.status == 'done' %}table-success{% endif %}">
+      <td>
+        {% if task.status == 'expired' %}<span title="Vencida"><i class="fas fa-exclamation-circle"></i></span> {% elif task.status == 'today' %}<span title="Hoje"><i class="fas fa-calendar-day"></i></span> {% elif task.status == 'done' %}<span title="Concluída"><i class="fas fa-check-circle"></i></span> {% endif %}
+        {{ task.description }}
+      </td>
+      <td>{{ task.date }}</td>
+      <td>{{ task.responsible }}</td>
+      <td>{{ task.sector.name if task.sector else '' }}</td>
+      <td class="text-center">
+        {% if task.completed %}
+          <span class="text-success" title="Concluída"><i class="fas fa-check-circle"></i></span>
+        {% elif task.date < current_date %}
+          <span class="text-danger" title="Vencida"><i class="fas fa-exclamation-circle"></i></span>
+        {% elif task.date == current_date %}
+          <span class="text-warning" title="Hoje"><i class="fas fa-calendar-day"></i></span>
+        {% else %}
+          <span class="text-secondary" title="Futura"><i class="fas fa-clock"></i></span>
+        {% endif %}
+      </td>
+      <td>
+        <a href="{{ url_for('main.edit_task', id=task.id) }}" class="btn btn-sm btn-warning">Editar</a>
+        {% if not task.completed %}
+        <form method="POST" action="{{ url_for('main.complete_task', id=task.id) }}" style="display:inline;">
+          <button type="submit" class="btn btn-sm btn-success">Marcar</button>
+        </form>
+        {% endif %}
+        <form method="POST" action="{{ url_for('main.delete_task', id=task.id) }}" style="display:inline;">
+          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir esta tarefa?');">Excluir</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">Nenhuma tarefa encontrada.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+<!-- Paginação -->
+{% if pagination.pages > 1 %}
+<nav aria-label="Paginação de tarefas">
+  <ul class="pagination justify-content-center mt-3">
+    {% if pagination.has_prev %}
+      <li class="page-item"><a class="page-link" href="{{ url_for('main.tasks', page=pagination.prev_num) }}">Anterior</a></li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+    {% endif %}
+    {% for p in range(1, pagination.pages + 1) %}
+      {% if p == pagination.page %}
+        <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+      {% else %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('main.tasks', page=p) }}">{{ p }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}
+      <li class="page-item"><a class="page-link" href="{{ url_for('main.tasks', page=pagination.next_num) }}">Próxima</a></li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Próxima</span></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

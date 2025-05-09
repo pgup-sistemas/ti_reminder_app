@@ -1,0 +1,465 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard de Relatórios{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 mb-5">
+  <!-- Cabeçalho -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="card-title mb-0">Dashboard de Relatórios</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Filtros</h5>
+        </div>
+        <div class="card-body">
+          <form class="row g-3" method="get" action="">
+            <div class="col-lg-2 col-md-4 col-sm-6">
+              <label for="task_status" class="form-label">Status das Tarefas</label>
+              <select id="task_status" name="task_status" class="form-select">
+                <option value="">Todas tarefas</option>
+                <option value="done" {% if request.args.get('task_status') == 'done' %}selected{% endif %}>Concluídas</option>
+                <option value="pending" {% if request.args.get('task_status') == 'pending' %}selected{% endif %}>Pendentes</option>
+                <option value="expired" {% if request.args.get('task_status') == 'expired' %}selected{% endif %}>Vencidas</option>
+              </select>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+              <label for="reminder_status" class="form-label">Status dos Lembretes</label>
+              <select id="reminder_status" name="reminder_status" class="form-select">
+                <option value="">Todos lembretes</option>
+                <option value="done" {% if request.args.get('reminder_status') == 'done' %}selected{% endif %}>Realizados</option>
+                <option value="pending" {% if request.args.get('reminder_status') == 'pending' %}selected{% endif %}>Pendentes</option>
+              </select>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+              <label for="start_date" class="form-label">Data Inicial</label>
+              <input type="date" id="start_date" name="start_date" class="form-control" value="{{ request.args.get('start_date', '') }}">
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+              <label for="end_date" class="form-label">Data Final</label>
+              <input type="date" id="end_date" name="end_date" class="form-control" value="{{ request.args.get('end_date', '') }}">
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+              <label for="sector_id" class="form-label">Setor</label>
+              <select id="sector_id" name="sector_id" class="form-select">
+                <option value="">Todos setores</option>
+                {% for sector in sectors %}
+                  <option value="{{ sector.id }}" {% if sector.id == selected_sector %}selected{% endif %}>{{ sector.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {% if session.is_admin %}
+            <div class="col-lg-2 col-md-4 col-sm-6">
+              <label for="user_id" class="form-label">Usuário</label>
+              <select id="user_id" name="user_id" class="form-select">
+                <option value="">Todos usuários</option>
+                {% for user in users %}
+                  <option value="{{ user.id }}" {% if user.id == selected_user %}selected{% endif %}>{{ user.username }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {% endif %}
+            <div class="col-12 mt-3">
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-filter"></i> Aplicar Filtros
+                </button>
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
+                  <i class="bi bi-x-circle"></i> Limpar Filtros
+                </a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exportação -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Exportar Relatórios</h5>
+        </div>
+        <div class="card-body">
+          <form class="row g-3" method="get" action="">
+            <input type="hidden" name="task_status" value="{{ request.args.get('task_status', '') }}">
+            <input type="hidden" name="reminder_status" value="{{ request.args.get('reminder_status', '') }}">
+            <input type="hidden" name="start_date" value="{{ request.args.get('start_date', '') }}">
+            <input type="hidden" name="end_date" value="{{ request.args.get('end_date', '') }}">
+            <input type="hidden" name="sector_id" value="{{ request.args.get('sector_id', '') }}">
+            <input type="hidden" name="user_id" value="{{ request.args.get('user_id', '') }}">
+            
+            <div class="col-md-4">
+              <label for="export_type" class="form-label">Tipo de Exportação</label>
+              <select id="export_type" name="export_type" class="form-select">
+                <option value="all">Tarefas e Lembretes</option>
+                <option value="tasks" {% if request.args.get('export_type') == 'tasks' %}selected{% endif %}>Somente Tarefas</option>
+                <option value="reminders" {% if request.args.get('export_type') == 'reminders' %}selected{% endif %}>Somente Lembretes</option>
+              </select>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">Formatos Disponíveis</label>
+              <div class="d-flex gap-2">
+                <button type="submit" formaction="{{ url_for('main.export_excel') }}" class="btn btn-success">
+                  <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+                </button>
+                <button type="submit" formaction="{{ url_for('main.export_pdf') }}" class="btn btn-danger">
+                  <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cards de resumo -->
+  <div class="row mb-4">
+    <!-- Card de Tarefas -->
+    <div class="col-md-6 mb-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Resumo de Tarefas</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3" style="width: 100%; max-width: 220px; margin: 0 auto;">
+                <canvas id="grafico_tarefas" height="220"></canvas>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Total
+                  <span class="badge bg-primary rounded-pill">{{ tasks_total }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Concluídas
+                  <span class="badge bg-success rounded-pill">{{ tasks_done }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Pendentes
+                  <span class="badge bg-danger rounded-pill">{{ tasks_pending }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Vencidas
+                  <span class="badge bg-warning text-dark rounded-pill">{{ tasks_expired }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Card de Lembretes -->
+    <div class="col-md-6 mb-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Resumo de Lembretes</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3" style="width: 100%; max-width: 220px; margin: 0 auto;">
+                <canvas id="grafico_lembretes" height="220"></canvas>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Total
+                  <span class="badge bg-primary rounded-pill">{{ reminders_total }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Realizados
+                  <span class="badge bg-success rounded-pill">{{ reminders_done }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Pendentes
+                  <span class="badge bg-danger rounded-pill">{{ reminders_pending }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficos Detalhados -->
+  <div class="row mb-4">
+    <!-- Gráfico de Linha -->
+    <div class="col-lg-6 mb-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Evolução Mensal</h5>
+        </div>
+        <div class="card-body">
+          <div style="width: 100%; height: 300px;">
+            <canvas id="grafico_linha"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Gráfico de Barra -->
+    <div class="col-lg-6 mb-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Distribuição por Setor</h5>
+        </div>
+        <div class="card-body">
+          <div style="width: 100%; height: 300px;">
+            <canvas id="grafico_barra"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts do Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Configuração para os gráficos de pizza
+  const tarefasData = {
+    labels: ['Concluídas', 'Pendentes', 'Vencidas'],
+    datasets: [{
+      data: [{{ tasks_done }}, {{ tasks_pending }}, {{ tasks_expired }}],
+      backgroundColor: ['#198754', '#dc3545', '#ffc107'],
+      borderWidth: 1
+    }]
+  };
+  
+  const lembretesData = {
+    labels: ['Realizados', 'Pendentes'],
+    datasets: [{
+      data: [{{ reminders_done }}, {{ reminders_pending }}],
+      backgroundColor: ['#198754', '#dc3545'],
+      borderWidth: 1
+    }]
+  };
+  
+  new Chart(document.getElementById('grafico_tarefas'), {
+    type: 'pie',
+    data: tarefasData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 12,
+            padding: 15
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const label = context.label || '';
+              const value = context.raw || 0;
+              const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+              const percentage = Math.round((value / total) * 100);
+              return `${label}: ${value} (${percentage}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+  
+  new Chart(document.getElementById('grafico_lembretes'), {
+    type: 'pie',
+    data: lembretesData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 12,
+            padding: 15
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const label = context.label || '';
+              const value = context.raw || 0;
+              const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+              const percentage = Math.round((value / total) * 100);
+              return `${label}: ${value} (${percentage}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+  
+  // Gráfico de Linha: Evolução mensal
+  const mesesLabels = {{ meses_labels|tojson }};
+  const tarefasPorMes = {{ tarefas_por_mes|tojson }};
+  const tarefasConcluidasPorMes = {{ tarefas_concluidas_por_mes|tojson }};
+  const lembretesPorMes = {{ lembretes_por_mes|tojson }};
+  const lembretesRealizadosPorMes = {{ lembretes_realizados_por_mes|tojson }};
+  
+  new Chart(document.getElementById('grafico_linha'), {
+    type: 'line',
+    data: {
+      labels: mesesLabels,
+      datasets: [
+        {
+          label: 'Tarefas Criadas',
+          data: tarefasPorMes,
+          borderColor: '#0d6efd',
+          backgroundColor: 'rgba(13,110,253,0.1)',
+          borderWidth: 2,
+          fill: false,
+          tension: 0.3,
+          pointRadius: 3,
+          pointHoverRadius: 5
+        },
+        {
+          label: 'Tarefas Concluídas',
+          data: tarefasConcluidasPorMes,
+          borderColor: '#198754',
+          backgroundColor: 'rgba(25,135,84,0.1)',
+          borderWidth: 2,
+          fill: false,
+          tension: 0.3,
+          pointRadius: 3,
+          pointHoverRadius: 5
+        },
+        {
+          label: 'Lembretes Criados',
+          data: lembretesPorMes,
+          borderColor: '#ffc107',
+          backgroundColor: 'rgba(255,193,7,0.1)',
+          borderWidth: 2,
+          fill: false,
+          tension: 0.3,
+          pointRadius: 3,
+          pointHoverRadius: 5
+        },
+        {
+          label: 'Lembretes Realizados',
+          data: lembretesRealizadosPorMes,
+          borderColor: '#dc3545',
+          backgroundColor: 'rgba(220,53,69,0.1)',
+          borderWidth: 2,
+          fill: false,
+          tension: 0.3,
+          pointRadius: 3,
+          pointHoverRadius: 5
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 12,
+            padding: 15
+          }
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            drawBorder: false
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
+        }
+      },
+      interaction: {
+        mode: 'nearest',
+        axis: 'x',
+        intersect: false
+      }
+    }
+  });
+  
+  // Gráfico de Barra: Distribuição por setor
+  const setoresLabels = {{ setores_labels|tojson }};
+  const tarefasPorSetor = {{ tarefas_por_setor|tojson }};
+  const lembretesPorSetor = {{ lembretes_por_setor|tojson }};
+  
+  new Chart(document.getElementById('grafico_barra'), {
+    type: 'bar',
+    data: {
+      labels: setoresLabels,
+      datasets: [
+        {
+          label: 'Tarefas',
+          data: tarefasPorSetor,
+          backgroundColor: 'rgba(13,110,253,0.7)',
+          borderColor: '#0d6efd',
+          borderWidth: 1,
+          borderRadius: 4
+        },
+        {
+          label: 'Lembretes',
+          data: lembretesPorSetor,
+          backgroundColor: 'rgba(255,193,7,0.7)',
+          borderColor: '#ffc107',
+          borderWidth: 1,
+          borderRadius: 4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 12,
+            padding: 15
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            drawBorder: false
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

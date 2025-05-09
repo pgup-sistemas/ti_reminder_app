@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Resumo Geral<script>
+// Atualiza a página a cada 3 minutos (180000 ms)
+setInterval(function() {
+    window.location.reload();
+}, 180000);
+</script>
+{% endblock %}
+{% block content %}
+<h1>Resumo Geral</h1>
+<div class="row">
+  <div class="col-md-4">
+    <div class="card text-white bg-success mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Lembretes Ativos</h5>
+        <p class="card-text">{{ reminders_count }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <h3>Lembretes do Dia</h3>
+    <div class="mb-2">
+      <span class="badge bg-danger"><i class="fas fa-clock"></i> Pendente</span>
+      <span class="badge bg-success"><i class="fas fa-check-circle"></i> Realizado</span>
+    </div>
+    <strong>Pendentes</strong>
+    <ul class="list-group mb-2">
+      {% for reminder in reminders_today_pend %}
+        <li class="list-group-item">
+          <span class="text-danger" title="Pendente"><i class="fas fa-clock"></i></span>
+          {{ reminder.name }} - <span>{{ reminder.responsible }}</span>
+        </li>
+      {% else %}
+        <li class="list-group-item">Nenhum lembrete pendente para hoje.</li>
+      {% endfor %}
+    </ul>
+    <strong>Realizados</strong>
+    <ul class="list-group">
+      {% for reminder in reminders_today_done %}
+        <li class="list-group-item">
+          <span class="text-success" title="Realizado"><i class="fas fa-check-circle"></i></span>
+          {{ reminder.name }} - <span class="text-secondary">{{ reminder.responsible }}</span>
+        </li>
+      {% else %}
+        <li class="list-group-item">Nenhum lembrete realizado hoje.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="col-md-4">
+    <h3>Tarefas do Dia</h3>
+    <div class="mb-2">
+      <span class="badge bg-danger"><i class="fas fa-clock"></i> Pendente</span>
+      <span class="badge bg-success"><i class="fas fa-check-circle"></i> Concluída</span>
+    </div>
+    <strong>Pendentes</strong>
+    <ul class="list-group mb-2">
+      {% for task in tasks_today_pend %}
+        <li class="list-group-item">
+          <span class="text-danger" title="Pendente"><i class="fas fa-clock"></i></span>
+          {{ task.description }} - <span>{{ task.responsible }}</span>
+        </li>
+      {% else %}
+        <li class="list-group-item">Nenhuma tarefa pendente para hoje.</li>
+      {% endfor %}
+    </ul>
+    <strong>Concluídas</strong>
+    <ul class="list-group">
+      {% for task in tasks_today_done %}
+        <li class="list-group-item">
+          <span class="text-success" title="Concluída"><i class="fas fa-check-circle"></i></span>
+          {{ task.description }} - <span class="text-secondary">{{ task.responsible }}</span>
+        </li>
+      {% else %}
+        <li class="list-group-item">Nenhuma tarefa concluída hoje.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+<script>
+// Atualiza a página a cada 3 minutos (180000 ms)
+setInterval(function() {
+    window.location.reload();
+}, 180000);
+</script>
+{% endblock %}

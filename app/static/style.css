@@ -1,0 +1,24 @@
+html, body {
+  height: 100%;
+}
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 40px;
+}
+.container {
+  flex: 1 0 auto;
+  overflow-y: auto;
+  max-width: 100vw;
+}
+.card {
+  margin-bottom: 20px;
+}
+
+/* Garante rolagem mesmo com footer fixo */
+@media (max-width: 991.98px) {
+  .container {
+    padding-bottom: 60px;
+  }
+}

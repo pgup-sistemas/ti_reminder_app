@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% block title %}Gestão de Lembretes<script>
+function renderStatus(reminder) {
+    if(reminder.completed) {
+        return '<span class="badge bg-primary">✔️ Realizado</span>';
+    } else if(reminder.status === 'ok') {
+        return '<span class="badge bg-success">✅ Ok</span>';
+    } else if(reminder.status === 'alert') {
+        return '<span class="badge bg-warning text-dark">⚠️ Em breve</span>';
+    } else if(reminder.status === 'expired') {
+        return '<span class="badge bg-danger">⏰ Vencido</span>';
+    }
+    return '';
+}
+
+function renderActions(reminder) {
+    let actions = `<a href="/reminders/edit/${reminder.id}" class="btn btn-sm btn-warning">Editar</a> `;
+    if (!reminder.completed) {
+        actions += `<form method="POST" action="/reminders/complete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-success">Finalizar</button></form> `;
+    }
+    actions += `<form method="POST" action="/reminders/delete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir este lembrete?');">Excluir</button></form>`;
+    return actions;
+}
+
+function updateRemindersTable() {
+    fetch('/reminders/json')
+      .then(response => response.json())
+      .then(data => {
+        const reminders = data.reminders;
+        const tbody = document.querySelector('table.table tbody');
+        if (!tbody) return;
+        if (reminders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7">Nenhum lembrete cadastrado.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = reminders.map(reminder => `
+          <tr class="${reminder.completed ? 'table-success' : ''}">
+            <td>${reminder.name}</td>
+            <td>${reminder.type}</td>
+            <td>${reminder.due_date}</td>
+            <td>${reminder.responsible}</td>
+            <td>${reminder.frequency || ''}</td>
+            <td>${reminder.sector || ''}</td>
+            <td>${renderStatus(reminder)}</td>
+            <td>${renderActions(reminder)}</td>
+          </tr>
+        `).join('');
+      });
+}
+// Atualiza a cada 3 minutos (180000 ms)
+setInterval(updateRemindersTable, 180000);
+// Atualiza ao carregar a página também
+window.addEventListener('DOMContentLoaded', updateRemindersTable);
+</script>
+{% endblock %}
+{% block content %}
+<h1>Lembretes</h1>
+<!-- Formulário de Cadastro/Edição de Lembretes -->
+{% if edit_id %}
+  <div class="alert alert-warning">Editando lembrete. <a href="{{ url_for('main.reminders') }}">Cancelar edição</a></div>
+{% endif %}
+<div class="card mb-3">
+  <div class="card-body">
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      <div class="row">
+        <div class="col-md-3 mb-2">
+          {{ form.name.label }}{{ form.name(class_='form-control') }}
+          {% for error in form.name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-2 mb-2">
+          {{ form.type.label }}{{ form.type(class_='form-control') }}
+          {% for error in form.type.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-2 mb-2">
+          {{ form.due_date.label }}{{ form.due_date(class_='form-control') }}
+          {% for error in form.due_date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-2 mb-2">
+          {{ form.responsible.label }}{{ form.responsible(class_='form-control') }}
+          {% for error in form.responsible.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-2 mb-2">
+          {{ form.frequency.label }}{{ form.frequency(class_='form-select') }}
+          {% for error in form.frequency.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-2 mb-2">
+          {{ form.sector_id.label }}{{ form.sector_id(class_='form-select') }}
+          {% for error in form.sector_id.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          <small class="text-muted">Ou cadastre um novo setor abaixo</small>
+          {{ form.new_sector(class_='form-control mt-1', placeholder='Novo setor') }}
+        </div>
+        <div class="col-md-1 mb-2 d-flex align-items-end">{{ form.submit(class_='btn btn-success w-100') }}</div>
+      </div>
+    </form>
+  </div>
+</div>
+<div style="max-height: 400px; overflow-y: auto;">
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Nome</th><th>Tipo</th><th>Vencimento</th><th>Responsável</th><th>Frequência</th><th>Setor</th><th>Status</th><th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for reminder in reminders %}
+    <tr class="{% if reminder.completed %}table-success{% endif %}">
+      <td>{{ reminder.name }}</td>
+      <td>{{ reminder.type }}</td>
+      <td>{{ reminder.due_date }}</td>
+      <td>{{ reminder.responsible }}</td>
+      <td>{{ reminder.frequency }}</td>
+      <td>{{ reminder.sector.name if reminder.sector else '' }}</td>
+      <td>{{ reminder.due_date }}</td>
+      <td>{{ reminder.responsible }}</td>
+      <td>{{ reminder.frequency }}</td>
+      <td>
+        {% if reminder.completed %}
+          <span class="badge bg-primary">✔️ Realizado</span>
+        {% elif reminder.status == 'ok' %}
+          <span class="badge bg-success">✅ Ok</span>
+        {% elif reminder.status == 'alert' %}
+          <span class="badge bg-warning text-dark">⚠️ Em breve</span>
+        {% elif reminder.status == 'expired' %}
+          <span class="badge bg-danger">⏰ Vencido</span>
+        {% endif %}
+      </td>
+      <td>
+        <a href="{{ url_for('main.edit_reminder', id=reminder.id) }}" class="btn btn-sm btn-warning">Editar</a>
+        {% if not reminder.completed %}
+        <form method="POST" action="{{ url_for('main.complete_reminder', id=reminder.id) }}" style="display:inline;">
+          <button type="submit" class="btn btn-sm btn-success">Finalizar</button>
+        </form>
+        {% endif %}
+        <form method="POST" action="{{ url_for('main.delete_reminder', id=reminder.id) }}" style="display:inline;">
+          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir este lembrete?');">Excluir</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7">Nenhum lembrete cadastrado.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+<script>
+function renderStatus(reminder) {
+    if(reminder.completed) {
+        return '<span class="badge bg-primary">✔️ Realizado</span>';
+    } else if(reminder.status === 'ok') {
+        return '<span class="badge bg-success">✅ Ok</span>';
+    } else if(reminder.status === 'alert') {
+        return '<span class="badge bg-warning text-dark">⚠️ Em breve</span>';
+    } else if(reminder.status === 'expired') {
+        return '<span class="badge bg-danger">⏰ Vencido</span>';
+    }
+    return '';
+}
+
+function renderActions(reminder) {
+    let actions = `<a href="/reminders/edit/${reminder.id}" class="btn btn-sm btn-warning">Editar</a> `;
+    if (!reminder.completed) {
+        actions += `<form method="POST" action="/reminders/complete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-success">Finalizar</button></form> `;
+    }
+    actions += `<form method="POST" action="/reminders/delete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir este lembrete?');">Excluir</button></form>`;
+    return actions;
+}
+
+function updateRemindersTable() {
+    fetch('/reminders/json')
+      .then(response => response.json())
+      .then(data => {
+        const reminders = data.reminders;
+        const tbody = document.querySelector('table.table tbody');
+        if (!tbody) return;
+        if (reminders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7">Nenhum lembrete cadastrado.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = reminders.map(reminder => `
+          <tr class="${reminder.completed ? 'table-success' : ''}">
+            <td>${reminder.name}</td>
+            <td>${reminder.type}</td>
+            <td>${reminder.due_date}</td>
+            <td>${reminder.responsible}</td>
+            <td>${reminder.frequency || ''}</td>
+            <td>${reminder.sector || ''}</td>
+            <td>${renderStatus(reminder)}</td>
+            <td>${renderActions(reminder)}</td>
+          </tr>
+        `).join('');
+      });
+}
+// Atualiza a cada 3 minutos (180000 ms)
+setInterval(updateRemindersTable, 180000);
+// Atualiza ao carregar a página também
+window.addEventListener('DOMContentLoaded', updateRemindersTable);
+</script>
+{% endblock %}
