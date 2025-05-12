@@ -1,58 +1,60 @@
 {% extends 'base.html' %}
-{% block title %}Gestão de Lembretes<script>
-function renderStatus(reminder) {
-    if(reminder.completed) {
-        return '<span class="badge bg-primary">✔️ Realizado</span>';
-    } else if(reminder.status === 'ok') {
-        return '<span class="badge bg-success">✅ Ok</span>';
-    } else if(reminder.status === 'alert') {
-        return '<span class="badge bg-warning text-dark">⚠️ Em breve</span>';
-    } else if(reminder.status === 'expired') {
-        return '<span class="badge bg-danger">⏰ Vencido</span>';
-    }
-    return '';
-}
+{% block title %}Gestão de Lembretes | TI reminder {% endblock %}
 
-function renderActions(reminder) {
-    let actions = `<a href="/reminders/edit/${reminder.id}" class="btn btn-sm btn-warning">Editar</a> `;
-    if (!reminder.completed) {
-        actions += `<form method="POST" action="/reminders/complete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-success">Finalizar</button></form> `;
-    }
-    actions += `<form method="POST" action="/reminders/delete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir este lembrete?');">Excluir</button></form>`;
-    return actions;
-}
+<script>
+  function renderStatus(reminder) {
+      if(reminder.completed) {
+          return '<span class="badge bg-primary">✔️ Realizado</span>';
+      } else if(reminder.status === 'ok') {
+          return '<span class="badge bg-success">✅ Ok</span>';
+      } else if(reminder.status === 'alert') {
+          return '<span class="badge bg-warning text-dark">⚠️ Em breve</span>';
+      } else if(reminder.status === 'expired') {
+          return '<span class="badge bg-danger">⏰ Vencido</span>';
+      }
+      return '';
+  }
 
-function updateRemindersTable() {
-    fetch('/reminders/json')
-      .then(response => response.json())
-      .then(data => {
-        const reminders = data.reminders;
-        const tbody = document.querySelector('table.table tbody');
-        if (!tbody) return;
-        if (reminders.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7">Nenhum lembrete cadastrado.</td></tr>';
-          return;
-        }
-        tbody.innerHTML = reminders.map(reminder => `
-          <tr class="${reminder.completed ? 'table-success' : ''}">
-            <td>${reminder.name}</td>
-            <td>${reminder.type}</td>
-            <td>${reminder.due_date}</td>
-            <td>${reminder.responsible}</td>
-            <td>${reminder.frequency || ''}</td>
-            <td>${reminder.sector || ''}</td>
-            <td>${renderStatus(reminder)}</td>
-            <td>${renderActions(reminder)}</td>
-          </tr>
-        `).join('');
-      });
-}
-// Atualiza a cada 3 minutos (180000 ms)
-setInterval(updateRemindersTable, 180000);
-// Atualiza ao carregar a página também
-window.addEventListener('DOMContentLoaded', updateRemindersTable);
+  function renderActions(reminder) {
+      let actions = `<a href="/reminders/edit/${reminder.id}" class="btn btn-sm btn-warning">Editar</a> `;
+      if (!reminder.completed) {
+          actions += `<form method="POST" action="/reminders/complete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-success">Finalizar</button></form> `;
+      }
+      actions += `<form method="POST" action="/reminders/delete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir este lembrete?');">Excluir</button></form>`;
+      return actions;
+  }
+
+  function updateRemindersTable() {
+      fetch('/reminders/json')
+        .then(response => response.json())
+        .then(data => {
+          const reminders = data.reminders;
+          const tbody = document.querySelector('table.table tbody');
+          if (!tbody) return;
+          if (reminders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7">Nenhum lembrete cadastrado.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = reminders.map(reminder => `
+            <tr class="${reminder.completed ? 'table-success' : ''}">
+              <td>${reminder.name}</td>
+              <td>${reminder.type}</td>
+              <td>${reminder.due_date}</td>
+              <td>${reminder.responsible}</td>
+              <td>${reminder.frequency || ''}</td>
+              <td>${reminder.sector || ''}</td>
+              <td>${renderStatus(reminder)}</td>
+              <td>${renderActions(reminder)}</td>
+            </tr>
+          `).join('');
+        });
+  }
+  // Atualiza a cada 3 minutos (180000 ms)
+  setInterval(updateRemindersTable, 180000);
+  // Atualiza ao carregar a página também
+  window.addEventListener('DOMContentLoaded', updateRemindersTable);
 </script>
-{% endblock %}
+
 {% block content %}
 <h1>Lembretes</h1>
 <!-- Formulário de Cadastro/Edição de Lembretes -->

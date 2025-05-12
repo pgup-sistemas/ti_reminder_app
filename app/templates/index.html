@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}Resumo Geral<script>
-// Atualiza a página a cada 3 minutos (180000 ms)
+{% block title %}Resumo Geral | TI Reminder {% endblock %}
+
+<script>
 setInterval(function() {
     window.location.reload();
 }, 180000);
 </script>
-{% endblock %}
+
 {% block content %}
 <h1>Resumo Geral</h1>
 <div class="row">
@@ -75,6 +76,7 @@ setInterval(function() {
       {% endfor %}
     </ul>
   </div>
+
 </div>
 <script>
 // Atualiza a página a cada 3 minutos (180000 ms)
