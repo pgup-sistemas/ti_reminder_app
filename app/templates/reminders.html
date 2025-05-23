@@ -3,26 +3,28 @@
 
 <script>
   function renderStatus(reminder) {
-      if(reminder.completed) {
-          return '<span class="badge bg-primary">✔️ Realizado</span>';
-      } else if(reminder.status === 'ok') {
-          return '<span class="badge bg-success">✅ Ok</span>';
-      } else if(reminder.status === 'alert') {
-          return '<span class="badge bg-warning text-dark">⚠️ Em breve</span>';
-      } else if(reminder.status === 'expired') {
-          return '<span class="badge bg-danger">⏰ Vencido</span>';
-      }
-      return '';
-  }
+    if(reminder.completed) {
+        return '<span class="badge bg-success d-flex align-items-center gap-1"><i class="fas fa-check-circle"></i> Concluído</span>';
+    } else if(reminder.status === 'ok') {
+        return '<span class="badge bg-primary d-flex align-items-center gap-1"><i class="fas fa-check"></i> Ok</span>';
+    } else if(reminder.status === 'alert') {
+        return '<span class="badge bg-warning text-dark d-flex align-items-center gap-1"><i class="fas fa-calendar-day"></i> Em breve</span>';
+    } else if(reminder.status === 'expired') {
+        return '<span class="badge bg-danger d-flex align-items-center gap-1"><i class="fas fa-exclamation-circle"></i> Vencido</span>';
+    }
+    return '<span class="badge bg-secondary d-flex align-items-center gap-1"><i class="fas fa-clock"></i> Pendente</span>';
+}
 
   function renderActions(reminder) {
-      let actions = `<a href="/reminders/edit/${reminder.id}" class="btn btn-sm btn-warning">Editar</a> `;
-      if (!reminder.completed) {
-          actions += `<form method="POST" action="/reminders/complete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-success">Finalizar</button></form> `;
-      }
-      actions += `<form method="POST" action="/reminders/delete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir este lembrete?');">Excluir</button></form>`;
-      return actions;
-  }
+    let actions = `<div class='d-flex gap-1'>`;
+    actions += `<a href="/reminders/edit/${reminder.id}" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"> </i></a>`;
+    if (!reminder.completed) {
+        actions += `<form method="POST" action="/reminders/complete/${reminder.id}" class="d-inline"><button type="submit"class="btn btn-sm btn-success"title="Finalizar"><i class="fas fa-check"> </i></button></form>`;
+    }
+    actions += `<form method="POST" action="/reminders/delete/${reminder.id}" class="d-inline"><button type="submit"class="btn btn-sm btn-danger"onclick="return confirm('Excluir este lembrete?');"title="Excluir"><i class="fas fa-trash-alt"></i></button></form>`;
+    actions += `</div>`;
+    return actions;
+}
 
   function updateRemindersTable() {
       fetch('/reminders/json')
@@ -56,7 +58,7 @@
 </script>
 
 {% block content %}
-<h1>Lembretes</h1>
+<h1 class="mt-2 mb-3" style="padding-top:0.5rem;"><i class="fas fa-bell me-2"></i>Lembretes</h1>
 <!-- Formulário de Cadastro/Edição de Lembretes -->
 {% if edit_id %}
   <div class="alert alert-warning">Editando lembrete. <a href="{{ url_for('main.reminders') }}">Cancelar edição</a></div>
@@ -97,11 +99,18 @@
     </form>
   </div>
 </div>
-<div style="max-height: 400px; overflow-y: auto;">
-<table class="table table-bordered">
-  <thead>
+<div class="table-responsive" style="max-height: 400px;">
+<table class="table table-bordered align-middle mb-0">
+  <thead class="table-light">
     <tr>
-      <th>Nome</th><th>Tipo</th><th>Vencimento</th><th>Responsável</th><th>Frequência</th><th>Setor</th><th>Status</th><th>Ações</th>
+      <th><i class="fas fa-clipboard-list"></i> Nome</th>
+      <th><i class="fas fa-tag"></i> Tipo</th>
+      <th><i class="fas fa-calendar-alt"></i> Vencimento</th>
+      <th><i class="fas fa-user"></i> Responsável</th>
+      <th><i class="fas fa-sync-alt"></i> Frequência</th>
+      <th><i class="fas fa-sitemap"></i> Setor</th>
+      <th><i class="fas fa-info-circle"></i> Status</th>
+      <th><i class="fas fa-cogs"></i> Ações</th>
     </tr>
   </thead>
   <tbody>
@@ -113,34 +122,35 @@
       <td>{{ reminder.responsible }}</td>
       <td>{{ reminder.frequency }}</td>
       <td>{{ reminder.sector.name if reminder.sector else '' }}</td>
-      <td>{{ reminder.due_date }}</td>
-      <td>{{ reminder.responsible }}</td>
-      <td>{{ reminder.frequency }}</td>
       <td>
         {% if reminder.completed %}
-          <span class="badge bg-primary">✔️ Realizado</span>
+          <span class="badge bg-success d-flex align-items-center gap-1"><i class="fas fa-check-circle"></i> Concluído</span>
         {% elif reminder.status == 'ok' %}
-          <span class="badge bg-success">✅ Ok</span>
+          <span class="badge bg-primary d-flex align-items-center gap-1"><i class="fas fa-check"></i> Ok</span>
         {% elif reminder.status == 'alert' %}
-          <span class="badge bg-warning text-dark">⚠️ Em breve</span>
+          <span class="badge bg-warning text-dark d-flex align-items-center gap-1"><i class="fas fa-calendar-day"></i> Em breve</span>
         {% elif reminder.status == 'expired' %}
-          <span class="badge bg-danger">⏰ Vencido</span>
+          <span class="badge bg-danger d-flex align-items-center gap-1"><i class="fas fa-exclamation-circle"></i> Vencido</span>
+        {% else %}
+          <span class="badge bg-secondary d-flex align-items-center gap-1"><i class="fas fa-clock"></i> Pendente</span>
         {% endif %}
       </td>
-      <td>
-        <a href="{{ url_for('main.edit_reminder', id=reminder.id) }}" class="btn btn-sm btn-warning">Editar</a>
-        {% if not reminder.completed %}
-        <form method="POST" action="{{ url_for('main.complete_reminder', id=reminder.id) }}" style="display:inline;">
-          <button type="submit" class="btn btn-sm btn-success">Finalizar</button>
-        </form>
-        {% endif %}
-        <form method="POST" action="{{ url_for('main.delete_reminder', id=reminder.id) }}" style="display:inline;">
-          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir este lembrete?');">Excluir</button>
-        </form>
-      </td>
+      <td class="text-nowrap">
+  <div class="d-flex gap-1">
+    <a href="{{ url_for('main.edit_reminder', id=reminder.id) }}" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>
+{% if not reminder.completed %}
+<form method="POST" action="{{ url_for('main.complete_reminder', id=reminder.id) }}" class="d-inline">
+  <button type="submit" class="btn btn-sm btn-success" title="Finalizar"><i class="fas fa-check"></i></button>
+</form>
+{% endif %}
+<form method="POST" action="{{ url_for('main.delete_reminder', id=reminder.id) }}" class="d-inline">
+  <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir este lembrete?');" title="Excluir"><i class="fas fa-trash-alt"></i></button>
+</form>
+  </div>
+</td>
     </tr>
     {% else %}
-    <tr><td colspan="7">Nenhum lembrete cadastrado.</td></tr>
+    <tr><td colspan="8">Nenhum lembrete cadastrado.</td></tr>
     {% endfor %}
   </tbody>
 </table>
@@ -148,23 +158,23 @@
 <script>
 function renderStatus(reminder) {
     if(reminder.completed) {
-        return '<span class="badge bg-primary">✔️ Realizado</span>';
+        return '<span class="badge bg-primary"><i class="fas fa-check-circle"></i> Concluído</span>';
     } else if(reminder.status === 'ok') {
-        return '<span class="badge bg-success">✅ Ok</span>';
+        return '<span class="badge bg-success"><i class="fas fa-check"></i> Ok</span>';
     } else if(reminder.status === 'alert') {
-        return '<span class="badge bg-warning text-dark">⚠️ Em breve</span>';
+        return '<span class="badge bg-warning text-dark"><i class="fas fa-calendar-day"></i> Em breve</span>';
     } else if(reminder.status === 'expired') {
-        return '<span class="badge bg-danger">⏰ Vencido</span>';
+        return '<span class="badge bg-danger"><i class="fas fa-exclamation-circle"></i> Vencido</span>';
     }
     return '';
 }
 
 function renderActions(reminder) {
-    let actions = `<a href="/reminders/edit/${reminder.id}" class="btn btn-sm btn-warning">Editar</a> `;
+    let actions = `<a href="/reminders/edit/${reminder.id}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i>Editar</a> `;
     if (!reminder.completed) {
-        actions += `<form method="POST" action="/reminders/complete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-success">Finalizar</button></form> `;
+        actions += `<form method="POST" action="/reminders/complete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-success"><i class="fas fa-check"></i>Finalizar</button></form> `;
     }
-    actions += `<form method="POST" action="/reminders/delete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir este lembrete?');">Excluir</button></form>`;
+    actions += `<form method="POST" action="/reminders/delete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir este lembrete?');"><i class="fas fa-trash-alt"></i>Excluir</button></form>`;
     return actions;
 }
 
@@ -198,4 +208,5 @@ setInterval(updateRemindersTable, 180000);
 // Atualiza ao carregar a página também
 window.addEventListener('DOMContentLoaded', updateRemindersTable);
 </script>
+
 {% endblock %}

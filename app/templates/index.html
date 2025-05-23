@@ -8,80 +8,184 @@ setInterval(function() {
 </script>
 
 {% block content %}
-<h1>Resumo Geral</h1>
+<h1 class="mt-2 mb-3" style="padding-top:0.5rem;">Resumo Geral</h1>
 <div class="row">
   <div class="col-md-4">
-    <div class="card text-white bg-success mb-3">
-      <div class="card-body">
-        <h5 class="card-title">Lembretes Ativos</h5>
-        <p class="card-text">{{ reminders_count }}</p>
+    <form method="get" class="row gx-2 gy-1 align-items-center mb-3 flex-wrap">
+  <div class="col-12 col-sm-6 col-md-12 col-lg-12 mb-1">
+    <input type="text" class="form-control form-control-sm" name="search" placeholder="Buscar tarefa/lembrete..." value="{{ request.args.get('search', '') }}">
+  </div>
+  <div class="col-6 col-sm-3 col-md-6 col-lg-6 mb-1">
+    <select class="form-select form-select-sm" name="status">
+      <option value="">Todos status</option>
+      <option value="pendente" {% if request.args.get('status') == 'pendente' %}selected{% endif %}>Pendentes</option>
+      <option value="realizado" {% if request.args.get('status') == 'realizado' %}selected{% endif %}>Realizados/Concluídas</option>
+    </select>
+  </div>
+  <div class="col-6 col-sm-3 col-md-6 col-lg-6 d-flex gap-1 mb-1">
+    <button type="submit" class="btn btn-success btn-sm flex-fill"><i class="fas fa-search"></i> Filtrar</button>
+    <a href="/" class="btn btn-secondary btn-sm flex-fill">Limpar</a>
+  </div>
+</form>
+    <div class="row g-2">
+  <div class="col-12 col-md-6">
+    <div class="card text-bg-success mb-2 h-100">
+      <div class="card-body py-2">
+        <h6 class="card-title mb-1">Lembretes Ativos</h6>
+        <p class="card-text fs-4 fw-bold mb-0">{{ reminders_count }}</p>
       </div>
     </div>
   </div>
-  <div class="col-md-4">
-    <h3>Lembretes do Dia</h3>
-    <div class="mb-2">
-      <span class="badge bg-danger"><i class="fas fa-clock"></i> Pendente</span>
-      <span class="badge bg-success"><i class="fas fa-check-circle"></i> Realizado</span>
+  <div class="col-12 col-md-6">
+    <div class="card mb-2 h-100">
+      <div class="card-body py-2">
+        <h6 class="card-title mb-1">Indicadores</h6>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between align-items-center px-1 py-1">
+            <span><i class="fas fa-bell text-danger me-1"></i> Lembretes Pendentes</span>
+            <span class="badge bg-danger rounded-pill">{{ reminders_today_pend|length }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center px-1 py-1">
+            <span><i class="fas fa-check-circle text-success me-1"></i> Lembretes Realizados</span>
+            <span class="badge bg-success rounded-pill">{{ reminders_today_done|length }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center px-1 py-1">
+            <span><i class="fas fa-tasks text-danger me-1"></i> Tarefas Pendentes</span>
+            <span class="badge bg-danger rounded-pill">{{ tasks_today_pend|length }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center px-1 py-1">
+            <span><i class="fas fa-check text-success me-1"></i> Tarefas Concluídas</span>
+            <span class="badge bg-success rounded-pill">{{ tasks_today_done|length }}</span>
+          </li>
+        </ul>
+      </div>
     </div>
-    <strong>Pendentes</strong>
-    <ul class="list-group mb-2">
-      {% for reminder in reminders_today_pend %}
-        <li class="list-group-item">
-          <span class="text-danger" title="Pendente"><i class="fas fa-clock"></i></span>
-          {{ reminder.name }} - <span>{{ reminder.responsible }}</span>
-        </li>
-      {% else %}
-        <li class="list-group-item">Nenhum lembrete pendente para hoje.</li>
-      {% endfor %}
-    </ul>
-    <strong>Realizados</strong>
-    <ul class="list-group">
-      {% for reminder in reminders_today_done %}
-        <li class="list-group-item">
-          <span class="text-success" title="Realizado"><i class="fas fa-check-circle"></i></span>
-          {{ reminder.name }} - <span class="text-secondary">{{ reminder.responsible }}</span>
-        </li>
-      {% else %}
-        <li class="list-group-item">Nenhum lembrete realizado hoje.</li>
-      {% endfor %}
-    </ul>
   </div>
-  <div class="col-md-4">
-    <h3>Tarefas do Dia</h3>
-    <div class="mb-2">
-      <span class="badge bg-danger"><i class="fas fa-clock"></i> Pendente</span>
-      <span class="badge bg-success"><i class="fas fa-check-circle"></i> Concluída</span>
-    </div>
-    <strong>Pendentes</strong>
-    <ul class="list-group mb-2">
-      {% for task in tasks_today_pend %}
-        <li class="list-group-item">
-          <span class="text-danger" title="Pendente"><i class="fas fa-clock"></i></span>
-          {{ task.description }} - <span>{{ task.responsible }}</span>
-        </li>
-      {% else %}
-        <li class="list-group-item">Nenhuma tarefa pendente para hoje.</li>
-      {% endfor %}
-    </ul>
-    <strong>Concluídas</strong>
-    <ul class="list-group">
-      {% for task in tasks_today_done %}
-        <li class="list-group-item">
-          <span class="text-success" title="Concluída"><i class="fas fa-check-circle"></i></span>
-          {{ task.description }} - <span class="text-secondary">{{ task.responsible }}</span>
-        </li>
-      {% else %}
-        <li class="list-group-item">Nenhuma tarefa concluída hoje.</li>
-      {% endfor %}
-    </ul>
+</div>
   </div>
-
+  <div class="col-md-8">
+    <div class="accordion" id="accordionMain">
+  <div class="accordion-item mb-3">
+    <h2 class="accordion-header" id="headingReminders">
+      <button class="accordion-button py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReminders" aria-expanded="true" aria-controls="collapseReminders">
+        <i class="fas fa-bell me-2"></i> Lembretes do Dia
+      </button>
+    </h2>
+    <div id="collapseReminders" class="accordion-collapse collapse show" aria-labelledby="headingReminders" data-bs-parent="#accordionMain">
+      <div class="accordion-body p-2">
+        <div class="mb-2 d-flex gap-2 flex-wrap">
+          <span class="badge bg-danger d-flex align-items-center gap-1"><i class="fas fa-clock"></i> Pendente</span>
+          <span class="badge bg-success d-flex align-items-center gap-1"><i class="fas fa-check-circle"></i> Realizado</span>
+        </div>
+        <div class="mb-2 border-bottom pb-1"><strong>Pendentes ({{ reminders_today_pend|length }})</strong></div>
+        <ul class="list-group mb-2">
+          {% for reminder in reminders_today_pend %}
+            <li class="list-group-item d-flex align-items-center gap-2">
+              <span class="text-danger" title="Pendente"><i class="fas fa-clock"></i></span>
+              <span>{{ reminder.name }}</span> <span class="badge bg-light text-dark ms-auto">{{ reminder.responsible }}</span>
+            </li>
+          {% else %}
+            <li class="list-group-item">Nenhum lembrete pendente para hoje.</li>
+          {% endfor %}
+        </ul>
+        <div class="mb-2 border-bottom pb-1"><strong>Realizados ({{ reminders_today_done|length }})</strong></div>
+<ul class="list-group" id="reminders-done-list">
+  {% for reminder in reminders_today_done %}
+    <li class="list-group-item d-flex align-items-center gap-2 reminder-done-item {% if loop.index > 5 %}d-none{% endif %}">
+      <span class="text-success" title="Realizado"><i class="fas fa-check-circle"></i></span>
+      <span>{{ reminder.name }}</span> <span class="badge bg-light text-secondary ms-auto">{{ reminder.responsible }}</span>
+    </li>
+  {% else %}
+    <li class="list-group-item">Nenhum lembrete realizado hoje.</li>
+  {% endfor %}
+</ul>
+{% if reminders_today_done|length > 5 %}
+<div class="d-grid mt-2">
+  <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-toggle-reminders">Ver todos</button>
 </div>
 <script>
-// Atualiza a página a cada 3 minutos (180000 ms)
-setInterval(function() {
-    window.location.reload();
-}, 180000);
+  document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('btn-toggle-reminders');
+    var items = document.querySelectorAll('.reminder-done-item');
+    var expanded = false;
+    btn.addEventListener('click', function() {
+      expanded = !expanded;
+      items.forEach(function(item, idx) {
+        if (expanded) {
+          item.classList.remove('d-none');
+        } else {
+          if (idx >= 5) item.classList.add('d-none');
+        }
+      });
+      btn.textContent = expanded ? 'Fechar' : 'Ver todos';
+    });
+  });
 </script>
+{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="accordion-item mb-3">
+    <h2 class="accordion-header" id="headingTasks">
+      <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTasks" aria-expanded="false" aria-controls="collapseTasks">
+        <i class="fas fa-tasks me-2"></i> Tarefas do Dia
+      </button>
+    </h2>
+    <div id="collapseTasks" class="accordion-collapse collapse" aria-labelledby="headingTasks" data-bs-parent="#accordionMain">
+      <div class="accordion-body p-2">
+        <div class="mb-2 d-flex gap-2 flex-wrap">
+          <span class="badge bg-danger d-flex align-items-center gap-1"><i class="fas fa-clock"></i> Pendente</span>
+          <span class="badge bg-success d-flex align-items-center gap-1"><i class="fas fa-check-circle"></i> Concluída</span>
+        </div>
+        <div class="mb-2 border-bottom pb-1"><strong>Pendentes ({{ tasks_today_pend|length }})</strong></div>
+        <ul class="list-group mb-2">
+          {% for task in tasks_today_pend %}
+            <li class="list-group-item d-flex align-items-center gap-2">
+              <span class="text-danger" title="Pendente"><i class="fas fa-clock"></i></span>
+              <span>{{ task.description }}</span> <span class="badge bg-light text-dark ms-auto">{{ task.responsible }}</span>
+            </li>
+          {% else %}
+            <li class="list-group-item">Nenhuma tarefa pendente para hoje.</li>
+          {% endfor %}
+        </ul>
+        <div class="mb-2 border-bottom pb-1"><strong>Concluídas ({{ tasks_today_done|length }})</strong></div>
+<ul class="list-group" id="tasks-done-list">
+  {% for task in tasks_today_done %}
+    <li class="list-group-item d-flex align-items-center gap-2 task-done-item {% if loop.index > 5 %}d-none{% endif %}">
+      <span class="text-success" title="Concluída"><i class="fas fa-check-circle"></i></span>
+      <span>{{ task.description }}</span> <span class="badge bg-light text-secondary ms-auto">{{ task.responsible }}</span>
+    </li>
+  {% else %}
+    <li class="list-group-item">Nenhuma tarefa concluída hoje.</li>
+  {% endfor %}
+</ul>
+{% if tasks_today_done|length > 5 %}
+<div class="d-grid mt-2">
+  <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-toggle-tasks">Ver todos</button>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('btn-toggle-tasks');
+    var items = document.querySelectorAll('.task-done-item');
+    var expanded = false;
+    btn.addEventListener('click', function() {
+      expanded = !expanded;
+      items.forEach(function(item, idx) {
+        if (expanded) {
+          item.classList.remove('d-none');
+        } else {
+          if (idx >= 5) item.classList.add('d-none');
+        }
+      });
+      btn.textContent = expanded ? 'Fechar' : 'Ver todos';
+    });
+  });
+</script>
+{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
 {% endblock %}

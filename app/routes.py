@@ -23,11 +23,14 @@ bp = Blueprint('main', __name__)
 @bp.route('/')
 @login_required
 def index():
+    search = request.args.get('search', '').strip().lower()
+    status = request.args.get('status', '').strip().lower()
     # --- Recorrência automática de lembretes ---
     if session.get('is_admin'):
         reminders = Reminder.query.all()
     else:
         reminders = Reminder.query.filter_by(user_id=session.get('user_id')).all()
+    # Recorrência automática
     for r in reminders:
         if r.due_date < date.today() and not r.notified:
             if r.frequency == 'diario':
@@ -55,19 +58,31 @@ def index():
     if session.get('is_admin'):
         reminders_count = Reminder.query.count()
         reminders_today = Reminder.query.filter(Reminder.due_date <= date.today()).all()
-        reminders_today_pend = [r for r in reminders_today if not r.completed]
-        reminders_today_done = [r for r in reminders_today if r.completed]
         tasks_today = Task.query.filter(Task.date <= date.today()).all()
-        tasks_today_pend = [t for t in tasks_today if not t.completed]
-        tasks_today_done = [t for t in tasks_today if t.completed]
     else:
         reminders_count = Reminder.query.filter_by(user_id=session.get('user_id')).count()
         reminders_today = Reminder.query.filter(Reminder.due_date <= date.today(), Reminder.user_id == session.get('user_id')).all()
-        reminders_today_pend = [r for r in reminders_today if not r.completed]
-        reminders_today_done = [r for r in reminders_today if r.completed]
         tasks_today = Task.query.filter(Task.date <= date.today(), Task.user_id == session.get('user_id')).all()
-        tasks_today_pend = [t for t in tasks_today if not t.completed]
-        tasks_today_done = [t for t in tasks_today if t.completed]
+    # --- FILTRO E BUSCA LEMBRETES ---
+    reminders_today_pend = [r for r in reminders_today if not r.completed]
+    reminders_today_done = [r for r in reminders_today if r.completed]
+    if search:
+        reminders_today_pend = [r for r in reminders_today_pend if search in r.name.lower() or search in r.responsible.lower()]
+        reminders_today_done = [r for r in reminders_today_done if search in r.name.lower() or search in r.responsible.lower()]
+    if status == 'pendente':
+        reminders_today_done = []
+    elif status == 'realizado':
+        reminders_today_pend = []
+    # --- FILTRO E BUSCA TAREFAS ---
+    tasks_today_pend = [t for t in tasks_today if not t.completed]
+    tasks_today_done = [t for t in tasks_today if t.completed]
+    if search:
+        tasks_today_pend = [t for t in tasks_today_pend if search in t.description.lower() or search in t.responsible.lower()]
+        tasks_today_done = [t for t in tasks_today_done if search in t.description.lower() or search in t.responsible.lower()]
+    if status == 'pendente':
+        tasks_today_done = []
+    elif status == 'realizado':
+        tasks_today_pend = []
     return render_template(
         'index.html',
         reminders_count=reminders_count,

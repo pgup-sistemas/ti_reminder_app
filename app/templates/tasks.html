@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Lista de Tarefas | TI reminder {% endblock %}
 {% block content %}
-<h1>Tarefas</h1>
+<h1 class="mt-2 mb-3" style="padding-top:0.5rem;"><i class="fas fa-tasks me-2"></i>Tarefas</h1>
 <!-- Filtro e busca -->
 <form class="row g-2 mb-3" method="get">
   <div class="col-md-2">
@@ -74,12 +74,16 @@
     </form>
   </div>
 </div>
-<div style="max-height: 400px; overflow-y: auto;">
-<div style="max-height: 400px; overflow-y: auto;">
-<table class="table table-striped">
-  <thead>
+<div class="table-responsive" style="max-height: 400px;">
+<table class="table table-striped align-middle mb-0">
+  <thead class="table-light">
     <tr>
-      <th>Descrição</th><th>Data</th><th>Responsável</th><th>Setor</th><th>Concluída</th><th>Ações</th>
+      <th><i class="fas fa-tasks"></i> Descrição</th>
+      <th><i class="fas fa-calendar-alt"></i> Data</th>
+      <th><i class="fas fa-user"></i> Responsável</th>
+      <th><i class="fas fa-sitemap"></i> Setor</th>
+      <th><i class="fas fa-check-circle"></i> Status</th>
+      <th><i class="fas fa-cogs"></i> Ações</th>
     </tr>
   </thead>
   <tbody>
@@ -95,29 +99,29 @@
       <td>{{ task.sector.name if task.sector else '' }}</td>
       <td class="text-center">
         {% if task.completed %}
-          <span class="text-success" title="Concluída"><i class="fas fa-check-circle"></i></span>
+          <span class="badge bg-success d-flex align-items-center gap-1"><i class="fas fa-check-circle"></i> Concluída</span>
         {% elif task.date < current_date %}
-          <span class="text-danger" title="Vencida"><i class="fas fa-exclamation-circle"></i></span>
+          <span class="badge bg-danger d-flex align-items-center gap-1"><i class="fas fa-exclamation-circle"></i> Vencida</span>
         {% elif task.date == current_date %}
-          <span class="text-warning" title="Hoje"><i class="fas fa-calendar-day"></i></span>
+          <span class="badge bg-warning text-dark d-flex align-items-center gap-1"><i class="fas fa-calendar-day"></i> Hoje</span>
         {% else %}
-          <span class="text-secondary" title="Futura"><i class="fas fa-clock"></i></span>
+          <span class="badge bg-secondary d-flex align-items-center gap-1"><i class="fas fa-clock"></i> Futura</span>
         {% endif %}
       </td>
-      <td>
-        <a href="{{ url_for('main.edit_task', id=task.id) }}" class="btn btn-sm btn-warning">Editar</a>
+      <td class="text-nowrap">
+        <a href="{{ url_for('main.edit_task', id=task.id) }}" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>
         {% if not task.completed %}
         <form method="POST" action="{{ url_for('main.complete_task', id=task.id) }}" style="display:inline;">
-          <button type="submit" class="btn btn-sm btn-success">Marcar</button>
+          <button type="submit" class="btn btn-sm btn-success" title="Marcar como concluída"><i class="fas fa-check"></i></button>
         </form>
         {% endif %}
         <form method="POST" action="{{ url_for('main.delete_task', id=task.id) }}" style="display:inline;">
-          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir esta tarefa?');">Excluir</button>
+          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir esta tarefa?');" title="Excluir"><i class="fas fa-trash-alt"></i></button>
         </form>
       </td>
     </tr>
     {% else %}
-    <tr><td colspan="5">Nenhuma tarefa encontrada.</td></tr>
+    <tr><td colspan="6">Nenhuma tarefa encontrada.</td></tr>
     {% endfor %}
   </tbody>
 </table>
