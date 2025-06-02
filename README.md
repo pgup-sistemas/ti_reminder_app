@@ -1,89 +1,73 @@
 # TI Reminder App
 
-Aplicativo web para gestão de lembretes e tarefas, com painel de relatórios, exportação de dados e interface intuitiva.
+Aplicação web para gestão de lembretes, tarefas e chamados de TI, com painel de relatórios, exportação de dados e interface intuitiva.
+
+## Índice
+- [Visão Geral](#visão-geral)
+- [Funcionalidades](#funcionalidades)
+- [Stack Tecnológica](#stack-tecnológica)
+- [Estrutura de Diretórios](#estrutura-de-diretórios)
+- [Setup do Projeto](#setup-do-projeto)
+- [Como Utilizar](#como-utilizar)
+- [Próximos Passos](#próximos-passos)
+- [Considerações Técnicas](#considerações-técnicas)
+
+## Visão Geral
+
+O TI Reminder é uma solução completa para gestão de tarefas, lembretes e chamados de TI. O sistema foi projetado para facilitar a organização e o acompanhamento de atividades diárias, além de centralizar as solicitações de suporte técnico para a equipe de TI, permitindo que usuários de todos os setores possam registrar e acompanhar seus pedidos de forma organizada e eficiente.
 
 ## Funcionalidades
 
+### Gestão de Tarefas e Lembretes
 - **Cadastro, edição e exclusão de tarefas**
 - **Cadastro, edição e exclusão de lembretes**
 - **Lembretes recorrentes** (diários, quinzenais, mensais, anuais)
 - **Marcação de lembretes e tarefas como concluídos**
 - **Seção "do dia" na tela inicial** mostrando status (✔️/⏰) de tudo que foi feito ou está pendente
 - **Filtros avançados** para tarefas e lembretes (status, busca, data)
+- **Lista de Tarefas Diárias** com marcação de conclusão
+- **Notificações Automáticas** por e-mail para lembretes
+
+### Sistema de Chamados de TI
+- **Abertura de Novos Chamados** com título, descrição e prioridade
+- **Listagem de Chamados** com filtros por status, prioridade e setor
+- **Visualização Detalhada** de cada chamado
+- **Notificações por E-mail** na abertura de novos chamados
+- **Integração com Usuários e Setores**
+- **Permissões Personalizadas** para diferentes níveis de acesso
+
+### Relatórios e Análises
 - **Dashboard de relatórios** com:
   - Resumo visual de tarefas e lembretes
   - Gráficos (pizza) com distribuição dos status
-  - Exportação de dados para Excel e PDF (total ou parcial: só tarefas, só lembretes, período, status, etc.)
-- **Interface responsiva** com Bootstrap
-- **Mensagens de feedback amigáveis** e navegação facilitada
+  - Exportação de dados para Excel e PDF
 
-## Bibliotecas necessárias
+### Interface
+- **Interface responsiva** com Bootstrap 5
+- **Mensagens de feedback amigáveis**
+- **Navegação intuitiva**
+- **Design limpo e profissional**
 
-- flask
-- flask-sqlalchemy
-- flask-wtf
-- python-dateutil
-- pandas
-- xlsxwriter
-- reportlab
+## Stack Tecnológica
 
-Instale todas de uma vez:
-```sh
-pip install flask flask-sqlalchemy flask-wtf python-dateutil pandas xlsxwriter reportlab
-```
-
-## Como usar
-
-1. Clone o repositório e entre na pasta do projeto.
-2. Crie um ambiente virtual (opcional, mas recomendado):
-   ```sh
-   python -m venv venv
-   source venv/bin/activate  # ou venv\Scripts\activate no Windows
-   ```
-3. Instale as dependências:
-   ```sh
-   pip install -r requirements.txt  # ou use o comando acima
-   ```
-4. Execute as migrações do banco:
-   ```sh
-   flask db upgrade
-   ```
-5. Rode o sistema:
-   ```sh
-   python run.py
-   ```
-6. Acesse no navegador: [http://127.0.0.1:5000/](http://127.0.0.1:5000/)
-
-## Próximos Passos
-
-- **Implementação do sistema de login/autenticação de usuários**
-  - Controle de acesso às funcionalidades
-  - Usuários diferentes com lembretes/tarefas separados
-
----
-
-Se tiver dúvidas ou quiser sugerir novas funcionalidades, fique à vontade para abrir uma issue ou contribuir!
-
-## Descrição
-Aplicação web para gestão de lembretes e tarefas diárias, com envio automático de notificações por e-mail.
-
----
-
-## 1. Stack Tecnológica
 - **Backend:** Python + Flask
 - **Frontend:** HTML + Bootstrap 5
-- **Banco de Dados:** SQLite (padrão), com possibilidade de uso de PostgreSQL
+- **Banco de Dados:** SQLite (padrão), com suporte a PostgreSQL
 - **Notificações:** Envio de e-mails via SMTP (ex: Gmail)
-- **Outros:**
+- **Outras Bibliotecas:**
   - SQLAlchemy (ORM)
   - Flask-Mail
-  - Cron (para tarefas agendadas) ou APScheduler
+  - Flask-WTF
+  - Python-dateutil
+  - Pandas (exportação de dados)
+  - XlsxWriter (exportação para Excel)
+  - ReportLab (exportação para PDF)
+  - APScheduler (tarefas agendadas)
 
----
+## Estrutura de Diretórios
 
-## 2. Estrutura de Diretórios
 ```
-ti_reminder_app/
+ti_reminder/
 ├── app/
 │   ├── __init__.py
 │   ├── routes.py
@@ -94,86 +78,133 @@ ti_reminder_app/
 │   │   ├── base.html
 │   │   ├── index.html
 │   │   ├── tasks.html
-│   │   └── reminders.html
+│   │   ├── reminders.html
+│   │   ├── chamados/
+│   │   │   ├── listar.html
+│   │   │   ├── abrir.html
+│   │   │   └── detalhes.html
 │   └── static/
-│       └── style.css
+│       ├── css/
+│       │   └── style.css
+│       └── js/
+│           └── main.js
+├── migrations/
 ├── config.py
 ├── run.py
 ├── requirements.txt
 └── README.md
 ```
 
----
+## Setup do Projeto
 
-## 3. Funcionalidades
-### a. Gestão de Lembretes
-- Cadastro de lembretes (nome, tipo, vencimento, responsável, frequência)
-- Listagem com status por cor:
-  - ✅ Ok
-  - 🟡 Alerta
-  - 🔴 Vencido
-- Edição e exclusão de lembretes
+1. **Pré-requisitos**
+   - Python 3.7+
+   - pip (gerenciador de pacotes Python)
+   - Banco de dados (SQLite incluso, PostgreSQL opcional)
 
-### b. Lista de Tarefas Diárias
-- Adição de tarefas diárias
-- Marcar tarefas como concluídas
-- Exibição separada por data e responsável
+2. **Configuração do Ambiente**
+   ```bash
+   # 1. Clone o repositório
+   git clone [URL_DO_REPOSITORIO]
+   cd ti_reminder
 
-### c. Notificações Automáticas
-- Envio automático de e-mails X dias antes do vencimento
-- Execução diária agendada com cron ou APScheduler
+   # 2. Crie e ative o ambiente virtual (recomendado)
+   python -m venv venv
+   # Windows:
+   venv\Scripts\activate
+   # Linux/macOS:
+   source venv/bin/activate
 
----
+   # 3. Instale as dependências
+   pip install -r requirements.txt
 
-## 4. Setup do Projeto
-1. Criar ambiente virtual:
-    ```sh
-    python -m venv venv
-    venv\Scripts\activate     # Windows
-    # ou
-    source venv/bin/activate  # Linux/macOS
-    ```
-2. Instalar dependências:
-    ```sh
-    pip install -r requirements.txt
-    ```
-3. Rodar a aplicação:
-    ```sh
-    python run.py
-    ```
+   # 4. Configure as variáveis de ambiente
+   # Crie um arquivo .env baseado no .env.example
+   # Edite as configurações conforme necessário
 
----
+   # 5. Inicialize o banco de dados
+   flask db upgrade
 
-## 5. Agendamento de Notificações
-- Configurar cron (Linux) para execução diária de lembretes
-- Alternativamente, usar APScheduler integrado ao Python para controle programático
+   # 6. Execute a aplicação
+   python run.py
+   ```
 
----
+3. **Acesse a aplicação**
+   Abra seu navegador e acesse: [http://127.0.0.1:5000/](http://127.0.0.1:5000/)
 
-## 6. Telas Frontend
-- **index.html – Resumo Geral**
-  - Cards com número de lembretes ativos
-  - Lista de tarefas do dia
-- **reminders.html – Gestão de Lembretes**
-  - Tabela com lembretes, filtros e ações (editar, excluir)
-  - Botão “Adicionar Lembrete”
-- **tasks.html – Lista de Tarefas**
-  - Tarefas pendentes por data
-  - Checkbox para marcar como concluída
+## Como Utilizar
 
----
+### Gestão de Tarefas e Lembretes
+1. **Acesse** a aplicação e faça login
+2. **Adicione tarefas** através da seção "Tarefas"
+3. **Crie lembretes** recorrentes ou únicos
+4. **Acompanhe** suas atividades na página inicial
+5. **Receba notificações** por e-mail de lembretes
 
-## 7. To-Do para o Desenvolvedor
-- Criar formulários com WTForms (ou HTML puro)
-- Adicionar login simples (opcional)
-- Implementar opção de recorrência (mensal, anual)
-- Tornar a interface responsiva com Bootstrap
+### Sistema de Chamados de TI
+1. **Acesse** a seção "Chamados"
+2. **Clique em** "Abrir Novo Chamado"
+3. **Preencha** o formulário com as informações necessárias
+4. **Acompanhe** o status do seu chamado na lista
+5. **Receba notificações** por e-mail sobre atualizações
 
----
+### Relatórios
+1. **Acesse** o painel de relatórios
+2. **Filtre** os dados conforme necessário
+3. **Exporte** para Excel ou PDF
 
-## 8. Etapas Futuras / Melhorias
-- Sistema de login de usuário com autenticação
-- Melhorias no painel (filtros avançados e cores dinâmicas)
-- Adição de recorrência automática de lembretes
-- Exportação de dados (CSV, Excel, etc.)
-- Dashboard visual com gráficos (ex: Chart.js)
+## Configuração de E-mail
+
+Para que as notificações por e-mail funcionem, configure as seguintes variáveis de ambiente no arquivo `.env`:
+
+```
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=1
+MAIL_USERNAME=seu-email@gmail.com
+MAIL_PASSWORD=sua-senha-ou-app-password
+MAIL_DEFAULT_SENDER=seu-email@gmail.com
+TI_EMAIL=ti@empresa.com  # E-mail da equipe de TI para notificações
+```
+
+## Próximos Passos
+
+### Melhorias Planejadas
+- [ ] **Sistema de Comentários** nos chamados
+- [ ] **Atualização de Status** pelos técnicos de TI
+- [ ] **Anexos** em chamados
+- [ ] **Dashboard Avançado** com métricas
+- [ ] **Integração com Sistemas Externos**
+
+### Melhorias Futuras
+- [ ] **API REST** para integração com outros sistemas
+- [ ] **Aplicativo Móvel**
+- [ ] **Autenticação de Dois Fatores**
+- [ ] **Logs Detalhados**
+- [ ] **Sistema de Pesquisa Avançada**
+
+## Considerações Técnicas
+
+1. **Segurança**
+   - Todas as senhas são armazenadas com hash seguro
+   - Proteção contra CSRF
+   - Validação de entrada em todos os formulários
+   - Controle de acesso baseado em papéis (RBAC)
+
+2. **Desempenho**
+   - Cache de consultas frequentes
+   - Paginação de resultados
+   - Otimização de consultas ao banco de dados
+
+3. **Escalabilidade**
+   - Projeto estruturado para escalar horizontalmente
+   - Uso de filas para processamento assíncrono
+   - Suporte a múltiplos workers
+
+## Suporte
+
+Em caso de dúvidas ou problemas, entre em contato com a equipe de TI ou abra uma issue no repositório do projeto.
+
+## Licença
+
+Este projeto está licenciado sob a licença MIT. Consulte o arquivo LICENSE para obter mais informações.

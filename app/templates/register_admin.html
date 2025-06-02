@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card shadow-sm border-0 rounded-3 mt-5">
+                <div class="card-body p-4">
+                    <h4 class="card-title text-center mb-4">{{ title|default('Registrar Novo Usuário') }}</h4>
+                    
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.username.id }}" class="form-label small">Nome de Usuário</label>
+                            <div class="input-group input-group-sm shadow-sm">
+                                <span class="input-group-text border-0 bg-transparent">
+                                    <i class="fas fa-user text-muted"></i>
+                                </span>
+                                {{ form.username(class_='form-control form-control-sm border-0' + (' is-invalid' if form.username.errors else ''), placeholder='Digite o nome de usuário') }}
+                            </div>
+                            {% for error in form.username.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.email.id }}" class="form-label small">Email</label>
+                            <div class="input-group input-group-sm shadow-sm">
+                                <span class="input-group-text border-0 bg-transparent">
+                                    <i class="fas fa-envelope text-muted"></i>
+                                </span>
+                                {{ form.email(class_='form-control form-control-sm border-0' + (' is-invalid' if form.email.errors else ''), placeholder='Digite o email') }}
+                            </div>
+                            {% for error in form.email.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.password.id }}" class="form-label small">Senha</label>
+                            <div class="input-group input-group-sm shadow-sm">
+                                <span class="input-group-text border-0 bg-transparent">
+                                    <i class="fas fa-lock text-muted"></i>
+                                </span>
+                                {{ form.password(class_='form-control form-control-sm border-0' + (' is-invalid' if form.password.errors else ''), placeholder='Digite a senha') }}
+                            </div>
+                            {% for error in form.password.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.confirm_password.id }}" class="form-label small">Confirmar Senha</label>
+                            <div class="input-group input-group-sm shadow-sm">
+                                <span class="input-group-text border-0 bg-transparent">
+                                    <i class="fas fa-lock text-muted"></i>
+                                </span>
+                                {{ form.confirm_password(class_='form-control form-control-sm border-0' + (' is-invalid' if form.confirm_password.errors else ''), placeholder='Confirme a senha') }}
+                            </div>
+                            {% for error in form.confirm_password.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_admin(class_='form-check-input' + (' is-invalid' if form.is_admin.errors else '')) }}
+                                <label class="form-check-label" for="{{ form.is_admin.id }}">
+                                    <i class="fas fa-crown me-1"></i>Administrador
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                {{ form.is_ti(class_='form-check-input' + (' is-invalid' if form.is_ti.errors else '')) }}
+                                <label class="form-check-label" for="{{ form.is_ti.id }}">
+                                    <i class="fas fa-user-shield me-1"></i>Equipe de TI
+                                </label>
+                                <small class="form-text d-block text-muted">Usuários da equipe de TI podem ser atribuídos como responsáveis por chamados.</small>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="fas fa-user-plus me-1"></i>Registrar Usuário
+                            </button>
+                            <a href="{{ url_for('main.users_admin') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i>Voltar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

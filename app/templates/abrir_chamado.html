@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0">{{ title }}</h2>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else 'warning' }} alert-dismissible fade show" role="alert">
+                                    <i class="fas {{ 'fa-exclamation-triangle' if category == 'error' else 'fa-info-circle' }} me-2"></i>
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    {% if not setor_usuario %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Não foi possível determinar o setor do usuário. Contate o administrador para associar um setor ao seu usuário.
+                        </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('main.abrir_chamado') }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            <label for="titulo" class="form-label">Título <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-heading"></i>
+                                </span>
+                                {{ form.titulo(class="form-control" + (' is-invalid' if form.titulo.errors else ''), placeholder="Descreva brevemente o problema") }}
+                            </div>
+                            {% for error in form.titulo.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="descricao" class="form-label">Descrição Detalhada <span class="text-danger">*</span></label>
+                            {{ form.descricao(class="form-control" + (' is-invalid' if form.descricao.errors else ''), rows=5, placeholder="Descreva o problema com o máximo de detalhes possível") }}
+                            {% for error in form.descricao.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="prioridade" class="form-label">Prioridade <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                    </span>
+                                    {{ form.prioridade(class="form-select" + (' is-invalid' if form.prioridade.errors else '')) }}
+                                </div>
+                                {% for error in form.prioridade.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            {% if setor_usuario %}
+                            <div class="col-md-6 mb-3">
+                                <label for="setor" class="form-label">Setor</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-building"></i>
+                                    </span>
+                                    <input type="text" class="form-control" value="{{ setor_usuario.nome }}" readonly>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{{ url_for('main.listar_chamados') }}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-times me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary" {% if not setor_usuario %}disabled{% endif %}>
+                                <i class="fas fa-paper-plane me-1"></i> Abrir Chamado
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control:focus, .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+    }
+    .input-group-text {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}

@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}Login | Sistema | TI reminder{% endblock %}
 {% block content %}
+{% if request.args.get('need_login') %}
+<div class="alert alert-danger text-center mb-4">
+    Faça login para acessar esta página.
+</div>
+{% endif %}
 <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center" 
      style="background-color: var(--bs-body-bg);">
   <div class="row justify-content-center w-100">
@@ -14,6 +19,12 @@
         <!-- Card body with form -->
         <div class="card-body px-4 py-3">
           <h2 class="fs-5 mb-3 fw-bold text-center">Acesso ao Sistema</h2>
+          
+          {% if request.args.get('error') == 'invalid_credentials' %}
+      <div class="alert alert-danger text-center mb-4">
+        Usuário ou senha inválidos.
+      </div>
+    {% endif %}
           
           {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}

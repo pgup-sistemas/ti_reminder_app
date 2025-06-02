@@ -9,12 +9,34 @@ bp_auth = Blueprint('auth', __name__)
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data)
+        # Verifica se já existe um usuário com o mesmo nome de usuário ou email
+        existing_user = User.query.filter(
+            (User.username == form.username.data) | 
+            (User.email == form.email.data)
+        ).first()
+        
+        if existing_user:
+            flash('Nome de usuário ou email já está em uso.', 'danger')
+            return render_template('register.html', form=form)
+            
+        user = User(
+            username=form.username.data, 
+            email=form.email.data,
+            is_admin=False,  # Usuários comuns não são administradores
+            is_ti=False,     # Nem fazem parte da equipe de TI
+            ativo=True
+        )
         user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        flash('Usuário registrado com sucesso! Faça login.', 'success')
-        return redirect(url_for('auth.login'))
+        
+        try:
+            db.session.add(user)
+            db.session.commit()
+            flash('Usuário registrado com sucesso! Faça login.', 'success')
+            return redirect(url_for('auth.login'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Ocorreu um erro ao registrar o usuário. Por favor, tente novamente.', 'danger')
+            
     return render_template('register.html', form=form)
 
 @bp_auth.route('/login', methods=['GET', 'POST'])
@@ -29,7 +51,7 @@ def login():
             flash('Login realizado com sucesso!', 'success')
             return redirect(url_for('main.dashboard'))
         else:
-            flash('Usuário ou senha inválidos.', 'danger')
+            return redirect(url_for('auth.login', error='invalid_credentials'))
     return render_template('login.html', form=form)
 
 @bp_auth.route('/logout')

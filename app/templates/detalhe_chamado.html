@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>{{ title }}</h2>
+        <a href="{{ url_for("main.listar_chamados") }}" class="btn btn-secondary">Voltar para Lista</a>
+    </div>
+    <hr>
+
+    <div class="card">
+        <div class="card-header">
+            Detalhes do Chamado
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">ID:</dt>
+                <dd class="col-sm-9">{{ chamado.id }}</dd>
+
+                <dt class="col-sm-3">Título:</dt>
+                <dd class="col-sm-9">{{ chamado.titulo }}</dd>
+
+                <dt class="col-sm-3">Descrição:</dt>
+                <dd class="col-sm-9"><pre>{{ chamado.descricao }}</pre></dd>
+
+                <dt class="col-sm-3">Status:</dt>
+                <dd class="col-sm-9"><span class="badge bg-{{ "secondary" if chamado.status == "Fechado" else ("success" if chamado.status == "Resolvido" else ("warning" if chamado.status == "Em Andamento" else "primary")) }}">{{ chamado.status }}</span></dd>
+
+                <dt class="col-sm-3">Prioridade:</dt>
+                <dd class="col-sm-9"><span class="badge bg-{{ "dark" if chamado.prioridade == "Critica" else ("danger" if chamado.prioridade == "Alta" else ("warning" if chamado.prioridade == "Media" else "info")) }}">{{ chamado.prioridade }}</span></dd>
+
+                <dt class="col-sm-3">Data de Abertura:</dt>
+                <dd class="col-sm-9">{{ chamado.data_abertura.strftime("%d/%m/%Y %H:%M:%S") }}</dd>
+
+                <dt class="col-sm-3">Última Atualização:</dt>
+                <dd class="col-sm-9">{{ chamado.data_ultima_atualizacao.strftime("%d/%m/%Y %H:%M:%S") }}</dd>
+
+                {% if chamado.data_fechamento %}
+                <dt class="col-sm-3">Data de Fechamento:</dt>
+                <dd class="col-sm-9">{{ chamado.data_fechamento.strftime("%d/%m/%Y %H:%M:%S") }}</dd>
+                {% endif %}
+
+                <dt class="col-sm-3">Solicitante:</dt>
+                <dd class="col-sm-9">{{ chamado.solicitante.username if chamado.solicitante else "N/A" }} ({{ chamado.solicitante.email if chamado.solicitante else "N/A" }})</dd>
+
+                <dt class="col-sm-3">Setor:</dt>
+                <dd class="col-sm-9">{{ chamado.setor.name if chamado.setor else "N/A" }}</dd>
+
+                <dt class="col-sm-3">Responsável TI:</dt>
+                <dd class="col-sm-9">{{ chamado.responsavel_ti.username if chamado.responsavel_ti else "Não atribuído" }}</dd>
+            </dl>
+        </div>
+    </div>
+
+    {% if form is defined and form %}
+    <div class="card mt-4">
+        <div class="card-header bg-primary text-white">
+            <i class="fas fa-cogs me-2"></i>Ações Administrativas
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('main.gerenciar_chamado', id=chamado.id) }}">
+                {{ form.hidden_tag() }}
+                
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="status" class="form-label">Status</label>
+                        <select name="status" id="status" class="form-select">
+                            {% for value, label in form.status.choices %}
+                                <option value="{{ value }}" {% if chamado.status == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label for="responsavel_ti_id" class="form-label">Responsável TI</label>
+                        <select name="responsavel_ti_id" id="responsavel_ti_id" class="form-select">
+                            <option value="">Nenhum (sem responsável)</option>
+                            {% for user in usuarios_ti %}
+                                <option value="{{ user.id }}" {% if chamado.responsavel_ti_id == user.id %}selected{% endif %}>
+                                    {{ user.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Selecione um responsável ou 'Nenhum' para remover o responsável atual</small>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" name="notificar_solicitante" id="notificar_solicitante" checked>
+                            <label class="form-check-label" for="notificar_solicitante">
+                                Notificar solicitante
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="comentario" class="form-label">Adicionar Comentário</label>
+                    <textarea name="comentario" id="comentario" class="form-control" rows="3" placeholder="Adicione um comentário sobre esta atualização (opcional)"></textarea>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Atualizar Chamado
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Histórico de Atualizações e Comentários -->
+    <div class="card mt-4">
+        <div class="card-header bg-light">
+            <i class="fas fa-history me-2"></i>Histórico
+        </div>
+        <div class="card-body p-0">
+            {% if chamado.comentarios %}
+                <div class="list-group list-group-flush">
+                    {% for comentario in chamado.comentarios %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <strong>{{ comentario.usuario.username }}</strong>
+                                <span class="badge bg-{{ 'info' if comentario.tipo == 'atualizacao' else 'secondary' }} ms-2">
+                                    {{ 'Atualização' if comentario.tipo == 'atualizacao' else 'Comentário' }}
+                                </span>
+                            </h6>
+                            <small class="text-muted">{{ comentario.data_criacao.strftime('%d/%m/%Y %H:%M') }}</small>
+                        </div>
+                        <p class="mb-1">{{ comentario.texto }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="p-3 text-center text-muted">
+                    Nenhum registro de atualização ou comentário.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+

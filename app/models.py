@@ -9,9 +9,12 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
-    ativo = db.Column(db.Boolean, default=True)  # Novo campo para ativação/desativação
-    reminders = db.relationship('Reminder', backref='user', lazy=True)
-    tasks = db.relationship('Task', backref='user', lazy=True)
+    is_ti = db.Column(db.Boolean, default=False)  # Indica se o usuário é da equipe de TI
+    ativo = db.Column(db.Boolean, default=True)  # Para ativação/desativação
+    sector_id = db.Column(db.Integer, db.ForeignKey('sector.id'), nullable=True)
+    sector = db.relationship('Sector', backref='usuarios')
+    reminders = db.relationship('Reminder', backref='usuario', lazy=True)
+    tasks = db.relationship('Task', backref='usuario', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -45,3 +48,42 @@ class Task(db.Model):
     completed = db.Column(db.Boolean, default=False)
     sector_id = db.Column(db.Integer, db.ForeignKey('sector.id'), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+
+
+
+class Chamado(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(120), nullable=False)
+    descricao = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(50), nullable=False, default='Aberto') # Ex: Aberto, Em Andamento, Resolvido, Fechado
+    prioridade = db.Column(db.String(50), nullable=False, default='Media') # Ex: Baixa, Media, Alta, Critica
+    data_abertura = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    data_ultima_atualizacao = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    data_fechamento = db.Column(db.DateTime, nullable=True)
+    solicitante_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    setor_id = db.Column(db.Integer, db.ForeignKey('sector.id'), nullable=False)
+    responsavel_ti_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+
+    solicitante = db.relationship('User', foreign_keys=[solicitante_id], backref='chamados_solicitados')
+    setor = db.relationship('Sector', backref='chamados')
+    responsavel_ti = db.relationship('User', foreign_keys=[responsavel_ti_id], backref='chamados_responsaveis')
+
+    def __repr__(self):
+        return f'<Chamado {self.id}: {self.titulo}>'
+
+
+class ComentarioChamado(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    chamado_id = db.Column(db.Integer, db.ForeignKey('chamado.id'), nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    texto = db.Column(db.Text, nullable=False)
+    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+    tipo = db.Column(db.String(20), default='comentario')  # 'comentario' ou 'atualizacao'
+    
+    # Relacionamentos
+    chamado = db.relationship('Chamado', backref=db.backref('comentarios', lazy=True, order_by='ComentarioChamado.data_criacao.desc()'))
+    usuario = db.relationship('User')
+    
+    def __repr__(self):
+        return f'<Comentario {self.id} do Chamado {self.chamado_id}>'
+

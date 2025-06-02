@@ -5,8 +5,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            flash('Faça login para acessar esta página.', 'danger')
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('auth.login', need_login=True))
         # Bloqueia usuários inativos
         from .models import User
         user = User.query.get(session['user_id'])

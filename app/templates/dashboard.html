@@ -41,6 +41,16 @@
               </select>
             </div>
             <div class="col-lg-2 col-md-4 col-sm-6">
+              <label for="chamado_status" class="form-label">Status dos Chamados</label>
+              <select id="chamado_status" name="chamado_status" class="form-select">
+                <option value="">Todos status</option>
+                <option value="Aberto" {% if request.args.get('chamado_status') == 'Aberto' %}selected{% endif %}>Aberto</option>
+                <option value="Em Andamento" {% if request.args.get('chamado_status') == 'Em Andamento' %}selected{% endif %}>Em Andamento</option>
+                <option value="Resolvido" {% if request.args.get('chamado_status') == 'Resolvido' %}selected{% endif %}>Resolvido</option> {# Novo #}
+                <option value="Fechado" {% if request.args.get('chamado_status') == 'Fechado' %}selected{% endif %}>Fechado</option>
+              </select>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
               <label for="start_date" class="form-label">Data Inicial</label>
               <input type="date" id="start_date" name="start_date" class="form-control" value="{{ request.args.get('start_date', '') }}">
             </div>
@@ -95,17 +105,21 @@
           <form class="row g-3" method="get" action="">
             <input type="hidden" name="task_status" value="{{ request.args.get('task_status', '') }}">
             <input type="hidden" name="reminder_status" value="{{ request.args.get('reminder_status', '') }}">
+            <input type="hidden" name="chamado_status" value="{{ request.args.get('chamado_status', '') }}"> {# Adicionado #}
             <input type="hidden" name="start_date" value="{{ request.args.get('start_date', '') }}">
             <input type="hidden" name="end_date" value="{{ request.args.get('end_date', '') }}">
             <input type="hidden" name="sector_id" value="{{ request.args.get('sector_id', '') }}">
             <input type="hidden" name="user_id" value="{{ request.args.get('user_id', '') }}">
-            
+            {# O input hidden para chamado_status já foi adicionado em uma etapa anterior, mas garantindo que está aqui: #}
+            <input type="hidden" name="chamado_status" value="{{ request.args.get('chamado_status', '') }}">
+
             <div class="col-md-4">
               <label for="export_type" class="form-label">Tipo de Exportação</label>
               <select id="export_type" name="export_type" class="form-select">
-                <option value="all">Tarefas e Lembretes</option>
+                <option value="all" {% if request.args.get('export_type', 'all') == 'all' %}selected{% endif %}>Tarefas e Lembretes</option>
                 <option value="tasks" {% if request.args.get('export_type') == 'tasks' %}selected{% endif %}>Somente Tarefas</option>
                 <option value="reminders" {% if request.args.get('export_type') == 'reminders' %}selected{% endif %}>Somente Lembretes</option>
+                <option value="chamados" {% if request.args.get('export_type') == 'chamados' %}selected{% endif %}>Somente Chamados</option> {# Nova opção #}
               </select>
             </div>
             <div class="col-md-8">
@@ -128,7 +142,7 @@
   <!-- Cards de resumo -->
   <div class="row mb-4">
     <!-- Card de Tarefas -->
-    <div class="col-md-6 mb-3">
+    <div class="col-lg-4 col-md-6 mb-3">
       <div class="card shadow-sm h-100">
         <div class="card-header bg-light">
           <h5 class="mb-0">Resumo de Tarefas</h5>
@@ -165,7 +179,7 @@
       </div>
     </div>
     <!-- Card de Lembretes -->
-    <div class="col-md-6 mb-3">
+    <div class="col-lg-4 col-md-6 mb-3">
       <div class="card shadow-sm h-100">
         <div class="card-header bg-light">
           <h5 class="mb-0">Resumo de Lembretes</h5>
@@ -190,6 +204,60 @@
                 <div class="list-group-item d-flex justify-content-between align-items-center">
                   Pendentes
                   <span class="badge bg-danger rounded-pill">{{ reminders_pending }}</span>
+                </div> <!-- Fecha o list-group-item de Lembretes Pendentes -->
+              </div> <!-- Fecha o list-group de Lembretes -->
+            </div> <!-- Fecha o col-md-6 da lista de Lembretes -->
+          </div> <!-- Fecha o row do card-body de Lembretes -->
+        </div> <!-- Fecha o card-body de Lembretes -->
+      </div> <!-- Fecha o card de Lembretes -->
+    </div> <!-- Fecha o col-lg-4 do card de Lembretes -->
+
+    <!-- Card de Chamados -->
+    <div class="col-lg-4 col-md-6 mb-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Resumo de Chamados</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3" style="width: 100%; max-width: 220px; margin: 0 auto;">
+                <canvas id="grafico_chamados" height="220"></canvas>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Total
+                  <span class="badge bg-primary rounded-pill">{{ chamados_total }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Abertos
+                  <span class="badge bg-info rounded-pill">{{ chamados_aberto }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Em Andamento
+                  <span class="badge bg-warning text-dark rounded-pill">{{ chamados_em_andamento }}</span>
+                </div>
+<div class="list-group-item d-flex justify-content-between align-items-center">
+                  Resolvidos
+                  <span class="badge bg-primary rounded-pill">{{ chamados_resolvido }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Fechados
+                  <span class="badge bg-success rounded-pill">{{ chamados_fechado }}</span>
+                </div>
+              </div> <!-- Fecha o list-group de Chamados -->
+            </div> <!-- Fecha o col-md-6 da lista de Chamados -->
+          </div> <!-- Fecha o row do card-body de Chamados -->
+        </div> <!-- Fecha o card-body de Chamados -->
+      </div> <!-- Fecha o card de Chamados -->
+    </div> <!-- Fecha o col-lg-4 do card de Chamados -->
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -310,6 +378,45 @@
       }
     }
   });
+
+  // Gráfico de Pizza para Chamados
+  const chamadosData = {
+    labels: ['Abertos', 'Em Andamento', 'Resolvidos', 'Fechados'], // Adicionado Resolvidos
+    datasets: [{
+      data: [{{ chamados_aberto }}, {{ chamados_em_andamento }}, {{ chamados_resolvido }}, {{ chamados_fechado }}], // Adicionado chamados_resolvido
+      backgroundColor: ['#0dcaf0', '#ffc107', '#0d6efd', '#198754'], // Cores: Info, Warning, Primary (para Resolvido), Success
+      borderWidth: 1
+    }]
+  };
+
+  new Chart(document.getElementById('grafico_chamados'), {
+    type: 'pie',
+    data: chamadosData,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 12,
+            padding: 15
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              const label = context.label || '';
+              const value = context.raw || 0;
+              const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+              const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+              return `${label}: ${value} (${percentage}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
   
   // Gráfico de Linha: Evolução mensal
   const mesesLabels = {{ meses_labels|tojson }};
@@ -410,6 +517,7 @@
   const setoresLabels = {{ setores_labels|tojson }};
   const tarefasPorSetor = {{ tarefas_por_setor|tojson }};
   const lembretesPorSetor = {{ lembretes_por_setor|tojson }};
+  const chamadosPorSetor = {{ chamados_por_setor|tojson }}; // Adicionado
   
   new Chart(document.getElementById('grafico_barra'), {
     type: 'bar',
@@ -429,6 +537,14 @@
           data: lembretesPorSetor,
           backgroundColor: 'rgba(255,193,7,0.7)',
           borderColor: '#ffc107',
+          borderWidth: 1,
+          borderRadius: 4
+        },
+        { // Novo dataset para Chamados
+          label: 'Chamados',
+          data: chamadosPorSetor,
+          backgroundColor: 'rgba(25,135,84,0.7)', // Cor verde, por exemplo
+          borderColor: '#198754',
           borderWidth: 1,
           borderRadius: 4
         }

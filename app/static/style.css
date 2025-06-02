@@ -14,11 +14,143 @@ body {
 }
 .card {
   margin-bottom: 20px;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: none;
+  border-radius: 0.5rem;
+  overflow: hidden;
 }
 
-/* Garante rolagem mesmo com footer fixo */
+.card-header {
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Estilos para os badges de status */
+.badge-status {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+  border-radius: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Estilos para a tabela de lembretes */
+.table-reminders {
+  width: 100%;
+  margin-bottom: 1rem;
+  background-color: transparent;
+}
+
+.table-reminders th {
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+.table-reminders td {
+  vertical-align: middle;
+  padding: 0.75rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.table-reminders tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.025);
+}
+
+.table-reminders .badge {
+  font-size: 0.875rem;
+  padding: 0.35em 0.65em;
+}
+
+.table-reminders .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .table-reminders th,
+  .table-reminders td {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .table-reminders .badge {
+    font-size: 0.75rem;
+    padding: 0.25em 0.5em;
+  }
+}
+
+.badge-prioridade {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+  border-radius: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Cores personalizadas para os badges de status */
+.bg-info {
+  background-color: #0dcaf0 !important;
+}
+
+.bg-primary {
+  background-color: #0d6efd !important;
+}
+
+.bg-warning {
+  color: #000 !important;
+  background-color: #ffc107 !important;
+}
+
+.bg-success {
+  background-color: #198754 !important;
+}
+
+.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.bg-dark {
+  background-color: #212529 !important;
+}
+
+/* Estilo para a tabela de chamados */
+.table {
+  margin-bottom: 0;
+}
+
+.table th {
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6c757d;
+  border-top: none;
+  padding: 0.75rem 1rem;
+  background-color: #f8f9fa;
+}
+
+.table td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+  border-top: 1px solid #f1f1f1;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Ajustes para dispositivos móveis */
 @media (max-width: 991.98px) {
   .container {
     padding-bottom: 60px;
+  }
+  
+  .table-responsive {
+    border-radius: 0.5rem;
+    border: 1px solid #e9ecef;
   }
 }
