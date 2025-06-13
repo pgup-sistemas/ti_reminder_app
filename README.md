@@ -49,7 +49,6 @@ O TI Reminder é uma solução completa para gestão de tarefas, lembretes e cha
 - **Design limpo e profissional**
 
 ## Stack Tecnológica
-
 - **Backend:** Python + Flask
 - **Frontend:** HTML + Bootstrap 5
 - **Banco de Dados:** SQLite (padrão), com suporte a PostgreSQL
@@ -65,7 +64,6 @@ O TI Reminder é uma solução completa para gestão de tarefas, lembretes e cha
   - APScheduler (tarefas agendadas)
 
 ## Estrutura de Diretórios
-
 ```
 ti_reminder/
 ├── app/
@@ -154,7 +152,6 @@ ti_reminder/
 3. **Exporte** para Excel ou PDF
 
 ## Configuração de E-mail
-
 Para que as notificações por e-mail funcionem, configure as seguintes variáveis de ambiente no arquivo `.env`:
 
 ```
@@ -169,12 +166,12 @@ TI_EMAIL=ti@empresa.com  # E-mail da equipe de TI para notificações
 
 ## Próximos Passos
 
-### Melhorias Planejadas
+### Melhorias para implementar
 - [ ] **Sistema de Comentários** nos chamados
 - [ ] **Atualização de Status** pelos técnicos de TI
 - [ ] **Anexos** em chamados
 - [ ] **Dashboard Avançado** com métricas
-- [ ] **Integração com Sistemas Externos**
+
 
 ### Melhorias Futuras
 - [ ] **API REST** para integração com outros sistemas
