@@ -167,8 +167,8 @@ TI_EMAIL=ti@empresa.com  # E-mail da equipe de TI para notificações
 ## Próximos Passos
 
 ### Melhorias para implementar
-- [ ] **Sistema de Comentários** nos chamados
-- [ ] **Atualização de Status** pelos técnicos de TI
+- [x] **Sistema de Comentários** nos chamados
+- [x] **Atualização de Status** pelos técnicos de TI
 - [ ] **Anexos** em chamados
 - [ ] **Dashboard Avançado** com métricas
 
