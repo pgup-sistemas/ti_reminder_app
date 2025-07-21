@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DateField, SelectField, BooleanField, SubmitField, PasswordField, ValidationError
+from wtforms import StringField, DateField, SelectField, BooleanField, SubmitField, PasswordField, ValidationError, TextAreaField
 from wtforms.validators import DataRequired, Length, EqualTo, Optional
+from flask_wtf.file import FileAllowed, MultipleFileField
 
 class ReminderForm(FlaskForm):
     name = StringField('Nome', validators=[DataRequired()])
@@ -20,8 +21,6 @@ class TaskForm(FlaskForm):
     sector_id = SelectField('Setor', coerce=int, choices=[], validators=[])
     new_sector = StringField('Novo setor')
     submit = SubmitField('Salvar')
-
-
 
 from wtforms import TextAreaField, SelectField, StringField, SubmitField, TextAreaField, BooleanField, validators
 
@@ -114,4 +113,19 @@ class ChamadoAdminForm(FlaskForm):
                 int(field.data)
             except ValueError:
                 raise validators.ValidationError('ID do responsável deve ser um número inteiro')
+
+class TutorialForm(FlaskForm):
+    titulo = StringField('Título', validators=[DataRequired()])
+    conteudo = TextAreaField('Conteúdo', validators=[DataRequired()])
+    categoria = StringField('Categoria', validators=[Optional()])
+    imagens = MultipleFileField('Imagens', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Apenas imagens são permitidas!')])
+    submit = SubmitField('Salvar Tutorial')
+
+class ComentarioTutorialForm(FlaskForm):
+    texto = TextAreaField('Comentário', validators=[DataRequired()])
+    submit = SubmitField('Enviar Comentário')
+
+class FeedbackTutorialForm(FlaskForm):
+    util = BooleanField('Este tutorial foi útil para você?')
+    submit = SubmitField('Enviar Feedback')
 

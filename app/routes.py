@@ -1,10 +1,14 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session, jsonify
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
-from .models import Reminder, Task, Sector, User, db
-from .forms import ReminderForm, TaskForm
+from .models import Reminder, Task, Sector, User, db, Tutorial, TutorialImage, VisualizacaoTutorial, FeedbackTutorial
+from .forms import ReminderForm, TaskForm, TutorialForm, ComentarioTutorialForm, FeedbackTutorialForm
 from .auth_utils import login_required
 from functools import wraps
+from flask import current_app
+import os
+from werkzeug.utils import secure_filename
+import markdown
 
 def admin_required(f):
     @wraps(f)
@@ -642,6 +646,56 @@ def dashboard():
     lembretes_por_setor = [len([r for r in reminders_all if r.sector_id == s.id]) for s in sectors]
     chamados_por_setor = [len([c for c in chamados_all if c.setor_id == s.id]) for s in sectors] # Novo
 
+    # --- Tutoriais: agregação ---
+    tutoriais = Tutorial.query.all()
+    total_tutoriais = len(tutoriais)
+    # Visualizações por tutorial
+    visualizacoes_por_tutorial = {t.id: 0 for t in tutoriais}
+    for v in VisualizacaoTutorial.query.all():
+        if v.tutorial_id in visualizacoes_por_tutorial:
+            visualizacoes_por_tutorial[v.tutorial_id] += 1
+    # Top 5 mais visualizados
+    top_tutoriais_ids = sorted(visualizacoes_por_tutorial, key=visualizacoes_por_tutorial.get, reverse=True)[:5]
+    top_tutoriais = [Tutorial.query.get(tid) for tid in top_tutoriais_ids]
+    top_tutoriais_labels = [t.titulo for t in top_tutoriais if t]
+    top_tutoriais_values = [visualizacoes_por_tutorial[t.id] for t in top_tutoriais if t]
+    # Feedbacks agregados
+    feedbacks = FeedbackTutorial.query.all()
+    feedbacks_util = sum(1 for f in feedbacks if f.util)
+    feedbacks_nao_util = sum(1 for f in feedbacks if not f.util)
+    # Feedback por tutorial (top 5 mais feedbacks)
+    feedbacks_por_tutorial = {t.id: 0 for t in tutoriais}
+    for f in feedbacks:
+        if f.tutorial_id in feedbacks_por_tutorial:
+            feedbacks_por_tutorial[f.tutorial_id] += 1
+    top_feedback_ids = sorted(feedbacks_por_tutorial, key=feedbacks_por_tutorial.get, reverse=True)[:5]
+    top_feedback_tutoriais = [Tutorial.query.get(tid) for tid in top_feedback_ids]
+    top_feedback_labels = [t.titulo for t in top_feedback_tutoriais if t]
+    top_feedback_values = [feedbacks_por_tutorial[t.id] for t in top_feedback_tutoriais if t]
+    # Tutorial mais visualizado e mais útil
+    tutorial_mais_visualizado = Tutorial.query.get(top_tutoriais_ids[0]) if top_tutoriais_ids else None
+    tutorial_mais_util = None
+    max_util = -1
+    for t in tutoriais:
+        util = sum(1 for f in t.feedbacks if f.util)
+        if util > max_util:
+            max_util = util
+            tutorial_mais_util = t
+
+    # Filtros para tutoriais
+    tutorial_query = Tutorial.query
+    if not is_admin:
+        tutorial_query = tutorial_query.filter(Tutorial.autor_id == current_user_id)
+    if sector_id:
+        tutorial_query = tutorial_query.join(User).filter(User.sector_id == sector_id)
+    if user_id and is_admin:
+        tutorial_query = tutorial_query.filter(Tutorial.autor_id == user_id)
+    if start_date:
+        tutorial_query = tutorial_query.filter(Tutorial.data_criacao >= start_date)
+    if end_date:
+        tutorial_query = tutorial_query.filter(Tutorial.data_criacao <= end_date)
+    tutoriais = tutorial_query.all()
+
     return render_template('dashboard.html',
         tasks_total=tasks_total,
         tasks_done=tasks_done,
@@ -667,7 +721,16 @@ def dashboard():
         setores_labels=setores_labels,
         tarefas_por_setor=tarefas_por_setor,
         lembretes_por_setor=lembretes_por_setor,
-        chamados_por_setor=chamados_por_setor # Novo
+        chamados_por_setor=chamados_por_setor, # Novo
+        total_tutoriais=total_tutoriais,
+        top_tutoriais_labels=top_tutoriais_labels,
+        top_tutoriais_values=top_tutoriais_values,
+        feedbacks_util=feedbacks_util,
+        feedbacks_nao_util=feedbacks_nao_util,
+        top_feedback_labels=top_feedback_labels,
+        top_feedback_values=top_feedback_values,
+        tutorial_mais_visualizado=tutorial_mais_visualizado,
+        tutorial_mais_util=tutorial_mais_util,
     )
 
 @bp.route('/export/excel')
@@ -817,6 +880,38 @@ def export_excel():
             for i, col in enumerate(df_chamados.columns):
                 column_len = max(df_chamados[col].astype(str).map(len).max(), len(col))
                 worksheet_chamados.set_column(i, i, column_len + 2)
+
+    tutorial_query = Tutorial.query
+    if not is_admin:
+        tutorial_query = tutorial_query.filter(Tutorial.autor_id == current_user_id)
+    if sector_id:
+        tutorial_query = tutorial_query.join(User).filter(User.sector_id == sector_id)
+    if user_id_filter and is_admin:
+        tutorial_query = tutorial_query.filter(Tutorial.autor_id == user_id_filter)
+    if start_date:
+        tutorial_query = tutorial_query.filter(Tutorial.data_criacao >= start_date)
+    if end_date:
+        tutorial_query = tutorial_query.filter(Tutorial.data_criacao <= end_date)
+    tutoriais = tutorial_query.all()
+    if export_type in ['all', 'tutoriais']:
+        tutoriais_data = [{
+            'Título': t.titulo,
+            'Categoria': t.categoria or '',
+            'Autor': t.autor.username,
+            'Data de Criação': t.data_criacao.strftime('%d/%m/%Y %H:%M'),
+            'Visualizações': len(t.visualizacoes),
+            'Feedback Útil': sum(1 for f in t.feedbacks if f.util),
+            'Feedback Não Útil': sum(1 for f in t.feedbacks if not f.util)
+        } for t in tutoriais]
+        df_tutoriais = pd.DataFrame(tutoriais_data)
+        df_tutoriais.to_excel(writer, sheet_name='Tutoriais', index=False, header=False, startrow=1)
+        worksheet_tutoriais = writer.sheets['Tutoriais']
+        worksheet_tutoriais.merge_range('A1:G1', 'Relatório de Tutoriais', title_format)
+        for col_num, value in enumerate(df_tutoriais.columns.values):
+            worksheet_tutoriais.write(0, col_num, value, header_format)
+        for i, col in enumerate(df_tutoriais.columns):
+            column_len = max(df_tutoriais[col].astype(str).map(len).max(), len(col))
+            worksheet_tutoriais.set_column(i, i, column_len + 2)
 
     output.seek(0)
     # Forçar mimetype correto para navegadores modernos
@@ -1011,6 +1106,40 @@ def export_pdf():
     if not elements or all(isinstance(el, (Paragraph, Spacer)) and "Nenhum" in el.text for el in elements if isinstance(el, Paragraph)):
          elements.append(Paragraph("Nenhum dado para exportar com os filtros selecionados.", styles['Normal']))
 
+    tutorial_query = Tutorial.query
+    if not is_admin:
+        tutorial_query = tutorial_query.filter(Tutorial.autor_id == current_user_id)
+    if sector_id:
+        tutorial_query = tutorial_query.join(User).filter(User.sector_id == sector_id)
+    if user_id_filter and is_admin:
+        tutorial_query = tutorial_query.filter(Tutorial.autor_id == user_id_filter)
+    if start_date:
+        tutorial_query = tutorial_query.filter(Tutorial.data_criacao >= start_date)
+    if end_date:
+        tutorial_query = tutorial_query.filter(Tutorial.data_criacao <= end_date)
+    tutoriais = tutorial_query.all()
+    if export_type in ['all', 'tutoriais']:
+        elements.append(Paragraph("Relatório de Tutoriais", title_style))
+        elements.append(Spacer(1, 0.1*inch))
+        if tutoriais:
+            data_tutoriais = [["Título", "Categoria", "Autor", "Data de Criação", "Visualizações", "Feedback Útil", "Feedback Não Útil"]]
+            for t in tutoriais:
+                data_tutoriais.append([
+                    Paragraph(t.titulo if t.titulo else '', normal_style),
+                    Paragraph(t.categoria if t.categoria else '', normal_style),
+                    Paragraph(t.autor.username if t.autor else '', normal_style),
+                    t.data_criacao.strftime('%d/%m/%Y %H:%M'),
+                    str(len(t.visualizacoes)),
+                    str(sum(1 for f in t.feedbacks if f.util)),
+                    str(sum(1 for f in t.feedbacks if not f.util))
+                ])
+            table = Table(data_tutoriais, colWidths=[2*inch, 1*inch, 1.2*inch, 1.2*inch, 1*inch, 1*inch, 1*inch])
+            table.setStyle(table_style)
+            elements.append(table)
+        else:
+            elements.append(Paragraph("Nenhum tutorial encontrado.", normal_style))
+        elements.append(PageBreak() if export_type == 'all' else Spacer(1, 0.3*inch))
+
     doc.build(elements)
     buffer.seek(0)
     response = make_response(buffer.getvalue())
@@ -1156,7 +1285,6 @@ def edit_task(id):
         else:
             t.status = 'pending'
     return render_template('tasks.html', tasks=tasks, form=form, edit_id=id, pagination=pagination, status_filter=status_filter, search=search, date_filter=date_filter)
-
 
 
 
@@ -1438,6 +1566,218 @@ def gerenciar_chamado(id):
             flash(f'Erro no campo {getattr(form, field).label.text}: {error}', 'danger')
     
     return redirect(url_for('main.detalhe_chamado', id=chamado.id))
+
+# --- Tutoriais ---
+# Apenas usuários com is_ti=True (Equipe de TI) podem cadastrar, editar e excluir tutoriais.
+
+@bp.route('/tutoriais')
+@login_required
+def listar_tutoriais():
+    busca = request.args.get('busca', '').strip()
+    page = request.args.get('page', 1, type=int)
+    per_page = 6
+    query = Tutorial.query
+    if busca:
+        query = query.filter((Tutorial.titulo.ilike(f'%{busca}%')) | (Tutorial.conteudo.ilike(f'%{busca}%')) | (Tutorial.categoria.ilike(f'%{busca}%')))
+    pagination = query.order_by(Tutorial.data_criacao.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    tutoriais = pagination.items
+    return render_template('tutoriais.html', tutoriais=tutoriais, busca=busca, pagination=pagination)
+
+@bp.route('/tutoriais/novo', methods=['GET', 'POST'])
+@login_required
+def novo_tutorial():
+    # Apenas membros da equipe de TI ou administradores podem cadastrar tutoriais
+    if not (session.get('is_ti') or session.get('is_admin')):
+        flash('Apenas membros da equipe de TI ou administradores podem cadastrar tutoriais.', 'danger')
+        return redirect(url_for('main.listar_tutoriais'))
+    form = TutorialForm()
+    if form.validate_on_submit():
+        tutorial = Tutorial(
+            titulo=form.titulo.data,
+            conteudo=form.conteudo.data,
+            categoria=form.categoria.data,
+            autor_id=session.get('user_id')
+        )
+        db.session.add(tutorial)
+        db.session.commit()
+        # Upload de imagens
+        if form.imagens.data:
+            upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+            os.makedirs(upload_folder, exist_ok=True)
+            for file in form.imagens.data:
+                if file:
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(upload_folder, filename))
+                    img = TutorialImage(tutorial_id=tutorial.id, filename=filename)
+                    db.session.add(img)
+            db.session.commit()
+        flash('Tutorial cadastrado com sucesso!', 'success')
+        return redirect(url_for('main.listar_tutoriais'))
+    return render_template('tutorial_form.html', form=form, title='Novo Tutorial')
+
+@bp.route('/tutoriais/<int:tutorial_id>')
+@login_required
+def detalhe_tutorial(tutorial_id):
+    tutorial = Tutorial.query.get_or_404(tutorial_id)
+    comentario_form = ComentarioTutorialForm()
+    feedback_form = FeedbackTutorialForm()
+    # Registrar visualização (mantém se já estiver)
+    visualizacao = VisualizacaoTutorial(tutorial_id=tutorial.id, usuario_id=session.get('user_id'))
+    db.session.add(visualizacao)
+    db.session.commit()
+    # Preparar dados para gráficos (mantém se já estiver)
+    visualizacoes = VisualizacaoTutorial.query.filter_by(tutorial_id=tutorial.id).all()
+    datas = [v.data.strftime('%d/%m') for v in visualizacoes]
+    from collections import Counter
+    contagem_datas = Counter(datas)
+    datas_ordenadas = sorted(contagem_datas.keys(), key=lambda x: tuple(map(int, x.split('/')[::-1])))
+    visualizacoes_labels = datas_ordenadas[-15:]
+    visualizacoes_values = [contagem_datas[d] for d in visualizacoes_labels]
+    feedbacks = tutorial.feedbacks
+    total_util = sum(1 for f in feedbacks if f.util)
+    total_nao_util = sum(1 for f in feedbacks if not f.util)
+    feedback_data = {
+        'labels': ['Útil', 'Não útil'],
+        'values': [total_util, total_nao_util]
+    }
+    import json
+    conteudo_markdown = markdown.markdown(tutorial.conteudo, extensions=['extra', 'nl2br'])
+    return render_template(
+        'tutorial_detalhe.html',
+        tutorial=tutorial,
+        comentario_form=comentario_form,
+        feedback_form=feedback_form,
+        visualizacoes_labels=json.dumps(visualizacoes_labels),
+        visualizacoes_values=json.dumps(visualizacoes_values),
+        feedback_data=json.dumps(feedback_data),
+        conteudo_markdown=conteudo_markdown
+    )
+
+@bp.route('/tutoriais/<int:tutorial_id>/editar', methods=['GET', 'POST'])
+@login_required
+def editar_tutorial(tutorial_id):
+    tutorial = Tutorial.query.get_or_404(tutorial_id)
+    # Apenas membros da equipe de TI ou administradores podem editar tutoriais
+    if not (session.get('is_ti') or session.get('is_admin')) or (not session.get('is_admin') and tutorial.autor_id != session.get('user_id')):
+        flash('Apenas o autor TI ou administradores podem editar este tutorial.', 'danger')
+        return redirect(url_for('main.detalhe_tutorial', tutorial_id=tutorial.id))
+    form = TutorialForm(obj=tutorial)
+    if form.validate_on_submit():
+        tutorial.titulo = form.titulo.data
+        tutorial.conteudo = form.conteudo.data
+        tutorial.categoria = form.categoria.data
+        # Upload de novas imagens
+        if form.imagens.data:
+            upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+            os.makedirs(upload_folder, exist_ok=True)
+            for file in form.imagens.data:
+                if file:
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(upload_folder, filename))
+                    img = TutorialImage(tutorial_id=tutorial.id, filename=filename)
+                    db.session.add(img)
+        db.session.commit()
+        flash('Tutorial atualizado com sucesso!', 'success')
+        return redirect(url_for('main.detalhe_tutorial', tutorial_id=tutorial.id))
+    return render_template('tutorial_form.html', form=form, title='Editar Tutorial')
+
+@bp.route('/tutoriais/<int:tutorial_id>/excluir', methods=['POST'])
+@login_required
+def excluir_tutorial(tutorial_id):
+    tutorial = Tutorial.query.get_or_404(tutorial_id)
+    # Apenas membros da equipe de TI ou administradores podem excluir tutoriais
+    if not (session.get('is_ti') or session.get('is_admin')) or (not session.get('is_admin') and tutorial.autor_id != session.get('user_id')):
+        flash('Apenas o autor TI ou administradores podem excluir este tutorial.', 'danger')
+        return redirect(url_for('main.detalhe_tutorial', tutorial_id=tutorial.id))
+    # Excluir imagens do disco
+    upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+    for img in tutorial.imagens:
+        img_path = os.path.join(upload_folder, img.filename)
+        if os.path.exists(img_path):
+            os.remove(img_path)
+        db.session.delete(img)
+    db.session.delete(tutorial)
+    db.session.commit()
+    flash('Tutorial excluído com sucesso!', 'success')
+    return redirect(url_for('main.listar_tutoriais'))
+
+@bp.route('/tutoriais/<int:tutorial_id>/comentar', methods=['POST'])
+@login_required
+def comentar_tutorial(tutorial_id):
+    tutorial = Tutorial.query.get_or_404(tutorial_id)
+    form = ComentarioTutorialForm()
+    feedback_form = FeedbackTutorialForm()
+    if form.validate_on_submit():
+        comentario = ComentarioTutorial(
+            tutorial_id=tutorial.id,
+            usuario_id=session.get('user_id'),
+            texto=form.texto.data
+        )
+        db.session.add(comentario)
+        db.session.commit()
+        flash('Comentário enviado com sucesso!', 'success')
+        return redirect(url_for('main.detalhe_tutorial', tutorial_id=tutorial.id))
+    else:
+        flash('Erro ao enviar comentário.', 'danger')
+        # Renderiza o template com os formulários em caso de erro
+        return render_template('tutorial_detalhe.html', tutorial=tutorial, comentario_form=form, feedback_form=feedback_form)
+
+@bp.route('/tutoriais/<int:tutorial_id>/feedback', methods=['POST'])
+@login_required
+def feedback_tutorial(tutorial_id):
+    tutorial = Tutorial.query.get_or_404(tutorial_id)
+    comentario_form = ComentarioTutorialForm()
+    form = FeedbackTutorialForm()
+    if form.validate_on_submit():
+        feedback_existente = FeedbackTutorial.query.filter_by(tutorial_id=tutorial.id, usuario_id=session.get('user_id')).first()
+        if not feedback_existente:
+            feedback = FeedbackTutorial(
+                tutorial_id=tutorial.id,
+                usuario_id=session.get('user_id'),
+                util=form.util.data
+            )
+            db.session.add(feedback)
+            db.session.commit()
+            flash('Feedback registrado!', 'success')
+        else:
+            flash('Você já enviou feedback para este tutorial.', 'info')
+        return redirect(url_for('main.detalhe_tutorial', tutorial_id=tutorial.id))
+    else:
+        flash('Erro ao enviar feedback.', 'danger')
+        # Renderiza o template com os formulários em caso de erro
+        return render_template('tutorial_detalhe.html', tutorial=tutorial, comentario_form=comentario_form, feedback_form=form)
+
+@bp.route('/tutoriais/<int:tutorial_id>/pdf')
+@login_required
+def exportar_tutorial_pdf(tutorial_id):
+    tutorial = Tutorial.query.get_or_404(tutorial_id)
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+    y = height - 40
+    p.setFont('Helvetica-Bold', 16)
+    p.drawString(40, y, tutorial.titulo)
+    y -= 30
+    p.setFont('Helvetica', 12)
+    p.drawString(40, y, f'Categoria: {tutorial.categoria or "Sem categoria"}')
+    y -= 20
+    p.drawString(40, y, f'Autor: {tutorial.autor.username}')
+    y -= 20
+    p.drawString(40, y, f'Data: {tutorial.data_criacao.strftime("%d/%m/%Y %H:%M")}')
+    y -= 30
+    p.setFont('Helvetica', 12)
+    conteudo = tutorial.conteudo.replace('\r', '').split('\n')
+    for linha in conteudo:
+        if y < 60:
+            p.showPage()
+            y = height - 40
+            p.setFont('Helvetica', 12)
+        p.drawString(40, y, linha[:110])
+        y -= 18
+    p.showPage()
+    p.save()
+    buffer.seek(0)
+    return send_file(buffer, as_attachment=True, download_name=f'tutorial_{tutorial.id}.pdf', mimetype='application/pdf')
 
 
 

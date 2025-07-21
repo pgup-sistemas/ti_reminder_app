@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} | TI reminder{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          <h4 class="mb-0">{{ title }}</h4>
+        </div>
+        <div class="card-body">
+          <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+              {{ form.titulo.label(class="form-label") }}
+              {{ form.titulo(class="form-control" + (' is-invalid' if form.titulo.errors else '')) }}
+              {% for error in form.titulo.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="mb-3">
+              {{ form.categoria.label(class="form-label") }}
+              {{ form.categoria(class="form-control" + (' is-invalid' if form.categoria.errors else '')) }}
+              {% for error in form.categoria.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="mb-3">
+              {{ form.conteudo.label(class="form-label") }}
+              {{ form.conteudo(class="form-control" + (' is-invalid' if form.conteudo.errors else ''), rows=6) }}
+              {% for error in form.conteudo.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="mb-3">
+              {{ form.imagens.label(class="form-label") }}
+              {{ form.imagens(class="form-control", multiple=true) }}
+              <div class="form-text">Você pode selecionar várias imagens (jpg, png, gif).</div>
+              {% for error in form.imagens.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-success">Salvar</button>
+            <a href="{{ url_for('main.listar_tutoriais') }}" class="btn btn-secondary ms-2">Cancelar</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

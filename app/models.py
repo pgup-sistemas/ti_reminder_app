@@ -87,3 +87,67 @@ class ComentarioChamado(db.Model):
     def __repr__(self):
         return f'<Comentario {self.id} do Chamado {self.chamado_id}>'
 
+class Tutorial(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(150), nullable=False)
+    conteudo = db.Column(db.Text, nullable=False)
+    data_criacao = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    autor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    categoria = db.Column(db.String(100), nullable=True)
+
+    autor = db.relationship('User', backref='tutoriais')
+
+    def __repr__(self):
+        return f'<Tutorial {self.id}: {self.titulo}>'
+
+class TutorialImage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tutorial_id = db.Column(db.Integer, db.ForeignKey('tutorial.id'), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    upload_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+    tutorial = db.relationship('Tutorial', backref=db.backref('imagens', lazy=True))
+
+    def __repr__(self):
+        return f'<TutorialImage {self.id} - {self.filename}>'
+
+class ComentarioTutorial(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tutorial_id = db.Column(db.Integer, db.ForeignKey('tutorial.id'), nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    texto = db.Column(db.Text, nullable=False)
+    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+    chamado_id = db.Column(db.Integer, db.ForeignKey('chamado.id'), nullable=True)  # Integração opcional com chamado
+
+    tutorial = db.relationship('Tutorial', backref=db.backref('comentarios', lazy=True, order_by='ComentarioTutorial.data_criacao.desc()'))
+    usuario = db.relationship('User')
+    chamado = db.relationship('Chamado')
+
+    def __repr__(self):
+        return f'<ComentarioTutorial {self.id} do Tutorial {self.tutorial_id}>'
+
+class FeedbackTutorial(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tutorial_id = db.Column(db.Integer, db.ForeignKey('tutorial.id'), nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    util = db.Column(db.Boolean, nullable=False)  # True = útil, False = não útil
+    data = db.Column(db.DateTime, default=datetime.utcnow)
+
+    tutorial = db.relationship('Tutorial', backref=db.backref('feedbacks', lazy=True))
+    usuario = db.relationship('User')
+
+    def __repr__(self):
+        return f'<FeedbackTutorial {self.id} - Tutorial {self.tutorial_id} - Util: {self.util}>'
+
+class VisualizacaoTutorial(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tutorial_id = db.Column(db.Integer, db.ForeignKey('tutorial.id'), nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Pode ser nulo para visitantes
+    data = db.Column(db.DateTime, default=datetime.utcnow)
+
+    tutorial = db.relationship('Tutorial', backref=db.backref('visualizacoes', lazy=True))
+    usuario = db.relationship('User')
+
+    def __repr__(self):
+        return f'<VisualizacaoTutorial {self.id} - Tutorial {self.tutorial_id}>'
+

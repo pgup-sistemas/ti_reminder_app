@@ -48,6 +48,39 @@ O TI Reminder é uma solução completa para gestão de tarefas, lembretes e cha
 - **Navegação intuitiva**
 - **Design limpo e profissional**
 
+### Funcionalidade de Tutoriais
+
+O sistema agora conta com um módulo completo de tutoriais, pensado para facilitar o compartilhamento de conhecimento pela equipe de TI e o autoatendimento dos usuários.
+
+### Recursos disponíveis
+- **Cadastro, edição e exclusão de tutoriais** (apenas Equipe de TI e Administradores)
+- **Upload múltiplo de imagens** por tutorial
+- **Comentários**: usuários podem tirar dúvidas diretamente nos tutoriais
+- **Feedback**: usuários podem marcar se o tutorial foi útil ou não
+- **Exportação em PDF**: qualquer usuário pode exportar o conteúdo do tutorial em PDF
+- **Visualizações**: cada acesso ao tutorial é registrado
+- **Gráficos no dashboard**: indicadores de tutoriais mais visualizados, mais úteis e proporção de feedbacks
+- **Filtros e busca**: por título, conteúdo, categoria, data, setor e autor
+- **Exportação de relatórios**: tutoriais podem ser exportados em Excel ou PDF, isoladamente ou junto dos demais módulos
+- **Paginação e layout responsivo**: otimizado para uso em dispositivos móveis
+
+### Permissões
+- **Equipe de TI (`is_ti=True`) e Administradores (`is_admin=True`)**: podem cadastrar, editar e excluir qualquer tutorial
+- **Usuários comuns**: podem visualizar, comentar e dar feedback
+
+### Como usar
+- Acesse o menu "Tutoriais" após login
+- Use o botão "Novo Tutorial" para cadastrar (TI/Admin)
+- Clique em "Editar" ou "Excluir" para gerenciar (TI/Admin)
+- Use a busca e os filtros para encontrar tutoriais
+- Exporte relatórios pelo dashboard ou exporte um tutorial individual em PDF
+- Veja indicadores de uso e feedbacks no dashboard
+
+### Observações
+- O conteúdo dos tutoriais aceita **Markdown** para formatação (títulos, listas, negrito, links, etc.)
+- O layout é responsivo e adaptado para mobile
+- Todas as ações são auditadas e protegidas por permissões
+
 ## Stack Tecnológica
 - **Backend:** Python + Flask
 - **Frontend:** HTML + Bootstrap 5

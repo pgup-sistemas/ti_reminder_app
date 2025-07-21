@@ -78,6 +78,13 @@
               </select>
             </div>
             {% endif %}
+            <div class="col-lg-2 col-md-4 col-sm-6">
+              <label for="tutorial_status" class="form-label">Status dos Tutoriais</label>
+              <select id="tutorial_status" name="tutorial_status" class="form-select">
+                <option value="">Todos tutoriais</option>
+                <!-- Futuramente pode-se adicionar status como publicado, rascunho, etc. -->
+              </select>
+            </div>
             <div class="col-12 mt-3">
               <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">
@@ -116,10 +123,11 @@
             <div class="col-md-4">
               <label for="export_type" class="form-label">Tipo de Exportação</label>
               <select id="export_type" name="export_type" class="form-select">
-                <option value="all" {% if request.args.get('export_type', 'all') == 'all' %}selected{% endif %}>Tarefas e Lembretes</option>
+                <option value="all" {% if request.args.get('export_type', 'all') == 'all' %}selected{% endif %}>Tarefas, Lembretes e Tutoriais</option>
                 <option value="tasks" {% if request.args.get('export_type') == 'tasks' %}selected{% endif %}>Somente Tarefas</option>
                 <option value="reminders" {% if request.args.get('export_type') == 'reminders' %}selected{% endif %}>Somente Lembretes</option>
-                <option value="chamados" {% if request.args.get('export_type') == 'chamados' %}selected{% endif %}>Somente Chamados</option> {# Nova opção #}
+                <option value="chamados" {% if request.args.get('export_type') == 'chamados' %}selected{% endif %}>Somente Chamados</option>
+                <option value="tutoriais" {% if request.args.get('export_type') == 'tutoriais' %}selected{% endif %}>Somente Tutoriais</option>
               </select>
             </div>
             <div class="col-md-8">
@@ -253,14 +261,82 @@
         </div> <!-- Fecha o card-body de Chamados -->
       </div> <!-- Fecha o card de Chamados -->
     </div> <!-- Fecha o col-lg-4 do card de Chamados -->
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+
+    <!-- Card de Tutoriais -->
+    <div class="col-lg-4 col-md-6 mb-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Resumo de Tutoriais</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3" style="width: 100%; max-width: 220px; margin: 0 auto;">
+                <canvas id="grafico_tutoriais" height="220"></canvas>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Total
+                  <span class="badge bg-primary rounded-pill">{{ total_tutoriais }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Mais visualizado
+                  <span class="badge bg-success rounded-pill text-truncate" style="max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ tutorial_mais_visualizado.titulo if tutorial_mais_visualizado else '-' }}">
+                    {{ tutorial_mais_visualizado.titulo if tutorial_mais_visualizado else '-' }}
+                    {% if tutorial_mais_visualizado and tutorial_mais_visualizado.categoria %}
+                      <span class="badge bg-info ms-1">{{ tutorial_mais_visualizado.categoria }}</span>
+                    {% endif %}
+                  </span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  Mais útil
+                  <span class="badge bg-info rounded-pill text-truncate" style="max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ tutorial_mais_util.titulo if tutorial_mais_util else '-' }}">
+                    {{ tutorial_mais_util.titulo if tutorial_mais_util else '-' }}
+                    {% if tutorial_mais_util and tutorial_mais_util.categoria %}
+                      <span class="badge bg-info ms-1">{{ tutorial_mais_util.categoria }}</span>
+                    {% endif %}
+                  </span>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Gráfico de feedbacks -->
+    <div class="col-lg-4 col-md-6 mb-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Feedbacks de Tutoriais</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3" style="width: 100%; max-width: 220px; margin: 0 auto;">
+            <canvas id="grafico_feedbacks_tutoriais" height="220"></canvas>
+          </div>
+          <div class="list-group">
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              Útil
+              <span class="badge bg-success rounded-pill">{{ feedbacks_util }}</span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              Não útil
+              <span class="badge bg-danger rounded-pill">{{ feedbacks_nao_util }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Gráfico de mais visualizados -->
+    <div class="col-lg-4 col-md-12 mb-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Top 5 Tutoriais Mais Visualizados</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3" style="width: 100%; max-width: 400px; margin: 0 auto;">
+            <canvas id="grafico_top_tutoriais" height="220"></canvas>
           </div>
         </div>
       </div>
@@ -577,5 +653,70 @@
       }
     }
   });
+
+  // Gráfico de pizza de feedbacks
+  const ctxFeedback = document.getElementById('grafico_feedbacks_tutoriais');
+  if (ctxFeedback) {
+    new Chart(ctxFeedback, {
+      type: 'pie',
+      data: {
+        labels: ['Útil', 'Não útil'],
+        datasets: [{
+          data: [{{ feedbacks_util }}, {{ feedbacks_nao_util }}],
+          backgroundColor: ['#198754', '#dc3545'],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+  }
+  // Gráfico de barras dos mais visualizados
+  const ctxTop = document.getElementById('grafico_top_tutoriais');
+  if (ctxTop) {
+    new Chart(ctxTop, {
+      type: 'bar',
+      data: {
+        labels: {{ top_tutoriais_labels|tojson }},
+        datasets: [{
+          label: 'Visualizações',
+          data: {{ top_tutoriais_values|tojson }},
+          backgroundColor: '#0d6efd',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
+  // Gráfico de barras dos mais feedbacks
+  const ctxTutoriais = document.getElementById('grafico_tutoriais');
+  if (ctxTutoriais) {
+    new Chart(ctxTutoriais, {
+      type: 'bar',
+      data: {
+        labels: {{ top_feedback_labels|tojson }},
+        datasets: [{
+          label: 'Feedbacks',
+          data: {{ top_feedback_values|tojson }},
+          backgroundColor: '#ffc107',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
 </script>
 {% endblock %}
