@@ -151,3 +151,63 @@ class VisualizacaoTutorial(db.Model):
     def __repr__(self):
         return f'<VisualizacaoTutorial {self.id} - Tutorial {self.tutorial_id}>'
 
+
+class EquipmentRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Campos principais (solicitados)
+    description = db.Column(db.Text, nullable=False)  # Descrição do equipamento
+    patrimony = db.Column(db.String(50), nullable=True)  # Número do patrimônio
+    delivery_date = db.Column(db.Date, nullable=True)  # Data de entrega
+    return_date = db.Column(db.Date, nullable=True)  # Data de devolução
+    conference_status = db.Column(db.String(50), nullable=True)  # Status de conferência
+    observations = db.Column(db.Text, nullable=True)  # Observações
+    
+    # Campos de relacionamento
+    requester_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Solicitante
+    received_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Quem recebeu
+    approved_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Quem aprovou
+    
+    # Campos de status e controle
+    status = db.Column(db.String(20), nullable=False, default='Solicitado')  # Solicitado, Aprovado, Entregue, Devolvido, Negado
+    request_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)  # Data da solicitação
+    approval_date = db.Column(db.DateTime, nullable=True)  # Data de aprovação
+    
+    # Campos adicionais
+    equipment_type = db.Column(db.String(50), nullable=True)  # Tipo de equipamento (notebook, monitor, etc.)
+    destination_sector = db.Column(db.String(100), nullable=True)  # Setor/Destino
+    request_reason = db.Column(db.Text, nullable=True)  # Motivo da solicitação
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relacionamentos
+    requester = db.relationship('User', foreign_keys=[requester_id], backref='equipment_requests_solicitadas')
+    received_by = db.relationship('User', foreign_keys=[received_by_id], backref='equipment_requests_recebidas')
+    approved_by = db.relationship('User', foreign_keys=[approved_by_id], backref='equipment_requests_aprovadas')
+    
+    def __repr__(self):
+        return f'<EquipmentRequest {self.id}: {self.description[:50]}...>'
+    
+    def get_status_display(self):
+        """Retorna o status em português"""
+        status_map = {
+            'Solicitado': 'Solicitado',
+            'Aprovado': 'Aprovado',
+            'Entregue': 'Entregue',
+            'Devolvido': 'Devolvido',
+            'Negado': 'Negado'
+        }
+        return status_map.get(self.status, self.status)
+    
+    def can_be_approved_by(self, user):
+        """Verifica se o usuário pode aprovar esta solicitação"""
+        return user.is_admin or user.is_ti
+    
+    def can_be_edited_by(self, user):
+        """Verifica se o usuário pode editar esta solicitação"""
+        return (user.id == self.requester_id or 
+                user.is_admin or 
+                user.is_ti)
+

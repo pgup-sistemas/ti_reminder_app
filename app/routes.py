@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session, jsonify
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
-from .models import Reminder, Task, Sector, User, db, Tutorial, TutorialImage, VisualizacaoTutorial, FeedbackTutorial
+from .models import Reminder, Task, Sector, User, db, Tutorial, TutorialImage, VisualizacaoTutorial, FeedbackTutorial, EquipmentRequest
 from .forms import ReminderForm, TaskForm, TutorialForm, ComentarioTutorialForm, FeedbackTutorialForm
 from .auth_utils import login_required
 from functools import wraps
@@ -1778,6 +1778,321 @@ def exportar_tutorial_pdf(tutorial_id):
     p.save()
     buffer.seek(0)
     return send_file(buffer, as_attachment=True, download_name=f'tutorial_{tutorial.id}.pdf', mimetype='application/pdf')
+
+
+# ========================================
+# ROTAS PARA CONTROLE DE EQUIPAMENTOS
+# ========================================
+
+@bp.route('/equipment/list')
+@login_required
+def list_equipment():
+    """Lista todas as solicitações de equipamentos"""
+    # Filtros
+    status_filter = request.args.get('status', '')
+    search = request.args.get('search', '').strip()
+    
+    # Query base
+    if session.get('is_admin') or session.get('is_ti'):
+        # TI/Admin vê todas as solicitações
+        query = EquipmentRequest.query
+    else:
+        # Usuário comum vê apenas suas solicitações
+        query = EquipmentRequest.query.filter_by(requester_id=session.get('user_id'))
+    
+    # Aplicar filtros
+    if status_filter:
+        query = query.filter(EquipmentRequest.status == status_filter)
+    
+    if search:
+        query = query.filter(
+            db.or_(
+                EquipmentRequest.description.contains(search),
+                EquipmentRequest.patrimony.contains(search),
+                EquipmentRequest.equipment_type.contains(search)
+            )
+        )
+    
+    # Ordenar por data de solicitação (mais recente primeiro)
+    equipment_requests = query.order_by(EquipmentRequest.request_date.desc()).all()
+    
+    return render_template('equipment_list.html', 
+                         equipment_requests=equipment_requests,
+                         status_filter=status_filter,
+                         search=search)
+
+
+@bp.route('/equipment/new', methods=['GET', 'POST'])
+@login_required
+def new_equipment_request():
+    """Nova solicitação de equipamento"""
+    if request.method == 'POST':
+        # Validar dados
+        description = request.form.get('description', '').strip()
+        patrimony = request.form.get('patrimony', '').strip()
+        equipment_type = request.form.get('equipment_type', '').strip()
+        destination_sector = request.form.get('destination_sector', '').strip()
+        request_reason = request.form.get('request_reason', '').strip()
+        delivery_date_str = request.form.get('delivery_date', '').strip()
+        observations = request.form.get('observations', '').strip()
+        
+        if not description:
+            flash('Descrição é obrigatória.', 'danger')
+            return render_template('equipment_form.html')
+        
+        if not request_reason:
+            flash('Motivo da solicitação é obrigatório.', 'danger')
+            return render_template('equipment_form.html')
+        
+        if not destination_sector:
+            flash('Setor/Destino é obrigatório.', 'danger')
+            return render_template('equipment_form.html')
+        
+        # Converter data se fornecida
+        delivery_date = None
+        if delivery_date_str:
+            try:
+                delivery_date = datetime.strptime(delivery_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                flash('Data de entrega inválida.', 'danger')
+                return render_template('equipment_form.html')
+        
+        # Criar solicitação
+        equipment_request = EquipmentRequest(
+            description=description,
+            patrimony=patrimony if patrimony else None,
+            equipment_type=equipment_type if equipment_type else None,
+            destination_sector=destination_sector if destination_sector else None,
+            request_reason=request_reason if request_reason else None,
+            delivery_date=delivery_date,
+            observations=observations if observations else None,
+            requester_id=session.get('user_id'),
+            status='Solicitado'
+        )
+        
+        db.session.add(equipment_request)
+        db.session.commit()
+        
+        flash('Solicitação de equipamento criada com sucesso!', 'success')
+        return redirect(url_for('main.list_equipment'))
+    
+    return render_template('equipment_form.html')
+
+
+@bp.route('/equipment/<int:id>')
+@login_required
+def equipment_detail(id):
+    """Detalhes de uma solicitação de equipamento"""
+    equipment_request = EquipmentRequest.query.get_or_404(id)
+    
+    # Verificar permissão
+    if not (session.get('is_admin') or session.get('is_ti') or 
+            equipment_request.requester_id == session.get('user_id')):
+        flash('Você não tem permissão para ver esta solicitação.', 'danger')
+        return redirect(url_for('main.list_equipment'))
+    
+    return render_template('equipment_detail.html', equipment_request=equipment_request)
+
+
+@bp.route('/equipment/<int:id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_equipment_request(id):
+    """Editar solicitação de equipamento"""
+    equipment_request = EquipmentRequest.query.get_or_404(id)
+    
+    # Verificar permissão
+    if not equipment_request.can_be_edited_by(User.query.get(session.get('user_id'))):
+        flash('Você não tem permissão para editar esta solicitação.', 'danger')
+        return redirect(url_for('main.equipment_detail', id=id))
+    
+    if request.method == 'POST':
+        # Validar dados
+        description = request.form.get('description', '').strip()
+        patrimony = request.form.get('patrimony', '').strip()
+        equipment_type = request.form.get('equipment_type', '').strip()
+        destination_sector = request.form.get('destination_sector', '').strip()
+        request_reason = request.form.get('request_reason', '').strip()
+        delivery_date_str = request.form.get('delivery_date', '').strip()
+        observations = request.form.get('observations', '').strip()
+        
+        if not description:
+            flash('Descrição é obrigatória.', 'danger')
+            return render_template('equipment_form.html', equipment_request=equipment_request)
+        
+        if not request_reason:
+            flash('Motivo da solicitação é obrigatório.', 'danger')
+            return render_template('equipment_form.html', equipment_request=equipment_request)
+        
+        if not destination_sector:
+            flash('Setor/Destino é obrigatório.', 'danger')
+            return render_template('equipment_form.html', equipment_request=equipment_request)
+        
+        # Converter data se fornecida
+        delivery_date = None
+        if delivery_date_str:
+            try:
+                delivery_date = datetime.strptime(delivery_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                flash('Data de entrega inválida.', 'danger')
+                return render_template('equipment_form.html', equipment_request=equipment_request)
+        
+        # Atualizar dados
+        equipment_request.description = description
+        equipment_request.patrimony = patrimony if patrimony else None
+        equipment_request.equipment_type = equipment_type if equipment_type else None
+        equipment_request.destination_sector = destination_sector if destination_sector else None
+        equipment_request.request_reason = request_reason if request_reason else None
+        equipment_request.delivery_date = delivery_date
+        equipment_request.observations = observations if observations else None
+        
+        db.session.commit()
+        
+        flash('Solicitação atualizada com sucesso!', 'success')
+        return redirect(url_for('main.equipment_detail', id=id))
+    
+    return render_template('equipment_form.html', equipment_request=equipment_request)
+
+
+@bp.route('/equipment/<int:id>/approve', methods=['POST'])
+@login_required
+def approve_equipment_request(id):
+    """Aprovar solicitação de equipamento (TI/Admin)"""
+    equipment_request = EquipmentRequest.query.get_or_404(id)
+    
+    # Verificar permissão
+    if not equipment_request.can_be_approved_by(User.query.get(session.get('user_id'))):
+        flash('Você não tem permissão para aprovar solicitações.', 'danger')
+        return redirect(url_for('main.equipment_detail', id=id))
+    
+    if equipment_request.status != 'Solicitado':
+        flash('Apenas solicitações pendentes podem ser aprovadas.', 'danger')
+        return redirect(url_for('main.equipment_detail', id=id))
+    
+    # Aprovar solicitação
+    equipment_request.status = 'Aprovado'
+    equipment_request.approved_by_id = session.get('user_id')
+    equipment_request.approval_date = datetime.utcnow()
+    
+    db.session.commit()
+    
+    flash('Solicitação aprovada com sucesso!', 'success')
+    return redirect(url_for('main.equipment_detail', id=id))
+
+
+@bp.route('/equipment/<int:id>/reject', methods=['POST'])
+@login_required
+def reject_equipment_request(id):
+    """Recusar solicitação de equipamento (TI/Admin)"""
+    equipment_request = EquipmentRequest.query.get_or_404(id)
+    
+    # Verificar permissão
+    if not equipment_request.can_be_approved_by(User.query.get(session.get('user_id'))):
+        flash('Você não tem permissão para recusar solicitações.', 'danger')
+        return redirect(url_for('main.equipment_detail', id=id))
+    
+    if equipment_request.status != 'Solicitado':
+        flash('Apenas solicitações pendentes podem ser recusadas.', 'danger')
+        return redirect(url_for('main.equipment_detail', id=id))
+    
+    # Recusar solicitação
+    equipment_request.status = 'Negado'
+    equipment_request.approved_by_id = session.get('user_id')
+    equipment_request.approval_date = datetime.utcnow()
+    
+    db.session.commit()
+    
+    flash('Solicitação recusada.', 'warning')
+    return redirect(url_for('main.equipment_detail', id=id))
+
+
+@bp.route('/equipment/<int:id>/deliver', methods=['POST'])
+@login_required
+def deliver_equipment_request(id):
+    """Marcar equipamento como entregue (TI/Admin)"""
+    equipment_request = EquipmentRequest.query.get_or_404(id)
+    
+    # Verificar permissão
+    if not equipment_request.can_be_approved_by(User.query.get(session.get('user_id'))):
+        flash('Você não tem permissão para marcar como entregue.', 'danger')
+        return redirect(url_for('main.equipment_detail', id=id))
+    
+    if equipment_request.status != 'Aprovado':
+        flash('Apenas solicitações aprovadas podem ser marcadas como entregues.', 'danger')
+        return redirect(url_for('main.equipment_detail', id=id))
+    
+    # Marcar como entregue
+    equipment_request.status = 'Entregue'
+    equipment_request.received_by_id = session.get('user_id')
+    equipment_request.delivery_date = datetime.utcnow().date()
+    
+    db.session.commit()
+    
+    flash('Equipamento marcado como entregue!', 'success')
+    return redirect(url_for('main.equipment_detail', id=id))
+
+
+@bp.route('/equipment/<int:id>/return', methods=['POST'])
+@login_required
+def return_equipment_request(id):
+    """Marcar equipamento como devolvido (TI/Admin)"""
+    equipment_request = EquipmentRequest.query.get_or_404(id)
+    
+    # Verificar permissão
+    if not equipment_request.can_be_approved_by(User.query.get(session.get('user_id'))):
+        flash('Você não tem permissão para marcar como devolvido.', 'danger')
+        return redirect(url_for('main.equipment_detail', id=id))
+    
+    if equipment_request.status != 'Entregue':
+        flash('Apenas equipamentos entregues podem ser marcados como devolvidos.', 'danger')
+        return redirect(url_for('main.equipment_detail', id=id))
+    
+    # Marcar como devolvido
+    equipment_request.status = 'Devolvido'
+    equipment_request.return_date = datetime.utcnow().date()
+    
+    db.session.commit()
+    
+    flash('Equipamento marcado como devolvido!', 'success')
+    return redirect(url_for('main.equipment_detail', id=id))
+
+
+@bp.route('/equipment/<int:id>/fill_technical', methods=['GET', 'POST'])
+@login_required
+def fill_technical_data(id):
+    """Preencher dados técnicos do equipamento (TI/Admin)"""
+    equipment_request = EquipmentRequest.query.get_or_404(id)
+    
+    # Verificar permissão
+    if not equipment_request.can_be_approved_by(User.query.get(session.get('user_id'))):
+        flash('Você não tem permissão para preencher dados técnicos.', 'danger')
+        return redirect(url_for('main.equipment_detail', id=id))
+    
+    if request.method == 'POST':
+        # Validar dados
+        patrimony = request.form.get('patrimony', '').strip()
+        equipment_type = request.form.get('equipment_type', '').strip()
+        delivery_date_str = request.form.get('delivery_date', '').strip()
+        conference_status = request.form.get('conference_status', '').strip()
+        
+        # Atualizar dados técnicos
+        equipment_request.patrimony = patrimony if patrimony else None
+        equipment_request.equipment_type = equipment_type if equipment_type else None
+        equipment_request.conference_status = conference_status if conference_status else None
+        
+        # Converter data se fornecida
+        if delivery_date_str:
+            try:
+                equipment_request.delivery_date = datetime.strptime(delivery_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                flash('Data de entrega inválida.', 'danger')
+                return render_template('equipment_technical_form.html', equipment_request=equipment_request)
+        
+        db.session.commit()
+        
+        flash('Dados técnicos atualizados com sucesso!', 'success')
+        return redirect(url_for('main.equipment_detail', id=id))
+    
+    return render_template('equipment_technical_form.html', equipment_request=equipment_request)
 
 
 

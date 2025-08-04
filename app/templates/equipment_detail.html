@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhes da Solicitação #{{ equipment_request.id }} - TI Reminder{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Cabeçalho -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2>
+                    <i class="fas fa-laptop me-2"></i>
+                    Solicitação #{{ equipment_request.id }}
+                </h2>
+                <p class="text-muted mb-0">
+                    Criada em {{ equipment_request.request_date.strftime('%d/%m/%Y às %H:%M') }}
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('main.list_equipment') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Voltar
+                </a>
+                {% if equipment_request.can_be_edited_by(equipment_request.requester) %}
+                <a href="{{ url_for('main.edit_equipment_request', id=equipment_request.id) }}" class="btn btn-warning">
+                    <i class="fas fa-edit me-1"></i>Editar
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Status Badge -->
+        <div class="mb-4">
+            {% if equipment_request.status == 'Solicitado' %}
+                <span class="badge bg-warning fs-6">Solicitado</span>
+            {% elif equipment_request.status == 'Aprovado' %}
+                <span class="badge bg-info fs-6">Aprovado</span>
+            {% elif equipment_request.status == 'Entregue' %}
+                <span class="badge bg-success fs-6">Entregue</span>
+            {% elif equipment_request.status == 'Devolvido' %}
+                <span class="badge bg-secondary fs-6">Devolvido</span>
+            {% elif equipment_request.status == 'Negado' %}
+                <span class="badge bg-danger fs-6">Negado</span>
+            {% endif %}
+        </div>
+
+        <div class="row">
+            <!-- Informações Principais -->
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Informações do Equipamento
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Descrição:</label>
+                                <p class="mb-0">{{ equipment_request.description }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Tipo:</label>
+                                <p class="mb-0">
+                                    {% if equipment_request.equipment_type %}
+                                        <span class="badge bg-secondary">{{ equipment_request.equipment_type }}</span>
+                                    {% else %}
+                                        <span class="text-muted">Não especificado</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Patrimônio:</label>
+                                <p class="mb-0">
+                                    {% if equipment_request.patrimony %}
+                                        <span class="badge bg-info">{{ equipment_request.patrimony }}</span>
+                                    {% else %}
+                                        <span class="text-muted">Não informado</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Setor/Destino:</label>
+                                <p class="mb-0">
+                                    {% if equipment_request.destination_sector %}
+                                        {{ equipment_request.destination_sector }}
+                                    {% else %}
+                                        <span class="text-muted">Não especificado</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold">Motivo da Solicitação:</label>
+                                <p class="mb-0">
+                                    {% if equipment_request.request_reason %}
+                                        {{ equipment_request.request_reason }}
+                                    {% else %}
+                                        <span class="text-muted">Não informado</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            {% if equipment_request.observations %}
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold">Observações:</label>
+                                <p class="mb-0">{{ equipment_request.observations }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Datas -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-calendar me-2"></i>Datas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Solicitação:</label>
+                                <p class="mb-0">{{ equipment_request.request_date.strftime('%d/%m/%Y às %H:%M') }}</p>
+                            </div>
+                            {% if equipment_request.approval_date %}
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Aprovação:</label>
+                                <p class="mb-0">{{ equipment_request.approval_date.strftime('%d/%m/%Y às %H:%M') }}</p>
+                            </div>
+                            {% endif %}
+                            {% if equipment_request.delivery_date %}
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Entrega:</label>
+                                <p class="mb-0">{{ equipment_request.delivery_date.strftime('%d/%m/%Y') }}</p>
+                            </div>
+                            {% endif %}
+                            {% if equipment_request.return_date %}
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Devolução:</label>
+                                <p class="mb-0">{{ equipment_request.return_date.strftime('%d/%m/%Y') }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar - Usuários e Ações -->
+            <div class="col-lg-4">
+                <!-- Usuários Envolvidos -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-users me-2"></i>Usuários Envolvidos
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Solicitante:</label>
+                            <p class="mb-0">{{ equipment_request.requester.username }}</p>
+                        </div>
+                        {% if equipment_request.approved_by %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Aprovado por:</label>
+                            <p class="mb-0">{{ equipment_request.approved_by.username }}</p>
+                        </div>
+                        {% endif %}
+                        {% if equipment_request.received_by %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Recebido por:</label>
+                            <p class="mb-0">{{ equipment_request.received_by.username }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Ações (TI/Admin) -->
+                {% if session.get('is_admin') or session.get('is_ti') %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-cogs me-2"></i>Ações Administrativas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if equipment_request.status == 'Solicitado' %}
+                        <form method="POST" action="{{ url_for('main.approve_equipment_request', id=equipment_request.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-success w-100 mb-2">
+                                <i class="fas fa-check me-1"></i>Aprovar
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('main.reject_equipment_request', id=equipment_request.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-danger w-100 mb-2">
+                                <i class="fas fa-times me-1"></i>Recusar
+                            </button>
+                        </form>
+                        {% elif equipment_request.status == 'Aprovado' %}
+                        <form method="POST" action="{{ url_for('main.deliver_equipment_request', id=equipment_request.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-primary w-100 mb-2">
+                                <i class="fas fa-truck me-1"></i>Marcar como Entregue
+                            </button>
+                        </form>
+                        {% elif equipment_request.status == 'Entregue' %}
+                        <form method="POST" action="{{ url_for('main.return_equipment_request', id=equipment_request.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-warning w-100 mb-2">
+                                <i class="fas fa-undo me-1"></i>Marcar como Devolvido
+                            </button>
+                        </form>
+                        {% endif %}
+                        
+                        <!-- Botão para preencher dados técnicos -->
+                        <a href="{{ url_for('main.fill_technical_data', id=equipment_request.id) }}" class="btn btn-info w-100 mb-2">
+                            <i class="fas fa-cogs me-1"></i>Preencher Dados Técnicos
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

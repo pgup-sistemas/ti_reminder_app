@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitações de Equipamentos - TI Reminder{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-laptop me-2"></i>Solicitações de Equipamentos</h2>
+            <a href="{{ url_for('main.new_equipment_request') }}" class="btn btn-success">
+                <i class="fas fa-plus me-1"></i>Nova Solicitação
+            </a>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="search" class="form-label">Buscar</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ search }}" placeholder="Patrimônio, descrição, tipo...">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">Todos os status</option>
+                            <option value="Solicitado" {% if status_filter == 'Solicitado' %}selected{% endif %}>Solicitado</option>
+                            <option value="Aprovado" {% if status_filter == 'Aprovado' %}selected{% endif %}>Aprovado</option>
+                            <option value="Entregue" {% if status_filter == 'Entregue' %}selected{% endif %}>Entregue</option>
+                            <option value="Devolvido" {% if status_filter == 'Devolvido' %}selected{% endif %}>Devolvido</option>
+                            <option value="Negado" {% if status_filter == 'Negado' %}selected{% endif %}>Negado</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-1"></i>Filtrar
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <a href="{{ url_for('main.list_equipment') }}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-times me-1"></i>Limpar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista de Solicitações -->
+        {% if equipment_requests %}
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Patrimônio</th>
+                                <th>Descrição</th>
+                                <th>Tipo</th>
+                                <th>Solicitante</th>
+                                <th>Status</th>
+                                <th>Data Solicitação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in equipment_requests %}
+                            <tr>
+                                <td><strong>#{{ request.id }}</strong></td>
+                                <td>
+                                    {% if request.patrimony %}
+                                        <span class="badge bg-info">{{ request.patrimony }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="fw-bold">{{ request.description[:50] }}{% if request.description|length > 50 %}...{% endif %}</div>
+                                    {% if request.equipment_type %}
+                                        <small class="text-muted">{{ request.equipment_type }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if request.equipment_type %}
+                                        <span class="badge bg-secondary">{{ request.equipment_type }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ request.requester.username }}</td>
+                                <td>
+                                    {% if request.status == 'Solicitado' %}
+                                        <span class="badge bg-warning">Solicitado</span>
+                                    {% elif request.status == 'Aprovado' %}
+                                        <span class="badge bg-info">Aprovado</span>
+                                    {% elif request.status == 'Entregue' %}
+                                        <span class="badge bg-success">Entregue</span>
+                                    {% elif request.status == 'Devolvido' %}
+                                        <span class="badge bg-secondary">Devolvido</span>
+                                    {% elif request.status == 'Negado' %}
+                                        <span class="badge bg-danger">Negado</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ request.request_date.strftime('%d/%m/%Y') }}</small>
+                                    <br>
+                                    <small class="text-muted">{{ request.request_date.strftime('%H:%M') }}</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('main.equipment_detail', id=request.id) }}" 
+                                           class="btn btn-sm btn-outline-primary" title="Ver detalhes">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if request.can_be_edited_by(request.requester) %}
+                                        <a href="{{ url_for('main.edit_equipment_request', id=request.id) }}" 
+                                           class="btn btn-sm btn-outline-warning" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-laptop fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Nenhuma solicitação encontrada</h4>
+                <p class="text-muted">Não há solicitações de equipamentos para exibir.</p>
+                <a href="{{ url_for('main.new_equipment_request') }}" class="btn btn-success">
+                    <i class="fas fa-plus me-1"></i>Criar primeira solicitação
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-submit do formulário de filtro quando mudar o select
+document.getElementById('status').addEventListener('change', function() {
+    this.form.submit();
+});
+</script>
+{% endblock %} 

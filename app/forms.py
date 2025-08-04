@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, DateField, SelectField, BooleanField, SubmitField, PasswordField, ValidationError, TextAreaField
 from wtforms.validators import DataRequired, Length, EqualTo, Optional
-from flask_wtf.file import FileAllowed, MultipleFileField
+from flask_wtf.file import FileAllowed, FileField
 
 class ReminderForm(FlaskForm):
     name = StringField('Nome', validators=[DataRequired()])
@@ -118,7 +118,7 @@ class TutorialForm(FlaskForm):
     titulo = StringField('Título', validators=[DataRequired()])
     conteudo = TextAreaField('Conteúdo', validators=[DataRequired()])
     categoria = StringField('Categoria', validators=[Optional()])
-    imagens = MultipleFileField('Imagens', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Apenas imagens são permitidas!')])
+    imagem = FileField('Imagem', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Apenas imagens são permitidas!')])
     submit = SubmitField('Salvar Tutorial')
 
 class ComentarioTutorialForm(FlaskForm):
