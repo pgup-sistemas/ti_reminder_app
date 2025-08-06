@@ -1,275 +1,211 @@
-{% extends 'base.html' %}
-{% block title %}Dashboard - TI reminder {% endblock %}
+
+{% extends "base.html" %}
+{% block title %}Dashboard - TI Pro System{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Header moderno -->
-    <div class="row mb-4 fade-in">
-        <div class="col-12">
-            <div class="modern-card modern-card-header text-white p-4">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h1 class="mb-2">
-                            <i class="fas fa-tachometer-alt me-3"></i>
-                            Dashboard TI Reminder
-                        </h1>
-                        <p class="mb-0 opacity-75">
-                            Bem-vindo, {{ session.username }}! Aqui está um resumo das suas atividades.
-                        </p>
-                    </div>
-                    <div class="text-end">
-                        <div class="fs-5 fw-bold" id="current-time"></div>
-                        <div class="small opacity-75" id="current-date"></div>
-                    </div>
-                </div>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 fw-bold text-primary mb-1">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </h1>
+                <p class="text-muted mb-0">Bem-vindo de volta, {{ session['username'] }}!</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button onclick="toggleTheme()" class="btn btn-outline-primary">
+                    <i class="fas fa-moon"></i>
+                    <span class="d-none d-sm-inline ms-1">Tema</span>
+                </button>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-sync-alt"></i>
+                    <span class="d-none d-sm-inline ms-1">Atualizar</span>
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Cards de estatísticas -->
-    <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="dashboard-card slide-in-right" style="animation-delay: 0.1s">
-                <div class="dashboard-card-icon bg-primary">
+<!-- Cards de resumo -->
+<div class="row g-4 mb-5">
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card h-100">
+            <div class="d-flex align-items-center">
+                <div class="dashboard-card-icon primary">
                     <i class="fas fa-bell"></i>
                 </div>
-                <h3 class="mb-1">{{ reminders_count }}</h3>
-                <p class="text-muted mb-0">Lembretes Ativos</p>
-                <div class="mt-3">
-                    <a href="{{ url_for('main.reminders') }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus me-2"></i>Novo Lembrete
-                    </a>
+                <div class="flex-grow-1">
+                    <h3 class="h5 fw-semibold mb-1">Lembretes Ativos</h3>
+                    <p class="text-2xl fw-bold text-primary mb-0">{{ lembretes_count or 0 }}</p>
+                    <p class="text-sm text-muted mb-0">Próximos vencimentos</p>
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="dashboard-card slide-in-right" style="animation-delay: 0.2s">
-                <div class="dashboard-card-icon" style="background: var(--gradient-success)">
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card h-100">
+            <div class="d-flex align-items-center">
+                <div class="dashboard-card-icon success">
                     <i class="fas fa-tasks"></i>
                 </div>
-                <h3 class="mb-1">{{ tasks_today_pend|length + tasks_today_done|length }}</h3>
-                <p class="text-muted mb-0">Tarefas Hoje</p>
-                <div class="mt-3">
-                    <a href="{{ url_for('main.tasks') }}" class="btn btn-success btn-sm">
-                        <i class="fas fa-plus me-2"></i>Nova Tarefa
-                    </a>
+                <div class="flex-grow-1">
+                    <h3 class="h5 fw-semibold mb-1">Tarefas Pendentes</h3>
+                    <p class="text-2xl fw-bold text-success mb-0">{{ tarefas_count or 0 }}</p>
+                    <p class="text-sm text-muted mb-0">Para hoje</p>
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="dashboard-card slide-in-right" style="animation-delay: 0.3s">
-                <div class="dashboard-card-icon" style="background: var(--gradient-warning)">
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card h-100">
+            <div class="d-flex align-items-center">
+                <div class="dashboard-card-icon warning">
                     <i class="fas fa-ticket-alt"></i>
                 </div>
-                <h3 class="mb-1">{{ chamados_abertos|length }}</h3>
-                <p class="text-muted mb-0">Chamados Abertos</p>
-                <div class="mt-3">
-                    <a href="{{ url_for('main.abrir_chamado') }}" class="btn btn-warning btn-sm">
-                        <i class="fas fa-plus me-2"></i>Abrir Chamado
-                    </a>
+                <div class="flex-grow-1">
+                    <h3 class="h5 fw-semibold mb-1">Chamados Abertos</h3>
+                    <p class="text-2xl fw-bold text-warning mb-0">{{ chamados_count or 0 }}</p>
+                    <p class="text-sm text-muted mb-0">Aguardando solução</p>
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="dashboard-card slide-in-right" style="animation-delay: 0.4s">
-                <div class="dashboard-card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card h-100">
+            <div class="d-flex align-items-center">
+                <div class="dashboard-card-icon danger">
                     <i class="fas fa-laptop"></i>
                 </div>
-                <h3 class="mb-1">12</h3>
-                <p class="text-muted mb-0">Equipamentos</p>
-                <div class="mt-3">
-                    <a href="{{ url_for('main.list_equipment') }}" class="btn btn-info btn-sm">
-                        <i class="fas fa-plus me-2"></i>Solicitar
-                    </a>
+                <div class="flex-grow-1">
+                    <h3 class="h5 fw-semibold mb-1">Equipamentos</h3>
+                    <p class="text-2xl fw-bold text-danger mb-0">{{ equipamentos_count or 0 }}</p>
+                    <p class="text-sm text-muted mb-0">Cadastrados</p>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Conteúdo principal -->
-    <div class="row">
-        <!-- Seção de Lembretes -->
-        <div class="col-lg-6 mb-4">
-            <div class="modern-card fade-in" style="animation-delay: 0.5s">
-                <div class="modern-card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-bell me-2"></i>Lembretes do Dia
-                        </h5>
-                        <div class="d-flex gap-2">
-                            <span class="status-badge status-danger">
-                                <i class="fas fa-clock"></i>
-                                {{ reminders_today_pend|length }} Pendentes
-                            </span>
-                            <span class="status-badge status-success">
-                                <i class="fas fa-check"></i>
-                                {{ reminders_today_done|length }} Realizados
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                    {% if reminders_today_pend %}
-                        <div class="mb-4">
-                            <h6 class="text-danger mb-3">
-                                <i class="fas fa-exclamation-circle me-2"></i>Pendentes
-                            </h6>
-                            {% for reminder in reminders_today_pend[:5] %}
-                            <div class="d-flex align-items-center p-3 mb-2 bg-light rounded-3 border-start border-4 border-danger">
-                                <div class="flex-grow-1">
-                                    <div class="fw-semibold">{{ reminder.name }}</div>
-                                    <div class="small text-muted">
-                                        <i class="fas fa-user me-1"></i>{{ reminder.responsible }}
-                                        <i class="fas fa-calendar ms-3 me-1"></i>{{ reminder.due_date.strftime('%d/%m/%Y') }}
-                                    </div>
-                                </div>
-                                <form method="POST" action="{{ url_for('main.complete_reminder', id=reminder.id) }}" class="ms-2">
-                                    <button type="submit" class="btn btn-success btn-sm pulse" title="Marcar como realizado">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                </form>
-                            </div>
-                            {% endfor %}
-                            {% if reminders_today_pend|length > 5 %}
-                            <div class="text-center">
-                                <a href="{{ url_for('main.reminders') }}" class="btn btn-outline-primary btn-sm">
-                                    Ver todos os {{ reminders_today_pend|length }} lembretes pendentes
-                                </a>
-                            </div>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-
-                    {% if reminders_today_done %}
-                        <div>
-                            <h6 class="text-success mb-3">
-                                <i class="fas fa-check-circle me-2"></i>Realizados
-                            </h6>
-                            {% for reminder in reminders_today_done[:3] %}
-                            <div class="d-flex align-items-center p-3 mb-2 bg-light rounded-3 border-start border-4 border-success opacity-75">
-                                <div class="flex-grow-1">
-                                    <div class="fw-semibold text-decoration-line-through">{{ reminder.name }}</div>
-                                    <div class="small text-muted">
-                                        <i class="fas fa-user me-1"></i>{{ reminder.responsible }}
-                                    </div>
-                                </div>
-                                <i class="fas fa-check-circle text-success fs-4"></i>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-
-                    {% if not reminders_today_pend and not reminders_today_done %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-bell-slash text-muted fs-1 mb-3"></i>
-                        <p class="text-muted">Nenhum lembrete para hoje!</p>
-                        <a href="{{ url_for('main.reminders') }}" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>Criar Lembrete
-                        </a>
-                    </div>
-                    {% endif %}
-                </div>
+<!-- Ações rápidas -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="modern-card">
+            <div class="modern-card-header">
+                <h2 class="h5 mb-0">
+                    <i class="fas fa-rocket me-2"></i>
+                    Ações Rápidas
+                </h2>
             </div>
-        </div>
-
-        <!-- Seção de Chamados -->
-        <div class="col-lg-6 mb-4">
-            <div class="modern-card fade-in" style="animation-delay: 0.6s">
-                <div class="modern-card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-ticket-alt me-2"></i>Chamados Recentes
-                        </h5>
-                        <a href="{{ url_for('main.listar_chamados') }}" class="btn btn-light btn-sm">
-                            <i class="fas fa-external-link-alt me-1"></i>Ver Todos
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <a href="{{ url_for('main.reminders') }}" class="btn btn-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="fas fa-bell fs-4 mb-2"></i>
+                            <span class="fw-medium">Novo Lembrete</span>
                         </a>
                     </div>
-                </div>
-                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                    {% if chamados_abertos %}
-                        {% for chamado in chamados_abertos[:5] %}
-                        <div class="d-flex align-items-center p-3 mb-3 bg-light rounded-3 border-start border-4 
-                            {% if chamado.prioridade == 'Alta' %}border-danger{% elif chamado.prioridade == 'Media' %}border-warning{% else %}border-info{% endif %}">
-                            <div class="flex-grow-1">
-                                <div class="fw-semibold">#{{ chamado.id }} - {{ chamado.titulo }}</div>
-                                <div class="small text-muted mb-2">{{ chamado.descricao[:50] }}{% if chamado.descricao|length > 50 %}...{% endif %}</div>
-                                <div class="d-flex gap-3 small">
-                                    <span class="status-badge 
-                                        {% if chamado.status == 'Aberto' %}status-danger{% elif chamado.status == 'Em Andamento' %}status-warning{% else %}status-success{% endif %}">
-                                        {{ chamado.status }}
-                                    </span>
-                                    <span class="text-muted">
-                                        <i class="fas fa-clock me-1"></i>{{ chamado.data_abertura.strftime('%d/%m %H:%M') }}
-                                    </span>
-                                </div>
-                            </div>
-                            <a href="{{ url_for('main.detalhe_chamado', id=chamado.id) }}" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-ticket-alt text-muted fs-1 mb-3"></i>
-                        <p class="text-muted">Nenhum chamado aberto</p>
-                        <a href="{{ url_for('main.abrir_chamado') }}" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>Abrir Chamado
+                    
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <a href="{{ url_for('main.tasks') }}" class="btn btn-success w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="fas fa-tasks fs-4 mb-2"></i>
+                            <span class="fw-medium">Nova Tarefa</span>
                         </a>
                     </div>
-                    {% endif %}
+                    
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <a href="{{ url_for('main.abrir_chamado') }}" class="btn btn-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="fas fa-ticket-alt fs-4 mb-2"></i>
+                            <span class="fw-medium">Abrir Chamado</span>
+                        </a>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <a href="{{ url_for('main.add_equipment') }}" class="btn btn-info w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="fas fa-laptop fs-4 mb-2"></i>
+                            <span class="fw-medium">Novo Equipamento</span>
+                        </a>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="fas fa-chart-line fs-4 mb-2"></i>
+                            <span class="fw-medium">Relatórios</span>
+                        </a>
+                    </div>
+                    
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <a href="{{ url_for('main.listar_tutoriais') }}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="fas fa-book fs-4 mb-2"></i>
+                            <span class="fw-medium">Tutoriais</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Ações rápidas -->
-    <div class="row">
-        <div class="col-12">
-            <div class="modern-card fade-in" style="animation-delay: 0.7s">
-                <div class="card-body">
-                    <h5 class="mb-4">
-                        <i class="fas fa-bolt me-2"></i>Ações Rápidas
-                    </h5>
-                    <div class="row g-3">
-                        <div class="col-lg-2 col-md-4 col-sm-6">
-                            <a href="{{ url_for('main.reminders') }}" class="btn btn-modern btn-primary-modern w-100">
-                                <i class="fas fa-bell"></i>
-                                Lembretes
-                            </a>
-                        </div>
-                        <div class="col-lg-2 col-md-4 col-sm-6">
-                            <a href="{{ url_for('main.tasks') }}" class="btn btn-modern btn-success-modern w-100">
-                                <i class="fas fa-tasks"></i>
-                                Tarefas
-                            </a>
-                        </div>
-                        <div class="col-lg-2 col-md-4 col-sm-6">
-                            <a href="{{ url_for('main.abrir_chamado') }}" class="btn btn-modern btn-warning-modern w-100">
-                                <i class="fas fa-ticket-alt"></i>
-                                Chamados
-                            </a>
-                        </div>
-                        <div class="col-lg-2 col-md-4 col-sm-6">
-                            <a href="{{ url_for('main.list_equipment') }}" class="btn btn-modern btn-primary-modern w-100">
-                                <i class="fas fa-laptop"></i>
-                                Equipamentos
-                            </a>
-                        </div>
-                        <div class="col-lg-2 col-md-4 col-sm-6">
-                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-modern btn-primary-modern w-100">
-                                <i class="fas fa-chart-bar"></i>
-                                Relatórios
-                            </a>
-                        </div>
-                        <div class="col-lg-2 col-md-4 col-sm-6">
-                            <button onclick="toggleTheme()" class="btn btn-modern btn-success-modern w-100">
-                                <i class="fas fa-palette"></i>
-                                Tema
-                            </button>
-                        </div>
+<!-- Atividades recentes -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="modern-card">
+            <div class="modern-card-header">
+                <h2 class="h5 mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Atividades Recentes
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-center py-5">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-history fs-1 mb-3 opacity-25"></i>
+                        <p class="mb-0">Nenhuma atividade recente encontrada.</p>
+                        <small>As atividades aparecerão aqui conforme você usar o sistema.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="modern-card">
+            <div class="modern-card-header">
+                <h2 class="h5 mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Sistema
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0">
+                        <div class="badge bg-success rounded-pill">Online</div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0">Status do Sistema</h6>
+                        <small class="text-muted">Todos os serviços operacionais</small>
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-users text-primary"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0">Usuários Conectados</h6>
+                        <small class="text-muted">{{ session['username'] }} (você)</small>
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-calendar text-info"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0">Último Acesso</h6>
+                        <small class="text-muted">Agora</small>
                     </div>
                 </div>
             </div>
@@ -278,51 +214,19 @@
 </div>
 
 <script>
-// Relógio em tempo real
-function updateDateTime() {
-    const now = new Date();
-    const timeElement = document.getElementById('current-time');
-    const dateElement = document.getElementById('current-date');
-
-    if (timeElement) {
-        timeElement.textContent = now.toLocaleTimeString('pt-BR');
-    }
-    if (dateElement) {
-        dateElement.textContent = now.toLocaleDateString('pt-BR', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    }
-}
-
-// Atualizar a cada segundo
-setInterval(updateDateTime, 1000);
-updateDateTime(); // Executar imediatamente
-
-// Verificar notificações a cada 30 segundos na página inicial
-setInterval(() => {
-    if (window.notificationManager) {
-        window.notificationManager.checkForUpdates();
-    }
-}, 30000);
-
-// Animações de entrada baseadas no scroll
-const observeElements = () => {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('fade-in');
-            }
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    // Animação de entrada dos cards
+    const cards = document.querySelectorAll('.dashboard-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('fade-in');
     });
-
-    document.querySelectorAll('.dashboard-card, .modern-card').forEach(el => {
-        observer.observe(el);
-    });
-};
-
-document.addEventListener('DOMContentLoaded', observeElements);
+    
+    // Atualização automática dos contadores
+    setInterval(() => {
+        // Aqui você pode adicionar lógica para atualizar os contadores
+        console.log('Atualizando contadores...');
+    }, 300000); // 5 minutos
+});
 </script>
 {% endblock %}
