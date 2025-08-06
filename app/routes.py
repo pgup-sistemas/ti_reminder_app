@@ -671,9 +671,9 @@ def dashboard():
         lembretes_mes = [r for r in reminders_all if r.due_date >= m and r.due_date < prox]
         lembretes_por_mes[idx] = len(lembretes_mes)
         lembretes_realizados_por_mes[idx] = len([r for r in lembretes_mes if r.completed])
-        chamados_mes = [c for c in chamados_all if c.data_abertura >= m and c.data_abertura < prox]
+        chamados_mes = [c for c in chamados_all if c.data_abertura.date() >= m and c.data_abertura.date() < prox]
         chamados_por_mes[idx] = len(chamados_mes)
-        equipamentos_mes = [e for e in equipamentos_all if e.request_date >= m and e.request_date < prox]
+        equipamentos_mes = [e for e in equipamentos_all if e.request_date.date() >= m and e.request_date.date() < prox]
         equipamentos_por_mes[idx] = len(equipamentos_mes)
 
 
