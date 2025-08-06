@@ -121,7 +121,10 @@ def index():
     
     return render_template(
         'index.html',
-        reminders_count=reminders_count,
+        lembretes_count=reminders_count,
+        tarefas_count=len(tasks_today_pend),
+        chamados_count=len(chamados_abertos),
+        equipamentos_count=0,  # Adicionar contagem real se necessário
         reminders_today_pend=reminders_today_pend,
         reminders_today_done=reminders_today_done,
         tasks_today_pend=tasks_today_pend,
