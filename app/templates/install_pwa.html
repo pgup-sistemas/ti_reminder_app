@@ -1,0 +1,141 @@
+
+{% extends 'base.html' %}
+{% block title %}Instalar App - TI Reminder{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="modern-card text-center p-5">
+                <div class="dashboard-card-icon mx-auto mb-4">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                
+                <h1 class="mb-4">Instale o TI Reminder</h1>
+                <p class="lead mb-5">Acesse o sistema diretamente do seu dispositivo, com notificações e funcionamento offline!</p>
+                
+                <!-- Instruções para diferentes navegadores -->
+                <div class="row mb-5">
+                    <div class="col-md-4 mb-4">
+                        <div class="modern-card p-4 h-100">
+                            <i class="fab fa-chrome fs-1 text-primary mb-3"></i>
+                            <h5>Chrome/Edge</h5>
+                            <p class="small">Clique no ícone de instalação na barra de endereços ou no menu "Instalar App"</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-4">
+                        <div class="modern-card p-4 h-100">
+                            <i class="fab fa-firefox fs-1 text-orange mb-3"></i>
+                            <h5>Firefox</h5>
+                            <p class="small">Clique no menu e selecione "Instalar" quando a opção aparecer</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-4">
+                        <div class="modern-card p-4 h-100">
+                            <i class="fab fa-safari fs-1 text-info mb-3"></i>
+                            <h5>Safari (iOS)</h5>
+                            <p class="small">Toque em "Compartilhar" e depois em "Adicionar à Tela de Início"</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recursos do App -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="dashboard-card-icon me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="text-start">
+                                <div class="fw-bold">Notificações Push</div>
+                                <div class="small text-muted">Receba alertas de lembretes e chamados</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="dashboard-card-icon me-3" style="width: 40px; height: 40px; font-size: 1rem; background: var(--gradient-success);">
+                                <i class="fas fa-wifi"></i>
+                            </div>
+                            <div class="text-start">
+                                <div class="fw-bold">Funciona Offline</div>
+                                <div class="small text-muted">Continue trabalhando sem conexão</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="dashboard-card-icon me-3" style="width: 40px; height: 40px; font-size: 1rem; background: var(--gradient-warning);">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <div class="text-start">
+                                <div class="fw-bold">Acesso Rápido</div>
+                                <div class="small text-muted">Abra direto da tela inicial</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="dashboard-card-icon me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+                                <i class="fas fa-sync"></i>
+                            </div>
+                            <div class="text-start">
+                                <div class="fw-bold">Sincronização Auto</div>
+                                <div class="small text-muted">Dados sempre atualizados</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-3 justify-content-center">
+                    <button id="install-button" class="btn btn-modern btn-primary-modern" style="display: none;">
+                        <i class="fas fa-download me-2"></i>Instalar Agora
+                    </button>
+                    <a href="{{ url_for('main.index') }}" class="btn btn-modern btn-success-modern">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar ao Sistema
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// PWA Install prompt
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent Chrome 67 and earlier from automatically showing the prompt
+    e.preventDefault();
+    // Stash the event so it can be triggered later
+    deferredPrompt = e;
+    // Show install button
+    document.getElementById('install-button').style.display = 'inline-flex';
+});
+
+document.getElementById('install-button').addEventListener('click', async () => {
+    if (deferredPrompt) {
+        // Show the prompt
+        deferredPrompt.prompt();
+        // Wait for the user to respond to the prompt
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to the install prompt: ${outcome}`);
+        // Clear the saved prompt since it can't be used again
+        deferredPrompt = null;
+        // Hide install button
+        document.getElementById('install-button').style.display = 'none';
+        
+        if (outcome === 'accepted') {
+            if (window.components) {
+                window.components.toast('success', 'Sucesso!', 'App instalado com sucesso!');
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

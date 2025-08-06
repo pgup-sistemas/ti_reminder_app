@@ -997,6 +997,93 @@ def export_pdf():
         reminder_query = reminder_query.filter(Reminder.sector_id == sector_id)
         chamado_query = chamado_query.filter(Chamado.setor_id == sector_id)
 
+
+
+@bp.route('/api/notifications')
+@login_required
+def get_notifications():
+    """API para verificar notificações pendentes"""
+    from datetime import date, timedelta
+    
+    user_id = session.get('user_id')
+    is_admin = session.get('is_admin', False)
+    
+    notifications = {
+        'reminders_expiring': [],
+        'chamados_updated': [],
+        'tasks_overdue': []
+    }
+    
+    # Lembretes vencendo em 3 dias
+    expiring_date = date.today() + timedelta(days=3)
+    if is_admin:
+        expiring_reminders = Reminder.query.filter(
+            Reminder.due_date <= expiring_date,
+            Reminder.due_date >= date.today(),
+            Reminder.completed == False
+        ).all()
+    else:
+        expiring_reminders = Reminder.query.filter(
+            Reminder.due_date <= expiring_date,
+            Reminder.due_date >= date.today(),
+            Reminder.completed == False,
+            Reminder.user_id == user_id
+        ).all()
+    
+    for reminder in expiring_reminders:
+        notifications['reminders_expiring'].append({
+            'id': reminder.id,
+            'name': reminder.name,
+            'due_date': reminder.due_date.strftime('%d/%m/%Y'),
+            'responsible': reminder.responsible,
+            'days_left': (reminder.due_date - date.today()).days
+        })
+    
+    # Chamados com atualizações recentes (últimas 24h)
+    from datetime import datetime
+    last_24h = datetime.utcnow() - timedelta(hours=24)
+    
+    if is_admin:
+        updated_chamados = Chamado.query.filter(
+            Chamado.data_ultima_atualizacao >= last_24h,
+            Chamado.status != 'Fechado'
+        ).all()
+    else:
+        updated_chamados = Chamado.query.filter(
+            Chamado.data_ultima_atualizacao >= last_24h,
+            Chamado.status != 'Fechado',
+            Chamado.solicitante_id == user_id
+        ).all()
+    
+    for chamado in updated_chamados:
+        notifications['chamados_updated'].append({
+            'id': chamado.id,
+            'titulo': chamado.titulo,
+            'status': chamado.status,
+            'updated_at': chamado.data_ultima_atualizacao.strftime('%d/%m/%Y %H:%M')
+        })
+    
+    # Tarefas vencidas
+    if is_admin:
+        overdue_tasks = Task.query.filter(
+            Task.date < date.today(),
+            Task.completed == False
+        ).all()
+    else:
+        overdue_tasks = Task.query.filter(
+            Task.date < date.today(),
+            Task.completed == False,
+            Task.user_id == user_id
+        ).all()
+    
+    notifications['tasks_overdue'] = [{
+        'id': task.id,
+        'description': task.description,
+        'days_overdue': (date.today() - task.date).days
+    } for task in overdue_tasks]
+    
+    return jsonify(notifications)
+
     if user_id_filter and is_admin:
         task_query = task_query.filter(Task.user_id == user_id_filter)
         reminder_query = reminder_query.filter(Reminder.user_id == user_id_filter)
@@ -1010,6 +1097,33 @@ def export_pdf():
     title_style.alignment = 1 # Center
     normal_style = styles['Normal']
     normal_style.fontSize = 8 # Reduzir um pouco para caber mais dados
+
+
+@bp.route('/install-pwa')
+def install_pwa():
+    """Página de instruções para instalação PWA"""
+    return render_template('install_pwa.html')
+
+@bp.route('/offline')
+def offline():
+    """Página offline"""
+    return render_template('offline.html')
+
+@bp.route('/test-notification')
+@login_required
+def test_notification():
+    """Endpoint para testar notificações"""
+    return jsonify({
+        'reminders_expiring': [{
+            'id': 999,
+            'name': 'Teste de Notificação',
+            'responsible': 'Sistema',
+            'days_left': 1
+        }],
+        'chamados_updated': [],
+        'tasks_overdue': []
+    })
+
     
     # Definindo larguras das colunas (ajustar conforme necessário)
     col_widths_tasks = [2.3*inch, 0.8*inch, 1.2*inch, 1.2*inch, 1.2*inch, 0.8*inch]
