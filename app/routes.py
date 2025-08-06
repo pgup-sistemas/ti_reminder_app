@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session, jsonify
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
-from .models import Reminder, Task, Sector, User, db, Tutorial, TutorialImage, VisualizacaoTutorial, FeedbackTutorial, EquipmentRequest
-from .forms import ReminderForm, TaskForm, TutorialForm, ComentarioTutorialForm, FeedbackTutorialForm
+from .models import Reminder, Task, Sector, User, db, Tutorial, TutorialImage, VisualizacaoTutorial, FeedbackTutorial, EquipmentRequest, Chamado, ComentarioChamado # Importados modelos necessários
+from .forms import ReminderForm, TaskForm, TutorialForm, ComentarioTutorialForm, FeedbackTutorialForm, ChamadoForm, ChamadoAdminForm, UserEditForm # Importados formulários necessários
 from .auth_utils import login_required
 from functools import wraps
 from flask import current_app
@@ -10,6 +10,7 @@ import os
 from werkzeug.utils import secure_filename
 import markdown
 
+# Função para exigir que o usuário seja administrador
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -25,17 +26,18 @@ bp = Blueprint('main', __name__)
 @bp.route('/')
 @login_required
 def index():
+    # Importação local para evitar dependência circular se outros módulos importarem main.py diretamente
     from .models import Chamado
-    
+
     search = request.args.get('search', '').strip().lower()
     status = request.args.get('status', '').strip().lower()
-    
+
     # --- Recorrência automática de lembretes ---
     if session.get('is_admin'):
         reminders = Reminder.query.all()
     else:
         reminders = Reminder.query.filter_by(user_id=session.get('user_id')).all()
-    
+
     # Recorrência automática
     for r in reminders:
         if r.due_date < date.today() and not r.notified:
@@ -61,7 +63,7 @@ def index():
             db.session.add(novo)
             r.notified = True  # marca o lembrete antigo para não duplicar
             db.session.commit()
-    
+
     # Consulta de lembretes e tarefas
     if session.get('is_admin'):
         reminders_count = Reminder.query.count()
@@ -77,26 +79,26 @@ def index():
         user_id = session.get('user_id')
         reminders_count = Reminder.query.filter_by(user_id=user_id).count()
         reminders_today = Reminder.query.filter(
-            Reminder.due_date <= date.today(), 
+            Reminder.due_date <= date.today(),
             Reminder.user_id == user_id
         ).all()
         tasks_today = Task.query.filter(
-            Task.date <= date.today(), 
+            Task.date <= date.today(),
             Task.user_id == user_id
         ).all()
         # Buscar chamados do usuário ou do setor do usuário
         user = User.query.get(user_id)
         primeiro_lembrete = Reminder.query.filter_by(user_id=user_id).first()
         setor_id_usuario = primeiro_lembrete.sector_id if primeiro_lembrete and primeiro_lembrete.sector_id else None
-        
+
         chamados_abertos = Chamado.query.filter(
-            (Chamado.solicitante_id == user_id) | 
+            (Chamado.solicitante_id == user_id) |
             (Chamado.setor_id == setor_id_usuario),
             Chamado.status != 'Fechado'
         ).order_by(
             Chamado.data_abertura.desc()
         ).limit(10).all()  # Limita a 10 chamados mais recentes
-    
+
     # --- FILTRO E BUSCA LEMBRETES ---
     reminders_today_pend = [r for r in reminders_today if not r.completed]
     reminders_today_done = [r for r in reminders_today if r.completed]
@@ -107,7 +109,7 @@ def index():
         reminders_today_done = []
     elif status == 'realizado':
         reminders_today_pend = []
-    
+
     # --- FILTRO E BUSCA TAREFAS ---
     tasks_today_pend = [t for t in tasks_today if not t.completed]
     tasks_today_done = [t for t in tasks_today if t.completed]
@@ -118,7 +120,7 @@ def index():
         tasks_today_done = []
     elif status == 'realizado':
         tasks_today_pend = []
-    
+
     return render_template(
         'index.html',
         lembretes_count=reminders_count,
@@ -162,12 +164,12 @@ def reminders_json():
     order = request.args.get('order', 'desc')
     page = request.args.get('page', 1, type=int)
     per_page = 10
-    
+
     if session.get('is_admin'):
         query = Reminder.query
     else:
         query = Reminder.query.filter_by(user_id=session.get('user_id'))
-    
+
     # Aplica a ordenação
     if order_by == 'due_date':
         query = query.order_by(getattr(Reminder.due_date, order)())
@@ -175,11 +177,11 @@ def reminders_json():
         query = query.order_by(getattr(Reminder.name, order)())
     else:  # id ou padrão
         query = query.order_by(Reminder.id.desc())
-    
+
     # Aplica a paginação
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     reminders = pagination.items
-    
+
     # Converte para dicionário para serialização JSON
     reminders_data = []
     for r in reminders:
@@ -192,13 +194,13 @@ def reminders_json():
             'frequency': r.frequency,
             'sector': r.sector.name if r.sector else '',
             'completed': r.completed,
-            'status': 'completed' if r.completed else 
+            'status': 'completed' if r.completed else
                      'expired' if r.due_date < date.today() else
                      'ok' if r.due_date == date.today() else
                      'alert' if (r.due_date - date.today()).days <= 7 else
                      'pending'
         })
-    
+
     return jsonify({
         'reminders': reminders_data,
         'total': pagination.total,
@@ -212,12 +214,12 @@ def reminders_json():
 @login_required
 def reminders():
     form = ReminderForm()
-    
+
     # Popular o select de setores
     from .models import Sector
     sectors = Sector.query.order_by(Sector.name).all()
     form.sector_id.choices = [(0, 'Selecione')] + [(s.id, s.name) for s in sectors]
-    
+
     if form.validate_on_submit():
         # Lógica do setor: se novo setor preenchido, criar e usar
         sector_id = form.sector_id.data
@@ -233,7 +235,7 @@ def reminders():
             sector_id = sector.id
         elif sector_id == 0:
             sector_id = None
-            
+
         reminder = Reminder(
             name=form.name.data,
             type=form.type.data,
@@ -247,7 +249,7 @@ def reminders():
         db.session.commit()
         flash('Lembrete cadastrado com sucesso!', 'success')
         return redirect(url_for('main.reminders'))
-        
+
     return render_template('reminders.html', form=form)
 
 @bp.route('/reminders/edit/<int:id>', methods=['GET', 'POST'])
@@ -310,41 +312,41 @@ def users_admin():
 def edit_user(id):
     from .models import User, Sector
     from .forms import UserEditForm
-    
+
     user = User.query.get_or_404(id)
     form = UserEditForm(obj=user)
-    
+
     # Define o setor atual do usuário no formulário
     if user.sector_id:
         form.sector_id.data = user.sector_id
-    
+
     # Se o usuário for o próprio, não pode remover os privilégios de admin
     if user.id == session.get('user_id'):
         form.is_admin.data = True  # Garante que o admin não remova seus próprios privilégios
-    
+
     if form.validate_on_submit():
         # Verifica se o email já está em uso por outro usuário
         existing_user = User.query.filter(User.email == form.email.data, User.id != user.id).first()
         if existing_user:
             flash('Este email já está em uso por outro usuário.', 'danger')
             return redirect(url_for('main.edit_user', id=user.id))
-            
+
         # Verifica se o nome de usuário já está em uso por outro usuário
         existing_username = User.query.filter(User.username == form.username.data, User.id != user.id).first()
         if existing_username:
             flash('Este nome de usuário já está em uso por outro usuário.', 'danger')
             return redirect(url_for('main.edit_user', id=user.id))
-        
+
         # Atualiza os dados básicos
         user.username = form.username.data
         user.email = form.email.data
-        
+
         # Atualiza o setor
         user.sector_id = form.sector_id.data if form.sector_id.data != 0 else None
-        
+
         # Atualiza o status de TI (qualquer usuário pode ser marcado como TI)
         user.is_ti = form.is_ti.data
-        
+
         # Impede que o próprio administrador remova seus privilégios
         if user.id == session.get('user_id'):
             user.is_admin = True  # Garante que o admin não remova seus próprios privilégios
@@ -355,18 +357,18 @@ def edit_user(id):
                 if admin_count <= 1:  # Se for o único admin ativo
                     flash('Não é possível remover os privilégios de administrador do último administrador ativo.', 'danger')
                     return redirect(url_for('main.edit_user', id=user.id))
-            
+
             user.is_admin = form.is_admin.data
-        
+
         # Atualiza a senha se solicitado
         if form.change_password.data and form.new_password.data:
             if len(form.new_password.data) < 6:
                 flash('A senha deve ter pelo menos 6 caracteres.', 'danger')
                 return redirect(url_for('main.edit_user', id=user.id))
-                
+
             user.set_password(form.new_password.data)
             flash('Senha alterada com sucesso!', 'success')
-        
+
         try:
             db.session.commit()
             flash('Usuário atualizado com sucesso!', 'success')
@@ -375,7 +377,7 @@ def edit_user(id):
             db.session.rollback()
             flash('Ocorreu um erro ao atualizar o usuário. Por favor, tente novamente.', 'danger')
             return redirect(url_for('main.edit_user', id=user.id))
-    
+
     return render_template('edit_user.html', form=form, user=user)
 
 @bp.route('/admin/users/toggle/<int:id>', methods=['POST'])
@@ -383,23 +385,23 @@ def edit_user(id):
 @admin_required
 def toggle_user(id):
     from .models import User
-    
+
     user = User.query.get_or_404(id)
-    
+
     # Impede que o usuário desative a si mesmo
     if id == session.get('user_id'):
         flash('Você não pode desativar sua própria conta.', 'danger')
         return redirect(url_for('main.users_admin'))
-    
+
     # Verifica se está tentando desativar o último administrador ativo
     if user.is_admin and user.ativo:  # Se for admin e estiver ativo
         admin_count = User.query.filter_by(is_admin=True, ativo=True).count()
         if admin_count <= 1:  # Se for o único admin ativo
             flash('Não é possível desativar o último administrador ativo do sistema.', 'danger')
             return redirect(url_for('main.users_admin'))
-    
+
     user.ativo = not user.ativo
-    
+
     try:
         db.session.commit()
         status = 'ativado' if user.ativo else 'desativado'
@@ -407,7 +409,7 @@ def toggle_user(id):
     except Exception as e:
         db.session.rollback()
         flash('Ocorreu um erro ao atualizar o status do usuário.', 'danger')
-    
+
     return redirect(url_for('main.users_admin'))
 
 @bp.route('/admin/users/delete/<int:id>', methods=['POST'])
@@ -415,21 +417,21 @@ def toggle_user(id):
 @admin_required
 def delete_user(id):
     from .models import User
-    
+
     user = User.query.get_or_404(id)
-    
+
     # Impede que o usuário exclua a si mesmo
     if id == session.get('user_id'):
         flash('Você não pode excluir sua própria conta.', 'danger')
         return redirect(url_for('main.users_admin'))
-    
+
     # Verifica se está tentando excluir o último administrador ativo
     if user.is_admin and user.ativo:  # Se for admin e estiver ativo
         admin_count = User.query.filter_by(is_admin=True, ativo=True).count()
         if admin_count <= 1:  # Se for o único admin ativo
             flash('Não é possível excluir o último administrador ativo do sistema.', 'danger')
             return redirect(url_for('main.users_admin'))
-    
+
     try:
         db.session.delete(user)
         db.session.commit()
@@ -437,7 +439,7 @@ def delete_user(id):
     except Exception as e:
         db.session.rollback()
         flash('Ocorreu um erro ao excluir o usuário. Por favor, tente novamente.', 'danger')
-    
+
     return redirect(url_for('main.users_admin'))
 
 @bp.route('/register', methods=['GET', 'POST'])
@@ -446,20 +448,20 @@ def delete_user(id):
 def register():
     from .models import User
     from .forms import UserRegisterForm
-    
+
     form = UserRegisterForm()
-    
+
     if form.validate_on_submit():
         # Verifica se já existe um usuário com o mesmo nome de usuário ou email
         existing_user = User.query.filter(
-            (User.username == form.username.data) | 
+            (User.username == form.username.data) |
             (User.email == form.email.data)
         ).first()
-        
+
         if existing_user:
             flash('Nome de usuário ou email já está em uso.', 'danger')
             return render_template('register_admin.html', form=form, title='Registrar Novo Usuário')
-        
+
         # Cria o novo usuário
         user = User(
             username=form.username.data,
@@ -468,10 +470,10 @@ def register():
             is_ti=form.is_ti.data if hasattr(form, 'is_ti') else False,
             ativo=True
         )
-        
+
         # Define a senha
         user.set_password(form.password.data)
-        
+
         try:
             db.session.add(user)
             db.session.commit()
@@ -480,7 +482,7 @@ def register():
         except Exception as e:
             db.session.rollback()
             flash('Ocorreu um erro ao criar o usuário. Por favor, tente novamente.', 'danger')
-    
+
     return render_template('register_admin.html', form=form, title='Registrar Novo Usuário')
 
 @bp.route('/admin/users/reset_password/<int:id>', methods=['POST'])
@@ -491,27 +493,27 @@ def reset_user_password(id):
     from werkzeug.security import generate_password_hash
     import string
     import secrets
-    
+
     user = User.query.get_or_404(id)
-    
+
     # Gerar uma senha aleatória segura
     alphabet = string.ascii_letters + string.digits + '!@#$%&*'
     while True:
         password = ''.join(secrets.choice(alphabet) for i in range(12))
         # Garantir que a senha tenha pelo menos um caractere especial e um número
-        if (any(c.islower() for c in password) 
-            and any(c.isupper() for c in password) 
+        if (any(c.islower() for c in password)
+            and any(c.isupper() for c in password)
             and any(c.isdigit() for c in password)
             and any(c in '!@#$%&*' for c in password)):
             break
-    
+
     # Definir a nova senha
     user.set_password(password)
     db.session.commit()
-    
+
     # Aqui você pode adicionar o código para enviar a nova senha por email
     # send_password_reset_email(user.email, password)
-    
+
     flash(f'Senha redefinida com sucesso! Nova senha: {password} - Recomenda-se copiar e enviar ao usuário por um canal seguro.', 'success')
     return redirect(url_for('main.users_admin'))
 
@@ -552,15 +554,26 @@ def dashboard():
     task_query = Task.query
     reminder_query = Reminder.query
     chamado_query = Chamado.query # Nova query para chamados
+    equipment_query = EquipmentRequest.query # Query para equipamentos
 
     # Filtros
     current_user_id = session.get('user_id')
     is_admin = session.get('is_admin', False)
+    is_ti = session.get('is_ti', False) # Verifica se o usuário é de TI
 
-    if not is_admin:
+    if not is_admin and not is_ti: # Se não for admin nem TI, filtra por tarefas do usuário
         task_query = task_query.filter(Task.user_id == current_user_id)
         reminder_query = reminder_query.filter(Reminder.user_id == current_user_id)
         chamado_query = chamado_query.filter(Chamado.solicitante_id == current_user_id)
+        equipment_query = equipment_query.filter(EquipmentRequest.requester_id == current_user_id)
+    elif not is_admin and is_ti: # Se for TI mas não admin, pode ver chamados do setor
+        user = User.query.get(current_user_id)
+        primeiro_lembrete = Reminder.query.filter_by(user_id=current_user_id).first()
+        setor_id_usuario = primeiro_lembrete.sector_id if primeiro_lembrete and primeiro_lembrete.sector_id else None
+        chamado_query = chamado_query.filter((Chamado.solicitante_id == current_user_id) | (Chamado.setor_id == setor_id_usuario))
+        # TI pode ver todas as solicitações de equipamento
+        equipment_query = EquipmentRequest.query
+
     if task_status == 'done':
         task_query = task_query.filter(Task.completed == True)
     elif task_status == 'pending':
@@ -581,29 +594,35 @@ def dashboard():
         task_query = task_query.filter(Task.date >= start_date)
         reminder_query = reminder_query.filter(Reminder.due_date >= start_date)
         chamado_query = chamado_query.filter(Chamado.data_abertura >= start_date)
+        equipment_query = equipment_query.filter(EquipmentRequest.request_date >= start_date)
     if end_date:
         task_query = task_query.filter(Task.date <= end_date)
         reminder_query = reminder_query.filter(Reminder.due_date <= end_date)
         chamado_query = chamado_query.filter(Chamado.data_abertura <= end_date)
+        equipment_query = equipment_query.filter(EquipmentRequest.request_date <= end_date)
 
     if sector_id:
         task_query = task_query.filter(Task.sector_id == sector_id)
         reminder_query = reminder_query.filter(Reminder.sector_id == sector_id)
         chamado_query = chamado_query.filter(Chamado.setor_id == sector_id)
+        equipment_query = equipment_query.filter(EquipmentRequest.destination_sector.contains(Sector.query.get(sector_id).name if Sector.query.get(sector_id) else '')) # Filtro por setor de destino para equipamentos
 
-    if user_id and is_admin: # Admin pode filtrar por qualquer usuário
+    if user_id and (is_admin or is_ti): # Admin ou TI pode filtrar por qualquer usuário
         task_query = task_query.filter(Task.user_id == user_id)
         reminder_query = reminder_query.filter(Reminder.user_id == user_id)
         chamado_query = chamado_query.filter(Chamado.solicitante_id == user_id)
+        equipment_query = equipment_query.filter(EquipmentRequest.requester_id == user_id)
 
     # Totais
     tasks_all = task_query.all()
     reminders_all = reminder_query.all()
     chamados_all = chamado_query.all()
+    equipamentos_all = equipment_query.all() # Obtém as solicitações de equipamento filtradas
 
     tasks_total = len(tasks_all)
     reminders_total = len(reminders_all)
     chamados_total = len(chamados_all)
+    equipamentos_total = len(equipamentos_all) # Total de equipamentos solicitados
 
     tasks_done = len([t for t in tasks_all if t.completed])
     tasks_pending = len([t for t in tasks_all if not t.completed and t.date >= date.today()])
@@ -617,6 +636,14 @@ def dashboard():
     chamados_resolvido = len([c for c in chamados_all if c.status == 'Resolvido']) # Novo
     chamados_fechado = len([c for c in chamados_all if c.status == 'Fechado'])
     # Adicionar outros status de chamado conforme necessário
+
+    # Contagens de status para equipamentos
+    equipamentos_solicitados = len([e for e in equipamentos_all if e.status == 'Solicitado'])
+    equipamentos_aprovados = len([e for e in equipamentos_all if e.status == 'Aprovado'])
+    equipamentos_entregues = len([e for e in equipamentos_all if e.status == 'Entregue'])
+    equipamentos_devolvidos = len([e for e in equipamentos_all if e.status == 'Devolvido'])
+    equipamentos_negados = len([e for e in equipamentos_all if e.status == 'Negado'])
+
 
     # --- Dados para Gráficos de Linha (por mês, últimos 12 meses) ---
     from collections import OrderedDict
@@ -633,6 +660,9 @@ def dashboard():
     tarefas_concluidas_por_mes = [0]*12
     lembretes_por_mes = [0]*12
     lembretes_realizados_por_mes = [0]*12
+    chamados_por_mes = [0]*12 # Para chamados
+    equipamentos_por_mes = [0]*12 # Para equipamentos
+
     for idx, m in enumerate(meses):
         prox = (m + relativedelta(months=1))
         tarefas_mes = [t for t in tasks_all if t.date >= m and t.date < prox]
@@ -641,13 +671,19 @@ def dashboard():
         lembretes_mes = [r for r in reminders_all if r.due_date >= m and r.due_date < prox]
         lembretes_por_mes[idx] = len(lembretes_mes)
         lembretes_realizados_por_mes[idx] = len([r for r in lembretes_mes if r.completed])
-        # Adicionar lógica para chamados por mês se necessário
+        chamados_mes = [c for c in chamados_all if c.data_abertura >= m and c.data_abertura < prox]
+        chamados_por_mes[idx] = len(chamados_mes)
+        equipamentos_mes = [e for e in equipamentos_all if e.request_date >= m and e.request_date < prox]
+        equipamentos_por_mes[idx] = len(equipamentos_mes)
+
 
     # --- Dados para Gráfico de Barra (por setor) ---
     setores_labels = [s.name for s in sectors]
     tarefas_por_setor = [len([t for t in tasks_all if t.sector_id == s.id]) for s in sectors]
     lembretes_por_setor = [len([r for r in reminders_all if r.sector_id == s.id]) for s in sectors]
     chamados_por_setor = [len([c for c in chamados_all if c.setor_id == s.id]) for s in sectors] # Novo
+    equipamentos_por_setor = [len([e for e in equipamentos_all if s.name in e.destination_sector]) for s in sectors] # Equipamentos por setor de destino
+
 
     # --- Tutoriais: agregação ---
     tutoriais = Tutorial.query.all()
@@ -687,11 +723,11 @@ def dashboard():
 
     # Filtros para tutoriais
     tutorial_query = Tutorial.query
-    if not is_admin:
+    if not is_admin and not is_ti: # Usuário comum só vê os seus
         tutorial_query = tutorial_query.filter(Tutorial.autor_id == current_user_id)
     if sector_id:
         tutorial_query = tutorial_query.join(User).filter(User.sector_id == sector_id)
-    if user_id and is_admin:
+    if user_id and (is_admin or is_ti): # Admin ou TI pode filtrar por autor
         tutorial_query = tutorial_query.filter(Tutorial.autor_id == user_id)
     if start_date:
         tutorial_query = tutorial_query.filter(Tutorial.data_criacao >= start_date)
@@ -712,6 +748,12 @@ def dashboard():
         chamados_em_andamento=chamados_em_andamento,
         chamados_resolvido=chamados_resolvido, # Novo
         chamados_fechado=chamados_fechado,
+        equipamentos_total=equipamentos_total, # Total de equipamentos
+        equipamentos_solicitados=equipamentos_solicitados,
+        equipamentos_aprovados=equipamentos_aprovados,
+        equipamentos_entregues=equipamentos_entregues,
+        equipamentos_devolvidos=equipamentos_devolvidos,
+        equipamentos_negados=equipamentos_negados,
         sectors=sectors,
         users=users,
         selected_sector=sector_id,
@@ -721,10 +763,13 @@ def dashboard():
         tarefas_concluidas_por_mes=tarefas_concluidas_por_mes,
         lembretes_por_mes=lembretes_por_mes,
         lembretes_realizados_por_mes=lembretes_realizados_por_mes,
+        chamados_por_mes=chamados_por_mes,
+        equipamentos_por_mes=equipamentos_por_mes,
         setores_labels=setores_labels,
         tarefas_por_setor=tarefas_por_setor,
         lembretes_por_setor=lembretes_por_setor,
         chamados_por_setor=chamados_por_setor, # Novo
+        equipamentos_por_setor=equipamentos_por_setor,
         total_tutoriais=total_tutoriais,
         top_tutoriais_labels=top_tutoriais_labels,
         top_tutoriais_values=top_tutoriais_values,
@@ -769,15 +814,25 @@ def export_excel():
     task_query = Task.query
     reminder_query = Reminder.query
     chamado_query = Chamado.query # Novo
+    equipment_query = EquipmentRequest.query # Query para equipamentos
 
     current_user_id = session.get('user_id')
     is_admin = session.get('is_admin', False)
+    is_ti = session.get('is_ti', False)
 
-    # Filtros
-    if not is_admin:
+    # Filtros de permissão
+    if not is_admin and not is_ti:
         task_query = task_query.filter(Task.user_id == current_user_id)
         reminder_query = reminder_query.filter(Reminder.user_id == current_user_id)
         chamado_query = chamado_query.filter(Chamado.solicitante_id == current_user_id)
+        equipment_query = equipment_query.filter(EquipmentRequest.requester_id == current_user_id)
+    elif not is_admin and is_ti:
+        user = User.query.get(current_user_id)
+        primeiro_lembrete = Reminder.query.filter_by(user_id=current_user_id).first()
+        setor_id_usuario = primeiro_lembrete.sector_id if primeiro_lembrete and primeiro_lembrete.sector_id else None
+        chamado_query = chamado_query.filter((Chamado.solicitante_id == current_user_id) | (Chamado.setor_id == setor_id_usuario))
+        equipment_query = EquipmentRequest.query # TI pode ver todas as solicitações de equipamento
+
     if task_status == 'done':
         task_query = task_query.filter(Task.completed == True)
     elif task_status == 'pending':
@@ -797,20 +852,28 @@ def export_excel():
         task_query = task_query.filter(Task.date >= start_date)
         reminder_query = reminder_query.filter(Reminder.due_date >= start_date)
         chamado_query = chamado_query.filter(Chamado.data_abertura >= start_date)
+        equipment_query = equipment_query.filter(EquipmentRequest.request_date >= start_date)
     if end_date:
         task_query = task_query.filter(Task.date <= end_date)
         reminder_query = reminder_query.filter(Reminder.due_date <= end_date)
         chamado_query = chamado_query.filter(Chamado.data_abertura <= end_date)
+        equipment_query = equipment_query.filter(EquipmentRequest.request_date <= end_date)
 
     if sector_id:
         task_query = task_query.filter(Task.sector_id == sector_id)
         reminder_query = reminder_query.filter(Reminder.sector_id == sector_id)
         chamado_query = chamado_query.filter(Chamado.setor_id == sector_id)
+        # Filtro para equipamentos por setor de destino
+        setor_nome = Sector.query.get(sector_id).name if Sector.query.get(sector_id) else ''
+        equipment_query = equipment_query.filter(EquipmentRequest.destination_sector.contains(setor_nome))
 
-    if user_id_filter and is_admin: # Admin pode filtrar por qualquer usuário
+
+    if user_id_filter and (is_admin or is_ti): # Admin ou TI pode filtrar por qualquer usuário
         task_query = task_query.filter(Task.user_id == user_id_filter)
         reminder_query = reminder_query.filter(Reminder.user_id == user_id_filter)
         chamado_query = chamado_query.filter(Chamado.solicitante_id == user_id_filter)
+        equipment_query = equipment_query.filter(EquipmentRequest.requester_id == user_id_filter)
+
 
     export_type = request.args.get('export_type', 'all')
     output = BytesIO()
@@ -884,37 +947,46 @@ def export_excel():
                 column_len = max(df_chamados[col].astype(str).map(len).max(), len(col))
                 worksheet_chamados.set_column(i, i, column_len + 2)
 
-    tutorial_query = Tutorial.query
-    if not is_admin:
-        tutorial_query = tutorial_query.filter(Tutorial.autor_id == current_user_id)
-    if sector_id:
-        tutorial_query = tutorial_query.join(User).filter(User.sector_id == sector_id)
-    if user_id_filter and is_admin:
-        tutorial_query = tutorial_query.filter(Tutorial.autor_id == user_id_filter)
-    if start_date:
-        tutorial_query = tutorial_query.filter(Tutorial.data_criacao >= start_date)
-    if end_date:
-        tutorial_query = tutorial_query.filter(Tutorial.data_criacao <= end_date)
-    tutoriais = tutorial_query.all()
-    if export_type in ['all', 'tutoriais']:
-        tutoriais_data = [{
-            'Título': t.titulo,
-            'Categoria': t.categoria or '',
-            'Autor': t.autor.username,
-            'Data de Criação': t.data_criacao.strftime('%d/%m/%Y %H:%M'),
-            'Visualizações': len(t.visualizacoes),
-            'Feedback Útil': sum(1 for f in t.feedbacks if f.util),
-            'Feedback Não Útil': sum(1 for f in t.feedbacks if not f.util)
-        } for t in tutoriais]
-        df_tutoriais = pd.DataFrame(tutoriais_data)
-        df_tutoriais.to_excel(writer, sheet_name='Tutoriais', index=False, header=False, startrow=1)
-        worksheet_tutoriais = writer.sheets['Tutoriais']
-        worksheet_tutoriais.merge_range('A1:G1', 'Relatório de Tutoriais', title_format)
-        for col_num, value in enumerate(df_tutoriais.columns.values):
-            worksheet_tutoriais.write(0, col_num, value, header_format)
-        for i, col in enumerate(df_tutoriais.columns):
-            column_len = max(df_tutoriais[col].astype(str).map(len).max(), len(col))
-            worksheet_tutoriais.set_column(i, i, column_len + 2)
+        if export_type in ['all', 'equipamentos']: # Bloco para equipamentos
+            equipamentos = equipment_query.all()
+            equipamentos_data = [{
+                'ID': e.id,
+                'Descrição': e.description,
+                'Patrimônio': e.patrimony,
+                'Tipo': e.equipment_type,
+                'Status': e.status,
+                'Solicitante': e.requester.username if e.requester else '',
+                'Data Solicitação': e.request_date.strftime('%d/%m/%Y') if e.request_date else ''
+            } for e in equipamentos]
+            df_equipamentos = pd.DataFrame(equipamentos_data)
+            df_equipamentos.to_excel(writer, sheet_name='Equipamentos', index=False, header=False, startrow=1)
+            worksheet_equipamentos = writer.sheets['Equipamentos']
+            worksheet_equipamentos.merge_range('A1:G1', 'Relatório de Equipamentos', title_format)
+            for col_num, value in enumerate(df_equipamentos.columns.values):
+                worksheet_equipamentos.write(0, col_num, value, header_format)
+            for i, col in enumerate(df_equipamentos.columns):
+                column_len = max(df_equipamentos[col].astype(str).map(len).max(), len(col))
+                worksheet_equipamentos.set_column(i, i, column_len + 2)
+
+        if export_type in ['all', 'tutoriais']:
+            tutoriais_data = [{
+                'Título': t.titulo,
+                'Categoria': t.categoria or '',
+                'Autor': t.autor.username,
+                'Data de Criação': t.data_criacao.strftime('%d/%m/%Y %H:%M'),
+                'Visualizações': len(t.visualizacoes),
+                'Feedback Útil': sum(1 for f in t.feedbacks if f.util),
+                'Feedback Não Útil': sum(1 for f in t.feedbacks if not f.util)
+            } for t in tutoriais]
+            df_tutoriais = pd.DataFrame(tutoriais_data)
+            df_tutoriais.to_excel(writer, sheet_name='Tutoriais', index=False, header=False, startrow=1)
+            worksheet_tutoriais = writer.sheets['Tutoriais']
+            worksheet_tutoriais.merge_range('A1:G1', 'Relatório de Tutoriais', title_format)
+            for col_num, value in enumerate(df_tutoriais.columns.values):
+                worksheet_tutoriais.write(0, col_num, value, header_format)
+            for i, col in enumerate(df_tutoriais.columns):
+                column_len = max(df_tutoriais[col].astype(str).map(len).max(), len(col))
+                worksheet_tutoriais.set_column(i, i, column_len + 2)
 
     output.seek(0)
     # Forçar mimetype correto para navegadores modernos
@@ -962,14 +1034,24 @@ def export_pdf():
     task_query = Task.query
     reminder_query = Reminder.query
     chamado_query = Chamado.query
+    equipment_query = EquipmentRequest.query # Query para equipamentos
 
     current_user_id = session.get('user_id')
     is_admin = session.get('is_admin', False)
+    is_ti = session.get('is_ti', False)
 
-    if not is_admin:
+    # Filtros de permissão
+    if not is_admin and not is_ti:
         task_query = task_query.filter(Task.user_id == current_user_id)
         reminder_query = reminder_query.filter(Reminder.user_id == current_user_id)
         chamado_query = chamado_query.filter(Chamado.solicitante_id == current_user_id)
+        equipment_query = equipment_query.filter(EquipmentRequest.requester_id == current_user_id)
+    elif not is_admin and is_ti:
+        user = User.query.get(current_user_id)
+        primeiro_lembrete = Reminder.query.filter_by(user_id=current_user_id).first()
+        setor_id_usuario = primeiro_lembrete.sector_id if primeiro_lembrete and primeiro_lembrete.sector_id else None
+        chamado_query = chamado_query.filter((Chamado.solicitante_id == current_user_id) | (Chamado.setor_id == setor_id_usuario))
+        equipment_query = EquipmentRequest.query
 
     if task_status == 'done':
         task_query = task_query.filter(Task.completed == True)
@@ -990,107 +1072,26 @@ def export_pdf():
         task_query = task_query.filter(Task.date >= start_date)
         reminder_query = reminder_query.filter(Reminder.due_date >= start_date)
         chamado_query = chamado_query.filter(Chamado.data_abertura >= start_date)
+        equipment_query = equipment_query.filter(EquipmentRequest.request_date >= start_date)
     if end_date:
         task_query = task_query.filter(Task.date <= end_date)
         reminder_query = reminder_query.filter(Reminder.due_date <= end_date)
         chamado_query = chamado_query.filter(Chamado.data_abertura <= end_date)
+        equipment_query = equipment_query.filter(EquipmentRequest.request_date <= end_date)
 
     if sector_id:
         task_query = task_query.filter(Task.sector_id == sector_id)
         reminder_query = reminder_query.filter(Reminder.sector_id == sector_id)
         chamado_query = chamado_query.filter(Chamado.setor_id == sector_id)
+        setor_nome = Sector.query.get(sector_id).name if Sector.query.get(sector_id) else ''
+        equipment_query = equipment_query.filter(EquipmentRequest.destination_sector.contains(setor_nome))
 
 
-
-@bp.route('/api/notifications')
-@login_required
-def get_notifications():
-    """API para verificar notificações pendentes"""
-    from datetime import date, timedelta
-    
-    user_id = session.get('user_id')
-    is_admin = session.get('is_admin', False)
-    
-    notifications = {
-        'reminders_expiring': [],
-        'chamados_updated': [],
-        'tasks_overdue': []
-    }
-    
-    # Lembretes vencendo em 3 dias
-    expiring_date = date.today() + timedelta(days=3)
-    if is_admin:
-        expiring_reminders = Reminder.query.filter(
-            Reminder.due_date <= expiring_date,
-            Reminder.due_date >= date.today(),
-            Reminder.completed == False
-        ).all()
-    else:
-        expiring_reminders = Reminder.query.filter(
-            Reminder.due_date <= expiring_date,
-            Reminder.due_date >= date.today(),
-            Reminder.completed == False,
-            Reminder.user_id == user_id
-        ).all()
-    
-    for reminder in expiring_reminders:
-        notifications['reminders_expiring'].append({
-            'id': reminder.id,
-            'name': reminder.name,
-            'due_date': reminder.due_date.strftime('%d/%m/%Y'),
-            'responsible': reminder.responsible,
-            'days_left': (reminder.due_date - date.today()).days
-        })
-    
-    # Chamados com atualizações recentes (últimas 24h)
-    from datetime import datetime
-    last_24h = datetime.utcnow() - timedelta(hours=24)
-    
-    if is_admin:
-        updated_chamados = Chamado.query.filter(
-            Chamado.data_ultima_atualizacao >= last_24h,
-            Chamado.status != 'Fechado'
-        ).all()
-    else:
-        updated_chamados = Chamado.query.filter(
-            Chamado.data_ultima_atualizacao >= last_24h,
-            Chamado.status != 'Fechado',
-            Chamado.solicitante_id == user_id
-        ).all()
-    
-    for chamado in updated_chamados:
-        notifications['chamados_updated'].append({
-            'id': chamado.id,
-            'titulo': chamado.titulo,
-            'status': chamado.status,
-            'updated_at': chamado.data_ultima_atualizacao.strftime('%d/%m/%Y %H:%M')
-        })
-    
-    # Tarefas vencidas
-    if is_admin:
-        overdue_tasks = Task.query.filter(
-            Task.date < date.today(),
-            Task.completed == False
-        ).all()
-    else:
-        overdue_tasks = Task.query.filter(
-            Task.date < date.today(),
-            Task.completed == False,
-            Task.user_id == user_id
-        ).all()
-    
-    notifications['tasks_overdue'] = [{
-        'id': task.id,
-        'description': task.description,
-        'days_overdue': (date.today() - task.date).days
-    } for task in overdue_tasks]
-    
-    return jsonify(notifications)
-
-    if user_id_filter and is_admin:
+    if user_id_filter and (is_admin or is_ti):
         task_query = task_query.filter(Task.user_id == user_id_filter)
         reminder_query = reminder_query.filter(Reminder.user_id == user_id_filter)
         chamado_query = chamado_query.filter(Chamado.solicitante_id == user_id_filter)
+        equipment_query = equipment_query.filter(EquipmentRequest.requester_id == user_id_filter)
 
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=landscape(letter), rightMargin=0.5*inch, leftMargin=0.5*inch, topMargin=0.5*inch, bottomMargin=0.5*inch)
@@ -1102,36 +1103,11 @@ def get_notifications():
     normal_style.fontSize = 8 # Reduzir um pouco para caber mais dados
 
 
-@bp.route('/install-pwa')
-def install_pwa():
-    """Página de instruções para instalação PWA"""
-    return render_template('install_pwa.html')
-
-@bp.route('/offline')
-def offline():
-    """Página offline"""
-    return render_template('offline.html')
-
-@bp.route('/test-notification')
-@login_required
-def test_notification():
-    """Endpoint para testar notificações"""
-    return jsonify({
-        'reminders_expiring': [{
-            'id': 999,
-            'name': 'Teste de Notificação',
-            'responsible': 'Sistema',
-            'days_left': 1
-        }],
-        'chamados_updated': [],
-        'tasks_overdue': []
-    })
-
-    
     # Definindo larguras das colunas (ajustar conforme necessário)
     col_widths_tasks = [2.3*inch, 0.8*inch, 1.2*inch, 1.2*inch, 1.2*inch, 0.8*inch]
     col_widths_reminders = [1.8*inch, 0.8*inch, 0.8*inch, 1.2*inch, 1.2*inch, 1.2*inch, 0.8*inch]
     col_widths_chamados = [0.4*inch, 1.5*inch, 0.8*inch, 0.8*inch, 1.2*inch, 1.2*inch, 1.2*inch, 1.2*inch]
+    col_widths_equipamentos = [0.4*inch, 2*inch, 0.8*inch, 0.8*inch, 0.8*inch, 1*inch, 1*inch] # Larguras para equipamentos
 
     table_style = TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#4F81BD")), # Azul escuro para cabeçalho
@@ -1146,7 +1122,7 @@ def test_notification():
         ('LEFTPADDING', (0,0), (-1,-1), 3),
         ('RIGHTPADDING', (0,0), (-1,-1), 3),
     ])
-    
+
     # Título Geral do Documento
     elements.append(Paragraph("Relatório Geral - TI Reminder", styles['h1']))
     elements.append(Spacer(1, 0.3*inch))
@@ -1218,17 +1194,40 @@ def test_notification():
             elements.append(table)
         else:
             elements.append(Paragraph("Nenhum chamado encontrado.", normal_style))
-        elements.append(Spacer(1, 0.3*inch))
+        elements.append(PageBreak() if export_type == 'all' else Spacer(1, 0.3*inch))
+
+    if export_type in ['all', 'equipamentos']:
+        equipamentos = equipment_query.all()
+        elements.append(Paragraph("Relatório de Equipamentos", title_style))
+        elements.append(Spacer(1, 0.1*inch))
+        if equipamentos:
+            data_equipamentos = [["ID", "Descrição", "Patrimônio", "Tipo", "Status", "Solicitante", "Data Solicitação"]]
+            for e in equipamentos:
+                data_equipamentos.append([
+                    str(e.id),
+                    Paragraph(e.description if e.description else '', normal_style),
+                    e.patrimony if e.patrimony else '',
+                    e.equipment_type if e.equipment_type else '',
+                    Paragraph(e.status if e.status else '', normal_style),
+                    Paragraph(e.requester.username if e.requester else '', normal_style),
+                    e.request_date.strftime('%d/%m/%Y') if e.request_date else ''
+                ])
+            table = Table(data_equipamentos, colWidths=col_widths_equipamentos)
+            table.setStyle(table_style)
+            elements.append(table)
+        else:
+            elements.append(Paragraph("Nenhum equipamento encontrado.", normal_style))
+        elements.append(PageBreak() if export_type == 'all' else Spacer(1, 0.3*inch))
 
     if not elements or all(isinstance(el, (Paragraph, Spacer)) and "Nenhum" in el.text for el in elements if isinstance(el, Paragraph)):
          elements.append(Paragraph("Nenhum dado para exportar com os filtros selecionados.", styles['Normal']))
 
     tutorial_query = Tutorial.query
-    if not is_admin:
+    if not is_admin and not is_ti:
         tutorial_query = tutorial_query.filter(Tutorial.autor_id == current_user_id)
     if sector_id:
         tutorial_query = tutorial_query.join(User).filter(User.sector_id == sector_id)
-    if user_id_filter and is_admin:
+    if user_id_filter and (is_admin or is_ti):
         tutorial_query = tutorial_query.filter(Tutorial.autor_id == user_id_filter)
     if start_date:
         tutorial_query = tutorial_query.filter(Tutorial.data_criacao >= start_date)
@@ -1286,8 +1285,10 @@ def tasks():
         query = query.filter(Task.completed == False, Task.date == date.today())
     elif status_filter == 'done':
         query = query.filter(Task.completed == True)
+    elif status_filter == 'pending':
+        query = query.filter(Task.completed == False, Task.date >= date.today())
     if search:
-        query = query.filter(Task.description.ilike(f'%{search}%'))
+        query = query.filter(Task.description.ilike(f'%{search}%') | Task.responsible.ilike(f'%{search}%'))
     if date_filter:
         try:
             filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
@@ -1438,10 +1439,10 @@ def abrir_chamado():
     form = ChamadoForm()
     user_id = session.get('user_id')
     user = User.query.get(user_id)
-    
+
     # Tenta obter o setor do usuário de diferentes fontes
     setor_usuario = None
-    
+
     # 1. Verifica se o usuário tem um setor atribuído diretamente (se o modelo permitir)
     if hasattr(user, 'setor') and user.setor:
         setor_usuario = user.setor
@@ -1457,12 +1458,12 @@ def abrir_chamado():
             if hasattr(tarefa, 'setor') and tarefa.setor:
                 setor_usuario = tarefa.setor
                 break
-    
+
     if request.method == 'POST' and form.validate_on_submit():
         if not setor_usuario:
             flash('Não foi possível determinar o setor do usuário. Contate o administrador.', 'danger')
             return render_template('abrir_chamado.html', form=form, title='Abrir Novo Chamado', setor_usuario=setor_usuario)
-        
+
         try:
             novo_chamado = Chamado(
                 titulo=form.titulo.data,
@@ -1472,10 +1473,10 @@ def abrir_chamado():
                 setor_id=setor_usuario.id,
                 status='Aberto'  # Status inicial
             )
-            
+
             db.session.add(novo_chamado)
             db.session.commit()
-            
+
             # Enviar email de notificação
             try:
                 send_chamado_aberto_email(novo_chamado)
@@ -1484,17 +1485,17 @@ def abrir_chamado():
                 db.session.rollback()
                 flash(f"Chamado criado, mas houve um erro ao enviar notificações: {str(e)}", "warning")
                 print(f"Error sending notification email for Chamado {novo_chamado.id}: {e}")
-                
+
             flash("Chamado aberto com sucesso!", "success")
             return redirect(url_for('main.detalhe_chamado', id=novo_chamado.id))
-            
+
         except Exception as e:
             db.session.rollback()
             flash(f"Erro ao abrir o chamado: {str(e)}", "danger")
             print(f"Error creating Chamado: {e}")
-    
-    return render_template('abrir_chamado.html', 
-                         form=form, 
+
+    return render_template('abrir_chamado.html',
+                         form=form,
                          title='Abrir Novo Chamado',
                          setor_usuario=setor_usuario)
 
@@ -1505,7 +1506,7 @@ def listar_chamados():
     per_page = 10
     status_filter = request.args.get('status', '')
     prioridade_filter = request.args.get('prioridade', '')
-    setor_filter = request.args.get('setor_id', type=int)
+    setor_filter = request.args.get('sector_id', type=int)
 
     query = Chamado.query
 
@@ -1528,14 +1529,14 @@ def listar_chamados():
         query = query.filter(Chamado.setor_id == setor_filter)
 
     chamados_paginated = query.order_by(Chamado.data_abertura.desc()).paginate(page=page, per_page=per_page)
-    
+
     # Para os filtros no template
     setores = Sector.query.order_by(Sector.name).all()
     status_list = db.session.query(Chamado.status).distinct().all()
     prioridade_list = db.session.query(Chamado.prioridade).distinct().all()
 
-    return render_template('listar_chamados.html', 
-                           chamados=chamados_paginated.items, 
+    return render_template('listar_chamados.html',
+                           chamados=chamados_paginated.items,
                            pagination=chamados_paginated,
                            setores=setores,
                            status_list=[s[0] for s in status_list],
@@ -1546,11 +1547,11 @@ def listar_chamados():
 @login_required
 def detalhe_chamado(id):
     from .forms import ChamadoAdminForm
-    
+
     query = Chamado.query
     is_admin = session.get('is_admin')
     user_id = session.get('user_id')
-    
+
     # Aplicar restrição de acesso
     if not is_admin:
         user = User.query.get(user_id)
@@ -1560,7 +1561,7 @@ def detalhe_chamado(id):
         query = query.filter((Chamado.solicitante_id == user_id) | (Chamado.setor_id == setor_id_usuario))
 
     chamado = query.filter(Chamado.id == id).first_or_404()
-    
+
     # Se for administrador, preparar o formulário administrativo
     form = None
     usuarios_ti = []
@@ -1573,17 +1574,17 @@ def detalhe_chamado(id):
             ('Fechado', 'Fechado')
         ]
         form.status.data = chamado.status
-        
+
         # Buscar apenas usuários ativos com perfil de TI
         usuarios_ti = User.query.filter_by(is_ti=True, ativo=True).order_by(User.username).all()
-        
+
         # Definir o valor atual do responsável TI, se existir
         if chamado.responsavel_ti_id:
             form.responsavel_ti_id.data = str(chamado.responsavel_ti_id)
-    
+
     return render_template(
-        'detalhe_chamado.html', 
-        chamado=chamado, 
+        'detalhe_chamado.html',
+        chamado=chamado,
         form=form,
         usuarios_ti=usuarios_ti,
         title=f'Chamado #{chamado.id}'
@@ -1595,27 +1596,27 @@ def gerenciar_chamado(id):
     from .models import Chamado, ComentarioChamado, db
     from .forms import ChamadoAdminForm
     from .email_utils import send_chamado_atualizado_email
-    
+
     # Verifica se o usuário é administrador
     if not session.get('is_admin'):
         flash('Acesso restrito a administradores.', 'danger')
         return redirect(url_for('main.detalhe_chamado', id=id))
-    
+
     chamado = Chamado.query.get_or_404(id)
     form = ChamadoAdminForm()
-    
+
     # Preenche as opções de responsável TI (apenas usuários ativos e marcados como TI)
     usuarios_ti = User.query.filter_by(ativo=True, is_ti=True).order_by(User.username).all()
     form.responsavel_ti_id.choices = [('', 'Nenhum (sem responsável)')] + [(str(u.id), u.username) for u in usuarios_ti]
-    
+
     if form.validate_on_submit():
         alteracoes = []
-        
+
         # Atualiza o status se foi alterado
         if form.status.data != chamado.status:
             alteracoes.append(f'Status alterado de "{chamado.status}" para "{form.status.data}"')
             chamado.status = form.status.data
-            
+
             # Atualiza a data de fechamento se o status for Fechado
             if form.status.data == 'Fechado' and not chamado.data_fechamento:
                 chamado.data_fechamento = datetime.utcnow()
@@ -1623,7 +1624,7 @@ def gerenciar_chamado(id):
             elif form.status.data != 'Fechado' and chamado.data_fechamento:
                 chamado.data_fechamento = None
                 alteracoes.append('Chamado reaberto')
-        
+
         # Atualiza o responsável TI se foi alterado
         if form.responsavel_ti_id.data != str(chamado.responsavel_ti_id if chamado.responsavel_ti_id else ''):
             if form.responsavel_ti_id.data:  # Novo responsável selecionado
@@ -1635,7 +1636,7 @@ def gerenciar_chamado(id):
                 if chamado.responsavel_ti:
                     alteracoes.append('Responsável TI removido')
                     chamado.responsavel_ti_id = None
-        
+
         # Adiciona um comentário se foi preenchido
         if form.comentario.data.strip():
             comentario = ComentarioChamado(
@@ -1646,12 +1647,12 @@ def gerenciar_chamado(id):
             )
             db.session.add(comentario)
             alteracoes.append('Comentário adicionado')
-        
+
         # Se houve alterações, registra como atualização
         if alteracoes:
             # Atualiza a data da última atualização
             chamado.data_ultima_atualizacao = datetime.utcnow()
-            
+
             # Cria um registro de atualização
             atualizacao = ComentarioChamado(
                 chamado_id=chamado.id,
@@ -1660,9 +1661,9 @@ def gerenciar_chamado(id):
                 tipo='atualizacao'
             )
             db.session.add(atualizacao)
-            
+
             db.session.commit()
-            
+
             # Envia notificação por e-mail se solicitado
             if form.notificar_solicitante.data and chamado.solicitante.email:
                 try:
@@ -1670,18 +1671,18 @@ def gerenciar_chamado(id):
                 except Exception as e:
                     print(f"Erro ao enviar e-mail: {str(e)}")
                     flash('Chamado atualizado, mas ocorreu um erro ao enviar a notificação por e-mail.', 'warning')
-            
+
             flash('Chamado atualizado com sucesso!', 'success')
         else:
             flash('Nenhuma alteração foi realizada.', 'info')
-        
+
         return redirect(url_for('main.detalhe_chamado', id=chamado.id))
-    
+
     # Se o formulário não for válido, mostra os erros
     for field, errors in form.errors.items():
         for error in errors:
             flash(f'Erro no campo {getattr(form, field).label.text}: {error}', 'danger')
-    
+
     return redirect(url_for('main.detalhe_chamado', id=chamado.id))
 
 # --- Tutoriais ---
@@ -1822,13 +1823,13 @@ def excluir_tutorial(tutorial_id):
 @login_required
 def comentar_tutorial(tutorial_id):
     tutorial = Tutorial.query.get_or_404(tutorial_id)
-    form = ComentarioTutorialForm()
+    comentario_form = ComentarioTutorialForm()
     feedback_form = FeedbackTutorialForm()
-    if form.validate_on_submit():
+    if comentario_form.validate_on_submit():
         comentario = ComentarioTutorial(
             tutorial_id=tutorial.id,
             usuario_id=session.get('user_id'),
-            texto=form.texto.data
+            texto=comentario_form.texto.data
         )
         db.session.add(comentario)
         db.session.commit()
@@ -1837,7 +1838,7 @@ def comentar_tutorial(tutorial_id):
     else:
         flash('Erro ao enviar comentário.', 'danger')
         # Renderiza o template com os formulários em caso de erro
-        return render_template('tutorial_detalhe.html', tutorial=tutorial, comentario_form=form, feedback_form=feedback_form)
+        return render_template('tutorial_detalhe.html', tutorial=tutorial, comentario_form=comentario_form, feedback_form=feedback_form)
 
 @bp.route('/tutoriais/<int:tutorial_id>/feedback', methods=['POST'])
 @login_required
@@ -1908,7 +1909,7 @@ def list_equipment():
     # Filtros
     status_filter = request.args.get('status', '')
     search = request.args.get('search', '').strip()
-    
+
     # Query base
     if session.get('is_admin') or session.get('is_ti'):
         # TI/Admin vê todas as solicitações
@@ -1916,11 +1917,11 @@ def list_equipment():
     else:
         # Usuário comum vê apenas suas solicitações
         query = EquipmentRequest.query.filter_by(requester_id=session.get('user_id'))
-    
+
     # Aplicar filtros
     if status_filter:
         query = query.filter(EquipmentRequest.status == status_filter)
-    
+
     if search:
         query = query.filter(
             db.or_(
@@ -1929,11 +1930,11 @@ def list_equipment():
                 EquipmentRequest.equipment_type.contains(search)
             )
         )
-    
+
     # Ordenar por data de solicitação (mais recente primeiro)
     equipment_requests = query.order_by(EquipmentRequest.request_date.desc()).all()
-    
-    return render_template('equipment_list.html', 
+
+    return render_template('equipment_list.html',
                          equipment_requests=equipment_requests,
                          status_filter=status_filter,
                          search=search)
@@ -1952,19 +1953,19 @@ def new_equipment_request():
         request_reason = request.form.get('request_reason', '').strip()
         delivery_date_str = request.form.get('delivery_date', '').strip()
         observations = request.form.get('observations', '').strip()
-        
+
         if not description:
             flash('Descrição é obrigatória.', 'danger')
             return render_template('equipment_form.html')
-        
+
         if not request_reason:
             flash('Motivo da solicitação é obrigatório.', 'danger')
             return render_template('equipment_form.html')
-        
+
         if not destination_sector:
             flash('Setor/Destino é obrigatório.', 'danger')
             return render_template('equipment_form.html')
-        
+
         # Converter data se fornecida
         delivery_date = None
         if delivery_date_str:
@@ -1973,7 +1974,7 @@ def new_equipment_request():
             except ValueError:
                 flash('Data de entrega inválida.', 'danger')
                 return render_template('equipment_form.html')
-        
+
         # Criar solicitação
         equipment_request = EquipmentRequest(
             description=description,
@@ -1986,13 +1987,13 @@ def new_equipment_request():
             requester_id=session.get('user_id'),
             status='Solicitado'
         )
-        
+
         db.session.add(equipment_request)
         db.session.commit()
-        
+
         flash('Solicitação de equipamento criada com sucesso!', 'success')
         return redirect(url_for('main.list_equipment'))
-    
+
     return render_template('equipment_form.html')
 
 
@@ -2001,13 +2002,13 @@ def new_equipment_request():
 def equipment_detail(id):
     """Detalhes de uma solicitação de equipamento"""
     equipment_request = EquipmentRequest.query.get_or_404(id)
-    
+
     # Verificar permissão
-    if not (session.get('is_admin') or session.get('is_ti') or 
+    if not (session.get('is_admin') or session.get('is_ti') or
             equipment_request.requester_id == session.get('user_id')):
         flash('Você não tem permissão para ver esta solicitação.', 'danger')
         return redirect(url_for('main.list_equipment'))
-    
+
     return render_template('equipment_detail.html', equipment_request=equipment_request)
 
 
@@ -2016,12 +2017,12 @@ def equipment_detail(id):
 def edit_equipment_request(id):
     """Editar solicitação de equipamento"""
     equipment_request = EquipmentRequest.query.get_or_404(id)
-    
+
     # Verificar permissão
     if not equipment_request.can_be_edited_by(User.query.get(session.get('user_id'))):
         flash('Você não tem permissão para editar esta solicitação.', 'danger')
         return redirect(url_for('main.equipment_detail', id=id))
-    
+
     if request.method == 'POST':
         # Validar dados
         description = request.form.get('description', '').strip()
@@ -2031,19 +2032,19 @@ def edit_equipment_request(id):
         request_reason = request.form.get('request_reason', '').strip()
         delivery_date_str = request.form.get('delivery_date', '').strip()
         observations = request.form.get('observations', '').strip()
-        
+
         if not description:
             flash('Descrição é obrigatória.', 'danger')
             return render_template('equipment_form.html', equipment_request=equipment_request)
-        
+
         if not request_reason:
             flash('Motivo da solicitação é obrigatório.', 'danger')
             return render_template('equipment_form.html', equipment_request=equipment_request)
-        
+
         if not destination_sector:
             flash('Setor/Destino é obrigatório.', 'danger')
             return render_template('equipment_form.html', equipment_request=equipment_request)
-        
+
         # Converter data se fornecida
         delivery_date = None
         if delivery_date_str:
@@ -2052,7 +2053,7 @@ def edit_equipment_request(id):
             except ValueError:
                 flash('Data de entrega inválida.', 'danger')
                 return render_template('equipment_form.html', equipment_request=equipment_request)
-        
+
         # Atualizar dados
         equipment_request.description = description
         equipment_request.patrimony = patrimony if patrimony else None
@@ -2061,12 +2062,12 @@ def edit_equipment_request(id):
         equipment_request.request_reason = request_reason if request_reason else None
         equipment_request.delivery_date = delivery_date
         equipment_request.observations = observations if observations else None
-        
+
         db.session.commit()
-        
+
         flash('Solicitação atualizada com sucesso!', 'success')
         return redirect(url_for('main.equipment_detail', id=id))
-    
+
     return render_template('equipment_form.html', equipment_request=equipment_request)
 
 
@@ -2075,23 +2076,23 @@ def edit_equipment_request(id):
 def approve_equipment_request(id):
     """Aprovar solicitação de equipamento (TI/Admin)"""
     equipment_request = EquipmentRequest.query.get_or_404(id)
-    
+
     # Verificar permissão
     if not equipment_request.can_be_approved_by(User.query.get(session.get('user_id'))):
         flash('Você não tem permissão para aprovar solicitações.', 'danger')
         return redirect(url_for('main.equipment_detail', id=id))
-    
+
     if equipment_request.status != 'Solicitado':
         flash('Apenas solicitações pendentes podem ser aprovadas.', 'danger')
         return redirect(url_for('main.equipment_detail', id=id))
-    
+
     # Aprovar solicitação
     equipment_request.status = 'Aprovado'
     equipment_request.approved_by_id = session.get('user_id')
     equipment_request.approval_date = datetime.utcnow()
-    
+
     db.session.commit()
-    
+
     flash('Solicitação aprovada com sucesso!', 'success')
     return redirect(url_for('main.equipment_detail', id=id))
 
@@ -2101,23 +2102,23 @@ def approve_equipment_request(id):
 def reject_equipment_request(id):
     """Recusar solicitação de equipamento (TI/Admin)"""
     equipment_request = EquipmentRequest.query.get_or_404(id)
-    
+
     # Verificar permissão
     if not equipment_request.can_be_approved_by(User.query.get(session.get('user_id'))):
         flash('Você não tem permissão para recusar solicitações.', 'danger')
         return redirect(url_for('main.equipment_detail', id=id))
-    
+
     if equipment_request.status != 'Solicitado':
         flash('Apenas solicitações pendentes podem ser recusadas.', 'danger')
         return redirect(url_for('main.equipment_detail', id=id))
-    
+
     # Recusar solicitação
     equipment_request.status = 'Negado'
     equipment_request.approved_by_id = session.get('user_id')
     equipment_request.approval_date = datetime.utcnow()
-    
+
     db.session.commit()
-    
+
     flash('Solicitação recusada.', 'warning')
     return redirect(url_for('main.equipment_detail', id=id))
 
@@ -2127,23 +2128,23 @@ def reject_equipment_request(id):
 def deliver_equipment_request(id):
     """Marcar equipamento como entregue (TI/Admin)"""
     equipment_request = EquipmentRequest.query.get_or_404(id)
-    
+
     # Verificar permissão
     if not equipment_request.can_be_approved_by(User.query.get(session.get('user_id'))):
         flash('Você não tem permissão para marcar como entregue.', 'danger')
         return redirect(url_for('main.equipment_detail', id=id))
-    
+
     if equipment_request.status != 'Aprovado':
         flash('Apenas solicitações aprovadas podem ser marcadas como entregues.', 'danger')
         return redirect(url_for('main.equipment_detail', id=id))
-    
+
     # Marcar como entregue
     equipment_request.status = 'Entregue'
     equipment_request.received_by_id = session.get('user_id')
     equipment_request.delivery_date = datetime.utcnow().date()
-    
+
     db.session.commit()
-    
+
     flash('Equipamento marcado como entregue!', 'success')
     return redirect(url_for('main.equipment_detail', id=id))
 
@@ -2153,22 +2154,22 @@ def deliver_equipment_request(id):
 def return_equipment_request(id):
     """Marcar equipamento como devolvido (TI/Admin)"""
     equipment_request = EquipmentRequest.query.get_or_404(id)
-    
+
     # Verificar permissão
     if not equipment_request.can_be_approved_by(User.query.get(session.get('user_id'))):
         flash('Você não tem permissão para marcar como devolvido.', 'danger')
         return redirect(url_for('main.equipment_detail', id=id))
-    
+
     if equipment_request.status != 'Entregue':
         flash('Apenas equipamentos entregues podem ser marcados como devolvidos.', 'danger')
         return redirect(url_for('main.equipment_detail', id=id))
-    
+
     # Marcar como devolvido
     equipment_request.status = 'Devolvido'
     equipment_request.return_date = datetime.utcnow().date()
-    
+
     db.session.commit()
-    
+
     flash('Equipamento marcado como devolvido!', 'success')
     return redirect(url_for('main.equipment_detail', id=id))
 
@@ -2178,24 +2179,24 @@ def return_equipment_request(id):
 def fill_technical_data(id):
     """Preencher dados técnicos do equipamento (TI/Admin)"""
     equipment_request = EquipmentRequest.query.get_or_404(id)
-    
+
     # Verificar permissão
     if not equipment_request.can_be_approved_by(User.query.get(session.get('user_id'))):
         flash('Você não tem permissão para preencher dados técnicos.', 'danger')
         return redirect(url_for('main.equipment_detail', id=id))
-    
+
     if request.method == 'POST':
         # Validar dados
         patrimony = request.form.get('patrimony', '').strip()
         equipment_type = request.form.get('equipment_type', '').strip()
         delivery_date_str = request.form.get('delivery_date', '').strip()
         conference_status = request.form.get('conference_status', '').strip()
-        
+
         # Atualizar dados técnicos
         equipment_request.patrimony = patrimony if patrimony else None
         equipment_request.equipment_type = equipment_type if equipment_type else None
         equipment_request.conference_status = conference_status if conference_status else None
-        
+
         # Converter data se fornecida
         if delivery_date_str:
             try:
@@ -2203,13 +2204,38 @@ def fill_technical_data(id):
             except ValueError:
                 flash('Data de entrega inválida.', 'danger')
                 return render_template('equipment_technical_form.html', equipment_request=equipment_request)
-        
+
         db.session.commit()
-        
+
         flash('Dados técnicos atualizados com sucesso!', 'success')
         return redirect(url_for('main.equipment_detail', id=id))
-    
+
     return render_template('equipment_technical_form.html', equipment_request=equipment_request)
 
 
 
+
+@bp.route('/install-pwa')
+def install_pwa():
+    """Página de instruções para instalação PWA"""
+    return render_template('install_pwa.html')
+
+@bp.route('/offline')
+def offline():
+    """Página offline"""
+    return render_template('offline.html')
+
+@bp.route('/test-notification')
+@login_required
+def test_notification():
+    """Endpoint para testar notificações"""
+    return jsonify({
+        'reminders_expiring': [{
+            'id': 999,
+            'name': 'Teste de Notificação',
+            'responsible': 'Sistema',
+            'days_left': 1
+        }],
+        'chamados_updated': [],
+        'tasks_overdue': []
+    })

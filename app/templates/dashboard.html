@@ -127,6 +127,7 @@
                 <option value="tasks" {% if request.args.get('export_type') == 'tasks' %}selected{% endif %}>Somente Tarefas</option>
                 <option value="reminders" {% if request.args.get('export_type') == 'reminders' %}selected{% endif %}>Somente Lembretes</option>
                 <option value="chamados" {% if request.args.get('export_type') == 'chamados' %}selected{% endif %}>Somente Chamados</option>
+                <option value="equipamentos">Apenas Equipamentos</option>
                 <option value="tutoriais" {% if request.args.get('export_type') == 'tutoriais' %}selected{% endif %}>Somente Tutoriais</option>
               </select>
             </div>
@@ -262,85 +263,39 @@
       </div> <!-- Fecha o card de Chamados -->
     </div> <!-- Fecha o col-lg-4 do card de Chamados -->
 
-    <!-- Card de Tutoriais -->
-    <div class="col-lg-4 col-md-6 mb-3">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-light">
-          <h5 class="mb-0">Resumo de Tutoriais</h5>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="mb-3" style="width: 100%; max-width: 220px; margin: 0 auto;">
-                <canvas id="grafico_tutoriais" height="220"></canvas>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="list-group">
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Total
-                  <span class="badge bg-primary rounded-pill">{{ total_tutoriais }}</span>
-                </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Mais visualizado
-                  <span class="badge bg-success rounded-pill text-truncate" style="max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ tutorial_mais_visualizado.titulo if tutorial_mais_visualizado else '-' }}">
-                    {{ tutorial_mais_visualizado.titulo if tutorial_mais_visualizado else '-' }}
-                    {% if tutorial_mais_visualizado and tutorial_mais_visualizado.categoria %}
-                      <span class="badge bg-info ms-1">{{ tutorial_mais_visualizado.categoria }}</span>
-                    {% endif %}
-                  </span>
-                </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Mais útil
-                  <span class="badge bg-info rounded-pill text-truncate" style="max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ tutorial_mais_util.titulo if tutorial_mais_util else '-' }}">
-                    {{ tutorial_mais_util.titulo if tutorial_mais_util else '-' }}
-                    {% if tutorial_mais_util and tutorial_mais_util.categoria %}
-                      <span class="badge bg-info ms-1">{{ tutorial_mais_util.categoria }}</span>
-                    {% endif %}
-                  </span>
+    <!-- Card de Equipamentos -->
+          <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card bg-purple text-white h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h4 class="card-title">{{ equipamentos_total }}</h4>
+                    <p class="card-text">Equipamentos</p>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="fas fa-laptop fa-2x"></i>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-    <!-- Gráfico de feedbacks -->
-    <div class="col-lg-4 col-md-6 mb-3">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-light">
-          <h5 class="mb-0">Feedbacks de Tutoriais</h5>
-        </div>
-        <div class="card-body">
-          <div class="mb-3" style="width: 100%; max-width: 220px; margin: 0 auto;">
-            <canvas id="grafico_feedbacks_tutoriais" height="220"></canvas>
-          </div>
-          <div class="list-group">
-            <div class="list-group-item d-flex justify-content-between align-items-center">
-              Útil
-              <span class="badge bg-success rounded-pill">{{ feedbacks_util }}</span>
-            </div>
-            <div class="list-group-item d-flex justify-content-between align-items-center">
-              Não útil
-              <span class="badge bg-danger rounded-pill">{{ feedbacks_nao_util }}</span>
+
+          <!-- Card Tutoriais -->
+          <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card bg-success text-white h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h4 class="card-title">{{ total_tutoriais }}</h4>
+                    <p class="card-text">Tutoriais</p>
+                  </div>
+                  <div class="align-self-center">
+                    <i class="fas fa-book fa-2x"></i>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-    <!-- Gráfico de mais visualizados -->
-    <div class="col-lg-4 col-md-12 mb-3">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-light">
-          <h5 class="mb-0">Top 5 Tutoriais Mais Visualizados</h5>
-        </div>
-        <div class="card-body">
-          <div class="mb-3" style="width: 100%; max-width: 400px; margin: 0 auto;">
-            <canvas id="grafico_top_tutoriais" height="220"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- Gráficos Detalhados -->
@@ -358,7 +313,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Gráfico de Barra -->
     <div class="col-lg-6 mb-3">
       <div class="card shadow-sm h-100">
@@ -372,6 +327,37 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Gráficos de Pizza -->
+  <div class="row mb-4">
+    <!-- Gráfico de Pizza - Status dos Equipamentos -->
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="fas fa-laptop me-2"></i>Status dos Equipamentos
+              </h5>
+            </div>
+            <div class="card-body">
+              <canvas id="equipmentStatusChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráfico de Pizza - Feedbacks dos Tutoriais -->
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="fas fa-thumbs-up me-2"></i>Feedbacks dos Tutoriais
+              </h5>
+            </div>
+            <div class="card-body">
+              <canvas id="feedbackChart"></canvas>
+            </div>
+          </div>
+        </div>
   </div>
 </div>
 
@@ -387,7 +373,7 @@
       borderWidth: 1
     }]
   };
-  
+
   const lembretesData = {
     labels: ['Realizados', 'Pendentes'],
     datasets: [{
@@ -396,7 +382,7 @@
       borderWidth: 1
     }]
   };
-  
+
   new Chart(document.getElementById('grafico_tarefas'), {
     type: 'pie',
     data: tarefasData,
@@ -425,7 +411,7 @@
       }
     }
   });
-  
+
   new Chart(document.getElementById('grafico_lembretes'), {
     type: 'pie',
     data: lembretesData,
@@ -493,64 +479,50 @@
       }
     }
   });
-  
+
   // Gráfico de Linha: Evolução mensal
   const mesesLabels = {{ meses_labels|tojson }};
   const tarefasPorMes = {{ tarefas_por_mes|tojson }};
   const tarefasConcluidasPorMes = {{ tarefas_concluidas_por_mes|tojson }};
   const lembretesPorMes = {{ lembretes_por_mes|tojson }};
   const lembretesRealizadosPorMes = {{ lembretes_realizados_por_mes|tojson }};
-  
+
   new Chart(document.getElementById('grafico_linha'), {
     type: 'line',
     data: {
       labels: mesesLabels,
       datasets: [
         {
-          label: 'Tarefas Criadas',
-          data: tarefasPorMes,
-          borderColor: '#0d6efd',
-          backgroundColor: 'rgba(13,110,253,0.1)',
-          borderWidth: 2,
-          fill: false,
-          tension: 0.3,
-          pointRadius: 3,
-          pointHoverRadius: 5
-        },
-        {
+          label: 'Tarefas',
+          data: {{ tarefas_por_mes }},
+          borderColor: '#007bff',
+          backgroundColor: 'rgba(0, 123, 255, 0.1)',
+          tension: 0.1
+        }, {
           label: 'Tarefas Concluídas',
-          data: tarefasConcluidasPorMes,
-          borderColor: '#198754',
-          backgroundColor: 'rgba(25,135,84,0.1)',
-          borderWidth: 2,
-          fill: false,
-          tension: 0.3,
-          pointRadius: 3,
-          pointHoverRadius: 5
-        },
-        {
-          label: 'Lembretes Criados',
-          data: lembretesPorMes,
+          data: {{ tarefas_concluidas_por_mes }},
+          borderColor: '#28a745',
+          backgroundColor: 'rgba(40, 167, 69, 0.1)',
+          tension: 0.1
+        }, {
+          label: 'Lembretes',
+          data: {{ lembretes_por_mes }},
           borderColor: '#ffc107',
-          backgroundColor: 'rgba(255,193,7,0.1)',
-          borderWidth: 2,
-          fill: false,
-          tension: 0.3,
-          pointRadius: 3,
-          pointHoverRadius: 5
-        },
-        {
+          backgroundColor: 'rgba(255, 193, 7, 0.1)',
+          tension: 0.1
+        }, {
           label: 'Lembretes Realizados',
-          data: lembretesRealizadosPorMes,
-          borderColor: '#dc3545',
-          backgroundColor: 'rgba(220,53,69,0.1)',
-          borderWidth: 2,
-          fill: false,
-          tension: 0.3,
-          pointRadius: 3,
-          pointHoverRadius: 5
-        }
-      ]
+          data: {{ lembretes_realizados_por_mes }},
+          borderColor: '#17a2b8',
+          backgroundColor: 'rgba(23, 162, 184, 0.1)',
+          tension: 0.1
+        }, {
+          label: 'Equipamentos',
+          data: {{ equipamentos_por_mes }},
+          borderColor: '#6f42c1',
+          backgroundColor: 'rgba(111, 66, 193, 0.1)',
+          tension: 0.1
+        }]
     },
     options: {
       responsive: true,
@@ -588,13 +560,13 @@
       }
     }
   });
-  
+
   // Gráfico de Barra: Distribuição por setor
   const setoresLabels = {{ setores_labels|tojson }};
   const tarefasPorSetor = {{ tarefas_por_setor|tojson }};
   const lembretesPorSetor = {{ lembretes_por_setor|tojson }};
   const chamadosPorSetor = {{ chamados_por_setor|tojson }}; // Adicionado
-  
+
   new Chart(document.getElementById('grafico_barra'), {
     type: 'bar',
     data: {
@@ -655,7 +627,7 @@
   });
 
   // Gráfico de pizza de feedbacks
-  const ctxFeedback = document.getElementById('grafico_feedbacks_tutoriais');
+  const ctxFeedback = document.getElementById('feedbackChart').getContext('2d');
   if (ctxFeedback) {
     new Chart(ctxFeedback, {
       type: 'pie',
@@ -718,5 +690,53 @@
       }
     });
   }
+
+  // Gráfico de Pizza - Status dos Equipamentos
+    const equipmentStatusCtx = document.getElementById('equipmentStatusChart').getContext('2d');
+    new Chart(equipmentStatusCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Solicitado', 'Aprovado', 'Entregue', 'Devolvido', 'Negado'],
+        datasets: [{
+          data: [
+            {{ equipamentos_solicitado }}, 
+            {{ equipamentos_aprovado }}, 
+            {{ equipamentos_entregue }}, 
+            {{ equipamentos_devolvido }}, 
+            {{ equipamentos_negado }}
+          ],
+          backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#6c757d', '#dc3545']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
+    });
+
+    // Gráfico de Pizza - Feedbacks dos Tutoriais
+    const feedbackCtx = document.getElementById('feedbackChart').getContext('2d');
+    new Chart(feedbackCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Útil', 'Não útil'],
+        datasets: [{
+          data: [{{ feedbacks_util }}, {{ feedbacks_nao_util }}],
+          backgroundColor: ['#28a745', '#dc3545']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
+    });
 </script>
 {% endblock %}
