@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Login | Sistema | TI reminder{% endblock %}
+{% block title %}Login | TI OSN System - Sistema Profissional de Gerenciamento{% endblock %}
 {% block content %}
 {% if request.args.get('need_login') %}
 <div class="alert alert-danger text-center mb-4">
@@ -44,7 +44,7 @@
             <div class="mb-3">
               <div class="d-flex justify-content-between align-items-center">
                 <label for="{{ form.password.id }}" class="form-label small">Senha</label>
-                <a href="#" class="text-decoration-none small">Esqueceu?</a>
+                <a href="{{ url_for('auth.reset_password_request') }}" class="text-decoration-none small">Esqueceu?</a>
               </div>
               <div class="input-group input-group-sm shadow-sm">
                 <span class="input-group-text border-0 bg-transparent">

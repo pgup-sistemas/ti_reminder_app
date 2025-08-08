@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}{{ title }} | TI reminder{% endblock %}
+{% block title %}{{ title }} | TI OSN System{% endblock %}
 {% block content %}
 <div class="container mt-4">
   <div class="row justify-content-center">
     <div class="col-md-8">
       <div class="card">
-        <div class="card-header bg-success text-white">
+        <div class="card-header bg-body-tertiary text-black d-flex align-items-center">
+          <i class="fas fa-tools me-2"></i>
           <h4 class="mb-0">{{ title }}</h4>
         </div>
         <div class="card-body">
@@ -33,10 +34,10 @@
               {% endfor %}
             </div>
             <div class="mb-3">
-              {{ form.imagens.label(class="form-label") }}
-              {{ form.imagens(class="form-control", multiple=true) }}
+              {{ form.imagem.label(class="form-label") }}
+              {{ form.imagem(class="form-control", multiple=true) }}
               <div class="form-text">Você pode selecionar várias imagens (jpg, png, gif).</div>
-              {% for error in form.imagens.errors %}
+              {% for error in form.imagem.errors %}
                 <div class="invalid-feedback d-block">{{ error }}</div>
               {% endfor %}
             </div>
@@ -48,4 +49,4 @@
     </div>
   </div>
 </div>
-{% endblock %} 
+{% endblock %}

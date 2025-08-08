@@ -131,7 +131,7 @@ self.addEventListener('sync', event => {
 // Push notifications
 self.addEventListener('push', event => {
     const options = {
-        body: event.data ? event.data.text() : 'Nova notificação do TI Reminder',
+        body: event.data ? event.data.text() : 'Nova notificação do TI OSN System',
         icon: '/static/icons/icon-192x192.png',
         badge: '/static/icons/badge-72x72.png',
         vibrate: [100, 50, 100],
@@ -154,7 +154,7 @@ self.addEventListener('push', event => {
     };
 
     event.waitUntil(
-        self.registration.showNotification('TI Reminder', options)
+        self.registration.showNotification('TI OSN System', options)
     );
 });
 

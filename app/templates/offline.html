@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offline - TI Reminder</title>
+    <title>Offline - TI OSN System</title>
     <style>
         body {
             font-family: 'Inter', Arial, sans-serif;
@@ -73,7 +73,7 @@
         <p class="offline-message">
             Não foi possível conectar ao servidor. Verifique sua conexão com a internet e tente novamente.
             <br><br>
-            <strong>Não se preocupe!</strong> O TI Reminder funciona offline. Você pode continuar navegando pelas páginas já visitadas.
+            <strong>Não se preocupe!</strong> O TI OSN System funciona offline. Você pode continuar navegando pelas páginas já visitadas.
         </p>
         <button class="retry-button" onclick="window.location.reload()">
             🔄 Tentar novamente
@@ -88,11 +88,11 @@
         
         // Show connection status
         if (!navigator.onLine) {
-            document.title = '🔴 Offline - TI Reminder';
+            document.title = '🔴 Offline - TI OSN System';
         }
         
         window.addEventListener('online', () => {
-            document.title = '🟢 Conectando... - TI Reminder';
+            document.title = '🟢 Conectando... - TI OSN System';
             setTimeout(() => {
                 window.location.href = '/';
             }, 1000);

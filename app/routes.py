@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session, jsonify
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from .models import Reminder, Task, Sector, User, db, Tutorial, TutorialImage, VisualizacaoTutorial, FeedbackTutorial, EquipmentRequest, Chamado, ComentarioChamado # Importados modelos necessários
+from .models import Reminder, Task, Sector, User, db, Tutorial, TutorialImage, VisualizacaoTutorial, FeedbackTutorial, EquipmentRequest, Chamado, ComentarioChamado, ComentarioTutorial # Importados modelos necessários
 from .forms import ReminderForm, TaskForm, TutorialForm, ComentarioTutorialForm, FeedbackTutorialForm, ChamadoForm, ChamadoAdminForm, UserEditForm # Importados formulários necessários
 from .auth_utils import login_required
 from functools import wraps
@@ -40,7 +40,12 @@ def index():
 
     # Recorrência automática
     for r in reminders:
-        if r.due_date < date.today() and not r.notified:
+        if (r.due_date < date.today() and 
+            not r.notified and 
+            r.frequency and 
+            r.status == 'ativo' and
+            (not r.end_date or r.end_date > date.today()) and
+            (not r.pause_until or r.pause_until <= date.today())):
             if r.frequency == 'diario':
                 next_due = r.due_date + relativedelta(days=1)
             elif r.frequency == 'quinzenal':
@@ -58,7 +63,10 @@ def index():
                 responsible=r.responsible,
                 frequency=r.frequency,
                 sector_id=r.sector_id,
-                user_id=r.user_id
+                user_id=r.user_id,
+                status=r.status,
+                pause_until=r.pause_until,
+                end_date=r.end_date
             )
             db.session.add(novo)
             r.notified = True  # marca o lembrete antigo para não duplicar
@@ -154,6 +162,34 @@ def complete_reminder(id):
     flash('Lembrete marcado como realizado!', 'success')
     return redirect(url_for('main.reminders'))
 
+@bp.route('/reminders/toggle_status/<int:id>', methods=['POST'])
+@login_required
+def toggle_reminder_status(id):
+    if session.get('is_admin'):
+        reminder = Reminder.query.get_or_404(id)
+    else:
+        reminder = Reminder.query.filter_by(id=id, user_id=session.get('user_id')).first_or_404()
+    
+    # Obter o status desejado do formulário, se fornecido
+    target_status = request.form.get('target_status')
+    
+    if target_status == 'cancelado':
+        reminder.status = 'cancelado'
+        flash('Lembrete cancelado!', 'danger')
+    elif reminder.status == 'ativo':
+        reminder.status = 'pausado'
+        flash('Lembrete pausado!', 'warning')
+    elif reminder.status == 'pausado':
+        reminder.status = 'ativo'
+        reminder.pause_until = None
+        flash('Lembrete reativado!', 'success')
+    elif reminder.status == 'cancelado':
+        reminder.status = 'ativo'
+        flash('Lembrete reativado!', 'success')
+    
+    db.session.commit()
+    return redirect(url_for('main.reminders'))
+
 from flask import request
 
 @bp.route('/reminders/json')
@@ -194,6 +230,10 @@ def reminders_json():
             'frequency': r.frequency,
             'sector': r.sector.name if r.sector else '',
             'completed': r.completed,
+            'status_control': r.status,  # Campo de controle de status (ativo, pausado, cancelado)
+            'pause_until': r.pause_until.isoformat() if r.pause_until else None,
+            'end_date': r.end_date.isoformat() if r.end_date else None,
+            'created_at': r.created_at.isoformat() if r.created_at else None,
             'status': 'completed' if r.completed else
                      'expired' if r.due_date < date.today() else
                      'ok' if r.due_date == date.today() else
@@ -243,7 +283,11 @@ def reminders():
             responsible=form.responsible.data,
             frequency=form.frequency.data,
             sector_id=sector_id,
-            user_id=session.get('user_id')
+            user_id=session.get('user_id'),
+            status=form.status.data,
+            pause_until=form.pause_until.data,
+            end_date=form.end_date.data,
+            created_at=datetime.now()
         )
         db.session.add(reminder)
         db.session.commit()
@@ -1124,7 +1168,7 @@ def export_pdf():
     ])
 
     # Título Geral do Documento
-    elements.append(Paragraph("Relatório Geral - TI Reminder", styles['h1']))
+    elements.append(Paragraph("Relatório Geral - TI OSN System", styles['h1']))
     elements.append(Spacer(1, 0.3*inch))
 
     if export_type in ['all', 'tasks']:
@@ -1593,7 +1637,7 @@ def detalhe_chamado(id):
 @bp.route('/chamados/<int:id>/admin', methods=['POST'])
 @login_required
 def gerenciar_chamado(id):
-    from .models import Chamado, ComentarioChamado, db
+    from .models import Chamado, ComentarioChamado, ComentarioTutorial, db
     from .forms import ChamadoAdminForm
     from .email_utils import send_chamado_atualizado_email
 
@@ -1639,7 +1683,7 @@ def gerenciar_chamado(id):
 
         # Adiciona um comentário se foi preenchido
         if form.comentario.data.strip():
-            comentario = ComentarioChamado(
+            comentario = ComentarioChamado, ComentarioTutorial(
                 chamado_id=chamado.id,
                 usuario_id=session['user_id'],
                 texto=form.comentario.data,
@@ -1654,7 +1698,7 @@ def gerenciar_chamado(id):
             chamado.data_ultima_atualizacao = datetime.utcnow()
 
             # Cria um registro de atualização
-            atualizacao = ComentarioChamado(
+            atualizacao = ComentarioChamado, ComentarioTutorial(
                 chamado_id=chamado.id,
                 usuario_id=session['user_id'],
                 texto=' | '.join(alteracoes),
@@ -1719,15 +1763,15 @@ def novo_tutorial():
         db.session.add(tutorial)
         db.session.commit()
         # Upload de imagens
-        if form.imagens.data:
+        if form.imagem.data:
             upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
             os.makedirs(upload_folder, exist_ok=True)
-            for file in form.imagens.data:
-                if file:
-                    filename = secure_filename(file.filename)
-                    file.save(os.path.join(upload_folder, filename))
-                    img = TutorialImage(tutorial_id=tutorial.id, filename=filename)
-                    db.session.add(img)
+            file = form.imagem.data
+            if file:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(upload_folder, filename))
+                img = TutorialImage(tutorial_id=tutorial.id, filename=filename)
+                db.session.add(img)
             db.session.commit()
         flash('Tutorial cadastrado com sucesso!', 'success')
         return redirect(url_for('main.listar_tutoriais'))
@@ -1785,15 +1829,15 @@ def editar_tutorial(tutorial_id):
         tutorial.conteudo = form.conteudo.data
         tutorial.categoria = form.categoria.data
         # Upload de novas imagens
-        if form.imagens.data:
+        if form.imagem.data:
             upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
             os.makedirs(upload_folder, exist_ok=True)
-            for file in form.imagens.data:
-                if file:
-                    filename = secure_filename(file.filename)
-                    file.save(os.path.join(upload_folder, filename))
-                    img = TutorialImage(tutorial_id=tutorial.id, filename=filename)
-                    db.session.add(img)
+            file = form.imagem.data
+            if file:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(upload_folder, filename))
+                img = TutorialImage(tutorial_id=tutorial.id, filename=filename)
+                db.session.add(img)
         db.session.commit()
         flash('Tutorial atualizado com sucesso!', 'success')
         return redirect(url_for('main.detalhe_tutorial', tutorial_id=tutorial.id))
@@ -2238,4 +2282,69 @@ def test_notification():
         }],
         'chamados_updated': [],
         'tasks_overdue': []
+    })
+
+@bp.route('/api/notifications')
+def api_notifications():
+    """Endpoint para API de notificações usado pelo notifications.js"""
+    # Verificar se o usuário está autenticado
+    if 'user_id' not in session:
+        return jsonify({
+            'error': 'Não autenticado',
+            'reminders_expiring': [],
+            'chamados_updated': [],
+            'tasks_overdue': []
+        }), 200  # Retornar código 200 em vez de redirecionar
+        
+    # Verificar lembretes próximos do vencimento (7 dias)
+    user_id = session.get('user_id')
+    today = date.today()
+    
+    # Lembretes vencendo em até 7 dias
+    if session.get('is_admin'):
+        reminders_expiring = Reminder.query.filter(
+            Reminder.due_date >= today,
+            Reminder.due_date <= today + timedelta(days=7),
+            Reminder.completed == False,
+            Reminder.status == 'ativo'
+        ).all()
+    else:
+        reminders_expiring = Reminder.query.filter(
+            Reminder.due_date >= today,
+            Reminder.due_date <= today + timedelta(days=7),
+            Reminder.completed == False,
+            Reminder.status == 'ativo',
+            Reminder.user_id == user_id
+        ).all()
+    
+    # Tarefas vencidas
+    if session.get('is_admin'):
+        tasks_overdue = Task.query.filter(
+            Task.date < today,
+            Task.completed == False
+        ).all()
+    else:
+        tasks_overdue = Task.query.filter(
+            Task.date < today,
+            Task.completed == False,
+            Task.user_id == user_id
+        ).all()
+    
+    # Chamados atualizados recentemente (últimas 24h)
+    chamados_updated = []
+    # Implementação futura para chamados atualizados
+    
+    return jsonify({
+        'reminders_expiring': [{
+            'id': r.id,
+            'name': r.name,
+            'responsible': r.responsible,
+            'days_left': (r.due_date - today).days
+        } for r in reminders_expiring],
+        'chamados_updated': chamados_updated,
+        'tasks_overdue': [{
+            'id': t.id,
+            'name': t.description,
+            'days_overdue': (today - t.date).days
+        } for t in tasks_overdue]
     })

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}TI Reminder - Sistema Profissional{% endblock %}</title>
+    <title>{% block title %}TI OSN System - Sistema Profissional de Gerenciamento{% endblock %}</title>
 
     <!-- Preload crítico -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" as="style">
@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <!-- Meta tags -->
-    <meta name="description" content="Sistema profissional de gerenciamento de TI - Lembretes, Tarefas, Chamados e Equipamentos">
+    <meta name="description" content="TI OSN System - Sistema Profissional de Gerenciamento - Lembretes, Tarefas, Chamados e Equipamentos">
     <meta name="theme-color" content="#2563eb">
 
     <!-- PWA Meta -->
@@ -36,7 +36,7 @@
   <div class="container-fluid">
     <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') }}">
       <i class="fas fa-microchip me-2 text-primary"></i>
-      <span class="fw-bold">TI Pro System</span>
+      <span class="fw-bold">TI OSN System</span>
     </a>
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -137,7 +137,7 @@
       <div class="col-md-6">
         <p class="mb-0">
           <i class="fas fa-code me-1"></i>
-          <strong>TI Pro System</strong> - Sistema Profissional de Gerenciamento
+          <strong>TI OSN System</strong> - Sistema Profissional de Gerenciamento
         </p>
       </div>
       <div class="col-md-6 text-md-end">
@@ -236,8 +236,18 @@
         // Performance monitoring
         window.addEventListener('load', function() {
             if ('performance' in window) {
-                const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
-                console.log(`Tempo de carregamento: ${loadTime}ms`);
+                // Usar a API moderna de Performance
+                const perfEntries = performance.getEntriesByType('navigation');
+                if (perfEntries.length > 0) {
+                    const loadTime = Math.round(perfEntries[0].duration);
+                    console.log(`Tempo de carregamento: ${loadTime}ms`);
+                } else {
+                    // Fallback para navegadores que não suportam getEntriesByType
+                    const navStart = performance.timing.navigationStart;
+                    const loadEnd = performance.timing.loadEventEnd;
+                    const loadTime = loadEnd - navStart;
+                    console.log(`Tempo de carregamento (fallback): ${loadTime}ms`);
+                }
             }
         });
     </script>

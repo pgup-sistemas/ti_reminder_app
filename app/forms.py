@@ -11,6 +11,13 @@ class ReminderForm(FlaskForm):
     frequency = SelectField('Frequência', choices=[('','Nenhuma'),('diario','Diário'),('quinzenal','Quinzenal'),('mensal','Mensal'),('anual','Anual')])
     sector_id = SelectField('Setor', coerce=int, choices=[], validators=[])
     new_sector = StringField('Novo setor')
+    status = SelectField('Status', choices=[
+        ('ativo','Ativo'),
+        ('pausado','Pausado'),
+        ('cancelado','Cancelado')
+    ], default='ativo')
+    pause_until = DateField('Pausar até', validators=[Optional()])
+    end_date = DateField('Data de fim', validators=[Optional()])
     submit = SubmitField('Salvar')
 
 class TaskForm(FlaskForm):

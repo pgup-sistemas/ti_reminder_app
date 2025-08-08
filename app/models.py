@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
+import secrets
 from . import db
 
 class User(db.Model):
@@ -15,12 +16,37 @@ class User(db.Model):
     sector = db.relationship('Sector', backref='usuarios')
     reminders = db.relationship('Reminder', backref='usuario', lazy=True)
     tasks = db.relationship('Task', backref='usuario', lazy=True)
+    reset_token = db.Column(db.String(100), nullable=True)
+    reset_token_expiry = db.Column(db.DateTime, nullable=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+        
+    def generate_reset_token(self):
+        # Gera um token aleatório para redefinição de senha
+        token = secrets.token_hex(32)
+        self.reset_token = token
+        # Define a expiração para 1 hora a partir de agora
+        self.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
+        db.session.commit()
+        return token
+        
+    def verify_reset_token(self, token):
+        # Verifica se o token é válido e não expirou
+        if self.reset_token != token:
+            return False
+        if self.reset_token_expiry < datetime.utcnow():
+            return False
+        return True
+        
+    def clear_reset_token(self):
+        # Limpa o token após uso
+        self.reset_token = None
+        self.reset_token_expiry = None
+        db.session.commit()
 
 class Sector(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -39,6 +65,10 @@ class Reminder(db.Model):
     completed = db.Column(db.Boolean, default=False)
     sector_id = db.Column(db.Integer, db.ForeignKey('sector.id'), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    status = db.Column(db.String(20), default='ativo')  # ativo, pausado, cancelado
+    pause_until = db.Column(db.Date, nullable=True)  # Data até quando o lembrete está pausado
+    end_date = db.Column(db.Date, nullable=True)  # Data de término da recorrência
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)

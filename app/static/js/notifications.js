@@ -52,7 +52,23 @@ class NotificationManager {
     async checkForUpdates() {
         try {
             const response = await fetch('/api/notifications');
-            const data = await response.json();
+            console.log('API Response:', response);
+            let data;
+            try {
+                const responseText = await response.text();
+                console.log('Response Text:', responseText);
+                // Parse o texto da resposta para JSON em vez de chamar response.json()
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('Erro ao analisar JSON:', parseError);
+                return;
+            }
+            
+            // Verificar se há erro de autenticação
+            if (data.error === 'Não autenticado') {
+                // Usuário não está autenticado, não mostrar notificações
+                return;
+            }
 
             // Lembretes vencendo
             if (data.reminders_expiring && data.reminders_expiring.length > 0) {

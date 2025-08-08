@@ -47,6 +47,36 @@ Sistema de Chamados TI"""
     body_ti = f"Um novo chamado foi aberto:\n\nID: {chamado.id}\nTítulo: {chamado.titulo}\nSolicitante: {chamado.solicitante.username} ({chamado.solicitante.email})\nSetor: {chamado.setor.name}\nPrioridade: {chamado.prioridade}\nStatus: {chamado.status}\nDescrição:\n{chamado.descricao}\n\nAcesse o sistema para mais detalhes e atribuição."
     # Potentially add HTML version
     send_email(subject_ti, ti_recipients, body_ti)
+    
+def send_password_reset_email(user, token):
+    """Envia um email com instruções para redefinir a senha"""
+    reset_url = f"{current_app.config.get('BASE_URL', 'http://localhost:5000')}/auth/reset_password/{token}"
+    
+    subject = "Redefinição de Senha - TI OSN System"
+    body = f"""Olá {user.username},
+
+Você solicitou a redefinição de sua senha no TI OSN System.
+
+Para redefinir sua senha, clique no link abaixo ou copie e cole no seu navegador:
+
+{reset_url}
+
+Este link é válido por 1 hora.
+
+Se você não solicitou esta redefinição, ignore este email e nenhuma alteração será feita.
+
+Atenciosamente,
+Equipe TI OSN System"""
+    
+    html_body = f"""<p>Olá {user.username},</p>
+<p>Você solicitou a redefinição de sua senha no TI OSN System.</p>
+<p>Para redefinir sua senha, <a href="{reset_url}">clique aqui</a> ou copie e cole o link abaixo no seu navegador:</p>
+<p>{reset_url}</p>
+<p>Este link é válido por 1 hora.</p>
+<p>Se você não solicitou esta redefinição, ignore este email e nenhuma alteração será feita.</p>
+<p>Atenciosamente,<br>Equipe TI OSN System</p>"""
+    
+    send_email(subject, [user.email], body, html_body)
 
 def send_chamado_atualizado_email(chamado, atualizacao):
     """Envia e-mail de notificação quando um chamado é atualizado"""

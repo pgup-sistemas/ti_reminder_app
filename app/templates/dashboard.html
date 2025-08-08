@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Dashboard de Relatórios | TI reminder{% endblock %}
+{% block title %}Dashboard de Relatórios | TI OSN System{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4 mb-5">
@@ -265,15 +265,21 @@
 
     <!-- Card de Equipamentos -->
           <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card bg-purple text-white h-100">
-              <div class="card-body">
+            <div class="card shadow-sm h-100 border-0">
+              <div class="card-body bg-gradient" style="background-color: #6f42c1; border-radius: 0.375rem;">
                 <div class="d-flex justify-content-between">
-                  <div>
-                    <h4 class="card-title">{{ equipamentos_total }}</h4>
-                    <p class="card-text">Equipamentos</p>
+                  <div class="text-white">
+                    <h4 class="card-title fw-bold mb-1">{{ equipamentos_total }}</h4>
+                    <p class="card-text mb-0 small">Total de Equipamentos</p>
+                    <div class="mt-2">
+                      <span class="badge bg-light text-dark me-1">{{ equipamentos_solicitados }} Solicitados</span>
+                      <span class="badge bg-light text-dark me-1">{{ equipamentos_aprovados }} Aprovados</span>
+                      <span class="badge bg-light text-dark me-1">{{ equipamentos_entregues }} Entregues</span>
+                      <span class="badge bg-light text-dark">{{ equipamentos_negados }} Negados</span>
+                    </div>
                   </div>
-                  <div class="align-self-center">
-                    <i class="fas fa-laptop fa-2x"></i>
+                  <div class="align-self-center bg-white p-3 rounded-circle shadow-sm">
+                    <i class="fas fa-laptop fa-2x text-purple"></i>
                   </div>
                 </div>
               </div>
@@ -282,15 +288,20 @@
 
           <!-- Card Tutoriais -->
           <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card bg-success text-white h-100">
-              <div class="card-body">
+            <div class="card shadow-sm h-100 border-0">
+              <div class="card-body bg-gradient" style="background-color: #198754; border-radius: 0.375rem;">
                 <div class="d-flex justify-content-between">
-                  <div>
-                    <h4 class="card-title">{{ total_tutoriais }}</h4>
-                    <p class="card-text">Tutoriais</p>
+                  <div class="text-white">
+                    <h4 class="card-title fw-bold mb-1">{{ total_tutoriais }}</h4>
+                    <p class="card-text mb-0 small">Total de Tutoriais</p>
+                    <div class="mt-2">
+                      <span class="badge bg-light text-dark me-1">{{ feedbacks_util }} Úteis</span>
+                      <span class="badge bg-light text-dark me-1">{{ feedbacks_nao_util }} Não úteis</span>
+                      <span class="badge bg-light text-dark">{{ feedbacks_util + feedbacks_nao_util }} Feedbacks</span>
+                    </div>
                   </div>
-                  <div class="align-self-center">
-                    <i class="fas fa-book fa-2x"></i>
+                  <div class="align-self-center bg-white p-3 rounded-circle shadow-sm">
+                    <i class="fas fa-book fa-2x text-success"></i>
                   </div>
                 </div>
               </div>
@@ -333,28 +344,84 @@
   <div class="row mb-4">
     <!-- Gráfico de Pizza - Status dos Equipamentos -->
         <div class="col-md-6 mb-4">
-          <div class="card">
-            <div class="card-header">
+          <div class="card shadow-sm h-100">
+            <div class="card-header bg-light">
               <h5 class="card-title mb-0">
                 <i class="fas fa-laptop me-2"></i>Status dos Equipamentos
               </h5>
             </div>
             <div class="card-body">
-              <canvas id="equipmentStatusChart"></canvas>
+              <div class="row">
+                <div class="col-md-6">
+                  <div style="width: 100%; height: 180px;">
+                    <canvas id="equipmentStatusChart"></canvas>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="list-group">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                      Total
+                      <span class="badge bg-primary rounded-pill">{{ equipamentos_total }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                      Solicitados
+                      <span class="badge bg-warning text-dark rounded-pill">{{ equipamentos_solicitados }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                      Aprovados
+                      <span class="badge bg-info rounded-pill">{{ equipamentos_aprovados }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                      Entregues
+                      <span class="badge bg-success rounded-pill">{{ equipamentos_entregues }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                      Devolvidos
+                      <span class="badge bg-secondary rounded-pill">{{ equipamentos_devolvidos }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                      Negados
+                      <span class="badge bg-danger rounded-pill">{{ equipamentos_negados }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Gráfico de Pizza - Feedbacks dos Tutoriais -->
         <div class="col-md-6 mb-4">
-          <div class="card">
-            <div class="card-header">
+          <div class="card shadow-sm h-100">
+            <div class="card-header bg-light">
               <h5 class="card-title mb-0">
                 <i class="fas fa-thumbs-up me-2"></i>Feedbacks dos Tutoriais
               </h5>
             </div>
             <div class="card-body">
-              <canvas id="feedbackChart"></canvas>
+              <div class="row">
+                <div class="col-md-6">
+                  <div style="width: 100%; height: 180px;">
+                    <canvas id="feedbackChart"></canvas>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="list-group">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                      Total
+                      <span class="badge bg-primary rounded-pill">{{ feedbacks_util + feedbacks_nao_util }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                      Útil
+                      <span class="badge bg-success rounded-pill">{{ feedbacks_util }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                      Não útil
+                      <span class="badge bg-danger rounded-pill">{{ feedbacks_nao_util }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -363,14 +430,31 @@
 
 <!-- Scripts do Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  .text-purple {
+    color: #6f42c1 !important;
+  }
+</style>
+
 <script>
+  // Função para destruir gráficos existentes
+  function destroyChartIfExists(chartId) {
+    const canvas = document.getElementById(chartId);
+    if (canvas) {
+      const existingChart = Chart.getChart(canvas);
+      if (existingChart) {
+        existingChart.destroy();
+      }
+    }
+  }
+
   // Configuração para os gráficos de pizza
   const tarefasData = {
     labels: ['Concluídas', 'Pendentes', 'Vencidas'],
     datasets: [{
       data: [{{ tasks_done }}, {{ tasks_pending }}, {{ tasks_expired }}],
       backgroundColor: ['#198754', '#dc3545', '#ffc107'],
-      borderWidth: 1
+      borderWidth: 1,
     }]
   };
 
@@ -379,10 +463,12 @@
     datasets: [{
       data: [{{ reminders_done }}, {{ reminders_pending }}],
       backgroundColor: ['#198754', '#dc3545'],
-      borderWidth: 1
+      borderWidth: 1,
     }]
   };
 
+  // Destruir gráfico existente antes de criar um novo
+  destroyChartIfExists('grafico_tarefas');
   new Chart(document.getElementById('grafico_tarefas'), {
     type: 'pie',
     data: tarefasData,
@@ -412,6 +498,8 @@
     }
   });
 
+  // Destruir gráfico existente antes de criar um novo
+  destroyChartIfExists('grafico_lembretes');
   new Chart(document.getElementById('grafico_lembretes'), {
     type: 'pie',
     data: lembretesData,
@@ -447,10 +535,12 @@
     datasets: [{
       data: [{{ chamados_aberto }}, {{ chamados_em_andamento }}, {{ chamados_resolvido }}, {{ chamados_fechado }}], // Adicionado chamados_resolvido
       backgroundColor: ['#0dcaf0', '#ffc107', '#0d6efd', '#198754'], // Cores: Info, Warning, Primary (para Resolvido), Success
-      borderWidth: 1
+      borderWidth: 1,
     }]
   };
 
+  // Destruir gráfico existente antes de criar um novo
+  destroyChartIfExists('grafico_chamados');
   new Chart(document.getElementById('grafico_chamados'), {
     type: 'pie',
     data: chamadosData,
@@ -487,6 +577,8 @@
   const lembretesPorMes = {{ lembretes_por_mes|tojson }};
   const lembretesRealizadosPorMes = {{ lembretes_realizados_por_mes|tojson }};
 
+  // Destruir gráfico existente antes de criar um novo
+  destroyChartIfExists('grafico_linha');
   new Chart(document.getElementById('grafico_linha'), {
     type: 'line',
     data: {
@@ -567,6 +659,8 @@
   const lembretesPorSetor = {{ lembretes_por_setor|tojson }};
   const chamadosPorSetor = {{ chamados_por_setor|tojson }}; // Adicionado
 
+  // Destruir gráfico existente antes de criar um novo
+  destroyChartIfExists('grafico_barra');
   new Chart(document.getElementById('grafico_barra'), {
     type: 'bar',
     data: {
@@ -626,29 +720,12 @@
     }
   });
 
-  // Gráfico de pizza de feedbacks
-  const ctxFeedback = document.getElementById('feedbackChart').getContext('2d');
-  if (ctxFeedback) {
-    new Chart(ctxFeedback, {
-      type: 'pie',
-      data: {
-        labels: ['Útil', 'Não útil'],
-        datasets: [{
-          data: [{{ feedbacks_util }}, {{ feedbacks_nao_util }}],
-          backgroundColor: ['#198754', '#dc3545'],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom' } }
-      }
-    });
-  }
+  // Gráfico de feedbacks - definido mais abaixo como doughnut
   // Gráfico de barras dos mais visualizados
   const ctxTop = document.getElementById('grafico_top_tutoriais');
   if (ctxTop) {
+    // Destruir gráfico existente antes de criar um novo
+    destroyChartIfExists('grafico_top_tutoriais');
     new Chart(ctxTop, {
       type: 'bar',
       data: {
@@ -671,6 +748,8 @@
   // Gráfico de barras dos mais feedbacks
   const ctxTutoriais = document.getElementById('grafico_tutoriais');
   if (ctxTutoriais) {
+    // Destruir gráfico existente antes de criar um novo
+    destroyChartIfExists('grafico_tutoriais');
     new Chart(ctxTutoriais, {
       type: 'bar',
       data: {
@@ -693,26 +772,51 @@
 
   // Gráfico de Pizza - Status dos Equipamentos
     const equipmentStatusCtx = document.getElementById('equipmentStatusChart').getContext('2d');
+    // Destruir gráfico existente antes de criar um novo
+    destroyChartIfExists('equipmentStatusChart');
     new Chart(equipmentStatusCtx, {
-      type: 'pie',
+      type: 'doughnut',
       data: {
         labels: ['Solicitado', 'Aprovado', 'Entregue', 'Devolvido', 'Negado'],
         datasets: [{
           data: [
-            {{ equipamentos_solicitado }}, 
-            {{ equipamentos_aprovado }}, 
-            {{ equipamentos_entregue }}, 
-            {{ equipamentos_devolvido }}, 
-            {{ equipamentos_negado }}
+            {{ equipamentos_solicitados }}, 
+            {{ equipamentos_aprovados }}, 
+            {{ equipamentos_entregues }}, 
+            {{ equipamentos_devolvidos }}, 
+            {{ equipamentos_negados }}
           ],
-          backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#6c757d', '#dc3545']
+          backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#6c757d', '#dc3545'],
+          borderWidth: 2,
+          borderColor: '#ffffff',
+          hoverOffset: 4
         }]
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
         plugins: {
           legend: {
-            position: 'bottom'
+            position: 'bottom',
+            labels: {
+              boxWidth: 12,
+              padding: 20,
+              font: {
+                size: 11
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const label = context.label || '';
+                const value = context.raw || 0;
+                const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                return `${label}: ${value} (${percentage}%)`;
+              }
+            }
           }
         }
       }
@@ -720,20 +824,45 @@
 
     // Gráfico de Pizza - Feedbacks dos Tutoriais
     const feedbackCtx = document.getElementById('feedbackChart').getContext('2d');
+    // Destruir gráfico existente antes de criar um novo
+    destroyChartIfExists('feedbackChart');
     new Chart(feedbackCtx, {
-      type: 'pie',
+      type: 'doughnut',
       data: {
         labels: ['Útil', 'Não útil'],
         datasets: [{
           data: [{{ feedbacks_util }}, {{ feedbacks_nao_util }}],
-          backgroundColor: ['#28a745', '#dc3545']
+          backgroundColor: ['#28a745', '#dc3545'],
+          borderWidth: 2,
+          borderColor: '#ffffff',
+          hoverOffset: 4
         }]
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
         plugins: {
           legend: {
-            position: 'bottom'
+            position: 'bottom',
+            labels: {
+              boxWidth: 12,
+              padding: 20,
+              font: {
+                size: 11
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const label = context.label || '';
+                const value = context.raw || 0;
+                const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                return `${label}: ${value} (${percentage}%)`;
+              }
+            }
           }
         }
       }

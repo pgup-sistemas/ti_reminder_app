@@ -1,11 +1,18 @@
 {% extends 'base.html' %}
-{% block title %}Gestão de Lembretes | TI reminder {% endblock %}
+{% block title %}Gestão de Lembretes | TI OSN System {% endblock %}
 
 <script>
 function renderStatus(reminder) {
   if (reminder.completed) {
     return '<span class="badge bg-success d-flex align-items-center gap-1">' +
            '<i class="fas fa-check-circle"></i> Concluído</span>';
+  } else if (reminder.status_control === 'pausado') {
+    let pauseInfo = '';
+    if (reminder.pause_until) {
+      pauseInfo = ` até ${new Date(reminder.pause_until).toLocaleDateString('pt-BR')}`;
+    }
+    return `<span class="badge bg-secondary d-flex align-items-center gap-1">
+           <i class="fas fa-pause-circle"></i> Pausado${pauseInfo}</span>`;
   } else if (reminder.status === 'ok') {
     return '<span class="badge bg-primary d-flex align-items-center gap-1">' +
            '<i class="fas fa-check"></i> Ok</span>';
@@ -117,6 +124,18 @@ function renderActions(reminder) {
           <small class="text-muted">Ou cadastre um novo setor abaixo</small>
           {{ form.new_sector(class_='form-control mt-1', placeholder='Novo setor') }}
         </div>
+        <div class="col-md-2">
+          {{ form.status.label }}{{ form.status(class_='form-select') }}
+          {% for error in form.status.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-2">
+          {{ form.pause_until.label }}{{ form.pause_until(class_='form-control') }}
+          {% for error in form.pause_until.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-2">
+          {{ form.end_date.label }}{{ form.end_date(class_='form-control') }}
+          {% for error in form.end_date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
         <div class="col-md-1 d-flex align-items-end">
           {{ form.submit(class_='btn btn-success w-100') }}
         </div>
@@ -176,6 +195,14 @@ function renderActions(reminder) {
 function renderStatus(reminder) {
     if(reminder.completed) {
         return '<span class="badge bg-primary"><i class="fas fa-check-circle"></i> Concluído</span>';
+    } else if(reminder.status_control === 'pausado') {
+        let pauseInfo = '';
+        if(reminder.pause_until) {
+            pauseInfo = ` até ${new Date(reminder.pause_until).toLocaleDateString('pt-BR')}`;
+        }
+        return `<span class="badge bg-secondary"><i class="fas fa-pause-circle"></i> Pausado${pauseInfo}</span>`;
+    } else if(reminder.status_control === 'cancelado') {
+        return '<span class="badge bg-danger"><i class="fas fa-ban"></i> Cancelado</span>';
     } else if(reminder.status === 'ok') {
         return '<span class="badge bg-success"><i class="fas fa-check"></i> Ok</span>';
     } else if(reminder.status === 'alert') {
@@ -187,11 +214,57 @@ function renderStatus(reminder) {
 }
 
 function renderActions(reminder) {
-    let actions = `<a href="/reminders/edit/${reminder.id}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i>Editar</a> `;
+    let actions = `<div class="d-flex gap-1">
+      <a href="/reminders/edit/${reminder.id}" class="btn btn-sm btn-warning" title="Editar">
+        <i class="fas fa-edit"></i>
+      </a>`;
+    
     if (!reminder.completed) {
-        actions += `<form method="POST" action="/reminders/complete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-success"><i class="fas fa-check"></i>Finalizar</button></form> `;
+        actions += `
+      <form method="POST" action="/reminders/complete/${reminder.id}" class="d-inline">
+        <button type="submit" class="btn btn-sm btn-success" title="Finalizar">
+          <i class="fas fa-check"></i>
+        </button>
+      </form>`;
+        
+        // Botão de pausar/reativar/cancelar
+        if (reminder.status_control === 'ativo') {
+            actions += `
+      <form method="POST" action="/reminders/toggle_status/${reminder.id}" class="d-inline">
+        <button type="submit" class="btn btn-sm btn-secondary" title="Pausar">
+          <i class="fas fa-pause"></i>
+        </button>
+      </form>`;
+        } else if (reminder.status_control === 'pausado' || reminder.status_control === 'cancelado') {
+            actions += `
+      <form method="POST" action="/reminders/toggle_status/${reminder.id}" class="d-inline">
+        <button type="submit" class="btn btn-sm btn-info" title="Reativar">
+          <i class="fas fa-play"></i>
+        </button>
+      </form>`;
+        }
+        
+        // Botão de cancelar (apenas para lembretes ativos ou pausados)
+        if (reminder.status_control !== 'cancelado') {
+            actions += `
+      <form method="POST" action="/reminders/toggle_status/${reminder.id}" class="d-inline">
+        <input type="hidden" name="target_status" value="cancelado">
+        <button type="submit" class="btn btn-sm btn-danger" title="Cancelar" 
+                onclick="return confirm('Tem certeza que deseja cancelar este lembrete?');">
+          <i class="fas fa-ban"></i>
+        </button>
+      </form>`;
+        }
     }
-    actions += `<form method="POST" action="/reminders/delete/${reminder.id}" style="display:inline;"><button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir este lembrete?');"><i class="fas fa-trash-alt"></i>Excluir</button></form>`;
+    
+    actions += `
+      <form method="POST" action="/reminders/delete/${reminder.id}" class="d-inline" 
+            onsubmit="return confirm('Tem certeza que deseja excluir este lembrete?');">
+        <button type="submit" class="btn btn-sm btn-danger" title="Excluir">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </form>
+    </div>`;
     return actions;
 }
 
