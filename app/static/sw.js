@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'ti-reminder-v1.0.0';
+const CACHE_NAME = 'ti-reminder-v1.0.1';
 const OFFLINE_URL = '/static/offline.html';
 
 // Recursos para cache
@@ -17,7 +17,7 @@ const STATIC_ASSETS = [
 
 // Instalar Service Worker
 self.addEventListener('install', event => {
-    console.log('[SW] Installing...');
+    console.log(`[SW] Installing version ${CACHE_NAME}...`);
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
@@ -33,7 +33,7 @@ self.addEventListener('install', event => {
 
 // Ativar Service Worker
 self.addEventListener('activate', event => {
-    console.log('[SW] Activating...');
+    console.log(`[SW] Activating version ${CACHE_NAME}...`);
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
@@ -130,14 +130,36 @@ self.addEventListener('sync', event => {
 
 // Push notifications
 self.addEventListener('push', event => {
+    let payload;
+    try {
+        // Tentar analisar os dados como JSON
+        if (event.data) {
+            const text = event.data.text();
+            try {
+                payload = JSON.parse(text);
+            } catch (e) {
+                // Se não for JSON, usar o texto como está
+                payload = { message: text };
+            }
+        } else {
+            payload = { message: 'Nova notificação do TI OSN System' };
+        }
+    } catch (error) {
+        console.error('Erro ao processar notificação push:', error);
+        payload = { message: 'Nova notificação do TI OSN System' };
+    }
+
+    // Configurar opções da notificação
     const options = {
-        body: event.data ? event.data.text() : 'Nova notificação do TI OSN System',
+        body: payload.message || payload.body || 'Nova notificação do TI OSN System',
         icon: '/static/icons/icon-192x192.png',
         badge: '/static/icons/badge-72x72.png',
         vibrate: [100, 50, 100],
         data: {
             dateOfArrival: Date.now(),
-            primaryKey: '1'
+            primaryKey: payload.id || '1',
+            url: payload.url || '/',
+            ...payload
         },
         actions: [
             {
@@ -150,34 +172,75 @@ self.addEventListener('push', event => {
                 title: 'Fechar',
                 icon: '/static/icons/xmark.png'
             }
-        ]
+        ],
+        // Garantir que a notificação seja exibida mesmo que o dispositivo esteja em modo de economia de energia
+        requireInteraction: true
     };
 
+    const title = payload.title || 'TI OSN System';
+
     event.waitUntil(
-        self.registration.showNotification('TI OSN System', options)
+        self.registration.showNotification(title, options)
     );
 });
 
 // Clique em notificações
 self.addEventListener('notificationclick', event => {
+    // Fechar a notificação
     event.notification.close();
-
-    if (event.action === 'explore') {
-        // Abrir aplicação
-        event.waitUntil(
-            clients.matchAll()
-                .then(clientList => {
-                    for (const client of clientList) {
-                        if (client.url === '/' && 'focus' in client) {
-                            return client.focus();
-                        }
-                    }
-                    if (clients.openWindow) {
-                        return clients.openWindow('/');
-                    }
-                })
-        );
+    
+    // Ignorar se a ação for 'close'
+    if (event.action === 'close') return;
+    
+    // Determinar a URL de destino com base nos dados da notificação
+    let targetUrl = '/';
+    const notificationData = event.notification.data || {};
+    
+    // Se a notificação tiver uma URL específica, usá-la
+    if (notificationData.url && notificationData.url !== '/') {
+        targetUrl = notificationData.url;
+    } else {
+        // Caso contrário, determinar a URL com base no tipo de notificação
+        const tag = event.notification.tag || '';
+        
+        if (tag.startsWith('reminder-')) {
+            // Notificação de lembrete
+            const reminderId = tag.replace('reminder-', '');
+            targetUrl = `/reminders?highlight=${reminderId}`;
+        } else if (tag.startsWith('chamado-')) {
+            // Notificação de chamado
+            const chamadoId = tag.replace('chamado-', '');
+            targetUrl = `/chamados/detalhe/${chamadoId}`;
+        } else if (tag === 'tasks-overdue') {
+            // Notificação de tarefas vencidas
+            targetUrl = '/tasks?filter=overdue';
+        }
     }
+    
+    // Abrir a aplicação na URL determinada
+    event.waitUntil(
+        clients.matchAll({type: 'window', includeUncontrolled: true})
+            .then(clientList => {
+                // Verificar se já existe uma janela aberta com a URL alvo
+                for (const client of clientList) {
+                    const clientUrl = new URL(client.url);
+                    const targetUrlObj = new URL(targetUrl, self.location.origin);
+                    
+                    // Se a URL base for a mesma, focar nessa janela
+                    if (clientUrl.pathname === targetUrlObj.pathname && 'focus' in client) {
+                        return client.focus();
+                    }
+                }
+                
+                // Se não encontrar uma janela compatível, abrir uma nova
+                if (clients.openWindow) {
+                    return clients.openWindow(targetUrl);
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao processar clique na notificação:', error);
+            })
+    );
 });
 
 // Funções auxiliares

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session, jsonify
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, time
 from dateutil.relativedelta import relativedelta
 from .models import Reminder, Task, Sector, User, db, Tutorial, TutorialImage, VisualizacaoTutorial, FeedbackTutorial, EquipmentRequest, Chamado, ComentarioChamado, ComentarioTutorial # Importados modelos necessários
 from .forms import ReminderForm, TaskForm, TutorialForm, ComentarioTutorialForm, FeedbackTutorialForm, ChamadoForm, ChamadoAdminForm, UserEditForm # Importados formulários necessários
@@ -27,7 +27,7 @@ bp = Blueprint('main', __name__)
 @login_required
 def index():
     # Importação local para evitar dependência circular se outros módulos importarem main.py diretamente
-    from .models import Chamado
+    from .models import Chamado, EquipmentRequest
 
     search = request.args.get('search', '').strip().lower()
     status = request.args.get('status', '').strip().lower()
@@ -73,7 +73,11 @@ def index():
             db.session.commit()
 
     # Consulta de lembretes e tarefas
-    if session.get('is_admin'):
+    user_id = session.get('user_id')
+    is_admin = session.get('is_admin')
+    is_ti = session.get('is_ti', False)
+    
+    if is_admin:
         reminders_count = Reminder.query.count()
         reminders_today = Reminder.query.filter(Reminder.due_date <= date.today()).all()
         tasks_today = Task.query.filter(Task.date <= date.today()).all()
@@ -83,8 +87,9 @@ def index():
         ).order_by(
             Chamado.data_abertura.desc()
         ).limit(10).all()  # Limita a 10 chamados mais recentes
+        # Buscar equipamentos
+        equipamentos_count = EquipmentRequest.query.count()
     else:
-        user_id = session.get('user_id')
         reminders_count = Reminder.query.filter_by(user_id=user_id).count()
         reminders_today = Reminder.query.filter(
             Reminder.due_date <= date.today(),
@@ -106,6 +111,12 @@ def index():
         ).order_by(
             Chamado.data_abertura.desc()
         ).limit(10).all()  # Limita a 10 chamados mais recentes
+        
+        # Buscar equipamentos do usuário
+        if is_ti:
+            equipamentos_count = EquipmentRequest.query.count()
+        else:
+            equipamentos_count = EquipmentRequest.query.filter_by(requester_id=user_id).count()
 
     # --- FILTRO E BUSCA LEMBRETES ---
     reminders_today_pend = [r for r in reminders_today if not r.completed]
@@ -128,18 +139,69 @@ def index():
         tasks_today_done = []
     elif status == 'realizado':
         tasks_today_pend = []
+        
+    # --- ATIVIDADES RECENTES ---
+    # Combinar atividades recentes de diferentes fontes
+    atividades_recentes = []
+    
+    # Adicionar lembretes recentes
+    for r in reminders_today[:5]:  # Limitar a 5 lembretes mais recentes
+        atividades_recentes.append({
+            'tipo': 'lembrete',
+            'data': r.due_date,
+            'titulo': r.name,
+            'status': 'Realizado' if r.completed else 'Pendente',
+            'icone': 'bell',
+            'cor': 'success' if r.completed else 'warning'
+        })
+    
+    # Adicionar tarefas recentes
+    for t in tasks_today[:5]:  # Limitar a 5 tarefas mais recentes
+        atividades_recentes.append({
+            'tipo': 'tarefa',
+            'data': t.date,
+            'titulo': t.description,
+            'status': 'Concluída' if t.completed else 'Pendente',
+            'icone': 'tasks',
+            'cor': 'success' if t.completed else 'primary'
+        })
+    
+    # Adicionar chamados recentes
+    for c in chamados_abertos[:5]:  # Limitar a 5 chamados mais recentes
+        atividades_recentes.append({
+            'tipo': 'chamado',
+            'data': c.data_abertura,
+            'titulo': c.titulo,
+            'status': c.status,
+            'icone': 'ticket-alt',
+            'cor': 'info' if c.status == 'Em Andamento' else 'warning'
+        })
+    
+    # Ordenar atividades por data (mais recentes primeiro)
+    # Converter todas as datas para datetime para evitar erro de comparação entre date e datetime
+    for atividade in atividades_recentes:
+        if isinstance(atividade['data'], date) and not isinstance(atividade['data'], datetime):
+            # Converter date para datetime
+            atividade['data'] = datetime.combine(atividade['data'], time.min)
+    
+    atividades_recentes.sort(key=lambda x: x['data'], reverse=True)
+    
+    # Limitar a 10 atividades no total
+    atividades_recentes = atividades_recentes[:10]
 
     return render_template(
         'index.html',
         lembretes_count=reminders_count,
         tarefas_count=len(tasks_today_pend),
         chamados_count=len(chamados_abertos),
-        equipamentos_count=0,  # Adicionar contagem real se necessário
+        equipamentos_count=equipamentos_count,
         reminders_today_pend=reminders_today_pend,
         reminders_today_done=reminders_today_done,
         tasks_today_pend=tasks_today_pend,
         tasks_today_done=tasks_today_done,
         chamados_abertos=chamados_abertos,
+        atividades_recentes=atividades_recentes,
+        ultimo_acesso=datetime.now().strftime('%d/%m/%Y %H:%M'),
         is_admin=session.get('is_admin', False)
     )
 
@@ -828,7 +890,7 @@ def dashboard():
 @bp.route('/export/excel')
 def export_excel():
     from flask import request, session # session já estava importado globalmente, mas garantindo
-    from .models import Task, Reminder, Chamado, Sector, User # Adicionado Chamado, Sector, User
+    from .models import Task, Reminder, Chamado, Sector, User, Tutorial # Adicionado Tutorial
     from datetime import datetime, date # Adicionado datetime, date
     import pandas as pd # pd já estava importado globalmente
     from io import BytesIO # BytesIO já estava importado globalmente
@@ -933,7 +995,7 @@ def export_excel():
                 'Data': t.date.strftime('%d/%m/%Y') if t.date else '',
                 'Responsável': t.responsible,
                 'Setor': t.sector.name if t.sector else '',
-                'Usuário': t.user.username if t.user else '',
+                'Usuário': t.usuario.username if t.usuario else '',
                 'Concluída': 'Sim' if t.completed else 'Não'
             } for t in tasks]
             df_tasks = pd.DataFrame(tasks_data)
@@ -1013,6 +1075,22 @@ def export_excel():
                 worksheet_equipamentos.set_column(i, i, column_len + 2)
 
         if export_type in ['all', 'tutoriais']:
+            # Consulta para obter os tutoriais
+            tutorial_query = Tutorial.query
+            
+            # Aplicar filtros de data se fornecidos
+            if start_date:
+                tutorial_query = tutorial_query.filter(Tutorial.data_criacao >= start_date)
+            if end_date:
+                tutorial_query = tutorial_query.filter(Tutorial.data_criacao <= end_date)
+                
+            # Aplicar filtro de usuário se fornecido
+            if user_id_filter and (is_admin or is_ti):
+                tutorial_query = tutorial_query.filter(Tutorial.autor_id == user_id_filter)
+                
+            # Obter todos os tutoriais filtrados
+            tutoriais = tutorial_query.all()
+            
             tutoriais_data = [{
                 'Título': t.titulo,
                 'Categoria': t.categoria or '',
@@ -1183,7 +1261,7 @@ def export_pdf():
                     t.date.strftime('%d/%m/%Y') if t.date else '',
                     Paragraph(t.responsible if t.responsible else '', normal_style),
                     Paragraph(t.sector.name if t.sector else '', normal_style),
-                    Paragraph(t.user.username if t.user else '', normal_style),
+                    Paragraph(t.usuario.username if t.usuario else '', normal_style),
                     "Sim" if t.completed else "Não"
                 ])
             table = Table(data_tasks, colWidths=col_widths_tasks)
@@ -1487,34 +1565,58 @@ def abrir_chamado():
     # Tenta obter o setor do usuário de diferentes fontes
     setor_usuario = None
 
-    # 1. Verifica se o usuário tem um setor atribuído diretamente (se o modelo permitir)
-    if hasattr(user, 'setor') and user.setor:
-        setor_usuario = user.setor
+    # 1. Verifica se o usuário tem um setor atribuído diretamente
+    if user.sector:
+        setor_usuario = user.sector
     # 2. Verifica em lembretes do usuário
-    elif hasattr(user, 'lembretes') and user.lembretes:
-        for lembrete in user.lembretes:
-            if hasattr(lembrete, 'setor') and lembrete.setor:
-                setor_usuario = lembrete.setor
+    elif user.reminders:
+        for lembrete in user.reminders:
+            if lembrete.sector:
+                setor_usuario = lembrete.sector
                 break
     # 3. Verifica em tarefas do usuário
-    elif hasattr(user, 'tarefas') and user.tarefas:
-        for tarefa in user.tarefas:
-            if hasattr(tarefa, 'setor') and tarefa.setor:
-                setor_usuario = tarefa.setor
+    elif user.tasks:
+        for tarefa in user.tasks:
+            if tarefa.sector:
+                setor_usuario = tarefa.sector
                 break
 
     if request.method == 'POST' and form.validate_on_submit():
-        if not setor_usuario:
-            flash('Não foi possível determinar o setor do usuário. Contate o administrador.', 'danger')
-            return render_template('abrir_chamado.html', form=form, title='Abrir Novo Chamado', setor_usuario=setor_usuario)
-
         try:
+            # Verificar se o usuário está criando um novo setor
+            if form.new_sector.data and form.new_sector.data.strip():
+                # Verificar se o setor já existe
+                setor_existente = Sector.query.filter_by(name=form.new_sector.data.strip()).first()
+                if setor_existente:
+                    setor_id = setor_existente.id
+                else:
+                    # Criar novo setor
+                    novo_setor = Sector(name=form.new_sector.data.strip())
+                    db.session.add(novo_setor)
+                    db.session.commit()
+                    setor_id = novo_setor.id
+                    flash(f"Novo setor '{novo_setor.name}' criado com sucesso!", "success")
+            else:
+                # Usar o setor selecionado pelo usuário no formulário
+                setor_id = form.setor_id.data
+                
+                # Se o usuário não selecionou um setor (valor 0), usar o setor do usuário ou criar um genérico
+                if setor_id == 0:
+                    setor_id = setor_usuario.id if setor_usuario else 1
+                    
+                    # Verificar se o setor existe, se não, criar um setor genérico
+                    if not Sector.query.get(setor_id):
+                        setor_generico = Sector(id=1, name="Geral")
+                        db.session.add(setor_generico)
+                        db.session.commit()
+                        setor_id = 1
+            
             novo_chamado = Chamado(
                 titulo=form.titulo.data,
                 descricao=form.descricao.data,
                 prioridade=form.prioridade.data,
                 solicitante_id=user_id,
-                setor_id=setor_usuario.id,
+                setor_id=setor_id,
                 status='Aberto'  # Status inicial
             )
 
@@ -1538,6 +1640,10 @@ def abrir_chamado():
             flash(f"Erro ao abrir o chamado: {str(e)}", "danger")
             print(f"Error creating Chamado: {e}")
 
+    # Pré-selecionar o setor do usuário no formulário, se existir
+    if setor_usuario and hasattr(form, 'setor_id'):
+        form.setor_id.data = setor_usuario.id
+        
     return render_template('abrir_chamado.html',
                          form=form,
                          title='Abrir Novo Chamado',
@@ -1683,7 +1789,7 @@ def gerenciar_chamado(id):
 
         # Adiciona um comentário se foi preenchido
         if form.comentario.data.strip():
-            comentario = ComentarioChamado, ComentarioTutorial(
+            comentario = ComentarioChamado(
                 chamado_id=chamado.id,
                 usuario_id=session['user_id'],
                 texto=form.comentario.data,
@@ -1698,7 +1804,7 @@ def gerenciar_chamado(id):
             chamado.data_ultima_atualizacao = datetime.utcnow()
 
             # Cria um registro de atualização
-            atualizacao = ComentarioChamado, ComentarioTutorial(
+            atualizacao = ComentarioChamado(
                 chamado_id=chamado.id,
                 usuario_id=session['user_id'],
                 texto=' | '.join(alteracoes),
@@ -2331,8 +2437,21 @@ def api_notifications():
         ).all()
     
     # Chamados atualizados recentemente (últimas 24h)
-    chamados_updated = []
-    # Implementação futura para chamados atualizados
+    yesterday = datetime.now() - timedelta(days=1)
+    
+    if session.get('is_admin') or session.get('is_ti'):
+        # Administradores e equipe de TI veem todos os chamados atualizados
+        chamados_updated = Chamado.query.filter(
+            Chamado.data_ultima_atualizacao >= yesterday,
+            Chamado.status != 'Fechado'
+        ).all()
+    else:
+        # Usuários normais veem apenas seus próprios chamados atualizados
+        chamados_updated = Chamado.query.filter(
+            Chamado.data_ultima_atualizacao >= yesterday,
+            Chamado.solicitante_id == user_id,
+            Chamado.status != 'Fechado'
+        ).all()
     
     return jsonify({
         'reminders_expiring': [{
@@ -2341,7 +2460,13 @@ def api_notifications():
             'responsible': r.responsible,
             'days_left': (r.due_date - today).days
         } for r in reminders_expiring],
-        'chamados_updated': chamados_updated,
+        'chamados_updated': [{
+            'id': c.id,
+            'titulo': c.titulo,
+            'status': c.status,
+            'prioridade': c.prioridade,
+            'solicitante': c.solicitante.username if c.solicitante else 'Desconhecido'
+        } for c in chamados_updated],
         'tasks_overdue': [{
             'id': t.id,
             'name': t.description,

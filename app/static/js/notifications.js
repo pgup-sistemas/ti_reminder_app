@@ -14,22 +14,73 @@ class NotificationManager {
         }
 
         this.permission = await this.requestPermission();
+        console.log(`Status da permissão de notificações: ${this.permission}`);
+        
         if (this.permission === 'granted') {
             this.startPolling();
+            // Mostrar notificação de confirmação
+            setTimeout(() => {
+                this.notify('success', 'Notificações Ativadas', 'Você receberá notificações sobre lembretes, tarefas e chamados.');
+            }, 2000);
+        } else if (this.permission === 'denied') {
+            // Informar o usuário sobre como habilitar notificações
+            console.warn('Permissão para notificações negada pelo usuário');
+            // Adicionar um elemento na interface para informar o usuário
+            this.showPermissionMessage();
         }
+    }
+    
+    showPermissionMessage() {
+        // Verificar se já existe uma mensagem
+        if (document.querySelector('.notification-permission-message')) {
+            return;
+        }
+        
+        // Criar elemento de mensagem
+        const messageContainer = document.createElement('div');
+        messageContainer.className = 'notification-permission-message alert alert-warning alert-dismissible fade show';
+        messageContainer.style.position = 'fixed';
+        messageContainer.style.bottom = '20px';
+        messageContainer.style.right = '20px';
+        messageContainer.style.maxWidth = '350px';
+        messageContainer.style.zIndex = '9999';
+        
+        messageContainer.innerHTML = `
+            <h5><i class="fas fa-bell-slash"></i> Notificações Desativadas</h5>
+            <p>Para receber alertas sobre lembretes, tarefas e chamados, habilite as notificações nas configurações do navegador.</p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        `;
+        
+        document.body.appendChild(messageContainer);
     }
 
     async requestPermission() {
-        if (Notification.permission === 'granted') {
-            return 'granted';
-        }
+        try {
+            if (Notification.permission === 'granted') {
+                console.log('Permissão para notificações já concedida');
+                return 'granted';
+            }
 
-        if (Notification.permission !== 'denied') {
-            const permission = await Notification.requestPermission();
-            return permission;
-        }
+            if (Notification.permission !== 'denied') {
+                console.log('Solicitando permissão para notificações...');
+                const permission = await Notification.requestPermission();
+                console.log(`Resultado da solicitação de permissão: ${permission}`);
+                
+                // Se a permissão foi concedida, verificar o registro do service worker
+                if (permission === 'granted' && 'serviceWorker' in navigator) {
+                    const registration = await navigator.serviceWorker.ready;
+                    console.log('Service Worker pronto para notificações:', registration);
+                }
+                
+                return permission;
+            }
 
-        return Notification.permission;
+            console.log('Permissão para notificações foi negada anteriormente');
+            return Notification.permission;
+        } catch (error) {
+            console.error('Erro ao solicitar permissão para notificações:', error);
+            return 'denied';
+        }
     }
 
     showNotification(title, options = {}) {
@@ -51,13 +102,28 @@ class NotificationManager {
 
     async checkForUpdates() {
         try {
-            const response = await fetch('/api/notifications');
-            console.log('API Response:', response);
+            // Verificar se o usuário está online
+            if (!navigator.onLine) {
+                console.log('Usuário está offline, pulando verificação de notificações');
+                return;
+            }
+            
+            const response = await fetch('/api/notifications', {
+                method: 'GET',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                },
+                credentials: 'same-origin'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Erro na resposta da API: ${response.status} ${response.statusText}`);
+            }
+            
             let data;
             try {
                 const responseText = await response.text();
-                console.log('Response Text:', responseText);
-                // Parse o texto da resposta para JSON em vez de chamar response.json()
                 data = JSON.parse(responseText);
             } catch (parseError) {
                 console.error('Erro ao analisar JSON:', parseError);
@@ -111,9 +177,23 @@ class NotificationManager {
         this.checkForUpdates();
 
         // Verificação periódica
-        setInterval(() => {
+        this.pollingInterval = setInterval(() => {
             this.checkForUpdates();
         }, this.checkInterval);
+        
+        // Adicionar listeners para eventos de conectividade
+        window.addEventListener('online', () => {
+            console.log('Conexão restaurada, verificando notificações...');
+            this.checkForUpdates();
+        });
+        
+        // Registrar para eventos de visibilidade da página
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                console.log('Página visível, verificando notificações...');
+                this.checkForUpdates();
+            }
+        });
     }
 
     // Método para mostrar notificação manual

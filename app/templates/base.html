@@ -160,7 +160,17 @@
     <script>
         // Service Worker para PWA
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/static/sw.js');
+            navigator.serviceWorker.register('/static/sw.js')
+                .then(registration => {
+                    console.log('Service Worker registrado com sucesso:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('Erro ao registrar Service Worker:', error);
+                    // Notificar o usuário sobre o erro se o componente de notificação estiver disponível
+                    if (window.notificationManager) {
+                        window.notificationManager.notify('error', 'Erro no Service Worker', 'Não foi possível habilitar as notificações offline.');
+                    }
+                });
         }
 
         // Theme switcher moderno

@@ -23,12 +23,10 @@
                         {% endif %}
                     {% endwith %}
 
-                    {% if not setor_usuario %}
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            Não foi possível determinar o setor do usuário. Contate o administrador para associar um setor ao seu usuário.
-                        </div>
-                    {% endif %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Por favor, selecione o setor relacionado ao chamado. Se o seu setor não estiver na lista, você pode criar um novo setor preenchendo o campo "Novo setor".
+                    </div>
 
                     <form method="POST" action="{{ url_for('main.abrir_chamado') }}">
                         {{ form.hidden_tag() }}
@@ -68,24 +66,32 @@
                                 {% endfor %}
                             </div>
 
-                            {% if setor_usuario %}
                             <div class="col-md-6 mb-3">
-                                <label for="setor" class="form-label">Setor</label>
+                                <label for="setor_id" class="form-label">Setor <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="fas fa-building"></i>
                                     </span>
-                                    <input type="text" class="form-control" value="{{ setor_usuario.nome }}" readonly>
+                                    {{ form.setor_id(class="form-select" + (' is-invalid' if form.setor_id.errors else '')) }}
+                                </div>
+                                {% for error in form.setor_id.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                                <small class="text-muted">Ou cadastre um novo setor abaixo</small>
+                                <div class="input-group mt-1">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-plus-circle"></i>
+                                    </span>
+                                    {{ form.new_sector(class="form-control", placeholder="Novo setor") }}
                                 </div>
                             </div>
-                            {% endif %}
                         </div>
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                             <a href="{{ url_for('main.listar_chamados') }}" class="btn btn-outline-secondary me-md-2">
                                 <i class="fas fa-times me-1"></i> Cancelar
                             </a>
-                            <button type="submit" class="btn btn-primary" {% if not setor_usuario %}disabled{% endif %}>
+                            <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-paper-plane me-1"></i> Abrir Chamado
                             </button>
                         </div>

@@ -35,7 +35,15 @@ class ChamadoForm(FlaskForm):
     titulo = StringField("Título", validators=[DataRequired()])
     descricao = TextAreaField("Descrição", validators=[DataRequired()])
     prioridade = SelectField("Prioridade", choices=[("Baixa", "Baixa"), ("Media", "Média"), ("Alta", "Alta"), ("Critica", "Crítica")], default="Media", validators=[DataRequired()])
+    setor_id = SelectField("Setor", coerce=int, validators=[Optional()])
+    new_sector = StringField('Novo setor')
     submit = SubmitField("Abrir Chamado")
+    
+    def __init__(self, *args, **kwargs):
+        super(ChamadoForm, self).__init__(*args, **kwargs)
+        from .models import Sector
+        # Carrega os setores disponíveis
+        self.setor_id.choices = [(0, '-- Selecione um setor --')] + [(s.id, s.name) for s in Sector.query.order_by('name').all()]
 
 class UserRegisterForm(FlaskForm):
     username = StringField('Nome de Usuário', validators=[DataRequired()])
