@@ -2,12 +2,32 @@ from app import create_app
 import logging
 import sys
 import socket
+import os
+from init_db import init_postgres_db, init_migrations
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+# Inicializar banco de dados PostgreSQL se necessário
 try:
+    # Verificar se é a primeira execução
+    db_initialized = os.path.exists('db_initialized.flag')
+    if not db_initialized:
+        logger.info("Inicializando banco de dados PostgreSQL...")
+        if init_postgres_db():
+            logger.info("Inicializando migrações do Flask...")
+            init_migrations()
+            # Criar arquivo de flag para indicar que o banco foi inicializado
+            with open('db_initialized.flag', 'w') as f:
+                f.write('1')
+            logger.info("Configuração do banco de dados concluída com sucesso!")
+        else:
+            logger.error("Falha na configuração do banco de dados.")
+    else:
+        logger.info("Banco de dados já inicializado anteriormente.")
+
+    # Criar aplicação
     app = create_app()
     logger.info("Application created successfully")
 except Exception as e:
