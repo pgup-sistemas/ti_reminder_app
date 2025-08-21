@@ -403,6 +403,36 @@ def delete_reminder(id):
     flash('Lembrete excluído!', 'success')
     return redirect(url_for('main.reminders'))
 
+# --- API de Notificações ---
+# Rota movida para o final do arquivo para evitar duplicação
+
+# Chamados atualizados recentemente (últimas 24 horas)
+    yesterday = datetime.now() - timedelta(hours=24)
+    
+    # Buscar chamados do usuário ou que o usuário é responsável
+    chamados_query = Chamado.query.filter(
+        Chamado.data_ultima_atualizacao > yesterday
+    )
+    
+    # Se não for TI, filtrar apenas chamados do usuário
+    if not is_ti:
+        chamados_query = chamados_query.filter(
+            Chamado.solicitante_id == user_id
+        )
+    
+    chamados_updated = [{
+        'id': c.id,
+        'titulo': c.titulo,
+        'status': c.status,
+        'ultima_atualizacao': c.data_ultima_atualizacao.strftime('%d/%m/%Y %H:%M')
+    } for c in chamados_query.all()]
+    
+    return jsonify({
+        'reminders_expiring': reminders_expiring,
+        'tasks_overdue': tasks_overdue,
+        'chamados_updated': chamados_updated
+    })
+
 # --- Administração de Usuários ---
 @bp.route('/admin/users')
 @login_required
