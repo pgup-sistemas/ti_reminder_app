@@ -5,11 +5,20 @@ Aplicação web completa para gestão de lembretes, tarefas, chamados de TI, tut
 ## 📋 Índice
 - [Visão Geral](#visão-geral)
 - [Funcionalidades Principais](#funcionalidades-principais)
+  - [Gestão de Lembretes e Tarefas](#gestão-de-lembretes-e-tarefas)
+  - [Sistema de Chamados de TI](#sistema-de-chamados-de-ti)
+  - [Sistema de Tutoriais](#sistema-de-tutoriais)
+  - [Gestão de Equipamentos](#gestão-de-equipamentos)
+  - [Dashboard e Relatórios](#dashboard-e-relatórios)
 - [Progressive Web App (PWA)](#progressive-web-app-pwa)
 - [Stack Tecnológica](#stack-tecnológica)
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Instalação e Configuração](#instalação-e-configuração)
+  - [Configuração do PostgreSQL](#configuração-do-postgresql)
 - [Como Utilizar](#como-utilizar)
+- [Planos de Implementação](#planos-de-implementação)
+  - [Plano de Ação - Melhorias](#plano-de-ação---melhorias)
+  - [Plano de Implementação - Controle de Equipamentos](#plano-de-implementação---controle-de-equipamentos)
 - [Configurações Avançadas](#configurações-avançadas)
 - [Troubleshooting](#troubleshooting)
 - [Contribuição](#contribuição)
@@ -45,6 +54,25 @@ O **TI OSN System** é uma solução completa para gerenciamento de atividades d
 - **Filtros**: Por status, prioridade, setor e data
 - **Relatórios**: Exportação de chamados para Excel/PDF
 
+#### Funcionalidades Implementadas
+
+1. **Abertura de Novos Chamados:** Usuários autenticados podem criar novos chamados para a TI através de um formulário dedicado. É necessário fornecer um título claro, uma descrição detalhada do problema ou solicitação e definir a prioridade inicial (Baixa, Média, Alta, Crítica).
+
+2. **Listagem de Chamados:** Uma seção permite visualizar os chamados existentes. Usuários comuns podem ver os chamados que abriram ou os chamados relacionados ao seu setor. Administradores e a equipe de TI têm uma visão completa de todos os chamados.
+
+3. **Filtros de Listagem:** A tela de listagem oferece filtros por status (Aberto, Em Andamento, Resolvido, Fechado), prioridade e, para administradores/TI, por setor. Isso facilita a localização e o gerenciamento dos chamados.
+
+4. **Detalhes do Chamado:** É possível visualizar os detalhes completos de um chamado específico, incluindo todas as informações registradas na abertura, datas de criação e atualização, solicitante, setor e o responsável pela TI (se atribuído).
+
+5. **Notificações por E-mail:** Ao abrir um novo chamado, o sistema envia automaticamente notificações por e-mail para o usuário solicitante e para a equipe de TI.
+
+#### Como Utilizar
+
+1. **Acessar:** Após fazer login no sistema, acesse o menu "Chamados".
+2. **Abrir Chamado:** Clique em "Abrir Novo Chamado" na tela de listagem. Preencha o formulário com título, descrição e prioridade. Clique em "Abrir Chamado" para submeter.
+3. **Listar e Filtrar:** Acesse a seção "Chamados" para ver a lista. Utilize os filtros na parte superior para refinar a visualização por status, prioridade ou setor (se aplicável).
+4. **Ver Detalhes:** Clique no botão "Detalhes" na linha correspondente ao chamado na lista para visualizar todas as informações.
+
 ### 📚 Sistema de Tutoriais
 - **Criação de Tutoriais**: Suporte a Markdown e imagens
 - **Categorização**: Organização por categorias
@@ -59,6 +87,43 @@ O **TI OSN System** é uma solução completa para gerenciamento de atividades d
 - **Dados Técnicos**: Preenchimento de especificações técnicas
 - **Controle de Status**: Solicitado, Aprovado, Entregue, Devolvido, Negado
 - **Rastreamento**: Histórico completo de movimentações
+
+#### Campos do Modelo
+
+##### Campos Principais
+- **Descrição** - Descrição detalhada do equipamento
+- **Patrimônio** - Número do patrimônio do equipamento
+- **Data de entrega** - Data prevista/real da entrega
+- **Solicitante** - Usuário que solicitou o equipamento
+- **Data de devolução** - Data de devolução do equipamento
+- **Conferência** - Status de conferência do equipamento
+- **Observação** - Observações adicionais
+- **Quem recebeu** - Usuário que recebeu o equipamento
+
+##### Campos Adicionais Essenciais
+- **Status** - (Solicitado, Aprovado, Entregue, Devolvido, Negado)
+- **Data da solicitação** - Data automática da solicitação
+- **Quem aprovou** - Usuário TI que aprovou a solicitação
+- **Data de aprovação** - Data em que foi aprovado
+- **Tipo de equipamento** - Categoria (notebook, monitor, etc.)
+- **Setor/Destino** - Para onde o equipamento vai
+- **Motivo da solicitação** - Justificativa da solicitação
+
+#### Fluxo de Usuário
+
+##### Para Usuário Comum:
+1. Acessar "Equipamentos" no menu
+2. Clicar em "Nova Solicitação"
+3. Preencher formulário com dados do equipamento
+4. Enviar solicitação
+5. Acompanhar status na listagem
+
+##### Para TI/Admin:
+1. Acessar "Equipamentos" no menu
+2. Ver todas as solicitações pendentes
+3. Aprovar ou recusar solicitações
+4. Marcar como entregue quando equipamento for entregue
+5. Marcar como devolvido quando equipamento for devolvido
 
 ### 📊 Dashboard e Relatórios
 - **Métricas em Tempo Real**: Contadores de atividades
@@ -526,8 +591,11 @@ SECRET_KEY=sua-chave-secreta-aqui
 FLASK_ENV=development
 FLASK_DEBUG=True
 
-# Banco de Dados
+# Banco de Dados (SQLite - padrão)
 DATABASE_URL=sqlite:///reminder.db
+
+# Banco de Dados (PostgreSQL - opcional)
+# DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ti_reminder_db
 
 # Configurações de E-mail
 MAIL_SERVER=smtp.gmail.com
@@ -550,6 +618,62 @@ flask db upgrade
 
 # Ou se preferir, execute o script de migração
 python migration_reminder_control.py
+```
+
+### Configuração do PostgreSQL
+
+#### Pré-requisitos
+
+1. PostgreSQL instalado e em execução
+2. Python 3.8 ou superior
+3. Todas as dependências do projeto instaladas (`pip install -r requirements.txt`)
+
+#### Configuração Automática
+
+O sistema foi configurado para inicializar automaticamente o banco de dados PostgreSQL na primeira execução. Siga os passos abaixo:
+
+1. Certifique-se de que o PostgreSQL está instalado e em execução
+2. Verifique se as credenciais no arquivo `.env` estão corretas:
+   ```
+   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ti_reminder_db
+   ```
+   Substitua `postgres:postgres` pelo seu usuário e senha do PostgreSQL, se necessário.
+3. Execute o aplicativo normalmente:
+   ```
+   python run.py
+   ```
+   Na primeira execução, o sistema irá:
+   - Criar o banco de dados `ti_reminder_db` se não existir
+   - Inicializar as migrações do Flask-Migrate
+   - Aplicar todas as migrações necessárias
+
+#### Configuração Manual
+
+Se preferir configurar manualmente o banco de dados, siga os passos abaixo:
+
+1. Certifique-se de que o PostgreSQL está instalado e em execução
+2. Verifique se as credenciais no arquivo `.env` estão corretas
+3. Execute o script de configuração:
+   ```
+   python setup_postgres.py
+   ```
+   Este script irá:
+   - Criar o banco de dados `ti_reminder_db` se não existir
+   - Inicializar as migrações do Flask-Migrate
+   - Aplicar todas as migrações necessárias
+
+#### Backup e Restauração
+
+##### Backup do Banco de Dados
+
+```bash
+pg_dump -U postgres ti_reminder_db > backup_$(date +%Y%m%d).sql
+```
+
+##### Restauração do Backup
+
+```bash
+psql -U postgres ti_reminder_db < backup_20231201.sql
 ```
 
 #### 6. Crie um Usuário Administrador
@@ -579,6 +703,57 @@ Para que as notificações funcionem:
 1. Acesse a aplicação
 2. Faça login com as credenciais criadas
 3. Configure seu perfil e setor
+
+## 📋 Planos de Implementação
+
+### Plano de Ação - Melhorias
+
+Este plano define a implementação das funcionalidades restantes do sistema TI OSN System, organizadas por prioridade e dependências.
+
+#### FASE 1: CONTROLE DE LEMBRETES (Prioridade ALTA)
+
+**Objetivo**: Completar a funcionalidade de controle de lembretes recorrentes
+
+1. **Atualizar Lógica de Recorrência**
+2. **Adicionar Rota de Controle de Status**
+3. **Atualizar Formulário de Lembretes**
+4. **Atualizar Template de Lembretes**
+
+#### FASE 2: SEGURANÇA AVANÇADA (Prioridade ALTA)
+
+**Objetivo**: Implementar autenticação de dois fatores e logs de auditoria
+
+1. **Instalar Dependências**
+2. **Criar Modelo de Logs de Auditoria**
+3. **Adicionar Campos 2FA ao Usuário**
+4. **Criar Utilitário de Auditoria**
+5. **Implementar 2FA**
+
+### Plano de Implementação - Controle de Equipamentos
+
+**Objetivo**: Implementação de funcionalidade para controle de equipamentos solicitados para o setor de TI, permitindo solicitação, aprovação, entrega e devolução de equipamentos.
+
+#### Plano de Implementação Detalhado
+
+##### Fase 1: Modelo de Dados
+1. **Criar modelo `EquipmentRequest`** em `app/models.py`
+2. **Criar migration** para a nova tabela
+3. **Executar migration** para criar a tabela no banco
+
+##### Fase 2: Rotas e Controllers
+4. **Criar rotas** em `app/routes.py`
+
+##### Fase 3: Templates
+5. **Criar templates** para listagem, formulário e detalhes
+
+##### Fase 4: Menu e Navegação
+6. **Adicionar item no menu** "Equipamentos"
+7. **Configurar permissões** (usuário comum vs TI)
+
+##### Fase 5: Funcionalidades Avançadas
+8. **Relatórios** (opcional)
+9. **Notificações** (opcional)
+10. **Filtros e busca** (opcional)
 
 ### 📅 Gestão de Lembretes
 
