@@ -188,6 +188,42 @@ def index():
     
     # Limitar a 10 atividades no total
     atividades_recentes = atividades_recentes[:10]
+    
+    # Calcular estatísticas de SLA (apenas para administradores)
+    sla_vencidos = 0
+    sla_criticos = 0
+    sla_ok = 0
+    performance_sla = 0
+    
+    if is_admin:
+        # Buscar todos os chamados abertos com SLA
+        chamados_com_sla = Chamado.query.filter(
+            Chamado.status != 'Fechado',
+            Chamado.prazo_sla.isnot(None)
+        ).all()
+        
+        for chamado in chamados_com_sla:
+            status_sla = chamado.obter_status_sla()
+            if status_sla == 'vencido':
+                sla_vencidos += 1
+            elif status_sla == 'proximo_vencimento':
+                sla_criticos += 1
+            elif status_sla == 'dentro_prazo':
+                sla_ok += 1
+        
+        # Calcular performance de SLA dos últimos 30 dias
+        from datetime import timedelta
+        trinta_dias_atras = datetime.utcnow() - timedelta(days=30)
+        
+        chamados_fechados_30_dias = Chamado.query.filter(
+            Chamado.data_fechamento >= trinta_dias_atras,
+            Chamado.data_fechamento.isnot(None),
+            Chamado.sla_cumprido.isnot(None)
+        ).all()
+        
+        if chamados_fechados_30_dias:
+            sla_cumpridos = len([c for c in chamados_fechados_30_dias if c.sla_cumprido])
+            performance_sla = round((sla_cumpridos / len(chamados_fechados_30_dias)) * 100)
 
     return render_template(
         'index.html',
@@ -202,7 +238,11 @@ def index():
         chamados_abertos=chamados_abertos,
         atividades_recentes=atividades_recentes,
         ultimo_acesso=datetime.now().strftime('%d/%m/%Y %H:%M'),
-        is_admin=session.get('is_admin', False)
+        is_admin=session.get('is_admin', False),
+        sla_vencidos=sla_vencidos,
+        sla_criticos=sla_criticos,
+        sla_ok=sla_ok,
+        performance_sla=performance_sla
     )
 
 # --- Lembretes ---
@@ -870,6 +910,45 @@ def dashboard():
     if end_date:
         tutorial_query = tutorial_query.filter(Tutorial.data_criacao <= end_date)
     tutoriais = tutorial_query.all()
+    
+    # Calcular estatísticas de SLA (apenas para administradores)
+    sla_vencidos = 0
+    sla_criticos = 0
+    sla_ok = 0
+    performance_sla = 0
+    chamados_sla = []
+    
+    if is_admin:
+        # Buscar todos os chamados abertos com SLA
+        chamados_com_sla = Chamado.query.filter(
+            Chamado.status != 'Fechado',
+            Chamado.prazo_sla.isnot(None)
+        ).order_by(Chamado.data_abertura.desc()).limit(20).all()
+        
+        chamados_sla = chamados_com_sla
+        
+        for chamado in chamados_com_sla:
+            status_sla = chamado.obter_status_sla()
+            if status_sla == 'vencido':
+                sla_vencidos += 1
+            elif status_sla == 'proximo_vencimento':
+                sla_criticos += 1
+            elif status_sla == 'dentro_prazo':
+                sla_ok += 1
+        
+        # Calcular performance de SLA dos últimos 30 dias
+        from datetime import timedelta
+        trinta_dias_atras = datetime.utcnow() - timedelta(days=30)
+        
+        chamados_fechados_30_dias = Chamado.query.filter(
+            Chamado.data_fechamento >= trinta_dias_atras,
+            Chamado.data_fechamento.isnot(None),
+            Chamado.sla_cumprido.isnot(None)
+        ).all()
+        
+        if chamados_fechados_30_dias:
+            sla_cumpridos = len([c for c in chamados_fechados_30_dias if c.sla_cumprido])
+            performance_sla = round((sla_cumpridos / len(chamados_fechados_30_dias)) * 100)
 
     return render_template('dashboard.html',
         tasks_total=tasks_total,
@@ -915,6 +994,11 @@ def dashboard():
         top_feedback_values=top_feedback_values,
         tutorial_mais_visualizado=tutorial_mais_visualizado,
         tutorial_mais_util=tutorial_mais_util,
+        sla_vencidos=sla_vencidos,
+        sla_criticos=sla_criticos,
+        sla_ok=sla_ok,
+        performance_sla=performance_sla,
+        chamados_sla=chamados_sla,
     )
 
 @bp.route('/export/excel')
@@ -1649,6 +1733,9 @@ def abrir_chamado():
                 setor_id=setor_id,
                 status='Aberto'  # Status inicial
             )
+            
+            # Calcular e definir o prazo de SLA automaticamente
+            novo_chamado.calcular_sla()
 
             db.session.add(novo_chamado)
             db.session.commit()
@@ -1795,6 +1882,12 @@ def gerenciar_chamado(id):
         # Atualiza o status se foi alterado
         if form.status.data != chamado.status:
             alteracoes.append(f'Status alterado de "{chamado.status}" para "{form.status.data}"')
+            
+            # Marcar primeira resposta se mudou de "Aberto" para qualquer outro status
+            if chamado.status == 'Aberto' and form.status.data in ['Em Andamento', 'Resolvido', 'Fechado']:
+                chamado.marcar_primeira_resposta()
+                alteracoes.append('Primeira resposta registrada para cálculo de SLA')
+            
             chamado.status = form.status.data
 
             # Atualiza a data de fechamento se o status for Fechado

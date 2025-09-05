@@ -50,6 +50,41 @@
 
                 <dt class="col-sm-3">Responsável TI:</dt>
                 <dd class="col-sm-9">{{ chamado.responsavel_ti.username if chamado.responsavel_ti else "Não atribuído" }}</dd>
+                
+                {% if chamado.prazo_sla %}
+                <dt class="col-sm-3">SLA:</dt>
+                <dd class="col-sm-9">
+                    {% set status_sla = chamado.obter_status_sla() %}
+                    {% if status_sla == 'vencido' %}
+                        <span class="badge bg-danger fs-6" title="SLA vencido">
+                            <i class="fa fa-clock"></i> SLA Vencido
+                        </span>
+                        <br><small class="text-danger">Prazo: {{ chamado.prazo_sla.strftime("%d/%m/%Y %H:%M") }}</small>
+                    {% elif status_sla == 'proximo_vencimento' %}
+                        <span class="badge bg-warning fs-6" title="SLA próximo ao vencimento">
+                            <i class="fa fa-clock"></i> SLA Crítico
+                        </span>
+                        <br><small class="text-warning">Prazo: {{ chamado.prazo_sla.strftime("%d/%m/%Y %H:%M") }}</small>
+                    {% elif status_sla == 'dentro_prazo' %}
+                        <span class="badge bg-success fs-6" title="SLA dentro do prazo">
+                            <i class="fa fa-check"></i> SLA OK
+                        </span>
+                        <br><small class="text-success">Prazo: {{ chamado.prazo_sla.strftime("%d/%m/%Y %H:%M") }}</small>
+                    {% endif %}
+                </dd>
+                
+                {% if chamado.data_primeira_resposta %}
+                <dt class="col-sm-3">Primeira Resposta:</dt>
+                <dd class="col-sm-9">
+                    {{ chamado.data_primeira_resposta.strftime("%d/%m/%Y %H:%M") }}
+                    {% if chamado.sla_cumprido %}
+                        <span class="badge bg-success ms-2">SLA Cumprido</span>
+                    {% elif chamado.sla_cumprido == False %}
+                        <span class="badge bg-danger ms-2">SLA Não Cumprido</span>
+                    {% endif %}
+                </dd>
+                {% endif %}
+                {% endif %}
             </dl>
         </div>
     </div>

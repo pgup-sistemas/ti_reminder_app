@@ -89,6 +89,111 @@
     </div>
 </div>
 
+<!-- Cards de SLA -->
+{% if session.get('is_admin') %}
+<div class="row g-4 mb-5">
+    <div class="col-12">
+        <h2 class="h4 fw-bold text-secondary mb-3">
+            <i class="fas fa-clock me-2"></i>Monitoramento de SLA
+        </h2>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="dashboard-card h-100">
+            <div class="d-flex align-items-center">
+                <div class="dashboard-card-icon danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h3 class="h5 fw-semibold mb-1">SLA Vencido</h3>
+                    <p class="text-2xl fw-bold text-danger mb-0">{{ sla_vencidos or 0 }}</p>
+                    <p class="text-sm text-muted mb-0">Chamados</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="dashboard-card h-100">
+            <div class="d-flex align-items-center">
+                <div class="dashboard-card-icon warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h3 class="h5 fw-semibold mb-1">SLA Crítico</h3>
+                    <p class="text-2xl fw-bold text-warning mb-0">{{ sla_criticos or 0 }}</p>
+                    <p class="text-sm text-muted mb-0">Próximos ao vencimento</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="dashboard-card h-100">
+            <div class="d-flex align-items-center">
+                <div class="dashboard-card-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h3 class="h5 fw-semibold mb-1">SLA OK</h3>
+                    <p class="text-2xl fw-bold text-success mb-0">{{ sla_ok or 0 }}</p>
+                    <p class="text-sm text-muted mb-0">Dentro do prazo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="dashboard-card h-100">
+            <div class="d-flex align-items-center">
+                <div class="dashboard-card-icon primary">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h3 class="h5 fw-semibold mb-1">Performance SLA</h3>
+                    <p class="text-2xl fw-bold text-primary mb-0">{{ performance_sla or 0 }}%</p>
+                    <p class="text-sm text-muted mb-0">Últimos 30 dias</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Alertas de SLA -->
+{% if session.get('is_admin') and (sla_vencidos > 0 or sla_criticos > 0) %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-{{ 'danger' if sla_vencidos > 0 else 'warning' }} alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-{{ 'exclamation-triangle' if sla_vencidos > 0 else 'clock' }} fa-2x me-3"></i>
+                <div class="flex-grow-1">
+                    <h5 class="alert-heading mb-1">
+                        {% if sla_vencidos > 0 %}
+                            ⚠️ Atenção: SLA Vencido!
+                        {% else %}
+                            🕐 Alerta: SLA Próximo ao Vencimento
+                        {% endif %}
+                    </h5>
+                    <p class="mb-1">
+                        {% if sla_vencidos > 0 %}
+                            Existem {{ sla_vencidos }} chamado(s) com SLA vencido que precisam de atenção imediata.
+                        {% endif %}
+                        {% if sla_criticos > 0 %}
+                            {% if sla_vencidos > 0 %}Além disso, há{% else %}Há{% endif %} {{ sla_criticos }} chamado(s) com SLA crítico (próximo ao vencimento).
+                        {% endif %}
+                    </p>
+                    <a href="{{ url_for('main.listar_chamados') }}" class="btn btn-{{ 'light' if sla_vencidos > 0 else 'dark' }} btn-sm">
+                        <i class="fas fa-list"></i> Ver Chamados
+                    </a>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Ações rápidas -->
 <div class="row mb-5">
     <div class="col-12">

@@ -93,10 +93,68 @@ class Chamado(db.Model):
     solicitante_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     setor_id = db.Column(db.Integer, db.ForeignKey('sector.id'), nullable=False)
     responsavel_ti_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    
+    # Campos de SLA
+    prazo_sla = db.Column(db.DateTime, nullable=True)  # Data limite para cumprimento do SLA
+    data_primeira_resposta = db.Column(db.DateTime, nullable=True)  # Quando o chamado foi atendido pela primeira vez
+    sla_cumprido = db.Column(db.Boolean, default=None, nullable=True)  # True=cumprido, False=vencido, None=em andamento
+    tempo_resposta_horas = db.Column(db.Float, nullable=True)  # Tempo de resposta em horas
 
     solicitante = db.relationship('User', foreign_keys=[solicitante_id], backref='chamados_solicitados')
     setor = db.relationship('Sector', backref='chamados')
     responsavel_ti = db.relationship('User', foreign_keys=[responsavel_ti_id], backref='chamados_responsaveis')
+
+    @property
+    def status_sla(self):
+        """Retorna o status visual do SLA: 'cumprido', 'vencido', 'atencao', 'normal'"""
+        if self.sla_cumprido is True:
+            return 'cumprido'
+        elif self.sla_cumprido is False:
+            return 'vencido'
+        elif self.prazo_sla:
+            agora = datetime.utcnow()
+            tempo_restante = self.prazo_sla - agora
+            if tempo_restante.total_seconds() < 0:
+                return 'vencido'
+            elif tempo_restante.total_seconds() < 3600:  # Menos de 1 hora restante
+                return 'atencao'
+        return 'normal'
+    
+    @property
+    def tempo_restante_sla(self):
+        """Retorna o tempo restante para o SLA em formato legível"""
+        if not self.prazo_sla:
+            return None
+        
+        agora = datetime.utcnow()
+        diferenca = self.prazo_sla - agora
+        
+        if diferenca.total_seconds() < 0:
+            # SLA vencido
+            diferenca = agora - self.prazo_sla
+            horas = int(diferenca.total_seconds() // 3600)
+            minutos = int((diferenca.total_seconds() % 3600) // 60)
+            return f"Vencido há {horas}h {minutos}m"
+        else:
+            # SLA ainda válido
+            horas = int(diferenca.total_seconds() // 3600)
+            minutos = int((diferenca.total_seconds() % 3600) // 60)
+            return f"{horas}h {minutos}m restantes"
+
+    def calcular_sla(self):
+        """Calcula e define o prazo de SLA baseado na prioridade"""
+        sla_config = SlaConfig.query.filter_by(prioridade=self.prioridade).first()
+        if sla_config:
+            self.prazo_sla = self.data_abertura + timedelta(hours=sla_config.tempo_resposta_horas)
+    
+    def marcar_primeira_resposta(self):
+        """Marca a primeira resposta e calcula o tempo de resposta"""
+        if not self.data_primeira_resposta:
+            self.data_primeira_resposta = datetime.utcnow()
+            if self.prazo_sla:
+                diferenca = self.data_primeira_resposta - self.data_abertura
+                self.tempo_resposta_horas = diferenca.total_seconds() / 3600
+                self.sla_cumprido = self.data_primeira_resposta <= self.prazo_sla
 
     def __repr__(self):
         return f'<Chamado {self.id}: {self.titulo}>'
@@ -240,4 +298,39 @@ class EquipmentRequest(db.Model):
         return (user.id == self.requester_id or 
                 user.is_admin or 
                 user.is_ti)
+
+
+class SlaConfig(db.Model):
+    """Tabela para configurar os tempos de SLA por prioridade"""
+    id = db.Column(db.Integer, primary_key=True)
+    prioridade = db.Column(db.String(50), nullable=False, unique=True)  # Baixa, Media, Alta, Critica
+    tempo_resposta_horas = db.Column(db.Integer, nullable=False)  # Tempo em horas para primeira resposta
+    tempo_resolucao_horas = db.Column(db.Integer, nullable=True)  # Tempo total para resolução (futuro)
+    ativo = db.Column(db.Boolean, default=True)
+    
+    def __repr__(self):
+        return f'<SlaConfig {self.prioridade}: {self.tempo_resposta_horas}h>'
+    
+    @classmethod
+    def get_tempo_sla(cls, prioridade):
+        """Retorna o tempo de SLA para uma prioridade específica"""
+        config = cls.query.filter_by(prioridade=prioridade, ativo=True).first()
+        return config.tempo_resposta_horas if config else 24  # Default 24 horas
+    
+    @classmethod
+    def criar_configuracoes_padrao(cls):
+        """Cria as configurações padrão de SLA"""
+        configuracoes_padrao = [
+            {'prioridade': 'Critica', 'tempo_resposta_horas': 2},
+            {'prioridade': 'Alta', 'tempo_resposta_horas': 4},
+            {'prioridade': 'Media', 'tempo_resposta_horas': 24},
+            {'prioridade': 'Baixa', 'tempo_resposta_horas': 72},
+        ]
+        
+        for config in configuracoes_padrao:
+            if not cls.query.filter_by(prioridade=config['prioridade']).first():
+                nova_config = cls(**config)
+                db.session.add(nova_config)
+        
+        db.session.commit()
 

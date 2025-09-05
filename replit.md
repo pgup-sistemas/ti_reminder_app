@@ -13,6 +13,11 @@ This is the TI OSN System, a comprehensive IT management web application built w
 - Set up Flask application to run on 0.0.0.0:5000 for Replit proxy compatibility
 - Configured workflow to run the Flask server
 - Set up deployment configuration for autoscale deployment with Gunicorn
+- **IMPLEMENTED SLA SYSTEM**: Complete Service Level Agreement functionality for support tickets
+  - Automatic SLA calculation based on priority levels (Crítica: 2h, Alta: 4h, Média: 24h, Baixa: 72h)
+  - Visual indicators in dashboard and ticket listings
+  - Comprehensive SLA reports and performance metrics
+  - Automatic alerts for overdue and critical SLA tickets
 
 ## Project Architecture
 - **Backend**: Flask 3.1.2 with SQLAlchemy, APScheduler, Flask-Mail
