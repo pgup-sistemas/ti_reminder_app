@@ -2,43 +2,55 @@
 class NotificationManager {
     constructor() {
         this.isSupported = 'Notification' in window;
-        this.permission = null;
-        this.checkInterval = 60000; // 1 minuto
+        this.permission = Notification.permission;
+        this.checkInterval = 300000; // 5 minutos
         this.serviceWorkerRegistration = null;
+        this.messageShown = false;
+        this.pollingInterval = null;
+        this.listenersAdded = false;
+        this.notificationHistory = new Map(); // Rastrear notificações já enviadas
+        this.notificationCooldowns = new Map(); // Cooldowns por tipo
         this.init();
     }
 
     async init() {
         if (!this.isSupported) {
             console.warn('Notificações não são suportadas neste navegador');
+            this.showUnsupportedMessage();
             return;
         }
 
-        // Registrar o Service Worker antes de solicitar permissão
-        await this.registerServiceWorker();
-
-        this.permission = await this.requestPermission();
-        console.log(`Status da permissão de notificações: ${this.permission}`);
+        // Verificar permissão atual
+        this.permission = Notification.permission;
+        console.log(`Status inicial da permissão: ${this.permission}`);
+        
+        // Verificar se o usuário dispensou recentemente
+        if (!this.shouldShowMessage()) {
+            console.log('Usuário dispensou notificações recentemente, não mostrando mensagem');
+            return;
+        }
         
         if (this.permission === 'granted') {
+            // Registrar o Service Worker e iniciar polling
+            await this.registerServiceWorker();
             this.startPolling();
-            // Mostrar notificação de confirmação
-            setTimeout(() => {
-                this.notify('success', 'Notificações Ativadas', 'Você receberá notificações sobre lembretes, tarefas e chamados.');
-            }, 2000);
+            this.hidePermissionMessage();
+        } else if (this.permission === 'denied') {
+            // Permissão foi negada permanentemente
+            this.showPermissionDeniedMessage();
         } else {
-            // Informar o usuário sobre como habilitar notificações
-            console.warn('Permissão para notificações negada pelo usuário');
-            // Adicionar um elemento na interface para informar o usuário
-            this.showPermissionMessage();
-            
-            // Adicionar botão para tentar novamente
-            this.addRetryButton();
+            // Permissão ainda não foi solicitada (default)
+            // Aguardar um pouco antes de mostrar a mensagem para evitar aparecer na tela de login
+            setTimeout(() => {
+                if (this.shouldShowMessage()) {
+                    this.showPermissionRequestMessage();
+                }
+            }, 2000);
         }
     }
     
     async registerServiceWorker() {
-        if (!('serviceWorker' in navigator)) {
+        if (!this.isSupported) {
             console.warn('Service Worker não é suportado neste navegador');
             return false;
         }
@@ -86,13 +98,39 @@ class NotificationManager {
         }
     }
     
-    showPermissionMessage() {
-        // Verificar se já existe uma mensagem
-        if (document.querySelector('.notification-permission-message')) {
+    showPermissionRequestMessage() {
+        if (this.messageShown || document.querySelector('.notification-permission-message')) {
             return;
         }
         
-        // Criar elemento de mensagem
+        this.messageShown = true;
+        const messageContainer = document.createElement('div');
+        messageContainer.className = 'notification-permission-message alert alert-info alert-dismissible fade show';
+        messageContainer.style.position = 'fixed';
+        messageContainer.style.bottom = '20px';
+        messageContainer.style.right = '20px';
+        messageContainer.style.maxWidth = '350px';
+        messageContainer.style.zIndex = '9999';
+        
+        messageContainer.innerHTML = `
+            <h5><i class="fas fa-bell"></i> Ativar Notificações</h5>
+            <p>Receba alertas sobre lembretes, tarefas e chamados importantes.</p>
+            <div class="mt-2 d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-primary enable-notifications">Ativar Agora</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary dismiss-notifications">Agora Não</button>
+            </div>
+        `;
+        
+        document.body.appendChild(messageContainer);
+        this.addMessageListeners(messageContainer);
+    }
+    
+    showPermissionDeniedMessage() {
+        if (this.messageShown || document.querySelector('.notification-permission-message')) {
+            return;
+        }
+        
+        this.messageShown = true;
         const messageContainer = document.createElement('div');
         messageContainer.className = 'notification-permission-message alert alert-warning alert-dismissible fade show';
         messageContainer.style.position = 'fixed';
@@ -102,18 +140,147 @@ class NotificationManager {
         messageContainer.style.zIndex = '9999';
         
         messageContainer.innerHTML = `
-            <h5><i class="fas fa-bell-slash"></i> Notificações Desativadas</h5>
-            <p>Para receber alertas sobre lembretes, tarefas e chamados, habilite as notificações nas configurações do navegador.</p>
+            <h5><i class="fas fa-bell-slash"></i> Notificações Bloqueadas</h5>
+            <p>Para receber alertas, clique no ícone de cadeado <i class="fas fa-lock"></i> na barra de endereços e selecione "Permitir" para notificações.</p>
             <div class="mt-2 d-flex gap-2">
                 <button type="button" class="btn btn-sm btn-primary retry-notifications">Tentar Novamente</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary test-notifications">Testar Notificações</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary dismiss-notifications">Dispensar</button>
             </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
         `;
         
         document.body.appendChild(messageContainer);
+        this.addMessageListeners(messageContainer);
+    }
+    
+    showUnsupportedMessage() {
+        if (this.messageShown || document.querySelector('.notification-permission-message')) {
+            return;
+        }
         
-        // Adicionar listener para o botão de teste
+        this.messageShown = true;
+        const messageContainer = document.createElement('div');
+        messageContainer.className = 'notification-permission-message alert alert-warning alert-dismissible fade show';
+        messageContainer.style.position = 'fixed';
+        messageContainer.style.bottom = '20px';
+        messageContainer.style.right = '20px';
+        messageContainer.style.maxWidth = '400px';
+        messageContainer.style.zIndex = '9999';
+        
+        // Detectar o motivo específico
+        const isHttpIP = window.location.protocol === 'http:' && window.location.hostname !== 'localhost';
+        const hasNotificationAPI = 'Notification' in window;
+        const hasServiceWorker = 'serviceWorker' in navigator;
+        const isSecureContext = window.isSecureContext || window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+        
+        let message = '';
+        let title = '';
+        
+        if (!isSecureContext) {
+            title = '<i class="fas fa-shield-alt"></i> Notificações Requerem HTTPS';
+            message = `
+                <p><strong>Notificações não funcionam em HTTP com IPs.</strong></p>
+                <p><strong>Soluções:</strong></p>
+                <ul class="mb-2">
+                    <li>Acesse via <code>localhost:5000</code></li>
+                    <li>Configure HTTPS no servidor</li>
+                    <li>Use um domínio com certificado SSL</li>
+                </ul>
+                <p><small>Esta é uma limitação de segurança dos navegadores modernos.</small></p>
+            `;
+        } else if (!hasNotificationAPI) {
+            title = '<i class="fas fa-exclamation-triangle"></i> API de Notificações Indisponível';
+            message = '<p>Seu navegador não suporta a API de Notificações.</p>';
+        } else if (!hasServiceWorker) {
+            title = '<i class="fas fa-exclamation-triangle"></i> Service Worker Indisponível';
+            message = '<p>Seu navegador não suporta Service Workers.</p>';
+        } else {
+            title = '<i class="fas fa-info-circle"></i> Notificações Indisponíveis';
+            message = '<p>Notificações não estão disponíveis neste contexto.</p>';
+        }
+        
+        messageContainer.innerHTML = `
+            <h5>${title}</h5>
+            ${message}
+            <div class="mt-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary dismiss-notifications">Dispensar</button>
+            </div>
+        `;
+        
+        document.body.appendChild(messageContainer);
+        this.addMessageListeners(messageContainer);
+    }
+    
+    hidePermissionMessage() {
+        const existingMessage = document.querySelector('.notification-permission-message');
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+        this.messageShown = false;
+    }
+    
+    addMessageListeners(messageContainer) {
+        // Listener para ativar notificações
+        const enableButton = messageContainer.querySelector('.enable-notifications');
+        if (enableButton) {
+            enableButton.addEventListener('click', async () => {
+                this.hidePermissionMessage();
+                this.permission = await this.requestPermission();
+                
+                if (this.permission === 'granted') {
+                    await this.registerServiceWorker();
+                    this.startPolling();
+                    this.notify('success', 'Notificações Ativadas', 'Você receberá alertas sobre lembretes, tarefas e chamados.');
+                } else {
+                    // Mostrar mensagem apropriada baseada no novo status
+                    if (this.permission === 'denied') {
+                        this.showPermissionDeniedMessage();
+                    } else {
+                        this.showPermissionRequestMessage();
+                    }
+                }
+            });
+        }
+        
+        // Listener para tentar novamente (para permissões negadas)
+        const retryButton = messageContainer.querySelector('.retry-notifications');
+        if (retryButton) {
+            retryButton.addEventListener('click', async () => {
+                this.hidePermissionMessage();
+                // Verificar novamente o status da permissão
+                this.permission = Notification.permission;
+                
+                if (this.permission === 'granted') {
+                    await this.registerServiceWorker();
+                    this.startPolling();
+                    this.notify('success', 'Notificações Ativadas', 'Você receberá alertas sobre lembretes, tarefas e chamados.');
+                } else if (this.permission === 'default') {
+                    // Tentar solicitar permissão novamente
+                    this.permission = await this.requestPermission();
+                    if (this.permission === 'granted') {
+                        await this.registerServiceWorker();
+                        this.startPolling();
+                        this.notify('success', 'Notificações Ativadas', 'Você receberá alertas sobre lembretes, tarefas e chamados.');
+                    } else {
+                        this.showPermissionDeniedMessage();
+                    }
+                } else {
+                    // Ainda negada, mostrar instruções
+                    this.showPermissionDeniedMessage();
+                }
+            });
+        }
+        
+        // Listener para dispensar mensagem
+        const dismissButton = messageContainer.querySelector('.dismiss-notifications');
+        if (dismissButton) {
+            dismissButton.addEventListener('click', () => {
+                this.hidePermissionMessage();
+                // Salvar preferência para não mostrar novamente por um tempo
+                localStorage.setItem('notificationDismissed', Date.now().toString());
+            });
+        }
+        
+        // Listener para testar notificações
         const testButton = messageContainer.querySelector('.test-notifications');
         if (testButton) {
             testButton.addEventListener('click', () => {
@@ -122,64 +289,53 @@ class NotificationManager {
         }
     }
     
-    addRetryButton() {
-        // Aguardar um momento para garantir que a mensagem foi adicionada ao DOM
-        setTimeout(() => {
-            const retryButton = document.querySelector('.retry-notifications');
-            if (retryButton) {
-                retryButton.addEventListener('click', async () => {
-                    // Remover a mensagem atual
-                    const messageContainer = document.querySelector('.notification-permission-message');
-                    if (messageContainer) {
-                        messageContainer.remove();
-                    }
-                    
-                    // Solicitar permissão novamente
-                    this.permission = await this.requestPermission();
-                    
-                    if (this.permission === 'granted') {
-                        this.startPolling();
-                        this.notify('success', 'Notificações Ativadas', 'Você receberá notificações sobre lembretes, tarefas e chamados.');
-                        // Testar notificação automaticamente
-                        setTimeout(() => {
-                            this.testNotification();
-                        }, 3000);
-                    } else {
-                        this.showPermissionMessage();
-                        this.addRetryButton();
-                    }
-                });
-            }
+    shouldShowMessage() {
+        // Verificar se o usuário dispensou a mensagem recentemente (últimas 24 horas)
+        const dismissed = localStorage.getItem('notificationDismissed');
+        if (dismissed) {
+            const dismissedTime = parseInt(dismissed);
+            const now = Date.now();
+            const dayInMs = 24 * 60 * 60 * 1000;
             
-            // Já adicionamos o listener para o botão de teste no método showPermissionMessage
-        }, 500);
+            if (now - dismissedTime < dayInMs) {
+                return false;
+            }
+        }
+        
+        // Não mostrar se já está sendo exibida
+        if (this.messageShown || document.querySelector('.notification-permission-message')) {
+            return false;
+        }
+        
+        // Não mostrar se estivermos na página de login
+        if (window.location.pathname.includes('/login') || window.location.pathname === '/') {
+            return false;
+        }
+        
+        return true;
     }
 
     async requestPermission() {
         try {
-            if (Notification.permission === 'granted') {
+            // Verificar permissão atual
+            this.permission = Notification.permission;
+            
+            if (this.permission === 'granted') {
                 console.log('Permissão para notificações já concedida');
                 return 'granted';
             }
+            
+            if (this.permission === 'denied') {
+                console.log('Permissão para notificações foi negada pelo usuário');
+                return 'denied';
+            }
 
-            // Mesmo que a permissão tenha sido negada anteriormente, vamos tentar solicitar novamente
-            // Isso permite que o usuário mude de ideia se já negou antes
+            // Solicitar permissão apenas se ainda não foi solicitada (default)
             console.log('Solicitando permissão para notificações...');
             const permission = await Notification.requestPermission();
             console.log(`Resultado da solicitação de permissão: ${permission}`);
             
-            // Se a permissão foi concedida, verificar o registro do service worker
-            if (permission === 'granted' && 'serviceWorker' in navigator) {
-                try {
-                    const registration = await navigator.serviceWorker.ready;
-                    console.log('Service Worker pronto para notificações:', registration);
-                } catch (swError) {
-                    console.error('Erro ao verificar Service Worker:', swError);
-                    // Tentar registrar novamente o service worker
-                    await navigator.serviceWorker.register('/static/sw.js');
-                }
-            }
-            
+            this.permission = permission;
             return permission;
         } catch (error) {
             console.error('Erro ao solicitar permissão para notificações:', error);
@@ -193,7 +349,6 @@ class NotificationManager {
             this.permission = await this.requestPermission();
             if (this.permission !== 'granted') {
                 console.warn('Permissão para notificações não concedida');
-                this.showPermissionMessage();
                 return null;
             }
         }
@@ -315,6 +470,9 @@ class NotificationManager {
                 await this.registerServiceWorker();
             }
             
+            // Limpar histórico antigo (mais de 24 horas)
+            this.cleanOldNotifications();
+            
             const response = await fetch('/api/notifications', {
                 method: 'GET',
                 headers: {
@@ -361,49 +519,61 @@ class NotificationManager {
                 return;
             }
 
-            // Lembretes vencendo
+            // Lembretes vencendo (máximo 1 por dia por lembrete)
             if (data.reminders_expiring && data.reminders_expiring.length > 0) {
                 console.log(`${data.reminders_expiring.length} lembretes vencendo em breve`);
                 for (const reminder of data.reminders_expiring) {
-                    await this.showNotification('🔔 Lembrete Vencendo!', {
-                        body: `${reminder.name} - Responsável: ${reminder.responsible}`,
-                        tag: `reminder-${reminder.id}`,
-                        data: {
-                            url: `/reminders?highlight=${reminder.id}`,
-                            id: reminder.id
-                        },
-                        requireInteraction: true
-                    });
+                    const notificationKey = `reminder-${reminder.id}`;
+                    if (this.shouldShowNotification(notificationKey, 24 * 60 * 60 * 1000)) { // 24 horas
+                        await this.showNotification('🔔 Lembrete Vencendo!', {
+                            body: `${reminder.name} - Responsável: ${reminder.responsible}`,
+                            tag: notificationKey,
+                            data: {
+                                url: `/reminders?highlight=${reminder.id}`,
+                                id: reminder.id
+                            },
+                            requireInteraction: true
+                        });
+                        this.markNotificationShown(notificationKey);
+                    }
                 }
             }
 
-            // Chamados atualizados
+            // Chamados atualizados (máximo 1 por hora por chamado)
             if (data.chamados_updated && data.chamados_updated.length > 0) {
                 console.log(`${data.chamados_updated.length} chamados atualizados recentemente`);
                 for (const chamado of data.chamados_updated) {
-                    await this.showNotification('📞 Chamado Atualizado!', {
-                        body: `#${chamado.id} - ${chamado.titulo}`,
-                        tag: `chamado-${chamado.id}`,
-                        data: {
-                            url: `/chamados/detalhe/${chamado.id}`,
-                            id: chamado.id
-                        },
-                        requireInteraction: true
-                    });
+                    const notificationKey = `chamado-${chamado.id}`;
+                    if (this.shouldShowNotification(notificationKey, 60 * 60 * 1000)) { // 1 hora
+                        await this.showNotification('📞 Chamado Atualizado!', {
+                            body: `#${chamado.id} - ${chamado.titulo} (${chamado.status})`,
+                            tag: notificationKey,
+                            data: {
+                                url: `/chamados/${chamado.id}`,
+                                id: chamado.id
+                            },
+                            requireInteraction: true
+                        });
+                        this.markNotificationShown(notificationKey);
+                    }
                 }
             }
 
-            // Tarefas vencidas
+            // Tarefas vencidas (máximo 1 por 4 horas)
             if (data.tasks_overdue && data.tasks_overdue.length > 0) {
                 console.log(`${data.tasks_overdue.length} tarefas em atraso`);
-                await this.showNotification('⚠️ Tarefas Vencidas!', {
-                    body: `${data.tasks_overdue.length} tarefa(s) em atraso`,
-                    tag: 'tasks-overdue',
-                    data: {
-                        url: '/tasks?filter=overdue'
-                    },
-                    requireInteraction: true
-                });
+                const notificationKey = 'tasks-overdue';
+                if (this.shouldShowNotification(notificationKey, 4 * 60 * 60 * 1000)) { // 4 horas
+                    await this.showNotification('⚠️ Tarefas Vencidas!', {
+                        body: `${data.tasks_overdue.length} tarefa(s) em atraso`,
+                        tag: notificationKey,
+                        data: {
+                            url: '/tasks?filter=overdue'
+                        },
+                        requireInteraction: true
+                    });
+                    this.markNotificationShown(notificationKey);
+                }
             }
 
             console.log('Verificação de notificações concluída com sucesso');
@@ -413,13 +583,18 @@ class NotificationManager {
             
             // Se houver erro de conexão, tentar novamente mais tarde
             if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                console.log('Erro de conexão, tentando novamente em 30 segundos...');
-                setTimeout(() => this.checkForUpdates(), 30000);
+                console.log('Erro de conexão, tentando novamente em 2 minutos...');
+                setTimeout(() => this.checkForUpdates(), 120000); // 2 minutos
             }
         }
     }
 
     startPolling() {
+        // Parar polling anterior se existir
+        if (this.pollingInterval) {
+            clearInterval(this.pollingInterval);
+        }
+        
         // Verificação inicial
         this.checkForUpdates();
 
@@ -428,19 +603,58 @@ class NotificationManager {
             this.checkForUpdates();
         }, this.checkInterval);
         
-        // Adicionar listeners para eventos de conectividade
-        window.addEventListener('online', () => {
-            console.log('Conexão restaurada, verificando notificações...');
-            this.checkForUpdates();
-        });
-        
-        // Registrar para eventos de visibilidade da página
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') {
-                console.log('Página visível, verificando notificações...');
+        // Adicionar listeners para eventos de conectividade (apenas uma vez)
+        if (!this.listenersAdded) {
+            window.addEventListener('online', () => {
+                console.log('Conexão restaurada, verificando notificações...');
                 this.checkForUpdates();
+            });
+            
+            // Registrar para eventos de visibilidade da página
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    console.log('Página visível, verificando notificações...');
+                    this.checkForUpdates();
+                }
+            });
+            
+            this.listenersAdded = true;
+        }
+    }
+    
+    stopPolling() {
+        if (this.pollingInterval) {
+            clearInterval(this.pollingInterval);
+            this.pollingInterval = null;
+        }
+    }
+
+    // Métodos para controle de cooldown de notificações
+    shouldShowNotification(key, cooldownMs) {
+        const now = Date.now();
+        const lastShown = this.notificationHistory.get(key);
+        
+        if (!lastShown) {
+            return true; // Primeira vez
+        }
+        
+        return (now - lastShown) >= cooldownMs;
+    }
+    
+    markNotificationShown(key) {
+        this.notificationHistory.set(key, Date.now());
+    }
+    
+    cleanOldNotifications() {
+        const now = Date.now();
+        const dayInMs = 24 * 60 * 60 * 1000;
+        
+        // Remover entradas mais antigas que 24 horas
+        for (const [key, timestamp] of this.notificationHistory.entries()) {
+            if (now - timestamp > dayInMs) {
+                this.notificationHistory.delete(key);
             }
-        });
+        }
     }
 
     // Método para mostrar notificação manual
@@ -461,5 +675,15 @@ class NotificationManager {
 
 // Inicializar quando a página carregar
 document.addEventListener('DOMContentLoaded', function() {
-    window.notificationManager = new NotificationManager();
+    // Evitar múltiplas instâncias
+    if (!window.notificationManager) {
+        window.notificationManager = new NotificationManager();
+    }
+});
+
+// Limpar recursos quando a página for descarregada
+window.addEventListener('beforeunload', function() {
+    if (window.notificationManager) {
+        window.notificationManager.stopPolling();
+    }
 });

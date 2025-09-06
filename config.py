@@ -1,4 +1,5 @@
 import os
+from datetime import timezone, timedelta
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'changeme'
@@ -10,3 +11,7 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER') or 'reminder@example.com'
+    
+    # Configuração de timezone para Porto Velho, Rondônia (UTC-4)
+    TIMEZONE = timezone(timedelta(hours=-4))
+    TIMEZONE_NAME = 'America/Porto_Velho'

@@ -12,7 +12,7 @@
         <div class="card-body">
           <p class="mb-2"><strong>Categoria:</strong> {{ tutorial.categoria or 'Sem categoria' }}</p>
           <p class="mb-2"><strong>Autor:</strong> {{ tutorial.autor.username }}</p>
-          <p class="mb-2"><strong>Data de criação:</strong> {{ tutorial.data_criacao.strftime('%d/%m/%Y %H:%M') }}</p>
+          <p class="mb-2"><strong>Data de criação:</strong> {{ tutorial.data_criacao|local_datetime }}</p>
           <hr>
           <div class="mb-3">
             <strong>Conteúdo:</strong>
@@ -51,7 +51,7 @@
             <ul class="list-group mb-2">
               {% for comentario in tutorial.comentarios %}
               <li class="list-group-item">
-                <div class="fw-bold">{{ comentario.usuario.username }} <span class="text-muted small">({{ comentario.data_criacao.strftime('%d/%m/%Y %H:%M') }})</span></div>
+                <div class="fw-bold">{{ comentario.usuario.username }} <span class="text-muted small">({{ comentario.data_criacao|local_datetime }})</span></div>
                 <div>{{ comentario.texto }}</div>
               </li>
               {% else %}

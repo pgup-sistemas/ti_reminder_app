@@ -32,14 +32,14 @@
                 <dd class="col-sm-9"><span class="badge bg-{{ "dark" if chamado.prioridade == "Critica" else ("danger" if chamado.prioridade == "Alta" else ("warning" if chamado.prioridade == "Media" else "info")) }}">{{ chamado.prioridade }}</span></dd>
 
                 <dt class="col-sm-3">Data de Abertura:</dt>
-                <dd class="col-sm-9">{{ chamado.data_abertura.strftime("%d/%m/%Y %H:%M:%S") }}</dd>
+                <dd class="col-sm-9">{{ chamado.data_abertura|local_datetime('%d/%m/%Y %H:%M:%S') }}</dd>
 
                 <dt class="col-sm-3">Última Atualização:</dt>
-                <dd class="col-sm-9">{{ chamado.data_ultima_atualizacao.strftime("%d/%m/%Y %H:%M:%S") }}</dd>
+                <dd class="col-sm-9">{{ chamado.data_ultima_atualizacao|local_datetime('%d/%m/%Y %H:%M:%S') }}</dd>
 
                 {% if chamado.data_fechamento %}
                 <dt class="col-sm-3">Data de Fechamento:</dt>
-                <dd class="col-sm-9">{{ chamado.data_fechamento.strftime("%d/%m/%Y %H:%M:%S") }}</dd>
+                <dd class="col-sm-9">{{ chamado.data_fechamento|local_datetime('%d/%m/%Y %H:%M:%S') }}</dd>
                 {% endif %}
 
                 <dt class="col-sm-3">Solicitante:</dt>
@@ -54,29 +54,29 @@
                 {% if chamado.prazo_sla %}
                 <dt class="col-sm-3">SLA:</dt>
                 <dd class="col-sm-9">
-                    {% set status_sla = chamado.obter_status_sla() %}
+                    {% set status_sla = chamado.status_sla %}
                     {% if status_sla == 'vencido' %}
                         <span class="badge bg-danger fs-6" title="SLA vencido">
                             <i class="fa fa-clock"></i> SLA Vencido
                         </span>
-                        <br><small class="text-danger">Prazo: {{ chamado.prazo_sla.strftime("%d/%m/%Y %H:%M") }}</small>
-                    {% elif status_sla == 'proximo_vencimento' %}
+                        <br><small class="text-danger">Prazo: {{ chamado.prazo_sla|local_datetime('%d/%m/%Y %H:%M') }}</small>
+                    {% elif status_sla == 'atencao' %}
                         <span class="badge bg-warning fs-6" title="SLA próximo ao vencimento">
                             <i class="fa fa-clock"></i> SLA Crítico
                         </span>
-                        <br><small class="text-warning">Prazo: {{ chamado.prazo_sla.strftime("%d/%m/%Y %H:%M") }}</small>
-                    {% elif status_sla == 'dentro_prazo' %}
+                        <br><small class="text-warning">Prazo: {{ chamado.prazo_sla|local_datetime('%d/%m/%Y %H:%M') }}</small>
+                    {% elif status_sla == 'normal' %}
                         <span class="badge bg-success fs-6" title="SLA dentro do prazo">
                             <i class="fa fa-check"></i> SLA OK
                         </span>
-                        <br><small class="text-success">Prazo: {{ chamado.prazo_sla.strftime("%d/%m/%Y %H:%M") }}</small>
+                        <br><small class="text-success">Prazo: {{ chamado.prazo_sla|local_datetime('%d/%m/%Y %H:%M') }}</small>
                     {% endif %}
                 </dd>
                 
                 {% if chamado.data_primeira_resposta %}
                 <dt class="col-sm-3">Primeira Resposta:</dt>
                 <dd class="col-sm-9">
-                    {{ chamado.data_primeira_resposta.strftime("%d/%m/%Y %H:%M") }}
+                    {{ chamado.data_primeira_resposta|local_datetime('%d/%m/%Y %H:%M') }}
                     {% if chamado.sla_cumprido %}
                         <span class="badge bg-success ms-2">SLA Cumprido</span>
                     {% elif chamado.sla_cumprido == False %}
@@ -164,7 +164,7 @@
                                     {{ 'Atualização' if comentario.tipo == 'atualizacao' else 'Comentário' }}
                                 </span>
                             </h6>
-                            <small class="text-muted">{{ comentario.data_criacao.strftime('%d/%m/%Y %H:%M') }}</small>
+                            <small class="text-muted">{{ comentario.data_criacao|local_datetime('%d/%m/%Y %H:%M') }}</small>
                         </div>
                         <p class="mb-1">{{ comentario.texto }}</p>
                     </div>

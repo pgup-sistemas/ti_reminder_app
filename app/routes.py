@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session, jsonify
 from datetime import date, datetime, timedelta, time
 from dateutil.relativedelta import relativedelta
+from .utils.timezone_utils import get_current_time_for_db, now_local, format_local_datetime, utc_to_local
 from .models import Reminder, Task, Sector, User, db, Tutorial, TutorialImage, VisualizacaoTutorial, FeedbackTutorial, EquipmentRequest, Chamado, ComentarioChamado, ComentarioTutorial # Importados modelos necessários
 from .forms import ReminderForm, TaskForm, TutorialForm, ComentarioTutorialForm, FeedbackTutorialForm, ChamadoForm, ChamadoAdminForm, UserEditForm # Importados formulários necessários
 from .auth_utils import login_required
@@ -196,32 +197,47 @@ def index():
     performance_sla = 0
     
     if is_admin:
-        # Buscar todos os chamados abertos com SLA
-        chamados_com_sla = Chamado.query.filter(
-            Chamado.status != 'Fechado',
-            Chamado.prazo_sla.isnot(None)
+        # Buscar todos os chamados abertos (não fechados)
+        chamados_abertos_sla = Chamado.query.filter(
+            Chamado.status != 'Fechado'
         ).all()
         
-        for chamado in chamados_com_sla:
-            status_sla = chamado.obter_status_sla()
+        # Calcular SLA para chamados que não têm prazo definido
+        for chamado in chamados_abertos_sla:
+            if not chamado.prazo_sla:
+                chamado.calcular_sla()
+        
+        # Commit das mudanças no SLA
+        db.session.commit()
+        
+        # Agora contar os status de SLA
+        for chamado in chamados_abertos_sla:
+            status_sla = chamado.status_sla
             if status_sla == 'vencido':
                 sla_vencidos += 1
-            elif status_sla == 'proximo_vencimento':
+            elif status_sla == 'atencao':
                 sla_criticos += 1
-            elif status_sla == 'dentro_prazo':
+            elif status_sla == 'normal':
                 sla_ok += 1
         
         # Calcular performance de SLA dos últimos 30 dias
         from datetime import timedelta
-        trinta_dias_atras = datetime.utcnow() - timedelta(days=30)
+        trinta_dias_atras = get_current_time_for_db() - timedelta(days=30)
         
         chamados_fechados_30_dias = Chamado.query.filter(
             Chamado.data_fechamento >= trinta_dias_atras,
-            Chamado.data_fechamento.isnot(None),
-            Chamado.sla_cumprido.isnot(None)
+            Chamado.data_fechamento.isnot(None)
         ).all()
         
         if chamados_fechados_30_dias:
+            # Calcular SLA para chamados fechados que não têm sla_cumprido definido
+            for chamado in chamados_fechados_30_dias:
+                if chamado.sla_cumprido is None and chamado.prazo_sla:
+                    # Se foi fechado dentro do prazo, considera cumprido
+                    chamado.sla_cumprido = chamado.data_fechamento <= chamado.prazo_sla
+            
+            db.session.commit()
+            
             sla_cumpridos = len([c for c in chamados_fechados_30_dias if c.sla_cumprido])
             performance_sla = round((sla_cumpridos / len(chamados_fechados_30_dias)) * 100)
 
@@ -237,7 +253,7 @@ def index():
         tasks_today_done=tasks_today_done,
         chamados_abertos=chamados_abertos,
         atividades_recentes=atividades_recentes,
-        ultimo_acesso=datetime.now().strftime('%d/%m/%Y %H:%M'),
+        ultimo_acesso=format_local_datetime(now_local(), '%d/%m/%Y %H:%M'),
         is_admin=session.get('is_admin', False),
         sla_vencidos=sla_vencidos,
         sla_criticos=sla_criticos,
@@ -389,7 +405,7 @@ def reminders():
             status=form.status.data,
             pause_until=form.pause_until.data,
             end_date=form.end_date.data,
-            created_at=datetime.now()
+            created_at=get_current_time_for_db()
         )
         db.session.add(reminder)
         db.session.commit()
@@ -699,7 +715,7 @@ def reset_user_password(id):
 def dashboard():
     from flask import request, session
     from .models import Sector, User, Chamado, Task, Reminder # Adicionado Chamado, Task, Reminder
-    from datetime import datetime # Adicionado datetime
+    from datetime import datetime, date # Adicionado datetime e date
 
     task_status = request.args.get('task_status', '')
     reminder_status = request.args.get('reminder_status', '')
@@ -919,34 +935,49 @@ def dashboard():
     chamados_sla = []
     
     if is_admin:
-        # Buscar todos os chamados abertos com SLA
-        chamados_com_sla = Chamado.query.filter(
-            Chamado.status != 'Fechado',
-            Chamado.prazo_sla.isnot(None)
+        # Buscar todos os chamados abertos (não fechados)
+        chamados_abertos_dashboard = Chamado.query.filter(
+            Chamado.status != 'Fechado'
         ).order_by(Chamado.data_abertura.desc()).limit(20).all()
         
-        chamados_sla = chamados_com_sla
+        # Calcular SLA para chamados que não têm prazo definido
+        for chamado in chamados_abertos_dashboard:
+            if not chamado.prazo_sla:
+                chamado.calcular_sla()
         
-        for chamado in chamados_com_sla:
-            status_sla = chamado.obter_status_sla()
+        # Commit das mudanças no SLA
+        db.session.commit()
+        
+        chamados_sla = chamados_abertos_dashboard
+        
+        # Contar os status de SLA
+        for chamado in chamados_abertos_dashboard:
+            status_sla = chamado.status_sla
             if status_sla == 'vencido':
                 sla_vencidos += 1
-            elif status_sla == 'proximo_vencimento':
+            elif status_sla == 'atencao':
                 sla_criticos += 1
-            elif status_sla == 'dentro_prazo':
+            elif status_sla == 'normal':
                 sla_ok += 1
         
         # Calcular performance de SLA dos últimos 30 dias
         from datetime import timedelta
-        trinta_dias_atras = datetime.utcnow() - timedelta(days=30)
+        trinta_dias_atras = get_current_time_for_db() - timedelta(days=30)
         
         chamados_fechados_30_dias = Chamado.query.filter(
             Chamado.data_fechamento >= trinta_dias_atras,
-            Chamado.data_fechamento.isnot(None),
-            Chamado.sla_cumprido.isnot(None)
+            Chamado.data_fechamento.isnot(None)
         ).all()
         
         if chamados_fechados_30_dias:
+            # Calcular SLA para chamados fechados que não têm sla_cumprido definido
+            for chamado in chamados_fechados_30_dias:
+                if chamado.sla_cumprido is None and chamado.prazo_sla:
+                    # Se foi fechado dentro do prazo, considera cumprido
+                    chamado.sla_cumprido = chamado.data_fechamento <= chamado.prazo_sla
+            
+            db.session.commit()
+            
             sla_cumpridos = len([c for c in chamados_fechados_30_dias if c.sla_cumprido])
             performance_sla = round((sla_cumpridos / len(chamados_fechados_30_dias)) * 100)
 
@@ -1132,7 +1163,7 @@ def export_excel():
                 'Vencimento': r.due_date.strftime('%d/%m/%Y') if r.due_date else '',
                 'Responsável': r.responsible,
                 'Setor': r.sector.name if r.sector else '',
-                'Usuário': r.user.username if r.user else '',
+                'Usuário': r.usuario.username if r.usuario else '',
                 'Realizado': 'Sim' if r.completed else 'Não'
             } for r in reminders]
             df_reminders = pd.DataFrame(reminders_data)
@@ -1153,19 +1184,29 @@ def export_excel():
                 'Status': c.status,
                 'Prioridade': c.prioridade,
                 'Abertura': c.data_abertura.strftime('%d/%m/%Y %H:%M') if c.data_abertura else '',
+                'Prazo SLA': c.prazo_sla.strftime('%d/%m/%Y %H:%M') if c.prazo_sla else 'N/A',
+                'Status SLA': c.status_sla if hasattr(c, 'status_sla') else 'N/A',
                 'Solicitante': c.solicitante.username if c.solicitante else '',
                 'Setor': c.setor.name if c.setor else '',
-                'Responsável TI': c.responsavel_ti.username if c.responsavel_ti else ''
+                'Responsável TI': c.responsavel_ti.username if c.responsavel_ti else '',
+                'Fechamento': c.data_fechamento.strftime('%d/%m/%Y %H:%M') if c.data_fechamento else 'Em Aberto'
             } for c in chamados]
             df_chamados = pd.DataFrame(chamados_data)
-            df_chamados.to_excel(writer, sheet_name='Chamados', index=False, header=False, startrow=1)
-            worksheet_chamados = writer.sheets['Chamados']
-            worksheet_chamados.merge_range('A1:H1', 'Relatório de Chamados', title_format)
-            for col_num, value in enumerate(df_chamados.columns.values):
-                worksheet_chamados.write(0, col_num, value, header_format)
-            for i, col in enumerate(df_chamados.columns):
-                column_len = max(df_chamados[col].astype(str).map(len).max(), len(col))
-                worksheet_chamados.set_column(i, i, column_len + 2)
+            if not df_chamados.empty:
+                df_chamados.to_excel(writer, sheet_name='Chamados', index=False, header=False, startrow=2)
+                worksheet_chamados = writer.sheets['Chamados']
+                worksheet_chamados.merge_range('A1:K1', 'Relatório de Chamados', title_format)
+                for col_num, value in enumerate(df_chamados.columns.values):
+                    worksheet_chamados.write(1, col_num, value, header_format)
+                for i, col in enumerate(df_chamados.columns):
+                    column_len = max(df_chamados[col].astype(str).map(len).max(), len(col))
+                    worksheet_chamados.set_column(i, i, column_len + 2)
+            else:
+                # Criar planilha mesmo sem dados
+                worksheet_chamados = workbook.add_worksheet('Chamados')
+                worksheet_chamados.merge_range('A1:K1', 'Relatório de Chamados', title_format)
+                worksheet_chamados.write_row(1, 0, ['ID', 'Título', 'Status', 'Prioridade', 'Abertura', 'Prazo SLA', 'Status SLA', 'Solicitante', 'Setor', 'Responsável TI', 'Fechamento'], header_format)
+                worksheet_chamados.write(2, 0, 'Nenhum chamado encontrado com os filtros aplicados')
 
         if export_type in ['all', 'equipamentos']: # Bloco para equipamentos
             equipamentos = equipment_query.all()
@@ -1232,6 +1273,12 @@ def export_excel():
         as_attachment=True,
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
+
+@bp.route('/help')
+@login_required
+def help_page():
+    """Página de ajuda com documentação do sistema"""
+    return render_template('help.html', title='Central de Ajuda')
 
 @bp.route('/export/pdf')
 def export_pdf():
@@ -1398,7 +1445,7 @@ def export_pdf():
                     r.due_date.strftime('%d/%m/%Y') if r.due_date else '',
                     Paragraph(r.responsible if r.responsible else '', normal_style),
                     Paragraph(r.sector.name if r.sector else '', normal_style),
-                    Paragraph(r.user.username if r.user else '', normal_style),
+                    Paragraph(r.usuario.username if r.usuario else '', normal_style),
                     "Sim" if r.completed else "Não"
                 ])
             table = Table(data_reminders, colWidths=col_widths_reminders)

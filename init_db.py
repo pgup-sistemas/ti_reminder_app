@@ -101,6 +101,11 @@ def init_migrations():
                 # e aplicar as migrações existentes sem criar novas
                 print("Migrações já existem. Aplicando migrações existentes...")
                 os.system('flask db upgrade')
+            
+            # Inicializar configurações padrão de SLA
+            from app.models import SlaConfig
+            SlaConfig.criar_configuracoes_padrao()
+            print("Configurações padrão de SLA inicializadas!")
         
         return True
     except Exception as e:

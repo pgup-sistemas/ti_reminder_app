@@ -105,9 +105,9 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <small>{{ request.request_date.strftime('%d/%m/%Y') }}</small>
+                                    <small>{{ request.request_date|local_date }}</small>
                                     <br>
-                                    <small class="text-muted">{{ request.request_date.strftime('%H:%M') }}</small>
+                                    <small class="text-muted">{{ request.request_date|local_time }}</small>
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">

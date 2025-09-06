@@ -29,4 +29,8 @@ def create_app():
     from .auth import bp_auth
     app.register_blueprint(bp_auth, url_prefix='/auth')
 
+    # Registrar filtros de template para timezone
+    from .template_filters import register_template_filters
+    register_template_filters(app)
+
     return app

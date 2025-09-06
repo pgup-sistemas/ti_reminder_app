@@ -1,0 +1,525 @@
+{% extends "base.html" %}
+
+{% block title %}Ajuda - TI OSN System{% endblock %}
+
+{% block styles %}
+<style>
+    .help-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        border: 1px solid #e9ecef;
+        border-radius: 0.5rem;
+        background-color: #f8f9fa;
+    }
+    
+    .help-section h3 {
+        color: #495057;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .notification-rule {
+        background-color: #fff;
+        border-left: 4px solid #007bff;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 0.25rem 0.25rem 0;
+    }
+    
+    .notification-rule.reminder {
+        border-left-color: #28a745;
+    }
+    
+    .notification-rule.chamado {
+        border-left-color: #ffc107;
+    }
+    
+    .notification-rule.task {
+        border-left-color: #dc3545;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 0.25rem;
+        margin: 0.125rem;
+    }
+    
+    .status-badge.active { background-color: #d4edda; color: #155724; }
+    .status-badge.paused { background-color: #fff3cd; color: #856404; }
+    .status-badge.completed { background-color: #d1ecf1; color: #0c5460; }
+    .status-badge.cancelled { background-color: #f8d7da; color: #721c24; }
+    
+    .quick-access {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .quick-access-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        transition: transform 0.2s;
+    }
+    
+    .quick-access-card:hover {
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .toc {
+        background-color: #e9ecef;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .toc ul {
+        margin-bottom: 0;
+        padding-left: 1.5rem;
+    }
+    
+    .toc a {
+        color: #495057;
+        text-decoration: none;
+    }
+    
+    .toc a:hover {
+        color: #007bff;
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="fas fa-question-circle text-primary"></i> Central de Ajuda</h1>
+                <div>
+                    <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-home"></i> Voltar ao Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Índice -->
+    <div class="row">
+        <div class="col-12">
+            <div class="toc">
+                <h5><i class="fas fa-list"></i> Índice</h5>
+                <ul>
+                    <li><a href="#notifications">Sistema de Notificações</a></li>
+                    <li><a href="#reminders">Lembretes</a></li>
+                    <li><a href="#chamados">Chamados</a></li>
+                    <li><a href="#tasks">Tarefas</a></li>
+                    <li><a href="#tutorials">Tutoriais</a></li>
+                    <li><a href="#equipment">Equipamentos</a></li>
+                    <li><a href="#troubleshooting">Solução de Problemas</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema de Notificações -->
+    <div class="row">
+        <div class="col-12">
+            <div class="help-section" id="notifications">
+                <h3><i class="fas fa-bell"></i> Sistema de Notificações Inteligente</h3>
+                
+                <div class="alert alert-info">
+                    <strong><i class="fas fa-info-circle"></i> Importante:</strong> 
+                    O sistema possui regras inteligentes para evitar spam de notificações. Cada tipo tem sua própria frequência controlada.
+                </div>
+
+                <h5>Estados das Notificações</h5>
+                <ul>
+                    <li><strong>Primeira visita:</strong> Mensagem azul convidativa para ativar</li>
+                    <li><strong>Permissão concedida:</strong> Inicia automaticamente, sem mensagens</li>
+                    <li><strong>Permissão negada:</strong> Orientações para habilitar manualmente</li>
+                    <li><strong>Dispensado:</strong> Não mostra novamente por 24 horas</li>
+                </ul>
+
+                <h5>Como Ativar Notificações</h5>
+                <ol>
+                    <li><strong>Automático:</strong> Clique em "Ativar Agora" na mensagem que aparece</li>
+                    <li><strong>Manual:</strong> Clique no ícone de cadeado na barra de endereços do navegador</li>
+                    <li><strong>Configurações:</strong> Acesse configurações do navegador > Notificações</li>
+                </ol>
+
+                <h5>Regras por Tipo de Notificação</h5>
+                
+                <div class="notification-rule reminder">
+                    <h6><i class="fas fa-bell"></i> Lembretes Vencendo</h6>
+                    <ul>
+                        <li><strong>Quando aparecem:</strong> Lembretes vencendo em até 7 dias</li>
+                        <li><strong>Param quando:</strong> Marcados como concluídos OU passam de 7 dias do vencimento</li>
+                        <li><strong>Frequência:</strong> Máximo 1 notificação por 24 horas por lembrete</li>
+                        <li><strong>Condições:</strong> Status = "ativo" e não concluído</li>
+                    </ul>
+                </div>
+
+                <div class="notification-rule chamado">
+                    <h6><i class="fas fa-ticket-alt"></i> Chamados Atualizados</h6>
+                    <ul>
+                        <li><strong>Quando aparecem:</strong> Chamados atualizados nas últimas 24 horas</li>
+                        <li><strong>Param quando:</strong> Status = "Fechado" OU sem atualizações por 24h</li>
+                        <li><strong>Frequência:</strong> Máximo 1 notificação por hora por chamado</li>
+                        <li><strong>Conteúdo:</strong> Mostra número, título e status atual</li>
+                    </ul>
+                </div>
+
+                <div class="notification-rule task">
+                    <h6><i class="fas fa-tasks"></i> Tarefas Vencidas</h6>
+                    <ul>
+                        <li><strong>Quando aparecem:</strong> Tarefas com data anterior a hoje</li>
+                        <li><strong>Param quando:</strong> Marcadas como concluídas</li>
+                        <li><strong>Frequência:</strong> Máximo 1 notificação a cada 4 horas (agrupadas)</li>
+                        <li><strong>Conteúdo:</strong> Quantidade total de tarefas em atraso</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lembretes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="help-section" id="reminders">
+                <h3><i class="fas fa-calendar-alt"></i> Gestão de Lembretes</h3>
+                
+                <h5>Como Criar um Lembrete</h5>
+                <ol>
+                    <li>Acesse <strong>"Lembretes"</strong> no menu</li>
+                    <li>Clique em <strong>"Novo Lembrete"</strong></li>
+                    <li>Preencha os campos obrigatórios:
+                        <ul>
+                            <li><strong>Nome:</strong> Descrição clara do lembrete</li>
+                            <li><strong>Tipo:</strong> Categoria para organização</li>
+                            <li><strong>Vencimento:</strong> Data limite</li>
+                            <li><strong>Responsável:</strong> Quem deve executar</li>
+                            <li><strong>Frequência:</strong> Diário, quinzenal, mensal, anual</li>
+                            <li><strong>Setor:</strong> Setor responsável</li>
+                        </ul>
+                    </li>
+                    <li>Configure opções avançadas (opcional):
+                        <ul>
+                            <li><strong>Pausar até:</strong> Data para pausa temporária</li>
+                            <li><strong>Data de fim:</strong> Término da recorrência</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h5>Status dos Lembretes</h5>
+                <div class="mb-3">
+                    <span class="status-badge active">Ativo</span> - Lembrete funcionando normalmente
+                    <span class="status-badge paused">Pausado</span> - Temporariamente desativado
+                    <span class="status-badge completed">Concluído</span> - Tarefa realizada
+                    <span class="status-badge cancelled">Cancelado</span> - Lembrete cancelado permanentemente
+                </div>
+
+                <h5>Controles Disponíveis</h5>
+                <ul>
+                    <li><strong>⏸️ Pausar:</strong> Pausa temporariamente o lembrete</li>
+                    <li><strong>▶️ Reativar:</strong> Reativa um lembrete pausado</li>
+                    <li><strong>✅ Concluir:</strong> Marca como realizado</li>
+                    <li><strong>✏️ Editar:</strong> Modifica informações do lembrete</li>
+                    <li><strong>🗑️ Excluir:</strong> Remove permanentemente (apenas admin)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chamados -->
+    <div class="row">
+        <div class="col-12">
+            <div class="help-section" id="chamados">
+                <h3><i class="fas fa-ticket-alt"></i> Sistema de Chamados</h3>
+                
+                <h5>Como Abrir um Chamado</h5>
+                <ol>
+                    <li>Acesse <strong>"Chamados"</strong> no menu</li>
+                    <li>Clique em <strong>"Abrir Novo Chamado"</strong></li>
+                    <li>Preencha o formulário:
+                        <ul>
+                            <li><strong>Título:</strong> Resumo claro do problema</li>
+                            <li><strong>Descrição:</strong> Detalhes completos do problema ou solicitação</li>
+                            <li><strong>Prioridade:</strong> Baixa, Média, Alta, Crítica</li>
+                        </ul>
+                    </li>
+                    <li>Clique em <strong>"Abrir Chamado"</strong></li>
+                    <li>A TI será notificada automaticamente por e-mail</li>
+                </ol>
+
+                <h5>Fluxo de Status</h5>
+                <div class="alert alert-light">
+                    <strong>Aberto</strong> → <strong>Em Andamento</strong> → <strong>Resolvido</strong> → <strong>Fechado</strong>
+                </div>
+
+                <h5>Acompanhamento</h5>
+                <ul>
+                    <li><strong>Lista de Chamados:</strong> Veja todos os seus chamados</li>
+                    <li><strong>Filtros:</strong> Por status, prioridade, data</li>
+                    <li><strong>Detalhes:</strong> Clique no chamado para informações completas</li>
+                    <li><strong>Comentários:</strong> Adicione comentários para acompanhamento</li>
+                    <li><strong>Notificações:</strong> Receba alertas sobre atualizações</li>
+                </ul>
+
+                <h5>Níveis de Prioridade</h5>
+                <ul>
+                    <li><strong>Crítica:</strong> Sistema fora do ar, impacto total</li>
+                    <li><strong>Alta:</strong> Funcionalidade importante afetada</li>
+                    <li><strong>Média:</strong> Problema que pode aguardar</li>
+                    <li><strong>Baixa:</strong> Melhorias ou dúvidas</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarefas -->
+    <div class="row">
+        <div class="col-12">
+            <div class="help-section" id="tasks">
+                <h3><i class="fas fa-tasks"></i> Gestão de Tarefas</h3>
+                
+                <h5>Como Criar uma Tarefa</h5>
+                <ol>
+                    <li>Acesse <strong>"Tarefas"</strong> no menu</li>
+                    <li>Preencha o formulário:
+                        <ul>
+                            <li><strong>Descrição:</strong> O que precisa ser feito</li>
+                            <li><strong>Data:</strong> Prazo para conclusão</li>
+                            <li><strong>Setor:</strong> Setor responsável</li>
+                        </ul>
+                    </li>
+                    <li>Clique em <strong>"Adicionar Tarefa"</strong></li>
+                </ol>
+
+                <h5>Controles de Tarefa</h5>
+                <ul>
+                    <li><strong>✅ Concluir:</strong> Marca tarefa como finalizada</li>
+                    <li><strong>✏️ Editar:</strong> Modifica descrição ou data</li>
+                    <li><strong>🗑️ Excluir:</strong> Remove a tarefa (apenas admin)</li>
+                </ul>
+
+                <h5>Filtros Disponíveis</h5>
+                <ul>
+                    <li><strong>Status:</strong> Pendentes ou Concluídas</li>
+                    <li><strong>Data:</strong> Por período específico</li>
+                    <li><strong>Busca:</strong> Por texto na descrição</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutoriais -->
+    <div class="row">
+        <div class="col-12">
+            <div class="help-section" id="tutorials">
+                <h3><i class="fas fa-book"></i> Sistema de Tutoriais</h3>
+                
+                <h5>Como Usar os Tutoriais</h5>
+                <ol>
+                    <li>Acesse <strong>"Tutoriais"</strong> no menu</li>
+                    <li>Use a busca para encontrar tutoriais específicos</li>
+                    <li>Clique em <strong>"Ver detalhes"</strong> para abrir o tutorial</li>
+                    <li>Leia o conteúdo e siga as instruções</li>
+                    <li>Deixe feedback se foi útil ou não</li>
+                    <li>Adicione comentários com dúvidas ou sugestões</li>
+                </ol>
+
+                <h5>Recursos Disponíveis</h5>
+                <ul>
+                    <li><strong>Busca:</strong> Encontre tutoriais por título ou categoria</li>
+                    <li><strong>Categorias:</strong> Tutoriais organizados por assunto</li>
+                    <li><strong>Feedback:</strong> Marque se o tutorial foi útil</li>
+                    <li><strong>Comentários:</strong> Tire dúvidas ou dê sugestões</li>
+                    <li><strong>Exportar PDF:</strong> Baixe o tutorial para uso offline</li>
+                </ul>
+
+                <h5>Para Equipe de TI</h5>
+                <p>Apenas membros da equipe de TI e administradores podem:</p>
+                <ul>
+                    <li>Criar novos tutoriais</li>
+                    <li>Editar tutoriais existentes</li>
+                    <li>Excluir tutoriais</li>
+                    <li>Usar formatação Markdown</li>
+                    <li>Adicionar imagens</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equipamentos -->
+    <div class="row">
+        <div class="col-12">
+            <div class="help-section" id="equipment">
+                <h3><i class="fas fa-laptop"></i> Gestão de Equipamentos</h3>
+                
+                <h5>Como Solicitar um Equipamento</h5>
+                <ol>
+                    <li>Acesse <strong>"Equipamentos"</strong> no menu</li>
+                    <li>Clique em <strong>"Nova Solicitação"</strong></li>
+                    <li>Preencha o formulário:
+                        <ul>
+                            <li><strong>Descrição:</strong> Equipamento necessário</li>
+                            <li><strong>Tipo:</strong> Categoria do equipamento</li>
+                            <li><strong>Motivo:</strong> Justificativa da solicitação</li>
+                            <li><strong>Setor de destino:</strong> Onde será usado</li>
+                            <li><strong>Data de entrega:</strong> Quando precisa</li>
+                        </ul>
+                    </li>
+                    <li>Envie a solicitação</li>
+                </ol>
+
+                <h5>Fluxo de Aprovação</h5>
+                <div class="alert alert-light">
+                    <strong>Solicitado</strong> → <strong>Aprovado</strong> → <strong>Entregue</strong> → <strong>Devolvido</strong>
+                    <br><small class="text-muted">Ou pode ser <strong>Negado</strong> se não aprovado</small>
+                </div>
+
+                <h5>Acompanhamento</h5>
+                <ul>
+                    <li><strong>Status:</strong> Veja o andamento da sua solicitação</li>
+                    <li><strong>Histórico:</strong> Acompanhe todas as movimentações</li>
+                    <li><strong>Detalhes:</strong> Informações completas do equipamento</li>
+                    <li><strong>Edição:</strong> Modifique solicitações pendentes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Solução de Problemas -->
+    <div class="row">
+        <div class="col-12">
+            <div class="help-section" id="troubleshooting">
+                <h3><i class="fas fa-tools"></i> Solução de Problemas</h3>
+                
+                <h5>Problemas com Notificações</h5>
+                <div class="alert alert-warning">
+                    <strong>Não recebo notificações:</strong>
+                    <ol>
+                        <li>Verifique se estão habilitadas no navegador</li>
+                        <li>Clique no ícone de cadeado na barra de endereços</li>
+                        <li>Selecione "Permitir" para notificações</li>
+                        <li>Recarregue a página</li>
+                    </ol>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>Muitas notificações:</strong>
+                    <p>O sistema já possui controles automáticos para evitar spam. Cada tipo de notificação tem sua própria frequência controlada.</p>
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>Notificações param de aparecer:</strong>
+                    <p>Isso é normal! As notificações param automaticamente quando os itens são resolvidos conforme as regras de negócio.</p>
+                </div>
+
+                <h5>Problemas de Login</h5>
+                <ul>
+                    <li><strong>Esqueci a senha:</strong> Entre em contato com o administrador</li>
+                    <li><strong>Usuário bloqueado:</strong> Solicite desbloqueio ao admin</li>
+                    <li><strong>Erro de permissão:</strong> Verifique se tem acesso à funcionalidade</li>
+                </ul>
+
+                <h5>Problemas de Performance</h5>
+                <ul>
+                    <li><strong>Página lenta:</strong> Limpe o cache do navegador</li>
+                    <li><strong>Erro 500:</strong> Recarregue a página ou contate a TI</li>
+                    <li><strong>Dados não salvam:</strong> Verifique sua conexão com a internet</li>
+                </ul>
+
+                <h5>Contato para Suporte</h5>
+                <div class="alert alert-primary">
+                    <strong><i class="fas fa-headset"></i> Precisa de mais ajuda?</strong>
+                    <p>Abra um chamado através do sistema ou entre em contato com a equipe de TI.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acesso Rápido -->
+    <div class="row">
+        <div class="col-12">
+            <h3><i class="fas fa-rocket"></i> Acesso Rápido</h3>
+            <div class="quick-access">
+                <a href="{{ url_for('main.reminders') }}" class="quick-access-card">
+                    <i class="fas fa-bell fa-2x mb-2"></i>
+                    <h5>Lembretes</h5>
+                    <p>Criar e gerenciar lembretes recorrentes</p>
+                </a>
+                
+                <a href="{{ url_for('main.abrir_chamado') }}" class="quick-access-card">
+                    <i class="fas fa-ticket-alt fa-2x mb-2"></i>
+                    <h5>Abrir Chamado</h5>
+                    <p>Solicitar suporte técnico</p>
+                </a>
+                
+                <a href="{{ url_for('main.tasks') }}" class="quick-access-card">
+                    <i class="fas fa-tasks fa-2x mb-2"></i>
+                    <h5>Tarefas</h5>
+                    <p>Gerenciar suas tarefas</p>
+                </a>
+                
+                <a href="{{ url_for('main.listar_tutoriais') }}" class="quick-access-card">
+                    <i class="fas fa-book fa-2x mb-2"></i>
+                    <h5>Tutoriais</h5>
+                    <p>Consultar guias e manuais</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Smooth scrolling para links do índice
+document.querySelectorAll('.toc a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// Highlight da seção atual no scroll
+window.addEventListener('scroll', function() {
+    const sections = document.querySelectorAll('.help-section');
+    const tocLinks = document.querySelectorAll('.toc a');
+    
+    let current = '';
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (pageYOffset >= (sectionTop - 200)) {
+            current = section.getAttribute('id');
+        }
+    });
+    
+    tocLinks.forEach(link => {
+        link.classList.remove('fw-bold');
+        if (link.getAttribute('href') === '#' + current) {
+            link.classList.add('fw-bold');
+        }
+    });
+});
+</script>
+{% endblock %}

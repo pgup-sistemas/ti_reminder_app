@@ -3,12 +3,13 @@ from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 from . import db
+from .utils.timezone_utils import get_current_time_for_db, now_local
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     is_ti = db.Column(db.Boolean, default=False)  # Indica se o usuário é da equipe de TI
     ativo = db.Column(db.Boolean, default=True)  # Para ativação/desativação
@@ -68,7 +69,7 @@ class Reminder(db.Model):
     status = db.Column(db.String(20), default='ativo')  # ativo, pausado, cancelado
     pause_until = db.Column(db.Date, nullable=True)  # Data até quando o lembrete está pausado
     end_date = db.Column(db.Date, nullable=True)  # Data de término da recorrência
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=get_current_time_for_db)
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -87,8 +88,8 @@ class Chamado(db.Model):
     descricao = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(50), nullable=False, default='Aberto') # Ex: Aberto, Em Andamento, Resolvido, Fechado
     prioridade = db.Column(db.String(50), nullable=False, default='Media') # Ex: Baixa, Media, Alta, Critica
-    data_abertura = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    data_ultima_atualizacao = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    data_abertura = db.Column(db.DateTime, nullable=False, default=get_current_time_for_db)
+    data_ultima_atualizacao = db.Column(db.DateTime, default=get_current_time_for_db, onupdate=get_current_time_for_db)
     data_fechamento = db.Column(db.DateTime, nullable=True)
     solicitante_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     setor_id = db.Column(db.Integer, db.ForeignKey('sector.id'), nullable=False)
@@ -112,7 +113,7 @@ class Chamado(db.Model):
         elif self.sla_cumprido is False:
             return 'vencido'
         elif self.prazo_sla:
-            agora = datetime.utcnow()
+            agora = get_current_time_for_db()
             tempo_restante = self.prazo_sla - agora
             if tempo_restante.total_seconds() < 0:
                 return 'vencido'
@@ -126,7 +127,7 @@ class Chamado(db.Model):
         if not self.prazo_sla:
             return None
         
-        agora = datetime.utcnow()
+        agora = get_current_time_for_db()
         diferenca = self.prazo_sla - agora
         
         if diferenca.total_seconds() < 0:
@@ -150,7 +151,7 @@ class Chamado(db.Model):
     def marcar_primeira_resposta(self):
         """Marca a primeira resposta e calcula o tempo de resposta"""
         if not self.data_primeira_resposta:
-            self.data_primeira_resposta = datetime.utcnow()
+            self.data_primeira_resposta = get_current_time_for_db()
             if self.prazo_sla:
                 diferenca = self.data_primeira_resposta - self.data_abertura
                 self.tempo_resposta_horas = diferenca.total_seconds() / 3600
@@ -165,7 +166,7 @@ class ComentarioChamado(db.Model):
     chamado_id = db.Column(db.Integer, db.ForeignKey('chamado.id'), nullable=False)
     usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     texto = db.Column(db.Text, nullable=False)
-    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+    data_criacao = db.Column(db.DateTime, default=get_current_time_for_db)
     tipo = db.Column(db.String(20), default='comentario')  # 'comentario' ou 'atualizacao'
     
     # Relacionamentos
@@ -179,7 +180,7 @@ class Tutorial(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     titulo = db.Column(db.String(150), nullable=False)
     conteudo = db.Column(db.Text, nullable=False)
-    data_criacao = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    data_criacao = db.Column(db.DateTime, default=get_current_time_for_db, nullable=False)
     autor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     categoria = db.Column(db.String(100), nullable=True)
 
@@ -192,7 +193,7 @@ class TutorialImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     tutorial_id = db.Column(db.Integer, db.ForeignKey('tutorial.id'), nullable=False)
     filename = db.Column(db.String(255), nullable=False)
-    upload_date = db.Column(db.DateTime, default=datetime.utcnow)
+    upload_date = db.Column(db.DateTime, default=get_current_time_for_db)
 
     tutorial = db.relationship('Tutorial', backref=db.backref('imagens', lazy=True))
 
@@ -204,7 +205,7 @@ class ComentarioTutorial(db.Model):
     tutorial_id = db.Column(db.Integer, db.ForeignKey('tutorial.id'), nullable=False)
     usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     texto = db.Column(db.Text, nullable=False)
-    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+    data_criacao = db.Column(db.DateTime, default=get_current_time_for_db)
     chamado_id = db.Column(db.Integer, db.ForeignKey('chamado.id'), nullable=True)  # Integração opcional com chamado
 
     tutorial = db.relationship('Tutorial', backref=db.backref('comentarios', lazy=True, order_by='ComentarioTutorial.data_criacao.desc()'))
@@ -219,7 +220,7 @@ class FeedbackTutorial(db.Model):
     tutorial_id = db.Column(db.Integer, db.ForeignKey('tutorial.id'), nullable=False)
     usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     util = db.Column(db.Boolean, nullable=False)  # True = útil, False = não útil
-    data = db.Column(db.DateTime, default=datetime.utcnow)
+    data = db.Column(db.DateTime, default=get_current_time_for_db)
 
     tutorial = db.relationship('Tutorial', backref=db.backref('feedbacks', lazy=True))
     usuario = db.relationship('User')
@@ -231,7 +232,7 @@ class VisualizacaoTutorial(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     tutorial_id = db.Column(db.Integer, db.ForeignKey('tutorial.id'), nullable=False)
     usuario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Pode ser nulo para visitantes
-    data = db.Column(db.DateTime, default=datetime.utcnow)
+    data = db.Column(db.DateTime, default=get_current_time_for_db)
 
     tutorial = db.relationship('Tutorial', backref=db.backref('visualizacoes', lazy=True))
     usuario = db.relationship('User')
@@ -258,7 +259,7 @@ class EquipmentRequest(db.Model):
     
     # Campos de status e controle
     status = db.Column(db.String(20), nullable=False, default='Solicitado')  # Solicitado, Aprovado, Entregue, Devolvido, Negado
-    request_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)  # Data da solicitação
+    request_date = db.Column(db.DateTime, nullable=False, default=get_current_time_for_db)  # Data da solicitação
     approval_date = db.Column(db.DateTime, nullable=True)  # Data de aprovação
     
     # Campos adicionais
@@ -267,8 +268,8 @@ class EquipmentRequest(db.Model):
     request_reason = db.Column(db.Text, nullable=True)  # Motivo da solicitação
     
     # Timestamps
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=get_current_time_for_db)
+    updated_at = db.Column(db.DateTime, nullable=False, default=get_current_time_for_db, onupdate=get_current_time_for_db)
     
     # Relacionamentos
     requester = db.relationship('User', foreign_keys=[requester_id], backref='equipment_requests_solicitadas')

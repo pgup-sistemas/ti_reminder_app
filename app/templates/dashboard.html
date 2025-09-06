@@ -14,92 +14,31 @@
     </div>
   </div>
 
-  <!-- Filtros -->
+  <!-- Alertas Críticos -->
+  {% if session.get('is_admin') and (sla_vencidos > 0 or sla_criticos > 0) %}
   <div class="row mb-4">
     <div class="col-12">
-      <div class="card shadow-sm">
-        <div class="card-header bg-light">
-          <h5 class="mb-0">Filtros</h5>
-        </div>
-        <div class="card-body">
-          <form class="row g-3" method="get" action="">
-            <div class="col-lg-2 col-md-4 col-sm-6">
-              <label for="task_status" class="form-label">Status das Tarefas</label>
-              <select id="task_status" name="task_status" class="form-select">
-                <option value="">Todas tarefas</option>
-                <option value="done" {% if request.args.get('task_status') == 'done' %}selected{% endif %}>Concluídas</option>
-                <option value="pending" {% if request.args.get('task_status') == 'pending' %}selected{% endif %}>Pendentes</option>
-                <option value="expired" {% if request.args.get('task_status') == 'expired' %}selected{% endif %}>Vencidas</option>
-              </select>
-            </div>
-            <div class="col-lg-2 col-md-4 col-sm-6">
-              <label for="reminder_status" class="form-label">Status dos Lembretes</label>
-              <select id="reminder_status" name="reminder_status" class="form-select">
-                <option value="">Todos lembretes</option>
-                <option value="done" {% if request.args.get('reminder_status') == 'done' %}selected{% endif %}>Realizados</option>
-                <option value="pending" {% if request.args.get('reminder_status') == 'pending' %}selected{% endif %}>Pendentes</option>
-              </select>
-            </div>
-            <div class="col-lg-2 col-md-4 col-sm-6">
-              <label for="chamado_status" class="form-label">Status dos Chamados</label>
-              <select id="chamado_status" name="chamado_status" class="form-select">
-                <option value="">Todos status</option>
-                <option value="Aberto" {% if request.args.get('chamado_status') == 'Aberto' %}selected{% endif %}>Aberto</option>
-                <option value="Em Andamento" {% if request.args.get('chamado_status') == 'Em Andamento' %}selected{% endif %}>Em Andamento</option>
-                <option value="Resolvido" {% if request.args.get('chamado_status') == 'Resolvido' %}selected{% endif %}>Resolvido</option> {# Novo #}
-                <option value="Fechado" {% if request.args.get('chamado_status') == 'Fechado' %}selected{% endif %}>Fechado</option>
-              </select>
-            </div>
-            <div class="col-lg-2 col-md-4 col-sm-6">
-              <label for="start_date" class="form-label">Data Inicial</label>
-              <input type="date" id="start_date" name="start_date" class="form-control" value="{{ request.args.get('start_date', '') }}">
-            </div>
-            <div class="col-lg-2 col-md-4 col-sm-6">
-              <label for="end_date" class="form-label">Data Final</label>
-              <input type="date" id="end_date" name="end_date" class="form-control" value="{{ request.args.get('end_date', '') }}">
-            </div>
-            <div class="col-lg-2 col-md-4 col-sm-6">
-              <label for="sector_id" class="form-label">Setor</label>
-              <select id="sector_id" name="sector_id" class="form-select">
-                <option value="">Todos setores</option>
-                {% for sector in sectors %}
-                  <option value="{{ sector.id }}" {% if sector.id == selected_sector %}selected{% endif %}>{{ sector.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            {% if session.is_admin %}
-            <div class="col-lg-2 col-md-4 col-sm-6">
-              <label for="user_id" class="form-label">Usuário</label>
-              <select id="user_id" name="user_id" class="form-select">
-                <option value="">Todos usuários</option>
-                {% for user in users %}
-                  <option value="{{ user.id }}" {% if user.id == selected_user %}selected{% endif %}>{{ user.username }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            {% endif %}
-            <div class="col-lg-2 col-md-4 col-sm-6">
-              <label for="tutorial_status" class="form-label">Status dos Tutoriais</label>
-              <select id="tutorial_status" name="tutorial_status" class="form-select">
-                <option value="">Todos tutoriais</option>
-                <!-- Futuramente pode-se adicionar status como publicado, rascunho, etc. -->
-              </select>
-            </div>
-            <div class="col-12 mt-3">
-              <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">
-                  <i class="bi bi-filter"></i> Aplicar Filtros
-                </button>
-                <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
-                  <i class="bi bi-x-circle"></i> Limpar Filtros
-                </a>
-              </div>
-            </div>
-          </form>
+      <div class="alert alert-danger border-0 shadow-sm" role="alert">
+        <div class="d-flex align-items-center">
+          <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+          <div>
+            <h5 class="alert-heading mb-1">Atenção: Problemas de SLA Detectados!</h5>
+            <p class="mb-0">
+              {% if sla_vencidos > 0 %}<strong>{{ sla_vencidos }}</strong> chamado(s) com SLA vencido{% endif %}
+              {% if sla_vencidos > 0 and sla_criticos > 0 %} • {% endif %}
+              {% if sla_criticos > 0 %}<strong>{{ sla_criticos }}</strong> chamado(s) em situação crítica{% endif %}
+            </p>
+          </div>
+          <div class="ms-auto">
+            <a href="#sla-section" class="btn btn-light btn-sm">
+              <i class="fas fa-eye me-1"></i>Ver Detalhes
+            </a>
+          </div>
         </div>
       </div>
     </div>
   </div>
+  {% endif %}
 
   <!-- Exportação -->
   <div class="row mb-4">
@@ -144,6 +83,116 @@
             </div>
           </form>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros Rápidos -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body py-3">
+          <div class="d-flex flex-wrap align-items-center justify-content-between">
+            <div class="d-flex flex-wrap gap-2 mb-2 mb-lg-0">
+              <span class="text-muted me-2">Filtros Rápidos:</span>
+              <a href="{{ url_for('main.dashboard', task_status='expired') }}" class="btn btn-outline-danger btn-sm">
+                <i class="fas fa-exclamation-circle me-1"></i>Tarefas Vencidas
+              </a>
+              <a href="{{ url_for('main.dashboard', reminder_status='pending') }}" class="btn btn-outline-warning btn-sm">
+                <i class="fas fa-bell me-1"></i>Lembretes Pendentes
+              </a>
+              <a href="{{ url_for('main.dashboard', chamado_status='Aberto') }}" class="btn btn-outline-info btn-sm">
+                <i class="fas fa-ticket-alt me-1"></i>Chamados Abertos
+              </a>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters" aria-expanded="false">
+                <i class="fas fa-filter me-1"></i>Filtros Avançados
+              </button>
+              <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-refresh me-1"></i>Limpar
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros Avançados (Colapsável) -->
+  <div class="collapse mb-4" id="advancedFilters">
+    <div class="card shadow-sm">
+      <div class="card-header bg-light">
+        <h6 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Filtros Avançados</h6>
+      </div>
+      <div class="card-body">
+        <form class="row g-3" method="get" action="">
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <label for="task_status" class="form-label">Status das Tarefas</label>
+            <select id="task_status" name="task_status" class="form-select form-select-sm">
+              <option value="">Todas tarefas</option>
+              <option value="done" {% if request.args.get('task_status') == 'done' %}selected{% endif %}>Concluídas</option>
+              <option value="pending" {% if request.args.get('task_status') == 'pending' %}selected{% endif %}>Pendentes</option>
+              <option value="expired" {% if request.args.get('task_status') == 'expired' %}selected{% endif %}>Vencidas</option>
+            </select>
+          </div>
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <label for="reminder_status" class="form-label">Status dos Lembretes</label>
+            <select id="reminder_status" name="reminder_status" class="form-select form-select-sm">
+              <option value="">Todos lembretes</option>
+              <option value="done" {% if request.args.get('reminder_status') == 'done' %}selected{% endif %}>Realizados</option>
+              <option value="pending" {% if request.args.get('reminder_status') == 'pending' %}selected{% endif %}>Pendentes</option>
+            </select>
+          </div>
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <label for="chamado_status" class="form-label">Status dos Chamados</label>
+            <select id="chamado_status" name="chamado_status" class="form-select form-select-sm">
+              <option value="">Todos status</option>
+              <option value="Aberto" {% if request.args.get('chamado_status') == 'Aberto' %}selected{% endif %}>Aberto</option>
+              <option value="Em Andamento" {% if request.args.get('chamado_status') == 'Em Andamento' %}selected{% endif %}>Em Andamento</option>
+              <option value="Resolvido" {% if request.args.get('chamado_status') == 'Resolvido' %}selected{% endif %}>Resolvido</option>
+              <option value="Fechado" {% if request.args.get('chamado_status') == 'Fechado' %}selected{% endif %}>Fechado</option>
+            </select>
+          </div>
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <label for="start_date" class="form-label">Data Inicial</label>
+            <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" value="{{ request.args.get('start_date', '') }}">
+          </div>
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <label for="end_date" class="form-label">Data Final</label>
+            <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" value="{{ request.args.get('end_date', '') }}">
+          </div>
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <label for="sector_id" class="form-label">Setor</label>
+            <select id="sector_id" name="sector_id" class="form-select form-select-sm">
+              <option value="">Todos setores</option>
+              {% for sector in sectors %}
+                <option value="{{ sector.id }}" {% if sector.id == selected_sector %}selected{% endif %}>{{ sector.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% if session.is_admin %}
+          <div class="col-lg-2 col-md-4 col-sm-6">
+            <label for="user_id" class="form-label">Usuário</label>
+            <select id="user_id" name="user_id" class="form-select form-select-sm">
+              <option value="">Todos usuários</option>
+              {% for user in users %}
+                <option value="{{ user.id }}" {% if user.id == selected_user %}selected{% endif %}>{{ user.username }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+          <div class="col-12 mt-3">
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-search me-1"></i> Aplicar Filtros
+              </button>
+              <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-times me-1"></i> Limpar Filtros
+              </a>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -266,13 +315,27 @@
 
   <!-- Seção específica de SLA (apenas para administradores) -->
   {% if session.get('is_admin') %}
-  <div class="row mb-4">
+  <div class="row mb-4" id="sla-section">
     <div class="col-12">
       <div class="card shadow-sm">
         <div class="card-header bg-light">
-          <h5 class="mb-0">
-            <i class="fas fa-clock me-2"></i>Relatório de SLA
-          </h5>
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="fas fa-clock me-2"></i>Relatório de SLA
+            </h5>
+            <div class="d-flex gap-2">
+              <form method="get" action="{{ url_for('main.export_excel') }}" class="d-inline">
+                <input type="hidden" name="export_type" value="chamados">
+                <!-- Remover filtro automático que estava bloqueando a exportação -->
+                <button type="submit" class="btn btn-success btn-sm">
+                  <i class="fas fa-file-excel me-1"></i>Exportar SLA
+                </button>
+              </form>
+              <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleSLAFilters()">
+                <i class="fas fa-filter me-1"></i>Filtros SLA
+              </button>
+            </div>
+          </div>
         </div>
         <div class="card-body">
           <div class="row">
@@ -322,27 +385,93 @@
             </div>
           </div>
           
+          <!-- Filtros SLA (Colapsável) -->
+          <div class="collapse mt-3" id="slaFilters">
+            <div class="row">
+              <div class="col-12">
+                <div class="card border-0 bg-light">
+                  <div class="card-body py-2">
+                    <div class="row g-2">
+                      <div class="col-md-3">
+                        <select class="form-select form-select-sm" id="slaStatusFilter">
+                          <option value="">Todos os Status SLA</option>
+                          <option value="vencido">Vencidos</option>
+                          <option value="atencao">Críticos</option>
+                          <option value="normal">OK</option>
+                        </select>
+                      </div>
+                      <div class="col-md-3">
+                        <select class="form-select form-select-sm" id="slaPriorityFilter">
+                          <option value="">Todas as Prioridades</option>
+                          <option value="Critica">Crítica</option>
+                          <option value="Alta">Alta</option>
+                          <option value="Media">Média</option>
+                          <option value="Baixa">Baixa</option>
+                        </select>
+                      </div>
+                      <div class="col-md-4">
+                        <input type="text" class="form-control form-control-sm" id="slaSearchFilter" placeholder="Buscar por título...">
+                      </div>
+                      <div class="col-md-2">
+                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="clearSLAFilters()">
+                          <i class="fas fa-times me-1"></i>Limpar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Tabela de Chamados por Status de SLA -->
           <div class="row mt-4">
             <div class="col-12">
-              <h6 class="mb-3">Chamados por Status de SLA</h6>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0">Chamados por Status de SLA</h6>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="text-muted small">Mostrando <span id="slaTableCount">{{ chamados_sla|length }}</span> chamados</span>
+                  <select class="form-select form-select-sm" id="slaPageSize" style="width: auto;">
+                    <option value="10">10 por página</option>
+                    <option value="25">25 por página</option>
+                    <option value="50">50 por página</option>
+                  </select>
+                </div>
+              </div>
               <div class="table-responsive">
-                <table class="table table-sm table-striped">
+                <table class="table table-sm table-striped" id="slaTable">
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>Título</th>
-                      <th>Prioridade</th>
-                      <th>Status</th>
-                      <th>Prazo SLA</th>
-                      <th>Status SLA</th>
+                      <th style="cursor: pointer;" onclick="sortSLATable('id')">
+                        ID <i class="fas fa-sort text-muted"></i>
+                      </th>
+                      <th style="cursor: pointer;" onclick="sortSLATable('titulo')">
+                        Título <i class="fas fa-sort text-muted"></i>
+                      </th>
+                      <th style="cursor: pointer;" onclick="sortSLATable('prioridade')">
+                        Prioridade <i class="fas fa-sort text-muted"></i>
+                      </th>
+                      <th style="cursor: pointer;" onclick="sortSLATable('status')">
+                        Status <i class="fas fa-sort text-muted"></i>
+                      </th>
+                      <th style="cursor: pointer;" onclick="sortSLATable('prazo_sla')">
+                        Prazo SLA <i class="fas fa-sort text-muted"></i>
+                      </th>
+                      <th style="cursor: pointer;" onclick="sortSLATable('status_sla')">
+                        Status SLA <i class="fas fa-sort text-muted"></i>
+                      </th>
+                      <th>Ações</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody id="slaTableBody">
                     {% for chamado in chamados_sla %}
-                    <tr>
+                    <tr data-sla-status="{{ chamado.status_sla }}" data-priority="{{ chamado.prioridade }}" data-title="{{ chamado.titulo|lower }}">
                       <td>{{ chamado.id }}</td>
-                      <td>{{ chamado.titulo[:30] }}{% if chamado.titulo|length > 30 %}...{% endif %}</td>
+                      <td>
+                        <div class="text-truncate" style="max-width: 200px;" title="{{ chamado.titulo }}">
+                          {{ chamado.titulo[:30] }}{% if chamado.titulo|length > 30 %}...{% endif %}
+                        </div>
+                      </td>
                       <td>
                         <span class="badge bg-{{ 'dark' if chamado.prioridade == 'Critica' else ('danger' if chamado.prioridade == 'Alta' else ('warning' if chamado.prioridade == 'Media' else 'info')) }}">
                           {{ chamado.prioridade }}
@@ -355,29 +484,46 @@
                       </td>
                       <td>
                         {% if chamado.prazo_sla %}
-                          {{ chamado.prazo_sla.strftime("%d/%m/%Y %H:%M") }}
+                          {{ chamado.prazo_sla | local_datetime }}
                         {% else %}
-                          N/A
+                          <span class="text-muted">N/A</span>
                         {% endif %}
                       </td>
                       <td>
                         {% if chamado.prazo_sla %}
-                          {% set status_sla = chamado.obter_status_sla() %}
+                          {% set status_sla = chamado.status_sla %}
                           {% if status_sla == 'vencido' %}
-                            <span class="badge bg-danger">Vencido</span>
-                          {% elif status_sla == 'proximo_vencimento' %}
-                            <span class="badge bg-warning">Crítico</span>
-                          {% elif status_sla == 'dentro_prazo' %}
-                            <span class="badge bg-success">OK</span>
+                            <span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>Vencido</span>
+                          {% elif status_sla == 'atencao' %}
+                            <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Crítico</span>
+                          {% elif status_sla == 'normal' %}
+                            <span class="badge bg-success"><i class="fas fa-check me-1"></i>OK</span>
                           {% endif %}
                         {% else %}
                           <span class="text-muted">N/A</span>
                         {% endif %}
                       </td>
+                      <td>
+                        <a href="{{ url_for('main.detalhe_chamado', id=chamado.id) }}" class="btn btn-outline-primary btn-sm" title="Ver Detalhes">
+                          <i class="fas fa-eye"></i>
+                        </a>
+                      </td>
                     </tr>
                     {% endfor %}
                   </tbody>
                 </table>
+              </div>
+              
+              <!-- Paginação SLA -->
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <div class="text-muted small">
+                  Página <span id="slaCurrentPage">1</span> de <span id="slaTotalPages">1</span>
+                </div>
+                <nav>
+                  <ul class="pagination pagination-sm mb-0" id="slaPagination">
+                    <!-- Paginação será gerada via JavaScript -->
+                  </ul>
+                </nav>
               </div>
             </div>
           </div>
@@ -992,5 +1138,192 @@
         }
       }
     });
+
+  // Funções para SLA
+  function toggleSLAFilters() {
+    const filters = document.getElementById('slaFilters');
+    const bsCollapse = new bootstrap.Collapse(filters, {
+      toggle: true
+    });
+  }
+
+  // Variáveis globais para paginação SLA
+  let slaCurrentPage = 1;
+  let slaPageSize = 10;
+  let slaData = [];
+  let slaFilteredData = [];
+  let slaSortColumn = '';
+  let slaSortDirection = 'asc';
+
+  // Inicializar dados SLA
+  document.addEventListener('DOMContentLoaded', function() {
+    // Coletar dados da tabela
+    const rows = document.querySelectorAll('#slaTableBody tr');
+    slaData = Array.from(rows).map(row => {
+      return {
+        element: row,
+        id: parseInt(row.cells[0].textContent),
+        titulo: row.cells[1].textContent.trim(),
+        prioridade: row.getAttribute('data-priority'),
+        status: row.cells[3].textContent.trim(),
+        prazo_sla: row.cells[4].textContent.trim(),
+        status_sla: row.getAttribute('data-sla-status')
+      };
+    });
+    slaFilteredData = [...slaData];
+    
+    // Configurar event listeners
+    document.getElementById('slaStatusFilter').addEventListener('change', filterSLATable);
+    document.getElementById('slaPriorityFilter').addEventListener('change', filterSLATable);
+    document.getElementById('slaSearchFilter').addEventListener('input', filterSLATable);
+    document.getElementById('slaPageSize').addEventListener('change', function() {
+      slaPageSize = parseInt(this.value);
+      slaCurrentPage = 1;
+      renderSLATable();
+    });
+    
+    renderSLATable();
+  });
+
+  function filterSLATable() {
+    const statusFilter = document.getElementById('slaStatusFilter').value;
+    const priorityFilter = document.getElementById('slaPriorityFilter').value;
+    const searchFilter = document.getElementById('slaSearchFilter').value.toLowerCase();
+    
+    slaFilteredData = slaData.filter(item => {
+      const matchStatus = !statusFilter || item.status_sla === statusFilter;
+      const matchPriority = !priorityFilter || item.prioridade === priorityFilter;
+      const matchSearch = !searchFilter || item.titulo.toLowerCase().includes(searchFilter);
+      return matchStatus && matchPriority && matchSearch;
+    });
+    
+    slaCurrentPage = 1;
+    renderSLATable();
+  }
+
+  function sortSLATable(column) {
+    if (slaSortColumn === column) {
+      slaSortDirection = slaSortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      slaSortColumn = column;
+      slaSortDirection = 'asc';
+    }
+    
+    slaFilteredData.sort((a, b) => {
+      let aVal = a[column];
+      let bVal = b[column];
+      
+      if (column === 'id') {
+        aVal = parseInt(aVal);
+        bVal = parseInt(bVal);
+      }
+      
+      if (aVal < bVal) return slaSortDirection === 'asc' ? -1 : 1;
+      if (aVal > bVal) return slaSortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    
+    renderSLATable();
+    updateSortIcons(column, slaSortDirection);
+  }
+
+  function updateSortIcons(activeColumn, direction) {
+    // Reset all sort icons
+    document.querySelectorAll('#slaTable th i').forEach(icon => {
+      icon.className = 'fas fa-sort text-muted';
+    });
+    
+    // Update active column icon
+    const activeHeader = document.querySelector(`#slaTable th[onclick="sortSLATable('${activeColumn}')"] i`);
+    if (activeHeader) {
+      activeHeader.className = `fas fa-sort-${direction === 'asc' ? 'up' : 'down'} text-primary`;
+    }
+  }
+
+  function renderSLATable() {
+    const tbody = document.getElementById('slaTableBody');
+    const startIndex = (slaCurrentPage - 1) * slaPageSize;
+    const endIndex = startIndex + slaPageSize;
+    const pageData = slaFilteredData.slice(startIndex, endIndex);
+    
+    // Limpar tabela
+    tbody.innerHTML = '';
+    
+    // Adicionar linhas da página atual
+    pageData.forEach(item => {
+      tbody.appendChild(item.element.cloneNode(true));
+    });
+    
+    // Atualizar contadores
+    document.getElementById('slaTableCount').textContent = slaFilteredData.length;
+    
+    // Renderizar paginação
+    renderSLAPagination();
+  }
+
+  function renderSLAPagination() {
+    const totalPages = Math.ceil(slaFilteredData.length / slaPageSize);
+    const pagination = document.getElementById('slaPagination');
+    
+    document.getElementById('slaCurrentPage').textContent = slaCurrentPage;
+    document.getElementById('slaTotalPages').textContent = totalPages;
+    
+    let paginationHTML = '';
+    
+    // Botão Anterior
+    paginationHTML += `<li class="page-item ${slaCurrentPage === 1 ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="changeSLAPage(${slaCurrentPage - 1})">
+        <i class="fas fa-chevron-left"></i>
+      </a>
+    </li>`;
+    
+    // Páginas
+    const startPage = Math.max(1, slaCurrentPage - 2);
+    const endPage = Math.min(totalPages, slaCurrentPage + 2);
+    
+    if (startPage > 1) {
+      paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changeSLAPage(1)">1</a></li>`;
+      if (startPage > 2) {
+        paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+      }
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      paginationHTML += `<li class="page-item ${i === slaCurrentPage ? 'active' : ''}">
+        <a class="page-link" href="#" onclick="changeSLAPage(${i})">${i}</a>
+      </li>`;
+    }
+    
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+      }
+      paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changeSLAPage(${totalPages})">${totalPages}</a></li>`;
+    }
+    
+    // Botão Próximo
+    paginationHTML += `<li class="page-item ${slaCurrentPage === totalPages ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="changeSLAPage(${slaCurrentPage + 1})">
+        <i class="fas fa-chevron-right"></i>
+      </a>
+    </li>`;
+    
+    pagination.innerHTML = paginationHTML;
+  }
+
+  function changeSLAPage(page) {
+    const totalPages = Math.ceil(slaFilteredData.length / slaPageSize);
+    if (page >= 1 && page <= totalPages) {
+      slaCurrentPage = page;
+      renderSLATable();
+    }
+  }
+
+  function clearSLAFilters() {
+    document.getElementById('slaStatusFilter').value = '';
+    document.getElementById('slaPriorityFilter').value = '';
+    document.getElementById('slaSearchFilter').value = '';
+    filterSLATable();
+  }
 </script>
 {% endblock %}

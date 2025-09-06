@@ -73,28 +73,30 @@
                 <td><span class="badge bg-{{ "dark" if chamado.prioridade == "Critica" else ("danger" if chamado.prioridade == "Alta" else ("warning" if chamado.prioridade == "Media" else "info")) }}">{{ chamado.prioridade }}</span></td>
                 <td>
                     {% if chamado.prazo_sla %}
-                        {% set status_sla = chamado.obter_status_sla() %}
+                        {% set status_sla = chamado.status_sla %}
                         {% if status_sla == 'vencido' %}
                             <span class="badge bg-danger" title="SLA vencido">
                                 <i class="fa fa-clock"></i> Vencido
                             </span>
-                        {% elif status_sla == 'proximo_vencimento' %}
-                            <span class="badge bg-warning" title="SLA próximo ao vencimento">
-                                <i class="fa fa-clock"></i> Crítico
+                        {% elif status_sla == 'atencao' %}
+                            <span class="badge bg-warning" title="SLA próximo do vencimento">
+                                <i class="fa fa-clock"></i> Atenção
                             </span>
-                        {% elif status_sla == 'dentro_prazo' %}
-                            <span class="badge bg-success" title="SLA dentro do prazo">
+                        {% elif status_sla == 'normal' %}
+                            <span class="badge bg-success" title="Dentro do prazo do SLA">
                                 <i class="fa fa-check"></i> OK
                             </span>
+                        {% else %}
+                            <span class="text-muted">N/A</span>
                         {% endif %}
-                        <br><small class="text-muted">{{ chamado.prazo_sla.strftime("%d/%m %H:%M") }}</small>
+                        <br><small class="text-muted">{{ chamado.prazo_sla|local_datetime('%d/%m %H:%M') }}</small>
                     {% else %}
                         <span class="text-muted">N/A</span>
                     {% endif %}
                 </td>
                 <td>{{ chamado.solicitante.username if chamado.solicitante else "N/A" }}</td>
                 <td>{{ chamado.setor.name if chamado.setor else "N/A" }}</td>
-                <td>{{ chamado.data_abertura.strftime("%d/%m/%Y %H:%M") }}</td>
+                <td>{{ chamado.data_abertura|local_datetime }}</td>
                 <td>
                     <a href="{{ url_for("main.detalhe_chamado", id=chamado.id) }}" class="btn btn-sm btn-info">Detalhes</a>
                     {# Adicionar botões de ação para TI (editar, atribuir, etc.) aqui se necessário #}

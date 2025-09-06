@@ -7,8 +7,8 @@
 
 :root {
     /* Cores principais - Paleta profissional */
-    --primary: #2563eb;
-    --primary-hover: #1d4ed8;
+    --primary: #008BCD;
+    --primary-hover: #006ba3;
     --primary-light: #eff6ff;
     --secondary: #64748b;
     --success: #059669;
@@ -732,7 +732,7 @@ body {
 }
 
 /* Cores dos cartões */
-.bg-primary { background-color: #007bff !important; }
+.bg-primary { background-color: #008BCD !important; }
 .bg-success { background-color: #28a745 !important; }
 .bg-warning { background-color: #ffc107 !important; }
 .bg-danger { background-color: #dc3545 !important; }
