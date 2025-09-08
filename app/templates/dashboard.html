@@ -197,38 +197,46 @@
     </div>
   </div>
 
-  <!-- Cards de resumo -->
-  <div class="row mb-4">
+  <!-- Cards de resumo modernos -->
+  <div class="row mb-5">
     <!-- Card de Tarefas -->
-    <div class="col-lg-4 col-md-6 mb-3">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-light">
-          <h5 class="mb-0">Resumo de Tarefas</h5>
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="modern-dashboard-card h-100">
+        <div class="card-header-modern bg-gradient-primary">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="text-white mb-1 fw-bold">Tarefas</h5>
+              <p class="text-white-50 mb-0 small">Gerenciamento de atividades</p>
+            </div>
+            <div class="icon-container-modern">
+              <i class="fas fa-tasks fa-2x text-white"></i>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
           <div class="row">
             <div class="col-md-6">
-              <div class="mb-3" style="width: 100%; max-width: 220px; margin: 0 auto;">
-                <canvas id="grafico_tarefas" height="220"></canvas>
+              <div class="chart-container-modern">
+                <canvas id="grafico_tarefas" height="180"></canvas>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="list-group">
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Total
-                  <span class="badge bg-primary rounded-pill">{{ tasks_total }}</span>
+              <div class="stats-modern">
+                <div class="stat-item-modern">
+                  <span class="stat-label">Total</span>
+                  <span class="stat-value text-primary">{{ tasks_total }}</span>
                 </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Concluídas
-                  <span class="badge bg-success rounded-pill">{{ tasks_done }}</span>
+                <div class="stat-item-modern">
+                  <span class="stat-label">Concluídas</span>
+                  <span class="stat-value text-success">{{ tasks_done }}</span>
                 </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Pendentes
-                  <span class="badge bg-danger rounded-pill">{{ tasks_pending }}</span>
+                <div class="stat-item-modern">
+                  <span class="stat-label">Pendentes</span>
+                  <span class="stat-value text-danger">{{ tasks_pending }}</span>
                 </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Vencidas
-                  <span class="badge bg-warning text-dark rounded-pill">{{ tasks_expired }}</span>
+                <div class="stat-item-modern">
+                  <span class="stat-label">Vencidas</span>
+                  <span class="stat-value text-warning">{{ tasks_expired }}</span>
                 </div>
               </div>
             </div>
@@ -237,80 +245,96 @@
       </div>
     </div>
     <!-- Card de Lembretes -->
-    <div class="col-lg-4 col-md-6 mb-3">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-light">
-          <h5 class="mb-0">Resumo de Lembretes</h5>
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="modern-dashboard-card h-100">
+        <div class="card-header-modern bg-gradient-warning">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="text-white mb-1 fw-bold">Lembretes</h5>
+              <p class="text-white-50 mb-0 small">Notificações e alertas</p>
+            </div>
+            <div class="icon-container-modern">
+              <i class="fas fa-bell fa-2x text-white"></i>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
           <div class="row">
             <div class="col-md-6">
-              <div class="mb-3" style="width: 100%; max-width: 220px; margin: 0 auto;">
-                <canvas id="grafico_lembretes" height="220"></canvas>
+              <div class="chart-container-modern">
+                <canvas id="grafico_lembretes" height="180"></canvas>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="list-group">
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Total
-                  <span class="badge bg-primary rounded-pill">{{ reminders_total }}</span>
+              <div class="stats-modern">
+                <div class="stat-item-modern">
+                  <span class="stat-label">Total</span>
+                  <span class="stat-value text-primary">{{ reminders_total }}</span>
                 </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Realizados
-                  <span class="badge bg-success rounded-pill">{{ reminders_done }}</span>
+                <div class="stat-item-modern">
+                  <span class="stat-label">Realizados</span>
+                  <span class="stat-value text-success">{{ reminders_done }}</span>
                 </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Pendentes
-                  <span class="badge bg-danger rounded-pill">{{ reminders_pending }}</span>
-                </div> <!-- Fecha o list-group-item de Lembretes Pendentes -->
-              </div> <!-- Fecha o list-group de Lembretes -->
-            </div> <!-- Fecha o col-md-6 da lista de Lembretes -->
-          </div> <!-- Fecha o row do card-body de Lembretes -->
-        </div> <!-- Fecha o card-body de Lembretes -->
-      </div> <!-- Fecha o card de Lembretes -->
-    </div> <!-- Fecha o col-lg-4 do card de Lembretes -->
+                <div class="stat-item-modern">
+                  <span class="stat-label">Pendentes</span>
+                  <span class="stat-value text-warning">{{ reminders_pending }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Card de Chamados -->
-    <div class="col-lg-4 col-md-6 mb-3">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-light">
-          <h5 class="mb-0">Resumo de Chamados</h5>
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="modern-dashboard-card h-100">
+        <div class="card-header-modern bg-gradient-info">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="text-white mb-1 fw-bold">Chamados</h5>
+              <p class="text-white-50 mb-0 small">Suporte e atendimento</p>
+            </div>
+            <div class="icon-container-modern">
+              <i class="fas fa-ticket-alt fa-2x text-white"></i>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
           <div class="row">
             <div class="col-md-6">
-              <div class="mb-3" style="width: 100%; max-width: 220px; margin: 0 auto;">
-                <canvas id="grafico_chamados" height="220"></canvas>
+              <div class="chart-container-modern">
+                <canvas id="grafico_chamados" height="180"></canvas>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="list-group">
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Total
-                  <span class="badge bg-primary rounded-pill">{{ chamados_total }}</span>
+              <div class="stats-modern">
+                <div class="stat-item-modern">
+                  <span class="stat-label">Total</span>
+                  <span class="stat-value text-primary">{{ chamados_total }}</span>
                 </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Abertos
-                  <span class="badge bg-info rounded-pill">{{ chamados_aberto }}</span>
+                <div class="stat-item-modern">
+                  <span class="stat-label">Abertos</span>
+                  <span class="stat-value text-info">{{ chamados_aberto }}</span>
                 </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Em Andamento
-                  <span class="badge bg-warning text-dark rounded-pill">{{ chamados_em_andamento }}</span>
+                <div class="stat-item-modern">
+                  <span class="stat-label">Andamento</span>
+                  <span class="stat-value text-warning">{{ chamados_em_andamento }}</span>
                 </div>
-<div class="list-group-item d-flex justify-content-between align-items-center">
-                  Resolvidos
-                  <span class="badge bg-primary rounded-pill">{{ chamados_resolvido }}</span>
+                <div class="stat-item-modern">
+                  <span class="stat-label">Resolvidos</span>
+                  <span class="stat-value text-primary">{{ chamados_resolvido }}</span>
                 </div>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  Fechados
-                  <span class="badge bg-success rounded-pill">{{ chamados_fechado }}</span>
+                <div class="stat-item-modern">
+                  <span class="stat-label">Fechados</span>
+                  <span class="stat-value text-success">{{ chamados_fechado }}</span>
                 </div>
-              </div> <!-- Fecha o list-group de Chamados -->
-            </div> <!-- Fecha o col-md-6 da lista de Chamados -->
-          </div> <!-- Fecha o row do card-body de Chamados -->
-        </div> <!-- Fecha o card-body de Chamados -->
-      </div> <!-- Fecha o card de Chamados -->
-    </div> <!-- Fecha o col-lg-4 do card de Chamados -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Seção específica de SLA (apenas para administradores) -->
@@ -533,51 +557,155 @@
   </div>
   {% endif %}
 
-  <div class="row mb-4">
+  <!-- Cards secundários modernos -->
+  <div class="row mb-5">
     <!-- Card de Equipamentos -->
-          <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card shadow-sm h-100 border-0">
-              <div class="card-body bg-gradient" style="background-color: #6f42c1; border-radius: 0.375rem;">
-                <div class="d-flex justify-content-between">
-                  <div class="text-white">
-                    <h4 class="card-title fw-bold mb-1">{{ equipamentos_total }}</h4>
-                    <p class="card-text mb-0 small">Total de Equipamentos</p>
-                    <div class="mt-2">
-                      <span class="badge bg-light text-dark me-1">{{ equipamentos_solicitados }} Solicitados</span>
-                      <span class="badge bg-light text-dark me-1">{{ equipamentos_aprovados }} Aprovados</span>
-                      <span class="badge bg-light text-dark me-1">{{ equipamentos_entregues }} Entregues</span>
-                      <span class="badge bg-light text-dark">{{ equipamentos_negados }} Negados</span>
-                    </div>
-                  </div>
-                  <div class="align-self-center bg-white p-3 rounded-circle shadow-sm">
-                    <i class="fas fa-laptop fa-2x text-purple"></i>
-                  </div>
-                </div>
-              </div>
+    <div class="col-lg-6 col-xl-3 mb-4">
+      <div class="modern-dashboard-card h-100">
+        <div class="card-header-modern bg-gradient-purple">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="text-white mb-1 fw-bold">Equipamentos</h5>
+              <p class="text-white-50 mb-0 small">Controle de ativos</p>
+            </div>
+            <div class="icon-container-modern">
+              <i class="fas fa-laptop fa-2x text-white"></i>
             </div>
           </div>
+        </div>
+        <div class="card-body p-4">
+          <div class="text-center mb-3">
+            <h2 class="display-6 fw-bold text-primary mb-0">{{ equipamentos_total }}</h2>
+            <small class="text-muted">Total de equipamentos</small>
+          </div>
+          <div class="stats-modern">
+            <div class="stat-item-modern">
+              <span class="stat-label">Solicitados</span>
+              <span class="stat-value text-warning">{{ equipamentos_solicitados }}</span>
+            </div>
+            <div class="stat-item-modern">
+              <span class="stat-label">Aprovados</span>
+              <span class="stat-value text-info">{{ equipamentos_aprovados }}</span>
+            </div>
+            <div class="stat-item-modern">
+              <span class="stat-label">Entregues</span>
+              <span class="stat-value text-success">{{ equipamentos_entregues }}</span>
+            </div>
+            <div class="stat-item-modern">
+              <span class="stat-label">Negados</span>
+              <span class="stat-value text-danger">{{ equipamentos_negados }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-          <!-- Card Tutoriais -->
-          <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card shadow-sm h-100 border-0">
-              <div class="card-body bg-gradient" style="background-color: #198754; border-radius: 0.375rem;">
-                <div class="d-flex justify-content-between">
-                  <div class="text-white">
-                    <h4 class="card-title fw-bold mb-1">{{ total_tutoriais }}</h4>
-                    <p class="card-text mb-0 small">Total de Tutoriais</p>
-                    <div class="mt-2">
-                      <span class="badge bg-light text-dark me-1">{{ feedbacks_util }} Úteis</span>
-                      <span class="badge bg-light text-dark me-1">{{ feedbacks_nao_util }} Não úteis</span>
-                      <span class="badge bg-light text-dark">{{ feedbacks_util + feedbacks_nao_util }} Feedbacks</span>
-                    </div>
-                  </div>
-                  <div class="align-self-center bg-white p-3 rounded-circle shadow-sm">
-                    <i class="fas fa-book fa-2x text-success"></i>
-                  </div>
-                </div>
-              </div>
+    <!-- Card Tutoriais -->
+    <div class="col-lg-6 col-xl-3 mb-4">
+      <div class="modern-dashboard-card h-100">
+        <div class="card-header-modern bg-gradient-success">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="text-white mb-1 fw-bold">Tutoriais</h5>
+              <p class="text-white-50 mb-0 small">Base de conhecimento</p>
+            </div>
+            <div class="icon-container-modern">
+              <i class="fas fa-book fa-2x text-white"></i>
             </div>
           </div>
+        </div>
+        <div class="card-body p-4">
+          <div class="text-center mb-3">
+            <h2 class="display-6 fw-bold text-success mb-0">{{ total_tutoriais }}</h2>
+            <small class="text-muted">Total de tutoriais</small>
+          </div>
+          <div class="stats-modern">
+            <div class="stat-item-modern">
+              <span class="stat-label">Úteis</span>
+              <span class="stat-value text-success">{{ feedbacks_util }}</span>
+            </div>
+            <div class="stat-item-modern">
+              <span class="stat-label">Não úteis</span>
+              <span class="stat-value text-danger">{{ feedbacks_nao_util }}</span>
+            </div>
+            <div class="stat-item-modern">
+              <span class="stat-label">Total Feedbacks</span>
+              <span class="stat-value text-primary">{{ feedbacks_util + feedbacks_nao_util }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card de Performance Geral -->
+    <div class="col-lg-6 col-xl-3 mb-4">
+      <div class="modern-dashboard-card h-100">
+        <div class="card-header-modern bg-gradient-dark">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="text-white mb-1 fw-bold">Performance</h5>
+              <p class="text-white-50 mb-0 small">Indicadores gerais</p>
+            </div>
+            <div class="icon-container-modern">
+              <i class="fas fa-chart-line fa-2x text-white"></i>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-4">
+          <div class="text-center mb-3">
+            <h2 class="display-6 fw-bold text-dark mb-0">{{ ((tasks_done + reminders_done + chamados_fechado) / (tasks_total + reminders_total + chamados_total) * 100) | round(1) if (tasks_total + reminders_total + chamados_total) > 0 else 0 }}%</h2>
+            <small class="text-muted">Taxa de conclusão</small>
+          </div>
+          <div class="stats-modern">
+            <div class="stat-item-modern">
+              <span class="stat-label">Atividades</span>
+              <span class="stat-value text-primary">{{ tasks_total + reminders_total + chamados_total }}</span>
+            </div>
+            <div class="stat-item-modern">
+              <span class="stat-label">Concluídas</span>
+              <span class="stat-value text-success">{{ tasks_done + reminders_done + chamados_fechado }}</span>
+            </div>
+            <div class="stat-item-modern">
+              <span class="stat-label">Pendentes</span>
+              <span class="stat-value text-warning">{{ tasks_pending + reminders_pending + (chamados_total - chamados_fechado) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card de Ações Rápidas -->
+    <div class="col-lg-6 col-xl-3 mb-4">
+      <div class="modern-dashboard-card h-100">
+        <div class="card-header-modern bg-gradient-secondary">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="text-white mb-1 fw-bold">Ações Rápidas</h5>
+              <p class="text-white-50 mb-0 small">Acesso direto</p>
+            </div>
+            <div class="icon-container-modern">
+              <i class="fas fa-bolt fa-2x text-white"></i>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-4">
+          <div class="d-grid gap-2">
+            <a href="{{ url_for('main.tasks') }}" class="btn btn-outline-primary btn-sm">
+              <i class="fas fa-plus me-2"></i>Nova Tarefa
+            </a>
+            <a href="{{ url_for('main.reminders') }}" class="btn btn-outline-warning btn-sm">
+              <i class="fas fa-bell me-2"></i>Novo Lembrete
+            </a>
+            <a href="{{ url_for('main.abrir_chamado') }}" class="btn btn-outline-info btn-sm">
+              <i class="fas fa-ticket-alt me-2"></i>Abrir Chamado
+            </a>
+            <a href="{{ url_for('main.new_equipment_request') }}" class="btn btn-outline-success btn-sm">
+              <i class="fas fa-laptop me-2"></i>Solicitar Equipamento
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Gráficos Detalhados -->

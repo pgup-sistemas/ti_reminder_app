@@ -38,7 +38,7 @@
 <nav class="navbar navbar-expand-lg shadow-sm mb-4">
   <div class="container-fluid">
     <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') }}">
-      <i class="fas fa-microchip me-2" style="color: #008BCD;"></i>
+      <i class="fas fa-microchip me-2" style="color: white;"></i>
       <span class="fw-bold">TI OSN System</span>
     </a>
     
@@ -48,67 +48,143 @@
     
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
+        <!-- Dashboard Principal -->
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" href="{{ url_for('main.index') }}">
-            <i class="fas fa-home me-1"></i> Dashboard
+            <i class="fas fa-home me-2"></i> Dashboard
           </a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'main.reminders' %}active{% endif %}" href="{{ url_for('main.reminders') }}">
-            <i class="fas fa-bell me-1"></i> Lembretes
+        
+        <!-- Dropdown Atividades -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.tasks', 'main.reminders'] %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="fas fa-clipboard-list me-2"></i> Atividades
           </a>
+          <ul class="dropdown-menu">
+            <li><h6 class="dropdown-header"><i class="fas fa-clipboard-list me-2"></i>Gerenciar Atividades</h6></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'main.tasks' %}active{% endif %}" href="{{ url_for('main.tasks') }}">
+                <i class="fas fa-tasks me-2"></i> Tarefas
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'main.reminders' %}active{% endif %}" href="{{ url_for('main.reminders') }}">
+                <i class="fas fa-bell me-2"></i> Lembretes
+              </a>
+            </li>
+          </ul>
         </li>
-        <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'main.tasks' %}active{% endif %}" href="{{ url_for('main.tasks') }}">
-            <i class="fas fa-tasks me-1"></i> Tarefas
+        
+        <!-- Dropdown Suporte -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.listar_chamados', 'main.abrir_chamado'] %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="fas fa-headset me-2"></i> Suporte
           </a>
+          <ul class="dropdown-menu">
+            <li><h6 class="dropdown-header"><i class="fas fa-headset me-2"></i>Central de Suporte</h6></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item" href="{{ url_for('main.abrir_chamado') }}">
+                <i class="fas fa-plus-circle me-2"></i> Abrir Chamado
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'main.listar_chamados' %}active{% endif %}" href="{{ url_for('main.listar_chamados') }}">
+                <i class="fas fa-ticket-alt me-2"></i> Meus Chamados
+              </a>
+            </li>
+          </ul>
         </li>
-        <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'main.listar_chamados' %}active{% endif %}" href="{{ url_for('main.listar_chamados') }}">
-            <i class="fas fa-ticket-alt me-1"></i> Chamados
+        
+        <!-- Dropdown Recursos -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.list_equipment', 'main.request_equipment', 'main.listar_tutoriais'] %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="fas fa-cube me-2"></i> Recursos
           </a>
+          <ul class="dropdown-menu">
+            <li><h6 class="dropdown-header"><i class="fas fa-cube me-2"></i>Recursos e Conhecimento</h6></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'main.list_equipment' %}active{% endif %}" href="{{ url_for('main.list_equipment') }}">
+                <i class="fas fa-laptop me-2"></i> Equipamentos
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ url_for('main.new_equipment_request') }}">
+                <i class="fas fa-plus-circle me-2"></i> Solicitar Equipamento
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'main.listar_tutoriais' %}active{% endif %}" href="{{ url_for('main.listar_tutoriais') }}">
+                <i class="fas fa-book me-2"></i> Tutoriais
+              </a>
+            </li>
+          </ul>
         </li>
-        <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'main.list_equipment' %}active{% endif %}" href="{{ url_for('main.list_equipment') }}">
-            <i class="fas fa-laptop me-1"></i> Equipamentos
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'main.listar_tutoriais' %}active{% endif %}" href="{{ url_for('main.listar_tutoriais') }}">
-            <i class="fas fa-book me-1"></i> Tutoriais
-          </a>
-        </li>
+        
+        <!-- Relatórios -->
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}" href="{{ url_for('main.dashboard') }}">
-            <i class="fas fa-chart-bar me-1"></i> Relatórios
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'main.help_page' %}active{% endif %}" href="{{ url_for('main.help_page') }}">
-            <i class="fas fa-question-circle me-1"></i> Ajuda
+            <i class="fas fa-chart-bar me-2"></i> Relatórios
           </a>
         </li>
       </ul>
       
       <ul class="navbar-nav">
-        {% if session.get('is_admin') %}
+        <!-- Ajuda -->
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'main.users_admin' %}active{% endif %}" href="{{ url_for('main.users_admin') }}">
-            <i class="fas fa-users-cog me-1"></i> Usuários
+          <a class="nav-link {% if request.endpoint == 'main.help_page' %}active{% endif %}" href="{{ url_for('main.help_page') }}" title="Central de Ajuda">
+            <i class="fas fa-question-circle me-1"></i>
+            <span class="d-none d-lg-inline">Ajuda</span>
           </a>
         </li>
-        {% endif %}
+        
+        
+        <!-- Perfil do Usuário -->
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-            <i class="fas fa-user-circle me-2"></i>
-            <span class="d-none d-md-inline">{{ session['username'] }}</span>
+            <div class="user-avatar me-2">
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <span class="d-none d-md-inline fw-medium">{{ session['username'] }}</span>
           </a>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li><h6 class="dropdown-header">{{ session['username'] }}</h6></li>
+            <li><h6 class="dropdown-header">
+              <i class="fas fa-user me-2"></i>{{ session['username'] }}
+              {% if session.get('is_admin') %}
+                <span class="badge bg-primary ms-2">Admin</span>
+              {% endif %}
+            </h6></li>
             <li><hr class="dropdown-divider"></li>
             <li>
-              <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
-                <i class="fas fa-sign-out-alt me-2"></i> Sair
+              <a class="dropdown-item" href="{{ url_for('main.index') }}">
+                <i class="fas fa-tachometer-alt me-2"></i> Meu Dashboard
+              </a>
+            </li>
+            {% if session.get('is_admin') %}
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'main.users_admin' %}active{% endif %}" href="{{ url_for('main.users_admin') }}">
+                <i class="fas fa-users-cog me-2"></i> Gerenciar Usuários
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ url_for('main.dashboard') }}">
+                <i class="fas fa-chart-line me-2"></i> Relatórios Avançados
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            {% endif %}
+            <li>
+              <a class="dropdown-item" href="#" onclick="toggleTheme()">
+                <i class="fas fa-moon me-2"></i> Alternar Tema
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                <i class="fas fa-sign-out-alt me-2"></i> Sair do Sistema
               </a>
             </li>
           </ul>
