@@ -1,0 +1,431 @@
+/* ===== FORMULÁRIOS PADRONIZADOS - TI OSN SYSTEM ===== */
+
+/* Variáveis para formulários */
+:root {
+  --form-border-radius: 8px;
+  --form-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --form-shadow-focus: 0 4px 12px rgba(0, 139, 205, 0.15);
+  --form-transition: all 0.3s ease;
+  --form-spacing: 1.5rem;
+}
+
+/* Container padrão de formulários */
+.form-container {
+  background: white;
+  border-radius: var(--form-border-radius);
+  box-shadow: var(--form-shadow);
+  padding: var(--form-spacing);
+  margin-bottom: var(--form-spacing);
+  border: 1px solid var(--gray-200);
+}
+
+.form-container.compact {
+  padding: 1rem;
+}
+
+.form-container.large {
+  padding: 2rem;
+}
+
+/* Cabeçalho de formulário */
+.form-header {
+  border-bottom: 2px solid var(--gray-100);
+  padding-bottom: 1rem;
+  margin-bottom: var(--form-spacing);
+}
+
+.form-header h1,
+.form-header h2,
+.form-header h3 {
+  color: var(--primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-header .subtitle {
+  color: var(--gray-600);
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+  font-weight: normal;
+}
+
+/* Grupos de campos */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group.required .form-label::after {
+  content: ' *';
+  color: var(--danger);
+  font-weight: bold;
+}
+
+/* Labels padronizados */
+.form-label {
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 0.5rem;
+  display: block;
+  font-size: 0.9rem;
+}
+
+.form-label.inline {
+  display: inline-block;
+  margin-right: 1rem;
+}
+
+/* Inputs padronizados */
+.form-control,
+.form-select {
+  border: 2px solid var(--gray-200);
+  border-radius: var(--form-border-radius);
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  transition: var(--form-transition);
+  background: white;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary);
+  box-shadow: var(--form-shadow-focus);
+  outline: none;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: var(--danger);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+}
+
+.form-control.is-valid,
+.form-select.is-valid {
+  border-color: var(--success);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+}
+
+/* Textarea específico */
+.form-control[type="textarea"],
+textarea.form-control {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Input groups */
+.input-group {
+  box-shadow: var(--form-shadow);
+  border-radius: var(--form-border-radius);
+  overflow: hidden;
+}
+
+.input-group .form-control {
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.input-group-text {
+  background: var(--gray-50);
+  border: 2px solid var(--gray-200);
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+/* Checkboxes e radios */
+.form-check {
+  padding: 0.75rem 0;
+}
+
+.form-check-input {
+  width: 1.2em;
+  height: 1.2em;
+  margin-top: 0.1em;
+  border: 2px solid var(--gray-300);
+}
+
+.form-check-input:checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.form-check-label {
+  font-weight: 500;
+  color: var(--gray-700);
+  margin-left: 0.5rem;
+}
+
+/* Mensagens de erro */
+.invalid-feedback {
+  display: block;
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(220, 38, 38, 0.05);
+  border-radius: 4px;
+  border-left: 3px solid var(--danger);
+}
+
+.valid-feedback {
+  display: block;
+  color: var(--success);
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+/* Botões de formulário */
+.form-actions {
+  border-top: 2px solid var(--gray-100);
+  padding-top: var(--form-spacing);
+  margin-top: var(--form-spacing);
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.form-actions.center {
+  justify-content: center;
+}
+
+.form-actions.end {
+  justify-content: flex-end;
+}
+
+.form-actions.between {
+  justify-content: space-between;
+}
+
+/* Botões padronizados */
+.btn {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  border-radius: var(--form-border-radius);
+  border: 2px solid transparent;
+  transition: var(--form-transition);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--form-shadow);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: white;
+}
+
+.btn-secondary {
+  background: var(--gray-500);
+  color: white;
+  border-color: var(--gray-500);
+}
+
+.btn-secondary:hover {
+  background: var(--gray-600);
+  border-color: var(--gray-600);
+  color: white;
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+  border-color: var(--success);
+}
+
+.btn-success:hover {
+  background: var(--success-hover);
+  border-color: var(--success-hover);
+  color: white;
+}
+
+.btn-outline-primary {
+  background: transparent;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-outline-secondary {
+  background: transparent;
+  color: var(--gray-600);
+  border-color: var(--gray-300);
+}
+
+.btn-outline-secondary:hover {
+  background: var(--gray-500);
+  color: white;
+  border-color: var(--gray-500);
+}
+
+/* Tamanhos de botão */
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+}
+
+.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+}
+
+/* Seções de formulário */
+.form-section {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--form-border-radius);
+  padding: 1.5rem;
+  margin-bottom: var(--form-spacing);
+}
+
+.form-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Layout responsivo de formulários */
+.form-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.form-col {
+  flex: 1;
+  min-width: 250px;
+}
+
+.form-col-auto {
+  flex: 0 0 auto;
+}
+
+.form-col-2 {
+  flex: 0 0 calc(50% - 0.5rem);
+}
+
+.form-col-3 {
+  flex: 0 0 calc(33.333% - 0.67rem);
+}
+
+.form-col-4 {
+  flex: 0 0 calc(25% - 0.75rem);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .form-container {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .form-col,
+  .form-col-2,
+  .form-col-3,
+  .form-col-4 {
+    flex: 1 1 100%;
+    min-width: auto;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Estados de loading */
+.form-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.form-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--primary);
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Tooltips e ajuda */
+.form-help {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+.form-tooltip {
+  position: relative;
+  display: inline-block;
+  margin-left: 0.5rem;
+}
+
+.form-tooltip .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: var(--dark);
+  color: white;
+  text-align: center;
+  border-radius: 4px;
+  padding: 0.5rem;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.8rem;
+}
+
+.form-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}

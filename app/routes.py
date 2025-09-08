@@ -2643,3 +2643,9 @@ def api_notifications():
             'days_overdue': (today - t.date).days
         } for t in tasks_overdue]
     })
+
+@bp.route('/demo-components')
+@login_required
+def demo_components():
+    """Página de demonstração dos novos componentes implementados"""
+    return render_template('demo_components.html')
