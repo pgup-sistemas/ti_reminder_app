@@ -1,0 +1,391 @@
+/* ========================================
+   FASE 3 - SISTEMA DE ANIMAÇÕES E TRANSIÇÕES
+   TI OSN System - Animações Profissionais
+   ======================================== */
+
+/* ===== VARIÁVEIS DE ANIMAÇÃO ===== */
+:root {
+  --animation-speed-fast: 0.2s;
+  --animation-speed-normal: 0.3s;
+  --animation-speed-slow: 0.5s;
+  --animation-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --animation-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ===== MICRO-ANIMAÇÕES PARA FEEDBACK VISUAL ===== */
+
+/* Animações de entrada para cards */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Garante que os cards permaneçam visíveis após a animação */
+.dashboard-card, .modern-card {
+  opacity: 1 !important;
+  visibility: visible !important;
+  animation-fill-mode: forwards !important;
+}
+
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-on-scroll.animate-on-scroll-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Garante que o fade-in não afete a visibilidade */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out forwards !important;
+  opacity: 1 !important;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ===== LOADING STATES ANIMADOS ===== */
+
+/* Spinner moderno */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+/* Loading dots */
+.loading-dots {
+  display: inline-block;
+}
+
+.loading-dots::after {
+  content: '';
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: ''; }
+  40% { content: '.'; }
+  60% { content: '..'; }
+  80%, 100% { content: '...'; }
+}
+
+/* ===== HOVER EFFECTS AVANÇADOS ===== */
+
+/* Cards com hover suave */
+.card-hover {
+  transition: all var(--animation-speed-normal) var(--animation-easing);
+  cursor: pointer;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Botões com feedback visual */
+.btn-animated {
+  position: relative;
+  overflow: hidden;
+  transition: all var(--animation-speed-normal) var(--animation-easing);
+}
+
+.btn-animated::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left var(--animation-speed-slow) var(--animation-easing);
+}
+
+.btn-animated:hover::before {
+  left: 100%;
+}
+
+.btn-animated:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-animated:active {
+  transform: translateY(0);
+  transition: transform var(--animation-speed-fast);
+}
+
+/* ===== ANIMAÇÕES DE FORMULÁRIO ===== */
+
+/* Input focus animation */
+.form-control-animated {
+  transition: all var(--animation-speed-normal) var(--animation-easing);
+  position: relative;
+}
+
+.form-control-animated:focus {
+  transform: scale(1.02);
+  box-shadow: 0 0 0 3px rgba(0, 123, 205, 0.1);
+}
+
+/* Validação animada */
+.form-control.is-valid {
+  animation: successPulse var(--animation-speed-normal) var(--animation-easing);
+}
+
+.form-control.is-invalid {
+  animation: errorShake var(--animation-speed-normal) var(--animation-easing);
+}
+
+@keyframes successPulse {
+  0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* ===== TRANSIÇÕES DE PÁGINA ===== */
+
+/* Fade transition para mudanças de conteúdo */
+.page-transition {
+  animation: fadeIn var(--animation-speed-slow) var(--animation-easing);
+}
+
+/* Modal animations */
+.modal.fade .modal-dialog {
+  transition: transform var(--animation-speed-normal) var(--animation-easing);
+  transform: scale(0.9);
+}
+
+.modal.show .modal-dialog {
+  transform: scale(1);
+}
+
+/* ===== ANIMAÇÕES DE LISTA ===== */
+
+/* Animação para itens de lista */
+.list-item-animated {
+  animation: slideInRight var(--animation-speed-normal) var(--animation-easing);
+  animation-fill-mode: both;
+}
+
+/* Delays escalonados para listas */
+.list-item-animated:nth-child(1) { animation-delay: 0.1s; }
+.list-item-animated:nth-child(2) { animation-delay: 0.2s; }
+.list-item-animated:nth-child(3) { animation-delay: 0.3s; }
+.list-item-animated:nth-child(4) { animation-delay: 0.4s; }
+.list-item-animated:nth-child(5) { animation-delay: 0.5s; }
+
+/* ===== ANIMAÇÕES DE NOTIFICAÇÃO ===== */
+
+/* Toast notifications */
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideOutUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+
+.toast-animated {
+  animation: slideInDown var(--animation-speed-normal) var(--animation-easing);
+}
+
+.toast-animated.hiding {
+  animation: slideOutUp var(--animation-speed-normal) var(--animation-easing);
+}
+
+/* ===== ANIMAÇÕES DE PROGRESSO ===== */
+
+/* Barra de progresso animada */
+@keyframes progressBar {
+  from {
+    width: 0%;
+  }
+}
+
+.progress-bar-animated {
+  animation: progressBar 1s var(--animation-easing);
+}
+
+/* ===== ANIMAÇÕES DE ÍCONES ===== */
+
+/* Ícones rotativos */
+.icon-spin {
+  animation: spin 2s linear infinite;
+}
+
+.icon-pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Hover em ícones */
+.icon-hover {
+  transition: all var(--animation-speed-normal) var(--animation-easing);
+}
+
+.icon-hover:hover {
+  transform: scale(1.2);
+  color: var(--bs-primary);
+}
+
+/* ===== ANIMAÇÕES DE TABELA ===== */
+
+/* Hover em linhas de tabela */
+.table-row-animated {
+  transition: all var(--animation-speed-fast) var(--animation-easing);
+}
+
+.table-row-animated:hover {
+  background-color: rgba(0, 123, 205, 0.05);
+  transform: scale(1.01);
+}
+
+/* ===== ANIMAÇÕES DE BADGE ===== */
+
+/* Badges com animação */
+.badge-animated {
+  animation: scaleIn var(--animation-speed-normal) var(--animation-bounce);
+}
+
+/* ===== ANIMAÇÕES DE DROPDOWN ===== */
+
+/* Dropdown com animação suave */
+.dropdown-menu {
+  animation: fadeIn var(--animation-speed-fast) var(--animation-easing);
+}
+
+/* ===== UTILITIES DE ANIMAÇÃO ===== */
+
+/* Classes utilitárias */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all var(--animation-speed-slow) var(--animation-easing);
+}
+
+.animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reduzir animações para usuários com preferência */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== ANIMAÇÕES RESPONSIVAS ===== */
+
+/* Reduzir animações em dispositivos móveis para performance */
+@media (max-width: 768px) {
+  .card-hover:hover {
+    transform: none;
+  }
+  
+  .btn-animated:hover {
+    transform: none;
+  }
+  
+  .form-control-animated:focus {
+    transform: none;
+  }
+}

@@ -1,0 +1,230 @@
+/* ===== ESTILOS GLOBAIS ===== */
+@import url('_variables.css');
+
+/* Reset e Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-body);
+  transition: background-color var(--transition), color var(--transition);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Links */
+a {
+  color: var(--primary-500);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+a:hover {
+  color: var(--primary-600);
+  text-decoration: underline;
+}
+
+[data-theme="dark"] a {
+  color: var(--primary-300);
+}
+
+[data-theme="dark"] a:hover {
+  color: var(--primary-200);
+}
+
+/* Títulos */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+/* Parágrafos */
+p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+/* Listas */
+ul, ol {
+  padding-left: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* Imagens */
+img, svg {
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+/* Tabelas */
+table {
+  width: 100%;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 0.75rem;
+  vertical-align: top;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Código e Pré-formatação */
+code, kbd, pre, samp {
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875em;
+}
+
+pre {
+  display: block;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  overflow: auto;
+  font-size: 0.875em;
+  background-color: var(--bg-surface-alt);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+}
+
+code {
+  color: #e83e8c;
+  word-wrap: break-word;
+}
+
+/* Blocos de citação */
+blockquote {
+  padding: 0.5rem 1rem;
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  border-left: 0.25rem solid var(--border-color);
+}
+
+/* Elementos inline */
+mark {
+  padding: 0.2em;
+  background-color: var(--warning);
+  color: var(--dark);
+}
+
+/* Layout Flexbox para Footer Fixo - Força Aplicação */
+body.d-flex.flex-column.min-vh-100 {
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body {
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+main.flex-grow-1 {
+  flex: 1 !important;
+  flex-grow: 1 !important;
+}
+
+footer.footer.mt-auto {
+  margin-top: auto !important;
+  flex-shrink: 0 !important;
+  background: #f8f9fa !important;
+  border-top: 1px solid #dee2e6 !important;
+}
+
+.main-content {
+  flex: 1 !important;
+  flex-grow: 1 !important;
+}
+
+.footer.mt-auto {
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+}
+
+.footer {
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+}
+
+/* Classes de utilidade */
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+.text-primary {
+  color: var(--primary-500) !important;
+}
+
+[data-theme="dark"] .text-primary {
+  color: var(--primary-300) !important;
+}
+
+/* Transições suaves para temas */
+.theme-transition {
+  transition: background-color var(--transition), 
+              color var(--transition), 
+              border-color var(--transition);
+}
+
+/* Força o layout correto em todas as situações */
+html, body {
+  height: 100% !important;
+  min-height: 100vh !important;
+}
+
+body {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+main {
+  flex: 1 !important;
+  flex-grow: 1 !important;
+}
+
+footer {
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
+}
+
+/* Ajustes de impressão */
+@media print {
+  body {
+    background: none;
+    color: #000;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}

@@ -1,10 +1,13 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block title %}
 {% if equipment_request %}Editar Solicitação{% else %}Nova Solicitação de Equipamento{% endif %} - TI OSN System
 {% endblock %}
 
 {% block content %}
+<!-- Região de anúncio para leitores de tela -->
+<div id="a11y-live-region" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
 <script>
 // Configurar breadcrumb para esta página
 document.addEventListener('DOMContentLoaded', function() {
@@ -13,22 +16,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title mb-0">
-                    <i class="fas fa-laptop me-2"></i>
-                    {% if equipment_request %}Editar Solicitação{% else %}Nova Solicitação de Equipamento{% endif %}
-                </h3>
-            </div>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-body-tertiary d-flex align-items-center">
+                    <i class="fas fa-laptop me-2" aria-hidden="true"></i>
+                    <h1 class="h4 mb-0">
+                        {% if equipment_request %}Editar Solicitação{% else %}Nova Solicitação de Equipamento{% endif %}
+                    </h1>
+                </div>
             <div class="card-body">
-                <form method="POST">
+                <form method="POST" class="needs-validation" novalidate aria-label="Formulário de solicitação de equipamento">
                     <div class="row">
                         <!-- Descrição -->
-                        <div class="col-12 mb-3">
+                        <div class="col-12 mb-3 field-group required">
                             <label for="description" class="form-label">
-                                <i class="fas fa-info-circle me-1"></i>Descrição do Equipamento *
+                                <i class="fas fa-info-circle me-1" aria-hidden="true"></i>Descrição do Equipamento
                             </label>
                             <textarea class="form-control" id="description" name="description" rows="3" 
                                       placeholder="Descreva detalhadamente o equipamento solicitado..." required>{{ equipment_request.description if equipment_request else '' }}</textarea>
@@ -36,9 +41,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
 
                         <!-- Setor/Destino -->
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-3 field-group required">
                             <label for="destination_sector" class="form-label">
-                                <i class="fas fa-building me-1"></i>Setor/Destino *
+                                <i class="fas fa-building me-1" aria-hidden="true"></i>Setor/Destino
                             </label>
                             <input type="text" class="form-control" id="destination_sector" name="destination_sector" 
                                    value="{{ equipment_request.destination_sector if equipment_request else '' }}"
@@ -47,9 +52,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
 
                         <!-- Motivo da Solicitação -->
-                        <div class="col-12 mb-3">
+                        <div class="col-12 mb-3 field-group required">
                             <label for="request_reason" class="form-label">
-                                <i class="fas fa-question-circle me-1"></i>Motivo da Solicitação *
+                                <i class="fas fa-question-circle me-1" aria-hidden="true"></i>Motivo da Solicitação
                             </label>
                             <textarea class="form-control" id="request_reason" name="request_reason" rows="3" 
                                       placeholder="Justifique a necessidade do equipamento..." required>{{ equipment_request.request_reason if equipment_request else '' }}</textarea>
@@ -57,9 +62,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
 
                         <!-- Observações -->
-                        <div class="col-12 mb-3">
+                        <div class="col-12 mb-3 field-group">
                             <label for="observations" class="form-label">
-                                <i class="fas fa-sticky-note me-1"></i>Observações
+                                <i class="fas fa-sticky-note me-1" aria-hidden="true"></i>Observações
                             </label>
                             <textarea class="form-control" id="observations" name="observations" rows="2" 
                                       placeholder="Observações adicionais...">{{ equipment_request.observations if equipment_request else '' }}</textarea>
@@ -70,9 +75,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         {% if session.get('is_admin') or session.get('is_ti') or equipment_request %}
                         <div class="col-12">
                             <hr class="my-4">
-                            <h5 class="text-muted mb-3">
-                                <i class="fas fa-cogs me-2"></i>Informações Técnicas (TI)
-                            </h5>
+                            <h2 class="h5 text-muted mb-3" id="tech-info-heading">
+                                <i class="fas fa-cogs me-2" aria-hidden="true"></i>Informações Técnicas (TI)
+                            </h2>
                         </div>
 
                         <!-- Patrimônio e Tipo -->
@@ -117,16 +122,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
 
                     <!-- Botões -->
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ url_for('main.list_equipment') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>Voltar
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('main.list_equipment') }}" class="btn btn-outline-secondary" aria-label="Cancelar e voltar para a lista de equipamentos">
+                            <i class="fas fa-times me-1" aria-hidden="true"></i>Cancelar
                         </a>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save me-1"></i>
-                            {% if equipment_request %}Atualizar Solicitação{% else %}Criar Solicitação{% endif %}
+                        <button type="submit" class="btn btn-success" aria-label="{% if equipment_request %}Atualizar{% else %}Salvar{% endif %} solicitação de equipamento">
+                            <i class="fas fa-save me-1" aria-hidden="true"></i>
+                            {% if equipment_request %}Atualizar{% else %}Salvar{% endif %}
                         </button>
                     </div>
                 </form>
+                </div>
             </div>
         </div>
     </div>
@@ -135,6 +141,52 @@ document.addEventListener('DOMContentLoaded', function() {
 
 {% block scripts %}
 <script>
+// Validação do formulário
+(function () {
+    'use strict'
+    
+    // Selecionar todos os formulários que precisam de validação
+    var forms = document.querySelectorAll('.needs-validation')
+    
+    // Validar cada campo ao sair dele
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        var inputs = form.querySelectorAll('input, textarea, select')
+        
+        // Adicionar validação em tempo real
+        inputs.forEach(function (input) {
+            input.addEventListener('blur', function (event) {
+                if (!input.checkValidity()) {
+                    input.classList.add('is-invalid')
+                } else {
+                    input.classList.remove('is-invalid')
+                }
+            }, false)
+        })
+        
+        // Validar ao enviar o formulário
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+                
+                // Rolar até o primeiro campo inválido
+                const firstInvalid = form.querySelector(':invalid')
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    firstInvalid.focus()
+                    
+                    // Adicionar classe de inválido para exibir feedback visual
+                    firstInvalid.classList.add('is-invalid')
+                }
+            }
+            
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+
+// Melhorias de acessibilidade para campos de data
+
 // Definir data mínima como hoje
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];

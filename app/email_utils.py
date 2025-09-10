@@ -1,12 +1,14 @@
-from flask_mail import Mail, Message
 from flask import current_app
+from flask_mail import Mail, Message
 
 mail = Mail()
+
 
 def mail_init_app(app, mail_instance):
     global mail
     mail = mail_instance
     mail.init_app(app)
+
 
 def send_email(subject, recipients, body, html_body=None):
     # Ensure we are using the mail instance initialized with the app context
@@ -16,18 +18,21 @@ def send_email(subject, recipients, body, html_body=None):
         msg = Message(subject, recipients=recipients, body=body, html=html_body)
         # Ensure sender is configured, fallback to default if needed
         if not msg.sender:
-             msg.sender = current_app.config.get('MAIL_DEFAULT_SENDER')
+            msg.sender = current_app.config.get("MAIL_DEFAULT_SENDER")
         mail.send(msg)
-        print(f"Email sent to {recipients} with subject: {subject}") # Log success
+        print(f"Email sent to {recipients} with subject: {subject}")  # Log success
     except Exception as e:
-        print(f"Error sending email: {e}") # Log error
+        print(f"Error sending email: {e}")  # Log error
         # Handle error appropriately (log, flash message, etc.)
+
 
 def send_chamado_aberto_email(chamado):
     user_email = chamado.solicitante.email
     # Define TI email recipient(s) - maybe from config or a specific group
-    ti_recipients = [current_app.config.get('TI_EMAIL_GROUP', 'ti@example.com')] # Example
-    
+    ti_recipients = [
+        current_app.config.get("TI_EMAIL_GROUP", "ti@example.com")
+    ]  # Example
+
     subject_user = f"Chamado #{chamado.id} Aberto: {chamado.titulo}"
     body_user = f"""Olá {chamado.solicitante.username},
 
@@ -47,11 +52,12 @@ Sistema de Chamados TI"""
     body_ti = f"Um novo chamado foi aberto:\n\nID: {chamado.id}\nTítulo: {chamado.titulo}\nSolicitante: {chamado.solicitante.username} ({chamado.solicitante.email})\nSetor: {chamado.setor.name}\nPrioridade: {chamado.prioridade}\nStatus: {chamado.status}\nDescrição:\n{chamado.descricao}\n\nAcesse o sistema para mais detalhes e atribuição."
     # Potentially add HTML version
     send_email(subject_ti, ti_recipients, body_ti)
-    
+
+
 def send_password_reset_email(user, token):
     """Envia um email com instruções para redefinir a senha"""
     reset_url = f"{current_app.config.get('BASE_URL', 'http://localhost:5000')}/auth/reset_password/{token}"
-    
+
     subject = "Redefinição de Senha - TI OSN System"
     body = f"""Olá {user.username},
 
@@ -67,7 +73,7 @@ Se você não solicitou esta redefinição, ignore este email e nenhuma alteraç
 
 Atenciosamente,
 Equipe TI OSN System"""
-    
+
     html_body = f"""<p>Olá {user.username},</p>
 <p>Você solicitou a redefinição de sua senha no TI OSN System.</p>
 <p>Para redefinir sua senha, <a href="{reset_url}">clique aqui</a> ou copie e cole o link abaixo no seu navegador:</p>
@@ -75,24 +81,28 @@ Equipe TI OSN System"""
 <p>Este link é válido por 1 hora.</p>
 <p>Se você não solicitou esta redefinição, ignore este email e nenhuma alteração será feita.</p>
 <p>Atenciosamente,<br>Equipe TI OSN System</p>"""
-    
+
     send_email(subject, [user.email], body, html_body)
+
 
 def send_chamado_atualizado_email(chamado, atualizacao):
     """Envia e-mail de notificação quando um chamado é atualizado"""
-    from flask import url_for, render_template_string
-    
+    from flask import render_template_string, url_for
+
     # Destinatários: solicitante e responsável TI (se houver)
     recipients = [chamado.solicitante.email]
-    if chamado.responsavel_ti and chamado.responsavel_ti.email != chamado.solicitante.email:
+    if (
+        chamado.responsavel_ti
+        and chamado.responsavel_ti.email != chamado.solicitante.email
+    ):
         recipients.append(chamado.responsavel_ti.email)
-    
+
     # URL do chamado (usando _external=True para URL completa)
-    chamado_url = url_for('main.detalhe_chamado', id=chamado.id, _external=True)
-    
+    chamado_url = url_for("main.detalhe_chamado", id=chamado.id, _external=True)
+
     # Assunto do e-mail
     subject = f"Atualização no Chamado #{chamado.id}: {chamado.titulo}"
-    
+
     # Corpo do e-mail em texto simples
     body = f"""Olá,
 
@@ -107,15 +117,19 @@ Acesse o chamado em: {chamado_url}
 
 Atenciosamente,
 Sistema de Chamados TI"""
-    
+
     # Corpo do e-mail em HTML
     # Definir a cor do badge com base no status
     status_color = (
-        '#198754' if chamado.status == 'Resolvido' else 
-        '#fd7e14' if chamado.status == 'Em Andamento' else 
-        '#dc3545' if chamado.status == 'Fechado' else '#0d6efd'
+        "#198754"
+        if chamado.status == "Resolvido"
+        else "#fd7e14"
+        if chamado.status == "Em Andamento"
+        else "#dc3545"
+        if chamado.status == "Fechado"
+        else "#0d6efd"
     )
-    
+
     html_body = f"""
     <!DOCTYPE html>
     <html>
@@ -176,9 +190,6 @@ Sistema de Chamados TI"""
     </body>
     </html>
     """
-    
+
     # Envia o e-mail
     send_email(subject, recipients, body, html_body)
-
-
-

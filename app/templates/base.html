@@ -8,21 +8,55 @@
     <!-- Preload crítico -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" as="style">
 
-    <!-- CSS Framework -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Preload critical CSS -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"></noscript>
+    
+    <!-- Load Font Awesome asynchronously -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- CSS Customizado -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='form-styles.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='modal-styles.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='breadcrumb-styles.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='feedback-styles.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='responsive-tables.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='mobile-forms.css') }}">
+    <!-- CSS Crítico (render-blocking) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_globals.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_theme-overrides.css') }}">
+    
+    <!-- CSS Não Crítico (carregamento assíncrono) -->
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" 
+          href="{{ url_for('static', filename='css/form-accessibility.css') }}">
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" 
+          href="{{ url_for('static', filename='form-styles.css') }}">
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" 
+          href="{{ url_for('static', filename='modal-styles.css') }}">
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" 
+          href="{{ url_for('static', filename='breadcrumb-styles.css') }}">
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" 
+          href="{{ url_for('static', filename='feedback-styles.css') }}">
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" 
+          href="{{ url_for('static', filename='responsive-tables.css') }}">
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" 
+          href="{{ url_for('static', filename='mobile-forms.css') }}">
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" 
+          href="{{ url_for('static', filename='animations.css') }}">
+    
+    <!-- Fallback para navegadores sem JavaScript -->
+    <noscript>
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/form-accessibility.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='form-styles.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='modal-styles.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='breadcrumb-styles.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='feedback-styles.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='responsive-tables.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='mobile-forms.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='animations.css') }}">
+    </noscript>
+    
+    <!-- Load fonts with font-display: swap -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%23008BCD' d='M176 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64c-35.3 0-64 28.7-64 64H24c-13.3 0-24 10.7-24 24s10.7 24 24 24H64V352c0 88.4 71.6 160 160 160s160-71.6 160-160V176h40c13.3 0 24-10.7 24-24s-10.7-24-24-24H384c0-35.3-28.7-64-64-64V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H176V24zM160 128H352c17.7 0 32 14.3 32 32V352c0 53-43 96-96 96s-96-43-96-96V160c0-17.7 14.3-32 32-32zm32 64v16c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V192c0-17.7-14.3-32-32-32H224c-17.7 0-32 14.3-32 32z'/></svg>">
@@ -38,45 +72,103 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     {% block styles %}{% endblock %}
+    
+    <!-- CSS Inline para Footer Fix - Cache Bypass -->
+    <style>
+    /* Footer Fix - Força aplicação imediata */
+    html, body {
+        height: 100% !important;
+        min-height: 100vh !important;
+    }
+    
+    body {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    main#main-content {
+        flex: 1 !important;
+        flex-grow: 1 !important;
+    }
+    
+    .main-content {
+        flex: 1 !important;
+        flex-grow: 1 !important;
+    }
+    
+    footer.footer {
+        flex-shrink: 0 !important;
+        margin-top: auto !important;
+    }
+    
+    .footer {
+        flex-shrink: 0 !important;
+        margin-top: auto !important;
+    }
+    </style>
 </head>
-<body class="d-flex flex-column min-vh-100">
-{% if session.get('user_id') %}
+<body class="d-flex flex-column min-vh-100" aria-label="Aplicativo TI OSN System">
+  <!-- Botão de pular para o conteúdo principal (visível apenas para leitores de tela e foco) 
+  <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>-->
+  
+  <!-- Navegação principal -->
+  {% if session.get('user_id') %}
 <nav class="navbar navbar-expand-lg shadow-sm mb-4">
   <div class="container-fluid">
     <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') }}">
-      <i class="fas fa-microchip me-2" style="color: white;"></i>
+      <i class="fas fa-microchip me-2" style="color: #383838;"></i>
       <span class="fw-bold">TI OSN System</span>
     </a>
     
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+      <span class="navbar-toggler-icon" aria-hidden="true"></span>
     </button>
     
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
         <!-- Dashboard Principal -->
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" href="{{ url_for('main.index') }}">
-            <i class="fas fa-home me-2"></i> Dashboard
+          <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" 
+           href="{{ url_for('main.index') }}"
+           aria-current="{% if request.endpoint == 'main.index' %}page{% else %}false{% endif %}">
+            <i class="fas fa-home me-2" aria-hidden="true"></i> 
+            <span>Dashboard</span>
           </a>
         </li>
         
         <!-- Dropdown Atividades -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.tasks', 'main.reminders'] %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown">
-            <i class="fas fa-clipboard-list me-2"></i> Atividades
+          <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.tasks', 'main.reminders'] %}active{% endif %}" 
+           href="#" 
+           role="button" 
+           data-bs-toggle="dropdown" 
+           aria-expanded="false"
+           aria-haspopup="true"
+           id="atividadesDropdown">
+            <i class="fas fa-clipboard-list me-2" aria-hidden="true"></i> 
+            <span>Atividades</span>
           </a>
-          <ul class="dropdown-menu">
-            <li><h6 class="dropdown-header"><i class="fas fa-clipboard-list me-2"></i>Gerenciar Atividades</h6></li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-              <a class="dropdown-item {% if request.endpoint == 'main.tasks' %}active{% endif %}" href="{{ url_for('main.tasks') }}">
-                <i class="fas fa-tasks me-2"></i> Tarefas
+          <ul class="dropdown-menu py-2" aria-labelledby="atividadesDropdown" style="min-width: 220px;">
+            <li class="mb-1">
+              <h2 class="visually-hidden">Menu de Atividades</h2>
+              <h6 class="dropdown-header px-3 py-2 mb-1">
+                <i class="fas fa-clipboard-list me-2" aria-hidden="true"></i>Gerenciar Atividades
+              </h6>
+            </li>
+            <li class="mb-1"><hr class="dropdown-divider mx-2 my-1" role="separator" aria-label="Separador de seção"></li>
+            <li class="mb-1">
+              <a class="dropdown-item px-3 py-2 d-flex align-items-center {% if request.endpoint == 'main.tasks' %}active{% endif %}" 
+                 href="{{ url_for('main.tasks') }}"
+                 role="menuitem">
+                <i class="fas fa-tasks me-2" aria-hidden="true"></i> Tarefas
               </a>
             </li>
             <li>
-              <a class="dropdown-item {% if request.endpoint == 'main.reminders' %}active{% endif %}" href="{{ url_for('main.reminders') }}">
-                <i class="fas fa-bell me-2"></i> Lembretes
+              <a class="dropdown-item px-3 py-2 d-flex align-items-center {% if request.endpoint == 'main.reminders' %}active{% endif %}" 
+                 href="{{ url_for('main.reminders') }}"
+                 role="menuitem">
+                <i class="fas fa-bell me-2" aria-hidden="true"></i> Lembretes
               </a>
             </li>
           </ul>
@@ -84,20 +176,36 @@
         
         <!-- Dropdown Suporte -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.listar_chamados', 'main.abrir_chamado'] %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown">
-            <i class="fas fa-headset me-2"></i> Suporte
+          <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.listar_chamados', 'main.abrir_chamado'] %}active{% endif %}" 
+           href="#" 
+           role="button" 
+           data-bs-toggle="dropdown" 
+           aria-expanded="false"
+           aria-haspopup="true"
+           id="suporteDropdown">
+            <i class="fas fa-headset me-2" aria-hidden="true"></i> 
+            <span>Suporte</span>
           </a>
-          <ul class="dropdown-menu">
-            <li><h6 class="dropdown-header"><i class="fas fa-headset me-2"></i>Central de Suporte</h6></li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-              <a class="dropdown-item" href="{{ url_for('main.abrir_chamado') }}">
-                <i class="fas fa-plus-circle me-2"></i> Abrir Chamado
+          <ul class="dropdown-menu py-2" aria-labelledby="suporteDropdown" style="min-width: 220px;">
+            <li class="mb-1">
+              <h2 class="visually-hidden">Menu de Suporte</h2>
+              <h6 class="dropdown-header px-3 py-2 mb-1">
+                <i class="fas fa-headset me-2" aria-hidden="true"></i>Central de Suporte
+              </h6>
+            </li>
+            <li class="mb-1"><hr class="dropdown-divider mx-2 my-1" role="separator" aria-label="Separador de seção"></li>
+            <li class="mb-1">
+              <a class="dropdown-item px-3 py-2 d-flex align-items-center" 
+                 href="{{ url_for('main.abrir_chamado') }}"
+                 role="menuitem">
+                <i class="fas fa-plus-circle me-2" aria-hidden="true"></i> Abrir Chamado
               </a>
             </li>
             <li>
-              <a class="dropdown-item {% if request.endpoint == 'main.listar_chamados' %}active{% endif %}" href="{{ url_for('main.listar_chamados') }}">
-                <i class="fas fa-ticket-alt me-2"></i> Meus Chamados
+              <a class="dropdown-item px-3 py-2 d-flex align-items-center {% if request.endpoint == 'main.listar_chamados' %}active{% endif %}" 
+                 href="{{ url_for('main.listar_chamados') }}"
+                 role="menuitem">
+                <i class="fas fa-ticket-alt me-2" aria-hidden="true"></i> Meus Chamados
               </a>
             </li>
           </ul>
@@ -105,26 +213,40 @@
         
         <!-- Dropdown Recursos -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.list_equipment', 'main.request_equipment', 'main.listar_tutoriais'] %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown">
-            <i class="fas fa-cube me-2"></i> Recursos
+          <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.list_equipment', 'main.request_equipment', 'main.listar_tutoriais'] %}active{% endif %}" 
+           href="#" 
+           role="button" 
+           data-bs-toggle="dropdown" 
+           aria-expanded="false"
+           aria-haspopup="true"
+           id="recursosDropdown">
+            <i class="fas fa-cube me-2" aria-hidden="true"></i> 
+            <span>Recursos</span>
           </a>
-          <ul class="dropdown-menu">
-            <li><h6 class="dropdown-header"><i class="fas fa-cube me-2"></i>Recursos e Conhecimento</h6></li>
-            <li><hr class="dropdown-divider"></li>
+          <ul class="dropdown-menu" aria-labelledby="recursosDropdown">
+            <li><h2 class="visually-hidden">Menu de Recursos</h2></li>
+            <li><h6 class="dropdown-header"><i class="fas fa-cube me-2" aria-hidden="true"></i>Recursos e Conhecimento</h6></li>
+            <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
             <li>
-              <a class="dropdown-item {% if request.endpoint == 'main.list_equipment' %}active{% endif %}" href="{{ url_for('main.list_equipment') }}">
-                <i class="fas fa-laptop me-2"></i> Equipamentos
+              <a class="dropdown-item {% if request.endpoint == 'main.list_equipment' %}active{% endif %}" 
+                 href="{{ url_for('main.list_equipment') }}"
+                 role="menuitem">
+                <i class="fas fa-laptop me-2" aria-hidden="true"></i> Equipamentos
               </a>
             </li>
             <li>
-              <a class="dropdown-item" href="{{ url_for('main.new_equipment_request') }}">
-                <i class="fas fa-plus-circle me-2"></i> Solicitar Equipamento
+              <a class="dropdown-item" 
+                 href="{{ url_for('main.new_equipment_request') }}"
+                 role="menuitem">
+                <i class="fas fa-plus-circle me-2" aria-hidden="true"></i> Solicitar Equipamento
               </a>
             </li>
-            <li><hr class="dropdown-divider"></li>
+            <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
             <li>
-              <a class="dropdown-item {% if request.endpoint == 'main.listar_tutoriais' %}active{% endif %}" href="{{ url_for('main.listar_tutoriais') }}">
-                <i class="fas fa-book me-2"></i> Tutoriais
+              <a class="dropdown-item {% if request.endpoint == 'main.listar_tutoriais' %}active{% endif %}" 
+                 href="{{ url_for('main.listar_tutoriais') }}"
+                 role="menuitem">
+                <i class="fas fa-book me-2" aria-hidden="true"></i> Tutoriais
               </a>
             </li>
           </ul>
@@ -132,17 +254,32 @@
         
         <!-- Relatórios -->
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}" href="{{ url_for('main.dashboard') }}">
-            <i class="fas fa-chart-bar me-2"></i> Relatórios
+          <a class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}" 
+           href="{{ url_for('main.dashboard') }}"
+           aria-current="{% if request.endpoint == 'main.dashboard' %}page{% else %}false{% endif %}">
+            <i class="fas fa-chart-bar me-2" aria-hidden="true"></i> 
+            <span>Relatórios</span>
           </a>
         </li>
       </ul>
       
       <ul class="navbar-nav">
+        <!-- Botão de alternar tema -->
+        <li class="nav-item d-flex align-items-center ms-2">
+          <button id="theme-toggle" class="btn nav-link theme-toggle p-2" aria-label="Alternar entre tema claro e escuro" title="Alternar tema">
+            <i class="fas fa-sun theme-icon theme-icon-light"></i>
+            <i class="fas fa-moon theme-icon theme-icon-dark d-none"></i>
+            <span class="visually-hidden">Alternar tema</span>
+          </button>
+        </li>
+        
         <!-- Ajuda -->
         <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'main.help_page' %}active{% endif %}" href="{{ url_for('main.help_page') }}" title="Central de Ajuda">
-            <i class="fas fa-question-circle me-1"></i>
+          <a class="nav-link {% if request.endpoint == 'main.help_page' %}active{% endif %}" 
+           href="{{ url_for('main.help_page') }}" 
+           title="Central de Ajuda"
+           aria-label="Central de Ajuda">
+            <i class="fas fa-question-circle me-1" aria-hidden="true"></i>
             <span class="d-none d-lg-inline">Ajuda</span>
           </a>
         </li>
@@ -150,46 +287,57 @@
         
         <!-- Perfil do Usuário -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-            <div class="user-avatar me-2">
+          <a class="nav-link dropdown-toggle d-flex align-items-center" 
+           href="#" 
+           role="button" 
+           data-bs-toggle="dropdown"
+           aria-expanded="false"
+           aria-haspopup="true"
+           id="userDropdown">
+            <div class="user-avatar me-2" aria-hidden="true">
               <i class="fas fa-user-circle"></i>
             </div>
             <span class="d-none d-md-inline fw-medium">{{ session['username'] }}</span>
+            <span class="visually-hidden">Menu do usuário</span>
           </a>
-          <ul class="dropdown-menu dropdown-menu-end">
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" role="menu">
+            <li><h2 class="visually-hidden">Menu do Usuário</h2></li>
             <li><h6 class="dropdown-header">
-              <i class="fas fa-user me-2"></i>{{ session['username'] }}
+              <i class="fas fa-user me-2" aria-hidden="true"></i>{{ session['username'] }}
               {% if session.get('is_admin') %}
                 <span class="badge bg-primary ms-2">Admin</span>
               {% endif %}
             </h6></li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-              <a class="dropdown-item" href="{{ url_for('main.index') }}">
-                <i class="fas fa-tachometer-alt me-2"></i> Meu Dashboard
+            <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
+            <li role="none">
+              <a class="dropdown-item" 
+                 href="{{ url_for('main.index') }}"
+                 role="menuitem">
+                <i class="fas fa-tachometer-alt me-2" aria-hidden="true"></i> Meu Dashboard
               </a>
             </li>
             {% if session.get('is_admin') %}
-            <li>
-              <a class="dropdown-item {% if request.endpoint == 'main.users_admin' %}active{% endif %}" href="{{ url_for('main.users_admin') }}">
-                <i class="fas fa-users-cog me-2"></i> Gerenciar Usuários
+            <li role="none">
+              <a class="dropdown-item {% if request.endpoint == 'main.users_admin' %}active{% endif %}" 
+                 href="{{ url_for('main.users_admin') }}"
+                 role="menuitem">
+                <i class="fas fa-users-cog me-2" aria-hidden="true"></i> Gerenciar Usuários
               </a>
             </li>
-            <li>
-              <a class="dropdown-item" href="{{ url_for('main.dashboard') }}">
-                <i class="fas fa-chart-line me-2"></i> Relatórios Avançados
+            <li role="none">
+              <a class="dropdown-item" 
+                 href="{{ url_for('main.dashboard') }}"
+                 role="menuitem">
+                <i class="fas fa-chart-line me-2" aria-hidden="true"></i> Relatórios Avançados
               </a>
             </li>
-            <li><hr class="dropdown-divider"></li>
+            <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
             {% endif %}
-            <li>
-              <a class="dropdown-item" href="{{ url_for('main.demo_components') }}">
-                <i class="fas fa-palette me-2"></i> Demo Componentes
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#" onclick="toggleTheme()">
-                <i class="fas fa-moon me-2"></i> Alternar Tema
+            <li role="none">
+              <a class="dropdown-item" 
+                 href="{{ url_for('main.user_profile') }}"
+                 role="menuitem">
+                <i class="fas fa-user-cog me-2" aria-hidden="true"></i> Meu Perfil
               </a>
             </li>
             <li><hr class="dropdown-divider"></li>
@@ -205,7 +353,7 @@
   </div>
 </nav>
 {% endif %}
-<main class="main-content flex-grow-1">
+<main id="main-content" class="main-content flex-grow-1" tabindex="-1">
   <div class="container-fluid py-4">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -231,147 +379,167 @@
   </div>
 </main>
 
-<footer class="footer mt-auto">
-  <div class="container-fluid">
-    <div class="row align-items-center">
-      <div class="col-md-6">
+<footer class="footer mt-auto py-3 bg-light" role="contentinfo">
+    <div class="container">
+      <div class="text-center">
         <p class="mb-0">
-          <i class="fas fa-code me-1"></i>
-          <strong>TI OSN System</strong> - Sistema Profissional de Gerenciamento
-          <span class="badge bg-dark ms-2">Versão 2.0</span>
+          <a href="{{ url_for('main.help_page') }}" class="text-decoration-none me-3">
+            <i class="fas fa-question-circle me-1" aria-hidden="true"></i> Ajuda
+          </a>
+          <a href="{{ url_for('main.terms') }}" class="text-decoration-none me-3">
+            <i class="fas fa-file-contract me-1" aria-hidden="true"></i> Termos de Uso
+          </a>
+          <a href="{{ url_for('main.privacy') }}" class="text-decoration-none">
+            <i class="fas fa-shield-alt me-1" aria-hidden="true"></i> Política de Privacidade
+          </a>
         </p>
       </div>
-      <div class="col-md-6 text-md-end">
-        <p class="mb-0">
-          &copy; 2025 PageUp Sistemas | 
-          Desenvolvido por <strong>Oézios Normando</strong>
-        </p>
+      <div class="card-footer bg-transparent border-0 py-2 text-center">
+        <small class="text-muted">
+          <hr class="my-2">
+          <i class="fas fa-code me-1"></i>
+          <strong>TI OSN System</strong> - Todos os direitos reservados.
+          &copy; 2024 PageUp Sistemas | Versão 2.0
+          Desenvolvido por <strong>Oézios Normando</strong><br>
+        </small>
       </div>
     </div>
-  </div>
-</footer>
-    <!-- Scripts essenciais -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </footer>
+  
+  <!-- Botão de voltar ao topo 
+  <button id="back-to-top" class="btn btn-secondary rounded-circle" aria-label="Voltar ao topo da página">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button> -->
 
-    <!-- Scripts customizados -->
+    <!-- JavaScript com carregamento otimizado -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" defer></script>
+    
+    <!-- Scripts principais em ordem de carregamento -->
+    <script src="{{ url_for('static', filename='js/theme-manager.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/components.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/notifications.js') }}" defer></script>
-
-    <!-- Scripts de inicialização -->
+    <script src="{{ url_for('static', filename='js/breadcrumbs.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/feedback.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/modals.js') }}" defer></script>
+    
+    <!-- Inicialização do Service Worker -->
     <script>
-        // Service Worker para PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/static/sw.js')
-                .then(registration => {
-                    console.log('Service Worker registrado com sucesso:', registration.scope);
-                })
-                .catch(error => {
-                    console.error('Erro ao registrar Service Worker:', error);
-                    // Notificar o usuário sobre o erro se o componente de notificação estiver disponível
-                    if (window.notificationManager) {
-                        window.notificationManager.notify('error', 'Erro no Service Worker', 'Não foi possível habilitar as notificações offline.');
-                    }
-                });
-        }
-
-        // Theme switcher moderno
-        function toggleTheme() {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme') || 'light';
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            
-            // Atualizar ícone do botão
-            const themeButton = document.querySelector('[onclick="toggleTheme()"]');
-            if (themeButton) {
-                const icon = themeButton.querySelector('i');
-                if (icon) {
-                    icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-                }
-            }
-            
-            console.log(`Tema alterado para: ${newTheme}`);
-        }
-
-        // Load saved theme
         document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            
-            // Atualizar ícone inicial
-            const themeButton = document.querySelector('[onclick="toggleTheme()"]');
-            if (themeButton) {
-                const icon = themeButton.querySelector('i');
-                if (icon) {
-                    icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-                }
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('Erro ao registrar Service Worker:', error);
+                    });
             }
         });
 
-        // Smooth scrolling for anchor links
+        // Função para gerenciar a acessibilidade do botão de voltar ao topo
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
+            const backToTopButton = document.getElementById('back-to-top');
+            
+            // Configura o botão de voltar ao topo
+            if (backToTopButton) {
+                // Mostra/oculta o botão ao rolar a página
+                window.addEventListener('scroll', function() {
+                    backToTopButton.classList.toggle('show', window.pageYOffset > 300);
+                });
+                
+                // Rola suavemente para o topo ao clicar
+                backToTopButton.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Move o foco para o cabeçalho principal para acessibilidade
+                    const header = document.querySelector('header') || document.querySelector('nav');
+                    if (header) {
+                        header.setAttribute('tabindex', '-1');
+                        header.focus();
+                    } else {
+                        document.body.focus();
+                    }
+                });
+            }
+
+            // Adiciona foco visível aos elementos interativos
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    document.body.classList.add('keyboard-navigation');
+                }
+            });
+            
+            document.addEventListener('mousedown', function() {
+                document.body.classList.remove('keyboard-navigation');
+            });
+            
+            // Foco no conteúdo principal ao pular para ele
+            const skipLink = document.querySelector('.skip-to-content');
+            const mainContent = document.getElementById('main-content');
+            
+            if (skipLink && mainContent) {
+                skipLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    mainContent.setAttribute('tabindex', '-1');
+                    mainContent.focus();
+                });
+            }
+            
+            // Rolagem suave para âncoras
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    if (href !== '#') {  // Evita conflito com links vazios
+                        e.preventDefault();
+                        const target = document.querySelector(href);
+                        if (target) {
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                            target.setAttribute('tabindex', '-1');
+                            target.focus();
+                        }
                     }
                 });
             });
 
-            // Auto-close alerts
-            setTimeout(() => {
-                document.querySelectorAll('.alert').forEach(alert => {
-                    if (!alert.classList.contains('alert-permanent')) {
-                        const bsAlert = new bootstrap.Alert(alert);
-                        bsAlert.close();
+            // Global error handler - desabilitado temporariamente
+            // window.addEventListener('unhandledrejection', function(event) {
+            //     console.error('Erro não tratado:', event.reason);
+            //     if (window.Feedback) {
+            //         Feedback.error('Erro', 'Ocorreu um erro inesperado. Tente recarregar a página.');
+            //     }
+            // });
+
+            // Performance monitoring
+            window.addEventListener('load', function() {
+                if ('performance' in window) {
+                    // Usar a API moderna de Performance
+                    const perfEntries = performance.getEntriesByType('navigation');
+                    if (perfEntries.length > 0) {
+                        const loadTime = Math.round(perfEntries[0].duration);
+                        console.log(`Tempo de carregamento: ${loadTime}ms`);
+                    } else if (performance.timing) {
+                        // Fallback para navegadores que não suportam getEntriesByType
+                        const navStart = performance.timing.navigationStart;
+                        const loadEnd = performance.timing.loadEventEnd;
+                        const loadTime = loadEnd - navStart;
+                        console.log(`Tempo de carregamento (fallback): ${loadTime}ms`);
                     }
-                });
-            }, 5000);
-        });
-
-        // Global error handler - desabilitado temporariamente
-        // window.addEventListener('unhandledrejection', function(event) {
-        //     console.error('Erro não tratado:', event.reason);
-        //     if (window.Feedback) {
-        //         Feedback.error('Erro', 'Ocorreu um erro inesperado. Tente recarregar a página.');
-        //     }
-        // });
-
-        // Performance monitoring
-        window.addEventListener('load', function() {
-            if ('performance' in window) {
-                // Usar a API moderna de Performance
-                const perfEntries = performance.getEntriesByType('navigation');
-                if (perfEntries.length > 0) {
-                    const loadTime = Math.round(perfEntries[0].duration);
-                    console.log(`Tempo de carregamento: ${loadTime}ms`);
-                } else {
-                    // Fallback para navegadores que não suportam getEntriesByType
-                    const navStart = performance.timing.navigationStart;
-                    const loadEnd = performance.timing.loadEventEnd;
-                    const loadTime = loadEnd - navStart;
-                    console.log(`Tempo de carregamento (fallback): ${loadTime}ms`);
                 }
-            }
-        });
+            });
+        }); // Fecha o evento DOMContentLoaded principal
     </script>
 
     <!-- Sistema de Modais Modernas -->
-    <script src="{{ url_for('static', filename='js/modals.js') }}"></script>
     
-    <!-- Sistema de Breadcrumbs -->
-    <script src="{{ url_for('static', filename='js/breadcrumbs.js') }}"></script>
-    
-    <!-- Sistema de Feedback Visual -->
-    <script src="{{ url_for('static', filename='js/feedback.js') }}"></script>
-
     {% block scripts %}{% endblock %}
 </body>
 </html>

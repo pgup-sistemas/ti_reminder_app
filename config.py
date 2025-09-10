@@ -15,3 +15,8 @@ class Config:
     # Configuração de timezone para Porto Velho, Rondônia (UTC-4)
     TIMEZONE = timezone(timedelta(hours=-4))
     TIMEZONE_NAME = 'America/Porto_Velho'
+    
+    # Configuração de logging
+    LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT')
+    LOG_LEVEL = os.environ.get('LOG_LEVEL') or 'INFO'
+    LOG_FILE = 'logs/ti_reminder.log'

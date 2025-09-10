@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-
-{% block title %}{{ title }}{% endblock %}
+{% block title %}Lista de Chamados | TI OSN System{% endblock %}
 
 {% block content %}
+<div class="page-transition">
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>{{ title }}</h2>
@@ -42,15 +42,21 @@
                 </select>
             </div>
             <div class="col-sm-6 col-lg-3">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fa fa-filter me-1"></i> Filtrar
+                <button type="submit" class="btn btn-primary btn-animated">
+                    <i class="fas fa-search icon-hover"></i> Filtrar
                 </button>
+                <a href="{{ url_for('main.listar_chamados') }}" class="btn btn-secondary btn-animated">
+                    <i class="fas fa-times icon-hover"></i> Limpar
+                </a>
             </div>
             {% else %}
             <div class="col-12 col-lg-6">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fa fa-filter me-1"></i> Filtrar
+                <button type="submit" class="btn btn-primary btn-animated">
+                    <i class="fas fa-search icon-hover"></i> Filtrar
                 </button>
+                <a href="{{ url_for('main.listar_chamados') }}" class="btn btn-secondary btn-animated">
+                    <i class="fas fa-times icon-hover"></i> Limpar
+                </a>
             </div>
             {% endif %}
         </div>
@@ -75,7 +81,7 @@
             </thead>
             <tbody>
                 {% for chamado in chamados %}
-                <tr>
+                <tr class="table-row-animated">
                     <td>{{ chamado.id }}</td>
                     <td>{{ chamado.titulo }}</td>
                     <td><span class="badge bg-{{ "secondary" if chamado.status == "Fechado" else ("success" if chamado.status == "Resolvido" else ("warning" if chamado.status == "Em Andamento" else "primary")) }}">{{ chamado.status }}</span></td>
@@ -107,8 +113,9 @@
                     <td>{{ chamado.setor.name if chamado.setor else "N/A" }}</td>
                     <td>{{ chamado.data_abertura|local_datetime }}</td>
                     <td>
-                        <a href="{{ url_for("main.detalhe_chamado", id=chamado.id) }}" class="btn btn-sm btn-info">Detalhes</a>
-                        {# Adicionar botões de ação para TI (editar, atribuir, etc.) aqui se necessário #}
+                        <a href="{{ url_for('main.detalhe_chamado', id=chamado.id) }}" class="btn btn-sm btn-outline-primary btn-animated" title="Visualizar">
+                            <i class="fas fa-eye icon-hover"></i>
+                        </a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -180,9 +187,9 @@
                         </div>
                         
                         <div class="d-grid">
-                            <a href="{{ url_for("main.detalhe_chamado", id=chamado.id) }}" class="btn btn-primary btn-sm">
-                                <i class="fa fa-eye me-1"></i> Ver Detalhes
-                            </a>
+                            <a href="{{ url_for('main.detalhe_chamado', id=chamado.id) }}" class="btn btn-sm btn-outline-primary btn-animated" title="Visualizar">
+                            <i class="fas fa-eye icon-hover"></i>
+                        </a>
                         </div>
                     </div>
                 </div>

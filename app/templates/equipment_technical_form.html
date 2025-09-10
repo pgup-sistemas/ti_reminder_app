@@ -3,15 +3,20 @@
 {% block title %}Dados Técnicos - Solicitação #{{ equipment_request.id }} - TI OSN System{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title mb-0">
-                    <i class="fas fa-cogs me-2"></i>Dados Técnicos do Equipamento
-                </h3>
-                <small class="text-muted">Solicitação #{{ equipment_request.id }}</small>
-            </div>
+<!-- Região de anúncio para leitores de tela -->
+<div id="a11y-live-region" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-body-tertiary d-flex align-items-center">
+                    <i class="fas fa-cogs me-2" aria-hidden="true"></i>
+                    <h1 class="h4 mb-0">
+                        Dados Técnicos do Equipamento
+                        <small class="text-muted ms-2">#{{ equipment_request.id }}</small>
+                    </h1>
+                </div>
             <div class="card-body">
                 <!-- Informações da Solicitação -->
                 <div class="alert alert-info mb-4">
@@ -28,12 +33,12 @@
                     </div>
                 </div>
 
-                <form method="POST">
+                <form method="POST" class="needs-validation" novalidate aria-label="Formulário de dados técnicos do equipamento">
                     <div class="row">
                         <!-- Patrimônio -->
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-3 field-group required">
                             <label for="patrimony" class="form-label">
-                                <i class="fas fa-barcode me-1"></i>Número do Patrimônio *
+                                <i class="fas fa-barcode me-1" aria-hidden="true"></i>Número do Patrimônio
                             </label>
                             <input type="text" class="form-control" id="patrimony" name="patrimony" 
                                    value="{{ equipment_request.patrimony if equipment_request.patrimony else '' }}"
@@ -42,9 +47,9 @@
                         </div>
 
                         <!-- Tipo de Equipamento -->
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-3 field-group required">
                             <label for="equipment_type" class="form-label">
-                                <i class="fas fa-tag me-1"></i>Tipo de Equipamento *
+                                <i class="fas fa-tag me-1" aria-hidden="true"></i>Tipo de Equipamento
                             </label>
                             <select class="form-select" id="equipment_type" name="equipment_type" required>
                                 <option value="">Selecione o tipo...</option>
@@ -61,9 +66,9 @@
                         </div>
 
                         <!-- Data de Entrega -->
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-3 field-group">
                             <label for="delivery_date" class="form-label">
-                                <i class="fas fa-calendar me-1"></i>Data de Entrega
+                                <i class="fas fa-calendar me-1" aria-hidden="true"></i>Data de Entrega
                             </label>
                             <input type="date" class="form-control" id="delivery_date" name="delivery_date" 
                                    value="{{ equipment_request.delivery_date.strftime('%Y-%m-%d') if equipment_request.delivery_date else '' }}">
@@ -71,9 +76,9 @@
                         </div>
 
                         <!-- Status de Conferência -->
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-3 field-group">
                             <label for="conference_status" class="form-label">
-                                <i class="fas fa-check-double me-1"></i>Status de Conferência
+                                <i class="fas fa-check-double me-1" aria-hidden="true"></i>Status de Conferência
                             </label>
                             <select class="form-select" id="conference_status" name="conference_status">
                                 <option value="">Selecione...</option>
@@ -88,12 +93,12 @@
                     </div>
 
                     <!-- Botões -->
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ url_for('main.equipment_detail', id=equipment_request.id) }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>Voltar
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('main.equipment_detail', id=equipment_request.id) }}" class="btn btn-outline-secondary" aria-label="Voltar para os detalhes do equipamento">
+                            <i class="fas fa-arrow-left me-1" aria-hidden="true"></i>Voltar
                         </a>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save me-1"></i>Salvar Dados Técnicos
+                        <button type="submit" class="btn btn-success" aria-label="Salvar dados técnicos">
+                            <i class="fas fa-save me-1" aria-hidden="true"></i>Salvar
                         </button>
                     </div>
                 </form>
@@ -105,6 +110,52 @@
 
 {% block scripts %}
 <script>
+// Validação do formulário
+(function () {
+    'use strict'
+    
+    // Selecionar todos os formulários que precisam de validação
+    var forms = document.querySelectorAll('.needs-validation')
+    
+    // Validar cada campo ao sair dele
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        var inputs = form.querySelectorAll('input, textarea, select')
+        
+        // Adicionar validação em tempo real
+        inputs.forEach(function (input) {
+            input.addEventListener('blur', function (event) {
+                if (!input.checkValidity()) {
+                    input.classList.add('is-invalid')
+                } else {
+                    input.classList.remove('is-invalid')
+                }
+            }, false)
+        })
+        
+        // Validar ao enviar o formulário
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+                
+                // Rolar até o primeiro campo inválido
+                const firstInvalid = form.querySelector(':invalid')
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    firstInvalid.focus()
+                    
+                    // Adicionar classe de inválido para exibir feedback visual
+                    firstInvalid.classList.add('is-invalid')
+                }
+            }
+            
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+
+// Melhorias de acessibilidade para campos de data
+
 // Definir data mínima como hoje
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];

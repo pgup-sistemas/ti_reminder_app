@@ -1,24 +1,34 @@
 {% extends 'base.html' %}
-{% block title %}Login | TI OSN System - Sistema Profissional de Gerenciamento{% endblock %}
+
+{% block title %}Login | TI OSN System{% endblock %}
+
 {% block content %}
+<!-- Região de anúncio para leitores de tela -->
+<div id="a11y-live-region" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
 {% if request.args.get('need_login') %}
-<div class="alert alert-danger text-center mb-4">
-    Faça login para acessar esta página.
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Faça login para acessar esta página.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+            </div>
+        </div>
+    </div>
 </div>
 {% endif %}
-<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center" 
-     style="background-color: var(--bs-body-bg);">
-  <div class="row justify-content-center w-100">
-    <div class="col-11 col-sm-8 col-md-6 col-lg-4">
-      <div class="card border-0" style="box-shadow: 0 0.5rem 1.5rem rgba(var(--bs-body-bg-rgb), 0.15);">
-        <!-- Logo/Brand section -->
-        <div class="text-center pt-4">
-          <i class="fa-solid fa-tasks fa-2x mb-2 text-success"></i>
-        </div>
-        
-        <!-- Card body with form -->
-        <div class="card-body px-4 py-3">
-          <h2 class="fs-5 mb-3 fw-bold text-center">Acesso ao Sistema</h2>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-body-tertiary d-flex align-items-center">
+                    <i class="fas fa-sign-in-alt me-2" aria-hidden="true"></i>
+                    <h1 class="h4 mb-0 text-center">Acesso ao Sistema</h1>
+                </div>
+                <div class="card-body">
           
           {% if request.args.get('error') == 'invalid_credentials' %}
       <div class="alert alert-danger text-center mb-4">
@@ -65,19 +75,23 @@
               {{ form.remember_me.label(class_='form-check-label small') }}
             </div>
             
-            <button type="submit" class="btn btn-success w-100 py-2 mb-3" style="box-shadow: 0 0.25rem 0.75rem rgba(var(--bs-primary-rgb), 0.15);">
-              Entrar
-            </button>
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-success" aria-label="Entrar no sistema">
+                    <i class="fas fa-sign-in-alt me-1" aria-hidden="true"></i>Entrar
+                </button>
+            </div>
             
-            <div class="text-center">
-              <span class="small text-muted">Novo usuário?</span>
-              <a href="{{ url_for('auth.register') }}" class="text-decoration-none small">
-                Cadastre-se
-              </a>
+            <div class="text-center mt-3">
+                <p class="small mb-0">
+                    Não tem uma conta? <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Cadastre-se</a>
+                </p>
+                <p class="small mt-2 mb-0">
+                    <a href="{{ url_for('auth.reset_password_request') }}" class="text-decoration-none">Esqueceu sua senha?</a>
+                </p>
             </div>
           </form>
         </div>
-        <!-- Footer with version info -->
+        <!-- Footer with version info 
         <div class="card-footer bg-transparent border-0 py-2 text-center">
           <small class="text-muted">
             <hr class="my-2">
@@ -86,7 +100,7 @@
             &copy; 2025 PageUp Sistemas | Versão 2.0
             Desenvolvido por <strong>Oézios Normando</strong><br>
           </small>
-        </div>
+        </div>-->
       </div>
     </div>
   </div>

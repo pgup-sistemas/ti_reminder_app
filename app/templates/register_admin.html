@@ -1,12 +1,20 @@
 {% extends 'base.html' %}
 
+{% block title %}Registrar Novo Usuário | TI OSN System{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
+<!-- Região de anúncio para leitores de tela -->
+<div id="a11y-live-region" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+<div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="card shadow-sm border-0 rounded-3 mt-5">
-                <div class="card-body p-4">
-                    <h4 class="card-title text-center mb-4">{{ title|default('Registrar Novo Usuário') }}</h4>
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-body-tertiary d-flex align-items-center">
+                    <i class="fas fa-user-plus me-2" aria-hidden="true"></i>
+                    <h1 class="h4 mb-0">Registrar Novo Usuário</h1>
+                </div>
+                <div class="card-body">
                     
                     <form method="POST" action="">
                         {{ form.hidden_tag() }}
@@ -80,13 +88,13 @@
                             </div>
                         </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success btn-sm">
-                                <i class="fas fa-user-plus me-1"></i>Registrar Usuário
-                            </button>
-                            <a href="{{ url_for('main.users_admin') }}" class="btn btn-outline-secondary btn-sm">
-                                <i class="fas fa-arrow-left me-1"></i>Voltar
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('main.users_admin') }}" class="btn btn-outline-secondary" aria-label="Voltar para a lista de usuários">
+                                <i class="fas fa-arrow-left me-1" aria-hidden="true"></i>Voltar
                             </a>
+                            <button type="submit" class="btn btn-success" aria-label="Registrar novo usuário">
+                                <i class="fas fa-user-plus me-1" aria-hidden="true"></i>Registrar
+                            </button>
                         </div>
                     </form>
                 </div>

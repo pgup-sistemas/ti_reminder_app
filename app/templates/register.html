@@ -3,17 +3,18 @@
 {% block title %}Registrar Usuário | TI OSN System{% endblock %}
 
 {% block content %}
-<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center" style="background-color: var(--bs-body-bg);">
-  <div class="row justify-content-center w-100">
-    <div class="col-11 col-sm-8 col-md-6 col-lg-4">
-      <div class="card border-0" style="box-shadow: 0 0.5rem 1.5rem rgba(var(--bs-body-bg-rgb), 0.15);">
-        <!-- Logo/Brand section -->
-        <div class="text-center pt-4">
-          <i class="fa-solid fa-tasks fa-2x mb-2 text-success"></i>
-        </div>
-        <!-- Card body with form -->
-        <div class="card-body px-4 py-3">
-          <h2 class="fs-5 mb-3 fw-bold text-center">Cadastro</h2>
+<!-- Região de anúncio para leitores de tela -->
+<div id="a11y-live-region" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-body-tertiary d-flex align-items-center">
+                    <i class="fas fa-user-plus me-2" aria-hidden="true"></i>
+                    <h1 class="h4 mb-0">Cadastro de Usuário</h1>
+                </div>
+                <div class="card-body">
           <form method="POST">
             {{ form.hidden_tag() }}
             <div class="mb-3">
@@ -73,14 +74,20 @@
               {% endif %}
             </div>
             
-            <button type="submit" class="btn btn-success w-100">Registrar</button>
-            <div class="mt-2 text-center">
-              <span class="small text-muted">Já tem conta?</span>
-              <a href="{{ url_for('auth.login') }}" class="text-decoration-none small">
-                Entrar
-              </a>
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary" aria-label="Voltar para o login">
+                    <i class="fas fa-arrow-left me-1" aria-hidden="true"></i>Voltar
+                </a>
+                <button type="submit" class="btn btn-success" aria-label="Finalizar cadastro">
+                    <i class="fas fa-user-plus me-1" aria-hidden="true"></i>Cadastrar
+                </button>
             </div>
-          </form> 
+          </form>
+          <div class="text-center mt-3">
+              <p class="small mb-0">
+                  Já tem uma conta? <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Faça login</a>
+              </p>
+          </div>
         </div>
       </div>
     </div>

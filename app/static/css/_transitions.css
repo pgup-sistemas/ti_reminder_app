@@ -1,0 +1,206 @@
+/* ===== TRANSIÇÕES E ANIMAÇÕES ===== */
+
+/* Transição suave para mudanças de tema */
+body,
+body *,
+body *::before,
+body *::after,
+::backdrop {
+  transition-duration: 0.3s !important;
+  transition-timing-function: ease-in-out !important;
+  transition-property: 
+    background-color,
+    border-color,
+    color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
+    backdrop-filter !important;
+}
+
+/* Desativar transições durante a mudança de tema para melhor performance */
+body.disable-transitions,
+body.disable-transitions *,
+body.disable-transitions *::before,
+body.disable-transitions *::after,
+body.disable-transitions ::backdrop {
+  transition: none !important;
+}
+
+/* Animações de fade */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s ease-in-out;
+}
+
+/* Animações de slide */
+@keyframes slideInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutUp {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+}
+
+.slide-in-down {
+  animation: slideInDown 0.3s ease-out;
+}
+
+.slide-out-up {
+  animation: slideOutUp 0.3s ease-in;
+}
+
+/* Efeito de hover suave */
+.hover-scale {
+  transition: transform 0.2s ease-in-out;
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+.hover-lift {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  box-shadow: var(--shadow-sm);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+/* Transições para elementos de interface específicos */
+.btn,
+.nav-link,
+.dropdown-item,
+.list-group-item,
+.form-control,
+.form-select,
+.form-check-input,
+.page-link,
+.alert,
+.modal-content,
+.toast,
+.accordion-button,
+.breadcrumb-item,
+.pagination,
+.progress,
+.tooltip,
+.popover {
+  transition: var(--transition);
+}
+
+/* Transições para elementos interativos */
+a,
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+[role="button"],
+[tabindex]:not([tabindex="-1"]):not([disabled]) {
+  transition: color 0.15s ease-in-out, 
+              background-color 0.15s ease-in-out, 
+              border-color 0.15s ease-in-out, 
+              box-shadow 0.15s ease-in-out,
+              opacity 0.15s ease-in-out;
+}
+
+/* Suavizar rolagem */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Melhorar a suavidade do scroll em navegadores WebKit */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-500) var(--bg-surface-alt);
+  }
+  
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--bg-surface-alt);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--primary-500);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--primary-600);
+  }
+  
+  [data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background-color: var(--primary-700);
+  }
+  
+  [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--primary-600);
+  }
+}
+
+/* Animações para notificações */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.notification-enter {
+  animation: slideInRight 0.3s ease-out forwards;
+}
+
+.notification-exit {
+  animation: slideOutRight 0.3s ease-in forwards;
+}

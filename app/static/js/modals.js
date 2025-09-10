@@ -539,13 +539,13 @@ class ModernModal {
 // Aguardar DOM estar pronto antes de inicializar
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        window.Modal = new ModalManager();
+        window.Modal = new ModernModal();
     });
 } else {
-    window.Modal = new ModalManager();
+    window.Modal = new ModernModal();
 }
 
 // Exportar para uso em módulos
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = ModalManager;
+    module.exports = ModernModal;
 }

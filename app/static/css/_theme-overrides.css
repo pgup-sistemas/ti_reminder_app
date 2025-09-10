@@ -1,0 +1,614 @@
+/* ===== SOBRESCRITAS DE TEMA ===== */
+
+/* Corpo e fundo */
+body {
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+/* Cabeçalhos */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  color: var(--text-primary);
+}
+
+/* Links */
+a {
+  color: var(--primary-500);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+a:hover {
+  color: var(--primary-600);
+  text-decoration: underline;
+}
+
+[data-theme="dark"] a {
+  color: var(--primary-300);
+}
+
+[data-theme="dark"] a:hover {
+  color: var(--primary-200);
+  text-decoration: underline;
+}
+
+/* Botões */
+.btn {
+  transition: all var(--transition);
+  border: 1px solid transparent;
+  font-weight: 500;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: var(--border-radius);
+}
+
+/* Botão Primário - Tamanho Profissional */
+.btn {
+  padding: 0.375rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all var(--transition);
+}
+
+.btn-sm {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8125rem;
+  border-radius: 4px;
+}
+
+.btn-lg {
+  padding: 0.5rem 1.25rem;
+  font-size: 1rem;
+  border-radius: 8px;
+}
+
+.btn-primary {
+  background-color: var(--primary-500);
+  border-color: var(--primary-500);
+  color: white;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--secondary-600) !important;
+  border-color: var(--secondary-600) !important;
+  color: white !important;
+  box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25);
+}
+
+.btn-primary:active {
+  background-color: var(--primary-700);
+  border-color: var(--primary-700);
+  color: white !important;
+}
+
+/* Botão Success - Forçar cor primária do sistema */
+.btn-success {
+  background-color: var(--primary-500) !important;
+  border-color: var(--primary-500) !important;
+  color: white !important;
+}
+
+.btn-success:hover,
+.btn-success:focus {
+  background-color: var(--secondary-600) !important;
+  border-color: var(--secondary-600) !important;
+  color: white !important;
+  box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25) !important;
+}
+
+.btn-success:active {
+  background-color: var(--secondary-700) !important;
+  border-color: var(--secondary-700) !important;
+  color: white !important;
+}
+
+/* Sobrescrever qualquer estilo Bootstrap padrão para btn-success */
+.btn.btn-success,
+button.btn-success,
+input[type="submit"].btn-success,
+input[type="button"].btn-success {
+  background-color: var(--primary-500) !important;
+  border-color: var(--primary-500) !important;
+  color: white !important;
+}
+
+.btn.btn-success:hover,
+.btn.btn-success:focus,
+button.btn-success:hover,
+button.btn-success:focus,
+input[type="submit"].btn-success:hover,
+input[type="submit"].btn-success:focus,
+input[type="button"].btn-success:hover,
+input[type="button"].btn-success:focus {
+  background-color: var(--secondary-600) !important;
+  border-color: var(--secondary-600) !important;
+  color: white !important;
+  box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25) !important;
+}
+
+/* Botão Secundário */
+.btn-secondary {
+  background-color: var(--secondary-500);
+  border-color: var(--secondary-500);
+  color: white;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+  background-color: var(--secondary-600);
+  border-color: var(--secondary-600);
+  color: white !important;
+  box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25);
+}
+
+.btn-secondary:active {
+  background-color: var(--secondary-700);
+  border-color: var(--secondary-700);
+  color: white !important;
+}
+
+/* Botão Outline Primário */
+.btn-outline-primary {
+  background-color: transparent;
+  border-color: var(--primary-500);
+  color: var(--primary-500);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  background-color: var(--primary-500);
+  border-color: var(--primary-500);
+  color: white !important;
+  box-shadow: 0 0 0 0.25rem rgba(0, 139, 205, 0.25);
+}
+
+/* Botão Outline Secundário */
+.btn-outline-secondary {
+  background-color: transparent;
+  border-color: var(--secondary-500);
+  color: var(--secondary-500);
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+  background-color: var(--secondary-500);
+  border-color: var(--secondary-500);
+  color: white !important;
+  box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25);
+}
+
+/* Tema Escuro - Botões */
+[data-theme="dark"] .btn-primary,
+[data-theme="dark"] .btn-success,
+[data-theme="dark"] .btn.btn-success,
+[data-theme="dark"] button.btn-success {
+  background-color: var(--primary-500) !important;
+  border-color: var(--primary-500) !important;
+  color: white !important;
+}
+
+[data-theme="dark"] .btn-primary:hover,
+[data-theme="dark"] .btn-primary:focus,
+[data-theme="dark"] .btn-success:hover,
+[data-theme="dark"] .btn-success:focus,
+[data-theme="dark"] .btn.btn-success:hover,
+[data-theme="dark"] .btn.btn-success:focus,
+[data-theme="dark"] button.btn-success:hover,
+[data-theme="dark"] button.btn-success:focus {
+  background-color: var(--secondary-500) !important;
+  border-color: var(--secondary-500) !important;
+  color: white !important;
+  box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.5) !important;
+}
+
+[data-theme="dark"] .btn-secondary {
+  background-color: var(--secondary-600);
+  border-color: var(--secondary-600);
+  color: white;
+}
+
+[data-theme="dark"] .btn-secondary:hover,
+[data-theme="dark"] .btn-secondary:focus {
+  background-color: var(--secondary-500);
+  border-color: var(--secondary-500);
+  color: white !important;
+  box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.5);
+}
+
+/* Estilos específicos para páginas de autenticação - MÁXIMA PRIORIDADE */
+/* Login, Cadastro e Esqueceu Senha */
+.auth-page .btn,
+.login-form .btn,
+.register-form .btn,
+.forgot-password-form .btn,
+form[action*="login"] .btn,
+form[action*="register"] .btn,
+form[action*="forgot"] .btn,
+form[action*="reset"] .btn,
+.btn-success.btn-success.btn-success {
+  background-color: var(--primary-500) !important;
+  border-color: var(--primary-500) !important;
+  color: white !important;
+  font-weight: 500;
+  padding: 0.375rem 1rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-size: 0.875rem;
+}
+
+.auth-page .btn:hover,
+.auth-page .btn:focus,
+.login-form .btn:hover,
+.login-form .btn:focus,
+.register-form .btn:hover,
+.register-form .btn:focus,
+.forgot-password-form .btn:hover,
+.forgot-password-form .btn:focus,
+form[action*="login"] .btn:hover,
+form[action*="login"] .btn:focus,
+form[action*="register"] .btn:hover,
+form[action*="register"] .btn:focus,
+form[action*="forgot"] .btn:hover,
+form[action*="forgot"] .btn:focus,
+form[action*="reset"] .btn:hover,
+form[action*="reset"] .btn:focus,
+.btn-success.btn-success.btn-success:hover,
+.btn-success.btn-success.btn-success:focus {
+  background-color: var(--secondary-600) !important;
+  border-color: var(--secondary-600) !important;
+  color: white !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3) !important;
+}
+
+.auth-page .btn:active,
+.login-form .btn:active,
+.register-form .btn:active,
+.forgot-password-form .btn:active,
+form[action*="login"] .btn:active,
+form[action*="register"] .btn:active,
+form[action*="forgot"] .btn:active,
+form[action*="reset"] .btn:active {
+  background-color: var(--secondary-700) !important;
+  border-color: var(--secondary-700) !important;
+  color: white !important;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2) !important;
+}
+
+/* Garantir que links em botões não tenham sublinhado */
+.auth-page .btn a,
+.login-form .btn a,
+.register-form .btn a,
+.forgot-password-form .btn a {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+/* Cards */
+.card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition);
+}
+
+.card-header {
+  background-color: var(--bg-surface-alt);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Formulários */
+.form-control,
+.form-select,
+.input-group-text,
+.form-check-input {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  transition: all var(--transition);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--bg-surface);
+  border-color: var(--primary-400);
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.5);
+}
+
+/* Tabelas */
+.table {
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.table th,
+.table td {
+  border-color: var(--border-color);
+}
+
+.table thead th {
+  background-color: var(--bg-surface-alt);
+  border-bottom-color: var(--border-color);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: var(--bg-surface-alt);
+}
+
+/* Navbar */
+.navbar {
+  background-color: var(--bg-surface) !important;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-brand,
+.nav-link {
+  color: var(--text-primary) !important;
+}
+
+.navbar-brand:hover {
+  text-decoration: none;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: var(--primary-500) !important;
+  text-decoration: none;
+}
+
+/* Dropdowns */
+.dropdown-menu {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+}
+
+.dropdown-item {
+  color: var(--text-primary);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background-color: var(--bg-surface-alt);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.dropdown-divider {
+  border-top: 1px solid var(--border-color);
+  opacity: 0.5;
+}
+
+/* Alertas */
+.alert {
+  border: 1px solid transparent;
+  border-left: 4px solid currentColor;
+}
+
+.alert-primary {
+  background-color: var(--primary-100);
+  border-color: var(--primary-200);
+  color: var(--primary-800);
+}
+
+[data-theme="dark"] .alert-primary {
+  background-color: var(--primary-900);
+  border-color: var(--primary-800);
+  color: var(--primary-200);
+}
+
+/* Badges */
+.badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+}
+
+/* Modais */
+.modal-content {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-footer {
+  border-top: 1px solid var(--border-color);
+}
+
+/* Tooltips */
+.tooltip {
+  --bs-tooltip-bg: var(--gray-800);
+}
+
+[data-theme="dark"] .tooltip {
+  --bs-tooltip-bg: var(--gray-700);
+}
+
+/* Paginação */
+.page-link {
+  color: var(--primary-500);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+}
+
+.page-link:hover {
+  color: var(--primary-600);
+  background-color: var(--bg-surface-alt);
+  border-color: var(--border-color);
+}
+
+.page-item.active .page-link {
+  background-color: var(--primary-500);
+  border-color: var(--primary-500);
+}
+
+[data-theme="dark"] .page-link {
+  color: var(--primary-300);
+}
+
+[data-theme="dark"] .page-link:hover {
+  color: var(--primary-200);
+}
+
+/* List groups */
+.list-group-item {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.list-group-item-action:hover,
+.list-group-item-action:focus {
+  background-color: var(--bg-surface-alt);
+  color: var(--text-primary);
+}
+
+.list-group-item.active {
+  background-color: var(--primary-500);
+  border-color: var(--primary-500);
+}
+
+/* Accordion */
+.accordion-button {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: var(--bg-surface-alt);
+  color: var(--primary-600);
+}
+
+.accordion-item {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+}
+
+/* Custom scrollbar para navegadores WebKit */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-surface-alt);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--primary-500);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary-600);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background-color: var(--primary-700);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary-600);
+}
+
+/* Ajustes específicos para o tema escuro */
+[data-theme="dark"] {
+  /* Ajustes para imagens no tema escuro */
+  img:not([src*='.svg']) {
+    filter: brightness(0.9) contrast(1.1);
+  }
+  
+  /* Ajustes para código e pré-formatação */
+  pre, code, kbd, samp {
+    background-color: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+  }
+  
+  /* Ajustes para blocos de citação */
+  blockquote {
+    border-left-color: var(--primary-500);
+    background-color: var(--bg-surface-alt);
+  }
+  
+  /* Ajustes para tabelas */
+  .table-hover tbody tr:hover {
+    background-color: var(--bg-surface-alt);
+  }
+  
+  /* Ajustes para cards */
+  .card.bg-light {
+    background-color: var(--bg-surface-alt) !important;
+  }
+}
+
+/* Ajustes para o seletor de tema */
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 2rem;
+  background-color: var(--bg-surface-alt);
+  border: 1px solid var(--border-color);
+}
+
+.theme-switcher-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.theme-switcher-btn:hover,
+.theme-switcher-btn:focus {
+  color: var(--primary-500);
+  background-color: var(--bg-surface);
+  outline: none;
+}
+
+.theme-switcher-btn.active {
+  color: var(--primary-500);
+  background-color: var(--bg-surface);
+  box-shadow: 0 0 0 2px var(--primary-500);
+}
+
+/* Ajustes para o seletor de tema no modo escuro */
+[data-theme="dark"] .theme-switcher {
+  background-color: var(--bg-surface-alt);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .theme-switcher-btn:hover,
+[data-theme="dark"] .theme-switcher-btn:focus {
+  background-color: var(--bg-surface);
+}
+
+[data-theme="dark"] .theme-switcher-btn.active {
+  background-color: var(--bg-surface);
+  box-shadow: 0 0 0 2px var(--primary-500);
+}

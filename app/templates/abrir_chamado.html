@@ -1,14 +1,18 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ title }} - TI OSN System{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-8">
+<!-- Região de anúncio para leitores de tela -->
+<div id="a11y-live-region" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
             <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h2 class="h5 mb-0">{{ title }}</h2>
+                <div class="card-header bg-body-tertiary d-flex align-items-center">
+                    <i class="fas fa-ticket-alt me-2" aria-hidden="true"></i>
+                    <h1 class="h4 mb-0">{{ title }}</h1>
                 </div>
                 <div class="card-body">
                     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -87,12 +91,12 @@
                             </div>
                         </div>
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                            <a href="{{ url_for('main.listar_chamados') }}" class="btn btn-outline-secondary me-md-2">
-                                <i class="fas fa-times me-1"></i> Cancelar
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary" aria-label="Cancelar e voltar para o dashboard">
+                                <i class="fas fa-times me-1" aria-hidden="true"></i>Cancelar
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-paper-plane me-1"></i> Abrir Chamado
+                            <button type="submit" class="btn btn-success" aria-label="Enviar chamado">
+                                <i class="fas fa-paper-plane me-1" aria-hidden="true"></i>Enviar
                             </button>
                         </div>
                     </form>
