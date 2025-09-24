@@ -3,7 +3,12 @@ from datetime import timezone, timedelta
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'changeme'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///reminder.db'
+    db_url = os.environ.get('DATABASE_URL')
+    if not db_url or db_url.startswith("sqlite:///"):
+        db_url = "postgresql://postgres:postgres@localhost:5432/ti_reminder_db"
+
+    SQLALCHEMY_DATABASE_URI = db_url
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587

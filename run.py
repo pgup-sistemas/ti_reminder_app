@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()  # Carregar variáveis do .env logo no início
+
 from app import create_app
 import logging
 import sys
@@ -9,9 +12,8 @@ from init_db import init_postgres_db, init_migrations
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Inicializar banco de dados PostgreSQL se necessário
 try:
-    # Verificar se é a primeira execução
+    # Verificar se é a primeira execução (flag simples em arquivo local)
     db_initialized = os.path.exists('db_initialized.flag')
     if not db_initialized:
         logger.info("Inicializando banco de dados PostgreSQL...")
@@ -29,7 +31,16 @@ try:
 
     # Criar aplicação
     app = create_app()
+
+    # Log do banco em uso
+    db_url = os.environ.get("DATABASE_URL")
+    if db_url:
+        logger.info(f"Conectando ao banco: {db_url}")
+    else:
+        logger.warning("Nenhuma variável DATABASE_URL encontrada. Usando fallback SQLite.")
+
     logger.info("Application created successfully")
+
 except Exception as e:
     logger.error(f"Error creating application: {str(e)}")
     raise
@@ -52,15 +63,16 @@ if __name__ == '__main__':
                 local_ip = socket.gethostbyname(socket.gethostname())
             finally:
                 s.close()
+
             # Confirma que não é localhost
             if local_ip.startswith('127.') or local_ip == '0.0.0.0':
-                # Busca todos os IPs possíveis
                 ips = socket.getaddrinfo(socket.gethostname(), None)
                 for result in ips:
                     ip = result[4][0]
                     if re.match(r'^192\.168\.', ip):
                         local_ip = ip
                         break
+
             logger.info(f"Starting in network mode on {local_ip}")
             print(f'\n>>> Servidor disponível na rede: http://{local_ip}:5000/ <<<\n')
             app.run(debug=True, host='0.0.0.0')
@@ -70,4 +82,3 @@ if __name__ == '__main__':
     except Exception as e:
         logger.error(f"Error starting application: {str(e)}")
         raise
-

@@ -64,17 +64,17 @@ def create_app():
     bootstrap.init_app(app)
 
     from . import routes
-
     app.register_blueprint(routes.bp)
 
     # Registrar blueprint de autenticação
     from .auth import bp_auth
-
     app.register_blueprint(bp_auth, url_prefix="/auth")
 
     # Registrar filtros de template para timezone
     from .template_filters import register_template_filters
-
     register_template_filters(app)
+
+    # 🔥 Logar o banco de dados realmente configurado
+    app.logger.info(f"SQLAlchemy conectado em: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
     return app
