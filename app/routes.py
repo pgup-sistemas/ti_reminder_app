@@ -1709,11 +1709,130 @@ def export_excel():
     )
 
 
+@bp.route("/docs")
+@login_required
+def docs_redirect():
+    """Redirecionamento de /docs para /help para compatibilidade"""
+    return redirect(url_for("main.help_page"))
+
+@bp.route("/docs/")
+@login_required
+def docs_redirect_slash():
+    """Redirecionamento de /docs/ para /help para compatibilidade"""
+    return redirect(url_for("main.help_page"))
+
 @bp.route("/help")
 @login_required
 def help_page():
-    """Página de ajuda com documentação do sistema"""
-    return render_template("help.html", title="Central de Ajuda")
+    """Página de ajuda com documentação profissional usando MKDocs"""
+    import subprocess
+    import os
+    import re
+    from flask import current_app, url_for
+
+    try:
+        # Verificar se MKDocs está instalado
+        import mkdocs
+
+        # Construir documentação se necessário
+        docs_dir = os.path.join(current_app.root_path, '..', 'docs')
+        site_dir = os.path.join(current_app.root_path, '..', 'site')
+
+        if os.path.exists(docs_dir):
+            # Construir documentação MKDocs
+            try:
+                subprocess.run([
+                    'mkdocs', 'build',
+                    '--config-file', os.path.join(current_app.root_path, '..', 'mkdocs.yml'),
+                    '--site-dir', site_dir,
+                    '--clean'
+                ], check=True, capture_output=True)
+
+                # Verificar se index.html foi gerado
+                index_path = os.path.join(site_dir, 'index.html')
+                if os.path.exists(index_path):
+                    # Ler conteúdo do index.html gerado pelo MKDocs
+                    with open(index_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+
+                    # Corrigir caminhos relativos para caminhos absolutos do Flask
+                    # Substituir caminhos relativos por caminhos absolutos para /docs/
+                    content = content.replace('href="assets/', 'href="/docs/assets/')
+                    content = content.replace('src="assets/', 'src="/docs/assets/')
+                    content = content.replace('href="javascripts/', 'href="/docs/javascripts/')
+                    content = content.replace('src="javascripts/', 'src="/docs/javascripts/')
+                    content = content.replace('href="stylesheets/', 'href="/docs/stylesheets/')
+                    content = content.replace('href="user-guide/', 'href="/docs/user-guide/')
+                    content = content.replace('href="admin-guide/', 'href="/docs/admin-guide/')
+                    content = content.replace('href="dev-guide/', 'href="/docs/dev-guide/')
+                    content = content.replace('href="references/', 'href="/docs/references/')
+                    content = content.replace('href="search/', 'href="/docs/search/')
+                    content = content.replace('href="."', 'href="/docs/"')
+                    content = content.replace('href="./"', 'href="/docs/"')
+                    content = content.replace('href="./', 'href="/docs/')
+                    content = content.replace('href="sitemap.xml', 'href="/docs/sitemap.xml')
+                    content = content.replace('href="404.html', 'href="/docs/404.html')
+                    # Corrigir caminhos no JavaScript de configuração
+                    content = content.replace('"search": "assets/javascripts/workers/', '"search": "/docs/assets/javascripts/workers/')
+                    content = content.replace('"search": "search/', '"search": "/docs/search/')
+                    # Corrigir o base path para funcionar com /docs/
+                    content = content.replace('"base": "."', '"base": "/docs/"')
+
+                    # Retornar conteúdo HTML corrigido
+                    from flask import Response
+                    return Response(content, mimetype='text/html')
+
+            except subprocess.CalledProcessError as e:
+                # Em caso de erro no MKDocs, fallback para template original
+                current_app.logger.error(f"Erro ao construir documentação MKDocs: {e}")
+            except FileNotFoundError:
+                # MKDocs não encontrado, fallback para template original
+                current_app.logger.warning("MKDocs não encontrado, usando template padrão")
+
+        # Fallback para template HTML original
+        return render_template("help.html", title="Central de Ajuda")
+
+    except ImportError:
+        # MKDocs não instalado, usar template original
+        return render_template("help.html", title="Central de Ajuda")
+
+
+@bp.route("/docs/<path:filename>")
+@login_required
+def docs_static(filename):
+    """Servir arquivos estáticos e páginas da documentação MKDocs"""
+    import os
+    from flask import current_app, send_from_directory, Response
+
+    site_dir = os.path.join(current_app.root_path, '..', 'site')
+
+    # Se o filename terminar com / ou for um diretório, tentar servir index.html
+    if filename.endswith('/') or os.path.isdir(os.path.join(site_dir, filename)):
+        if filename.endswith('/'):
+            filename = filename[:-1]
+        index_path = os.path.join(site_dir, filename, 'index.html')
+        if os.path.exists(index_path):
+            # Ler e corrigir o conteúdo HTML
+            with open(index_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # Corrigir caminhos relativos
+            content = content.replace('href="assets/', 'href="/docs/assets/')
+            content = content.replace('src="assets/', 'src="/docs/assets/')
+            content = content.replace('href="javascripts/', 'href="/docs/javascripts/')
+            content = content.replace('src="javascripts/', 'src="/docs/javascripts/')
+            content = content.replace('href="stylesheets/', 'href="/docs/stylesheets/')
+            content = content.replace('href="user-guide/', 'href="/docs/user-guide/')
+            content = content.replace('href="admin-guide/', 'href="/docs/admin-guide/')
+            content = content.replace('href="dev-guide/', 'href="/docs/dev-guide/')
+            content = content.replace('href="references/', 'href="/docs/references/')
+            content = content.replace('href="."', 'href="/docs/index.html"')
+            content = content.replace('href="./"', 'href="/docs/index.html"')
+
+            return Response(content, mimetype='text/html')
+
+    # Para arquivos normais, usar send_from_directory
+    return send_from_directory(site_dir, filename)
 
 
 @bp.route("/termos")
@@ -2370,6 +2489,11 @@ def abrir_chamado():
     form = ChamadoForm()
     user_id = session.get("user_id")
     user = User.query.get(user_id)
+
+    # Verificar se o usuário existe
+    if not user:
+        flash("Usuário não encontrado. Faça login novamente.", "danger")
+        return redirect(url_for("auth.login"))
 
     # Tenta obter o setor do usuário de diferentes fontes
     setor_usuario = None

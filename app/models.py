@@ -173,6 +173,11 @@ class Chamado(db.Model):
 
     def calcular_sla(self):
         """Calcula e define o prazo de SLA baseado na prioridade"""
+        # Verificar se data_abertura está definida
+        if not self.data_abertura:
+            # Se não estiver definida, usar o tempo atual
+            self.data_abertura = get_current_time_for_db()
+
         sla_config = SlaConfig.query.filter_by(prioridade=self.prioridade).first()
         if sla_config:
             self.prazo_sla = self.data_abertura + timedelta(

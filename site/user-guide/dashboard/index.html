@@ -1,0 +1,1221 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentação completa do Sistema de Gerenciamento TI OSN">
+      
+      
+        <meta name="author" content="Equipe TI OSN">
+      
+      
+        <link rel="canonical" href="http://192.168.1.86:5000/docs/user-guide/dashboard/">
+      
+      
+        <link rel="prev" href="../equipment/">
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.8">
+    
+    
+      
+        <title>Dashboard - TI OSN System - Documentação</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.4b4a2bd9.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dashboard-e-relatorios" class="md-skip">
+          Pular para conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabeçalho">
+    <a href="../.." title="TI OSN System - Documentação" class="md-header__button md-logo" aria-label="TI OSN System - Documentação" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TI OSN System - Documentação
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Dashboard
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Compartilhar" aria-label="Compartilhar" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando busca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Abas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+    
+  
+  Início
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../overview/" class="md-tabs__link">
+          
+  
+    
+  
+  Guia do Usuário
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="TI OSN System - Documentação" class="md-nav__button md-logo" aria-label="TI OSN System - Documentação" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    TI OSN System - Documentação
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Início
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Guia do Usuário
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Guia do Usuário
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Visão Geral
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reminders/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Lembretes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../chamados/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Chamados
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tasks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tarefas
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tutoriais
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../equipment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Equipamentos
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Dashboard
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Dashboard
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#visao-geral" class="md-nav__link">
+    🎯 Visão Geral
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acessando-o-dashboard" class="md-nav__link">
+    📊 Acessando o Dashboard
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Acessando o Dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#como-acessar" class="md-nav__link">
+    Como Acessar
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metricas-disponiveis" class="md-nav__link">
+    📈 Métricas Disponíveis
+  </a>
+  
+    <nav class="md-nav" aria-label="📈 Métricas Disponíveis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#contadores-em-tempo-real" class="md-nav__link">
+    Contadores em Tempo Real
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#estatisticas-de-sla" class="md-nav__link">
+    Estatísticas de SLA
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#graficos-e-visualizacoes" class="md-nav__link">
+    📊 Gráficos e Visualizações
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Gráficos e Visualizações">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#graficos-de-linha-tendencias" class="md-nav__link">
+    Gráficos de Linha (Tendências)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#graficos-de-barra-comparativos" class="md-nav__link">
+    Gráficos de Barra (Comparativos)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtros-e-busca" class="md-nav__link">
+    🔍 Filtros e Busca
+  </a>
+  
+    <nav class="md-nav" aria-label="🔍 Filtros e Busca">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filtros-disponiveis" class="md-nav__link">
+    Filtros Disponíveis
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#como-usar-filtros" class="md-nav__link">
+    Como Usar Filtros
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exportacao-de-dados" class="md-nav__link">
+    📋 Exportação de Dados
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 Exportação de Dados">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#formatos-disponiveis" class="md-nav__link">
+    Formatos Disponíveis
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#como-exportar" class="md-nav__link">
+    Como Exportar
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recursos-da-exportacao" class="md-nav__link">
+    Recursos da Exportação
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#personalizacao" class="md-nav__link">
+    🎨 Personalização
+  </a>
+  
+    <nav class="md-nav" aria-label="🎨 Personalização">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layout-responsivo" class="md-nav__link">
+    Layout Responsivo
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visualizacoes" class="md-nav__link">
+    Visualizações
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analise-de-dados" class="md-nav__link">
+    📈 Análise de Dados
+  </a>
+  
+    <nav class="md-nav" aria-label="📈 Análise de Dados">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#interpretando-metricas" class="md-nav__link">
+    Interpretando Métricas
+  </a>
+  
+    <nav class="md-nav" aria-label="Interpretando Métricas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lembretes" class="md-nav__link">
+    Lembretes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chamados" class="md-nav__link">
+    Chamados
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#equipamentos" class="md-nav__link">
+    Equipamentos
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alertas-e-notificacoes" class="md-nav__link">
+    🚨 Alertas e Notificações
+  </a>
+  
+    <nav class="md-nav" aria-label="🚨 Alertas e Notificações">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#alertas-visuais" class="md-nav__link">
+    Alertas Visuais
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notificacoes-push" class="md-nav__link">
+    Notificações Push
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dicas-de-uso" class="md-nav__link">
+    💡 Dicas de Uso
+  </a>
+  
+    <nav class="md-nav" aria-label="💡 Dicas de Uso">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#analise-eficiente" class="md-nav__link">
+    Análise Eficiente
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#relatorios-gerenciais" class="md-nav__link">
+    Relatórios Gerenciais
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuracoes-avancadas" class="md-nav__link">
+    🔧 Configurações Avançadas
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Configurações Avançadas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filtros-personalizados" class="md-nav__link">
+    Filtros Personalizados
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visualizacoes-customizadas" class="md-nav__link">
+    Visualizações Customizadas
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solucao-de-problemas" class="md-nav__link">
+    🚨 Solução de Problemas
+  </a>
+  
+    <nav class="md-nav" aria-label="🚨 Solução de Problemas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#problemas-comuns" class="md-nav__link">
+    Problemas Comuns
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recursos-relacionados" class="md-nav__link">
+    📚 Recursos Relacionados
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="dashboard-e-relatorios">Dashboard e Relatórios<a class="headerlink" href="#dashboard-e-relatorios" title="Permanent link">&para;</a></h1>
+<p>O dashboard oferece uma visão consolidada de todas as atividades do sistema com métricas em tempo real e ferramentas avançadas de análise.</p>
+<h2 id="visao-geral">🎯 Visão Geral<a class="headerlink" href="#visao-geral" title="Permanent link">&para;</a></h2>
+<p>O dashboard é o centro de controle do sistema, fornecendo:
+- ✅ <strong>Métricas em tempo real</strong> de todas as atividades
+- ✅ <strong>Gráficos interativos</strong> para análise visual
+- ✅ <strong>Filtros avançados</strong> para dados específicos
+- ✅ <strong>Exportação profissional</strong> em Excel e PDF
+- ✅ <strong>Alertas visuais</strong> para situações críticas</p>
+<h2 id="acessando-o-dashboard">📊 Acessando o Dashboard<a class="headerlink" href="#acessando-o-dashboard" title="Permanent link">&para;</a></h2>
+<h3 id="como-acessar">Como Acessar<a class="headerlink" href="#como-acessar" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Menu Principal</strong>:</li>
+<li>Clique em <strong>"Dashboard"</strong> no menu superior</li>
+<li>
+<p>URL: <code>http://192.168.1.86:5000/dashboard</code></p>
+</li>
+<li>
+<p><strong>Página Inicial</strong>:</p>
+</li>
+<li>Dashboard também é exibido na página inicial após login</li>
+</ol>
+<h2 id="metricas-disponiveis">📈 Métricas Disponíveis<a class="headerlink" href="#metricas-disponiveis" title="Permanent link">&para;</a></h2>
+<h3 id="contadores-em-tempo-real">Contadores em Tempo Real<a class="headerlink" href="#contadores-em-tempo-real" title="Permanent link">&para;</a></h3>
+<div class="grid cards">
+<ul>
+<li>
+<p>:material-bell-ring:
+    <strong>Lembretes Pendentes</strong></p>
+<hr />
+<p>Lembretes ativos que precisam de atenção hoje</p>
+</li>
+<li>
+<p>:material-clipboard-list:
+    <strong>Tarefas Ativas</strong></p>
+<hr />
+<p>Tarefas pendentes e em andamento</p>
+</li>
+<li>
+<p>:material-ticket-alt:
+    <strong>Chamados Abertos</strong></p>
+<hr />
+<p>Chamados aguardando atendimento ou resolução</p>
+</li>
+<li>
+<p>:material-laptop:
+    <strong>Equipamentos Solicitados</strong></p>
+<hr />
+<p>Solicitações de equipamentos pendentes</p>
+</li>
+<li>
+<p>:material-account-group:
+    <strong>Usuários Ativos</strong></p>
+<hr />
+<p>Usuários que acessaram nas últimas 24 horas</p>
+</li>
+</ul>
+</div>
+<h3 id="estatisticas-de-sla">Estatísticas de SLA<a class="headerlink" href="#estatisticas-de-sla" title="Permanent link">&para;</a></h3>
+<ul>
+<li>⏰ <strong>SLAs Vencidos</strong>: Chamados fora do prazo</li>
+<li>⚠️ <strong>SLAs Críticos</strong>: Próximos do vencimento</li>
+<li>✅ <strong>SLAs OK</strong>: Dentro do prazo estabelecido</li>
+<li>📊 <strong>Performance</strong>: Percentual de cumprimento mensal</li>
+</ul>
+<h2 id="graficos-e-visualizacoes">📊 Gráficos e Visualizações<a class="headerlink" href="#graficos-e-visualizacoes" title="Permanent link">&para;</a></h2>
+<h3 id="graficos-de-linha-tendencias">Gráficos de Linha (Tendências)<a class="headerlink" href="#graficos-de-linha-tendencias" title="Permanent link">&para;</a></h3>
+<ul>
+<li>📈 <strong>Lembretes realizados</strong> por mês (últimos 12 meses)</li>
+<li>📊 <strong>Tarefas concluídas</strong> por mês (últimos 12 meses)</li>
+<li>🎫 <strong>Chamados abertos</strong> por mês (últimos 12 meses)</li>
+<li>🖥️ <strong>Equipamentos solicitados</strong> por mês (últimos 12 meses)</li>
+</ul>
+<h3 id="graficos-de-barra-comparativos">Gráficos de Barra (Comparativos)<a class="headerlink" href="#graficos-de-barra-comparativos" title="Permanent link">&para;</a></h3>
+<ul>
+<li>📊 <strong>Atividades por setor</strong></li>
+<li>👥 <strong>Produtividade por usuário</strong></li>
+<li>📈 <strong>Distribuição por categoria</strong></li>
+</ul>
+<h2 id="filtros-e-busca">🔍 Filtros e Busca<a class="headerlink" href="#filtros-e-busca" title="Permanent link">&para;</a></h2>
+<h3 id="filtros-disponiveis">Filtros Disponíveis<a class="headerlink" href="#filtros-disponiveis" title="Permanent link">&para;</a></h3>
+<div class="grid cards">
+<ul>
+<li>
+<p>:material-calendar-range:
+    <strong>Período</strong></p>
+<hr />
+<p>Filtrar dados por intervalo de datas específico</p>
+</li>
+<li>
+<p>:material-office-building:
+    <strong>Setor</strong></p>
+<hr />
+<p>Visualizar dados de um setor específico</p>
+</li>
+<li>
+<p>:material-account:
+    <strong>Usuário</strong></p>
+<hr />
+<p>Filtrar por usuário responsável</p>
+</li>
+<li>
+<p>:material-format-list-bulleted:
+    <strong>Status</strong></p>
+<hr />
+<p>Filtrar por status (pendente, concluído, etc.)</p>
+</li>
+</ul>
+</div>
+<h3 id="como-usar-filtros">Como Usar Filtros<a class="headerlink" href="#como-usar-filtros" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Selecione o período</strong> desejado (início e fim)</li>
+<li><strong>Escolha o setor</strong> (se aplicável)</li>
+<li><strong>Filtre por usuário</strong> (se necessário)</li>
+<li><strong>Aplique filtros de status</strong></li>
+<li><strong>Visualize resultados</strong> atualizados automaticamente</li>
+</ol>
+<h2 id="exportacao-de-dados">📋 Exportação de Dados<a class="headerlink" href="#exportacao-de-dados" title="Permanent link">&para;</a></h2>
+<h3 id="formatos-disponiveis">Formatos Disponíveis<a class="headerlink" href="#formatos-disponiveis" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>📄 Excel (.xlsx)</strong>: Para análise avançada no Excel</li>
+<li><strong>📋 PDF</strong>: Para relatórios formais e impressão</li>
+<li><strong>🖨️ Imprimir</strong>: Visualização otimizada para impressão</li>
+</ul>
+<h3 id="como-exportar">Como Exportar<a class="headerlink" href="#como-exportar" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Configure os filtros</strong> desejados</li>
+<li><strong>Clique em "Exportar Excel"</strong> ou <strong>"Exportar PDF"</strong></li>
+<li><strong>Aguarde processamento</strong> (pode levar alguns segundos)</li>
+<li><strong>Baixe o arquivo</strong> gerado automaticamente</li>
+</ol>
+<h3 id="recursos-da-exportacao">Recursos da Exportação<a class="headerlink" href="#recursos-da-exportacao" title="Permanent link">&para;</a></h3>
+<ul>
+<li>✅ <strong>Dados filtrados</strong>: Apenas informações selecionadas</li>
+<li>✅ <strong>Formatação profissional</strong>: Tabelas e gráficos formatados</li>
+<li>✅ <strong>Auto-ajuste</strong>: Colunas ajustadas automaticamente</li>
+<li>✅ <strong>Cabeçalhos claros</strong>: Identificação fácil dos dados</li>
+</ul>
+<h2 id="personalizacao">🎨 Personalização<a class="headerlink" href="#personalizacao" title="Permanent link">&para;</a></h2>
+<h3 id="layout-responsivo">Layout Responsivo<a class="headerlink" href="#layout-responsivo" title="Permanent link">&para;</a></h3>
+<ul>
+<li>📱 <strong>Mobile</strong>: Cards empilhados para melhor visualização</li>
+<li>💻 <strong>Desktop</strong>: Layout completo com todos os gráficos</li>
+<li>📋 <strong>Tablet</strong>: Visualização intermediária otimizada</li>
+</ul>
+<h3 id="visualizacoes">Visualizações<a class="headerlink" href="#visualizacoes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>🌞 <strong>Modo claro</strong>: Interface padrão com cores vibrantes</li>
+<li>📊 <strong>Gráficos interativos</strong>: Passe o mouse para ver detalhes</li>
+<li>🔄 <strong>Atualização automática</strong>: Dados atualizados em tempo real</li>
+</ul>
+<h2 id="analise-de-dados">📈 Análise de Dados<a class="headerlink" href="#analise-de-dados" title="Permanent link">&para;</a></h2>
+<h3 id="interpretando-metricas">Interpretando Métricas<a class="headerlink" href="#interpretando-metricas" title="Permanent link">&para;</a></h3>
+<h4 id="lembretes">Lembretes<a class="headerlink" href="#lembretes" title="Permanent link">&para;</a></h4>
+<ul>
+<li>📊 <strong>Taxa de conclusão</strong>: Percentual de lembretes realizados</li>
+<li>⏰ <strong>Tempo médio</strong>: Tempo entre criação e conclusão</li>
+<li>📈 <strong>Tendências</strong>: Aumento ou diminuição de atividades</li>
+</ul>
+<h4 id="chamados">Chamados<a class="headerlink" href="#chamados" title="Permanent link">&para;</a></h4>
+<ul>
+<li>🎯 <strong>SLA compliance</strong>: Percentual de chamados dentro do prazo</li>
+<li>⏱️ <strong>Tempo de resposta</strong>: Desde abertura até primeira resposta</li>
+<li>🔄 <strong>Taxa de resolução</strong>: Chamados fechados vs abertos</li>
+</ul>
+<h4 id="equipamentos">Equipamentos<a class="headerlink" href="#equipamentos" title="Permanent link">&para;</a></h4>
+<ul>
+<li>📦 <strong>Demanda</strong>: Tipos de equipamento mais solicitados</li>
+<li>⏰ <strong>Tempo de aprovação</strong>: Desde solicitação até aprovação</li>
+<li>🔄 <strong>Ciclo de vida</strong>: Tempo médio de uso dos equipamentos</li>
+</ul>
+<h2 id="alertas-e-notificacoes">🚨 Alertas e Notificações<a class="headerlink" href="#alertas-e-notificacoes" title="Permanent link">&para;</a></h2>
+<h3 id="alertas-visuais">Alertas Visuais<a class="headerlink" href="#alertas-visuais" title="Permanent link">&para;</a></h3>
+<ul>
+<li>🔴 <strong>SLAs vencidos</strong>: Chamados fora do prazo (cor vermelha)</li>
+<li>🟠 <strong>SLAs críticos</strong>: Próximos do vencimento (cor amarela)</li>
+<li>🟢 <strong>SLAs OK</strong>: Dentro do prazo (cor verde)</li>
+<li>📊 <strong>Indicadores</strong>: Setas mostrando tendências</li>
+</ul>
+<h3 id="notificacoes-push">Notificações Push<a class="headerlink" href="#notificacoes-push" title="Permanent link">&para;</a></h3>
+<ul>
+<li>📱 <strong>Alertas móveis</strong>: Receba notificações no celular</li>
+<li>💻 <strong>Alertas desktop</strong>: Notificações no navegador</li>
+<li>📧 <strong>E-mails</strong>: Relatórios periódicos por e-mail</li>
+</ul>
+<h2 id="dicas-de-uso">💡 Dicas de Uso<a class="headerlink" href="#dicas-de-uso" title="Permanent link">&para;</a></h2>
+<h3 id="analise-eficiente">Análise Eficiente<a class="headerlink" href="#analise-eficiente" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>📅 Monitore diariamente</strong> os principais indicadores</li>
+<li><strong>📊 Compare períodos</strong> para identificar tendências</li>
+<li><strong>🎯 Foque em métricas</strong> relevantes para seu setor</li>
+<li><strong>📋 Exporte dados</strong> para análises mais detalhadas</li>
+</ol>
+<h3 id="relatorios-gerenciais">Relatórios Gerenciais<a class="headerlink" href="#relatorios-gerenciais" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>📊 Prepare apresentações</strong> usando dados exportados</li>
+<li><strong>📈 Identifique padrões</strong> de uso e demanda</li>
+<li><strong>🎯 Defina metas</strong> baseadas em métricas históricas</li>
+<li><strong>📋 Compartilhe insights</strong> com sua equipe</li>
+</ol>
+<h2 id="configuracoes-avancadas">🔧 Configurações Avançadas<a class="headerlink" href="#configuracoes-avancadas" title="Permanent link">&para;</a></h2>
+<h3 id="filtros-personalizados">Filtros Personalizados<a class="headerlink" href="#filtros-personalizados" title="Permanent link">&para;</a></h3>
+<ul>
+<li>💾 <strong>Salvar filtros</strong>: Guarde combinações de filtros frequentes</li>
+<li>📤 <strong>Compartilhar</strong>: Envie relatórios filtrados por e-mail</li>
+<li>📅 <strong>Agendamento</strong>: Configure relatórios automáticos</li>
+</ul>
+<h3 id="visualizacoes-customizadas">Visualizações Customizadas<a class="headerlink" href="#visualizacoes-customizadas" title="Permanent link">&para;</a></h3>
+<ul>
+<li>📊 <strong>Gráficos personalizados</strong>: Escolha métricas específicas</li>
+<li>🎨 <strong>Esquemas de cores</strong>: Customize aparência dos gráficos</li>
+<li>📱 <strong>Dashboards móveis</strong>: Visualizações otimizadas para celular</li>
+</ul>
+<h2 id="solucao-de-problemas">🚨 Solução de Problemas<a class="headerlink" href="#solucao-de-problemas" title="Permanent link">&para;</a></h2>
+<h3 id="problemas-comuns">Problemas Comuns<a class="headerlink" href="#problemas-comuns" title="Permanent link">&para;</a></h3>
+<p><strong>❓ Dados não carregam</strong>
+- ✅ Verifique conexão com internet
+- ✅ Aguarde alguns segundos para carregamento
+- ✅ Recarregue a página (F5 ou Ctrl+R)</p>
+<p><strong>❓ Gráficos não aparecem</strong>
+- ✅ Verifique se JavaScript está habilitado
+- ✅ Limpe cache do navegador
+- ✅ Tente outro navegador se problema persistir</p>
+<p><strong>❓ Exportação falha</strong>
+- ✅ Verifique espaço disponível em disco
+- ✅ Aguarde processamento completo
+- ✅ Tente novamente em alguns minutos</p>
+<p><strong>❓ Filtros não funcionam</strong>
+- ✅ Limpe todos os filtros e reaplique
+- ✅ Verifique se há dados para os critérios selecionados
+- ✅ Recarregue a página</p>
+<h2 id="recursos-relacionados">📚 Recursos Relacionados<a class="headerlink" href="#recursos-relacionados" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>🎫 Sistema de Chamados</strong>: Para dúvidas sobre métricas</li>
+<li><strong>📚 Tutoriais</strong>: Guias sobre interpretação de dados</li>
+<li><strong>❓ FAQ</strong>: Perguntas sobre dashboard e relatórios</li>
+<li><strong>📖 Documentação Técnica</strong>: Recursos avançados para administradores</li>
+</ul>
+<hr />
+<div class="info">
+    **Dica**: Use o dashboard diariamente para acompanhar o desempenho da equipe e identificar oportunidades de melhoria. Os dados ajudam na tomada de decisões estratégicas.
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Voltar para o topo
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Rodapé" >
+        
+          
+          <a href="../equipment/" class="md-footer__link md-footer__link--prev" aria-label="Anterior: Equipamentos">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Anterior
+              </span>
+              <div class="md-ellipsis">
+                Equipamentos
+              </div>
+            </div>
+          </a>
+        
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://python.org" target="_blank" rel="noopener" title="python.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6zM286.2 404c11.1 0 20.1 9.1 20.1 20.3 0 11.3-9 20.4-20.1 20.4-11 0-20.1-9.2-20.1-20.4.1-11.3 9.1-20.3 20.1-20.3zM167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4zm-6.7-142.6c-11.1 0-20.1-9.1-20.1-20.3.1-11.3 9-20.4 20.1-20.4 11 0 20.1 9.2 20.1 20.4s-9 20.3-20.1 20.3z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="http://192.168.1.86:5000" target="_blank" rel="noopener" title="192.168.1.86:5000" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M352 256c0 22.2-1.2 43.6-3.3 64H163.3c-2.2-20.4-3.3-41.8-3.3-64s1.2-43.6 3.3-64h185.4c2.2 20.4 3.3 41.8 3.3 64zm28.8-64h123.1c5.3 20.5 8.1 41.9 8.1 64s-2.8 43.5-8.1 64H380.8c2.1-20.6 3.2-42 3.2-64s-1.1-43.4-3.2-64zm112.6-32H376.7c-10-63.9-29.8-117.4-55.3-151.6 78.3 20.7 142 77.5 171.9 151.6zm-149.1 0H167.7c6.1-36.4 15.5-68.6 27-94.7 10.5-23.6 22.2-40.7 33.5-51.5C239.4 3.2 248.7 0 256 0s16.6 3.2 27.8 13.8c11.3 10.8 23 27.9 33.5 51.5 11.6 26 20.9 58.2 27 94.7zm-209 0H18.6c30-74.1 93.6-130.9 172-151.6-25.5 34.2-45.3 87.7-55.3 151.6zM8.1 192h123.1c-2.1 20.6-3.2 42-3.2 64s1.1 43.4 3.2 64H8.1C2.8 299.5 0 278.1 0 256s2.8-43.5 8.1-64zm186.6 254.6c-11.6-26-20.9-58.2-27-94.6h176.6c-6.1 36.4-15.5 68.6-27 94.6-10.5 23.6-22.2 40.7-33.5 51.5-11.2 10.7-20.5 13.9-27.8 13.9s-16.6-3.2-27.8-13.8c-11.3-10.8-23-27.9-33.5-51.5zM135.3 352c10 63.9 29.8 117.4 55.3 151.6-78.4-20.7-142-77.5-172-151.6h116.7zm358.1 0c-30 74.1-93.6 130.9-171.9 151.6 25.5-34.2 45.2-87.7 55.3-151.6h116.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.code.select", "content.footnote.tooltips", "content.tabs.link", "content.tooltips", "header.autohide", "navigation.expand", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.prune", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow", "toc.integrate"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.81fa17fe.min.js"></script>
+      
+        <script src="../../javascripts/extra.js"></script>
+      
+    
+  </body>
+</html>
