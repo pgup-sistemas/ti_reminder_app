@@ -1,121 +1,144 @@
 {% extends 'base.html' %}
-{% block title %}{{ title }} | TI OSN System{% endblock %}
-
-{% block scripts %}
-{{ super() }}
-<script src="{{ url_for('static', filename='js/tutorial-form.js') }}"></script>
-{% endblock %}
+{% block title %}{{ title }} - TI OSN System{% endblock %}
 
 {% block content %}
-<!-- Região de anúncio para leitores de tela -->
-<div id="a11y-live-region" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
 
-<div class="container mt-4">
-  <div class="row justify-content-center">
-    <div class="col-md-10 col-lg-8">
-      <div class="card shadow-sm">
-        <div class="card-header bg-body-tertiary text-black d-flex align-items-center">
-          <i class="fas fa-tools me-2" aria-hidden="true"></i>
-          <h1 class="h4 mb-0">{{ title }}</h1>
-        </div>
-        <div class="card-body">
-          <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate aria-labelledby="tutorial-form-title">
-            <p class="visually-hidden" id="tutorial-form-title">Formulário de {{ title }}</p>
+<!-- Header da Página -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="text-primary mb-0">
+        <i class="fas fa-{{ 'plus-circle' if 'Novo' in title else 'edit' }} me-2"></i>{{ title }}
+    </h4>
+    <a href="{{ url_for('main.listar_tutoriais') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>Voltar
+    </a>
+</div>
+
+<!-- Card do Formulário -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-light border-0 py-3">
+        <h6 class="mb-0 text-secondary">
+            <i class="fas fa-book me-2"></i>
+            {% if 'Novo' in title %}Criar Novo Tutorial{% else %}Editar Tutorial{% endif %}
+        </h6>
+    </div>
+    <div class="card-body">
+        <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
             {{ form.hidden_tag() }}
-            <!-- Título -->
-            <div class="mb-4 field-group required">
-              {{ form.titulo.label(class="form-label fw-semibold") }}
-              <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-heading" aria-hidden="true"></i></span>
-                {{ form.titulo(class="form-control" + (' is-invalid' if form.titulo.errors else ''), 
-                              placeholder="Digite um título descritivo para o tutorial") }}
-              </div>
-              <div class="form-text">Título claro e objetivo que descreva o conteúdo do tutorial</div>
-              {% for error in form.titulo.errors %}
-                <div class="invalid-feedback d-block" role="alert">
-                  <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
-                </div>
-              {% endfor %}
+            
+            <!-- Campo Título -->
+            <div class="mb-4">
+                <label for="titulo" class="form-label small text-muted mb-1">Título do Tutorial <span class="text-danger">*</span></label>
+                {{ form.titulo(class="form-control form-control-sm" + (' is-invalid' if form.titulo.errors else ''), 
+                              placeholder="Digite um título descritivo para o tutorial...") }}
+                <div class="form-text small text-muted mt-1">Título claro e objetivo que descreva o conteúdo do tutorial</div>
+                {% for error in form.titulo.errors %}
+                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                {% endfor %}
             </div>
-            <!-- Categoria -->
-            <div class="mb-4 field-group required">
-              {{ form.categoria.label(class="form-label fw-semibold") }}
-              <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-tags" aria-hidden="true"></i></span>
-                {{ form.categoria(class="form-select" + (' is-invalid' if form.categoria.errors else ''), 
-                                **{'aria-describedby': 'categoriaHelp'}) }}
-              </div>
-              <div id="categoriaHelp" class="form-text">Selecione a categoria mais adequada para este tutorial</div>
-              {% for error in form.categoria.errors %}
-                <div class="invalid-feedback d-block" role="alert">
-                  <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
-                </div>
-              {% endfor %}
+
+            <!-- Campo Categoria -->
+            <div class="mb-4">
+                <label for="categoria" class="form-label small text-muted mb-1">Categoria <span class="text-danger">*</span></label>
+                {{ form.categoria(class="form-select form-select-sm" + (' is-invalid' if form.categoria.errors else '')) }}
+                <div class="form-text small text-muted mt-1">Selecione a categoria mais adequada para este tutorial</div>
+                {% for error in form.categoria.errors %}
+                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                {% endfor %}
             </div>
-            <!-- Conteúdo -->
-            <div class="mb-4 field-group required">
-              {{ form.conteudo.label(class="form-label fw-semibold") }}
-              {{ form.conteudo(class="form-control" + (' is-invalid' if form.conteudo.errors else ''), 
-                            rows=8, placeholder="Descreva o passo a passo do tutorial de forma clara e detalhada") }}
-              <div class="form-text">
-                <p class="mb-1">Dicas para um bom tutorial:</p>
-                <ul class="small">
-                  <li>Seja claro e objetivo</li>
-                  <li>Use marcadores ou numeração para passos sequenciais</li>
-                  <li>Destaque informações importantes em <strong>negrito</strong></li>
-                </ul>
-              </div>
-              {% for error in form.conteudo.errors %}
-                <div class="invalid-feedback d-block" role="alert">
-                  <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+
+            <!-- Campo Conteúdo -->
+            <div class="mb-4">
+                <label for="conteudo" class="form-label small text-muted mb-1">Conteúdo <span class="text-danger">*</span></label>
+                {{ form.conteudo(class="form-control form-control-sm" + (' is-invalid' if form.conteudo.errors else ''), 
+                              rows=8, placeholder="Descreva o passo a passo do tutorial de forma clara e detalhada...") }}
+                <div class="form-text small text-muted mt-1">
+                    <span class="fw-medium">Dicas para um bom tutorial:</span>
+                    <ul class="mb-0 ps-3 small">
+                        <li>Seja claro e objetivo</li>
+                        <li>Use marcadores ou numeração para passos sequenciais</li>
+                        <li>Destaque informações importantes em <strong>negrito</strong></li>
+                    </ul>
                 </div>
-              {% endfor %}
+                {% for error in form.conteudo.errors %}
+                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                {% endfor %}
             </div>
-            <!-- Upload de Imagens -->
-            <div class="mb-4 field-group">
-              {{ form.imagem.label(class="form-label fw-semibold") }}
-              <div class="file-upload-wrapper" data-text="Selecionar arquivos...">
-                {{ form.imagem(class="form-control" + (' is-invalid' if form.imagem.errors else ''), 
-                              **{'aria-describedby': 'imagemHelp', 'data-browse': 'Procurar'}) }}
-              </div>
-              <div id="imagemHelp" class="form-text">
-                <p class="mb-1">Formatos aceitos: JPG, PNG, GIF (máx. 5MB por arquivo)</p>
-                <p class="mb-0">Você pode selecionar múltiplos arquivos mantendo a tecla Ctrl pressionada.</p>
-              </div>
-              {% for error in form.imagem.errors %}
-                <div class="invalid-feedback d-block" role="alert">
-                  <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+
+            <!-- Campo Upload de Imagens -->
+            <div class="mb-4">
+                <label for="imagem" class="form-label small text-muted mb-1">Imagens (opcional)</label>
+                {{ form.imagem(class="form-control form-control-sm" + (' is-invalid' if form.imagem.errors else '')) }}
+                <div class="form-text small text-muted mt-1">
+                    <span class="fw-medium">Formatos aceitos:</span> JPG, PNG, GIF (máx. 5MB por arquivo)<br>
+                    <span class="fw-medium">Dica:</span> Você pode selecionar múltiplos arquivos mantendo a tecla Ctrl pressionada
                 </div>
-              {% endfor %}
+                {% for error in form.imagem.errors %}
+                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                {% endfor %}
             </div>
-            <!-- Dicas de acessibilidade para teclado -->
-            <div class="alert alert-info mt-4 mb-0" role="alert">
+
+            <!-- Dicas de Acessibilidade -->
+            <div class="alert alert-info border-0 bg-info bg-opacity-10 mt-4 mb-0">
                 <div class="d-flex align-items-center">
-                    <i class="fas fa-keyboard me-2" aria-hidden="true"></i>
+                    <i class="fas fa-keyboard text-info me-3"></i>
                     <div>
-                        <p class="mb-1 fw-bold">Dicas de teclado:</p>
-                        <ul class="mb-0">
-                            <li>Pressione <kbd>Tab</kbd> para navegar entre os campos</li>
-                            <li>Use <kbd>Enter</kbd> para ir para o próximo campo</li>
-                            <li><kbd>Ctrl</kbd> + <kbd>Enter</kbd> para enviar o formulário</li>
-                            <li><kbd>Esc</kbd> para limpar o campo atual</li>
-                        </ul>
+                        <h6 class="text-info mb-1">Dicas de Teclado</h6>
+                        <div class="row g-2 small">
+                            <div class="col-sm-6">
+                                <span class="fw-medium me-1">Navegação:</span>
+                                <kbd>Tab</kbd> para avançar, <kbd>Shift</kbd> + <kbd>Tab</kbd> para voltar
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="fw-medium me-1">Ações:</span>
+                                <kbd>Ctrl</kbd> + <kbd>Enter</kbd> para enviar
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="d-flex justify-content-between mt-4">
-              <a href="{{ url_for('main.listar_tutoriais') }}" class="btn btn-outline-secondary" aria-label="Cancelar e voltar para a lista de tutoriais">
-                <i class="fas fa-times me-1" aria-hidden="true"></i>Cancelar
-              </a>
-              <button type="submit" class="btn btn-success" aria-label="Salvar tutorial">
-                <i class="fas fa-save me-1" aria-hidden="true"></i>Salvar Tutorial
-              </button>
+            <!-- Botões de Ação -->
+            <div class="d-flex justify-content-between pt-4 border-top">
+                <a href="{{ url_for('main.listar_tutoriais') }}" class="btn btn-outline-secondary btn-sm px-4">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </a>
+                <button type="submit" class="btn btn-success btn-sm px-4">
+                    <i class="fas fa-save me-1"></i>
+                    {% if 'Novo' in title %}Criar Tutorial{% else %}Atualizar Tutorial{% endif %}
+                </button>
             </div>
-          </form>
-        </div>
-      </div>
+        </form>
     </div>
-  </div>
 </div>
+
+<!-- Região de anúncio para leitores de tela -->
+<div id="a11y-live-region" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+<style>
+.form-control:focus, .form-select:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.15);
+}
+
+kbd {
+    background-color: #6c757d;
+    color: white;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75em;
+    border-radius: 0.25rem;
+}
+
+.alert-info {
+    border-left: 4px solid #0dcaf0;
+}
+
+.form-text ul {
+    margin-top: 0.25rem;
+}
+
+.form-text li {
+    margin-bottom: 0.1rem;
+}
+</style>
+
 {% endblock %}

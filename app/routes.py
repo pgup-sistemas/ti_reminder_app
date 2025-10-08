@@ -11,7 +11,7 @@ import markdown
 
 from .auth_utils import login_required
 from .forms import ChamadoAdminForm  # Importados formulários necessários
-from .forms import (ChamadoForm, ComentarioTutorialForm, FeedbackTutorialForm,
+from .forms import (ChamadoEditForm, ChamadoForm, ComentarioTutorialForm, FeedbackTutorialForm,
                     ReminderForm, TaskForm, TutorialForm, UserEditForm)
 from .models import Chamado  # Importados modelos necessários
 from .models import (ComentarioChamado, ComentarioTutorial, EquipmentRequest,
@@ -2594,6 +2594,99 @@ def abrir_chamado():
         form=form,
         title="Abrir Novo Chamado",
         setor_usuario=setor_usuario,
+    )
+
+
+@bp.route("/chamados/<int:id>/editar", methods=["GET", "POST"])
+@login_required
+def editar_chamado(id):
+    """Editar chamado por usuários comuns (apenas título, descrição e setor)"""
+    # Verificar permissão: apenas o solicitante pode editar
+    chamado = Chamado.query.get_or_404(id)
+    user_id = session.get("user_id")
+
+    if chamado.solicitante_id != user_id:
+        flash("Você não tem permissão para editar este chamado.", "danger")
+        return redirect(url_for("main.detalhe_chamado", id=id))
+
+    # Não permitir edição se o chamado estiver fechado
+    if chamado.status == "Fechado":
+        flash("Não é possível editar um chamado fechado.", "warning")
+        return redirect(url_for("main.detalhe_chamado", id=id))
+
+    form = ChamadoEditForm(obj=chamado)
+
+    if form.validate_on_submit():
+        try:
+            alteracoes = []
+
+            # Verificar se houve mudanças
+            if form.titulo.data != chamado.titulo:
+                alteracoes.append(f'Título alterado de "{chamado.titulo}" para "{form.titulo.data}"')
+                chamado.titulo = form.titulo.data
+
+            if form.descricao.data != chamado.descricao:
+                alteracoes.append("Descrição alterada")
+                chamado.descricao = form.descricao.data
+
+            # Lógica do setor: se novo setor preenchido, criar e usar
+            setor_id = form.setor_id.data
+            new_sector_name = form.new_sector.data.strip() if form.new_sector.data else ""
+            if new_sector_name:
+                existing = Sector.query.filter_by(name=new_sector_name).first()
+                if existing:
+                    setor = existing
+                else:
+                    setor = Sector(name=new_sector_name)
+                    db.session.add(setor)
+                    db.session.commit()
+                if setor_id != setor.id:
+                    alteracoes.append(f'Setor alterado para "{setor.name}"')
+                    setor_id = setor.id
+            elif setor_id == 0:
+                setor_id = None
+
+            if setor_id != chamado.setor_id:
+                setor_antigo = chamado.setor.name if chamado.setor else "Nenhum"
+                setor_novo = Sector.query.get(setor_id).name if setor_id and Sector.query.get(setor_id) else "Nenhum"
+                alteracoes.append(f'Setor alterado de "{setor_antigo}" para "{setor_novo}"')
+                chamado.setor_id = setor_id
+
+            # Se houve alterações, registrar no histórico
+            if alteracoes:
+                # Atualiza a data da última atualização
+                chamado.data_ultima_atualizacao = datetime.utcnow()
+
+                # Cria um registro de atualização
+                atualizacao = ComentarioChamado(
+                    chamado_id=chamado.id,
+                    usuario_id=user_id,
+                    texto=" | ".join(alteracoes),
+                    tipo="atualizacao",
+                )
+                db.session.add(atualizacao)
+
+                db.session.commit()
+
+                flash("Chamado atualizado com sucesso!", "success")
+                return redirect(url_for("main.detalhe_chamado", id=chamado.id))
+            else:
+                flash("Nenhuma alteração foi realizada.", "info")
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Erro ao atualizar o chamado: {str(e)}", "danger")
+            print(f"Error updating Chamado {id}: {e}")
+
+    # Pré-selecionar o setor atual no formulário
+    if chamado.setor_id:
+        form.setor_id.data = chamado.setor_id
+
+    return render_template(
+        "editar_chamado.html",
+        form=form,
+        chamado=chamado,
+        title=f"Editar Chamado #{chamado.id}",
     )
 
 

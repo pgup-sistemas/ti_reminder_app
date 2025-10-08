@@ -6,13 +6,13 @@
 
 <!-- Header da Página -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="text-primary mb-0"><i class="fas fa-ticket-alt me-2"></i>{{ title }}</h4>
+    <h4 class="text-primary mb-0"><i class="fas fa-edit me-2"></i>{{ title }}</h4>
 </div>
 
 <!-- Card Principal -->
 <div class="card shadow-sm border-0">
     <div class="card-header bg-light border-0 py-3">
-        <h6 class="mb-0 text-secondary"><i class="fas fa-plus-circle me-2"></i>Abrir Novo Chamado</h6>
+        <h6 class="mb-0 text-secondary"><i class="fas fa-edit me-2"></i>Editar Chamado</h6>
     </div>
     <div class="card-body">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -33,14 +33,14 @@
                 <i class="fas fa-info-circle text-info me-3 fs-5"></i>
                 <div>
                     <h6 class="text-info mb-1">Informação Importante</h6>
-                    <p class="mb-0 small">Selecione o setor relacionado ao chamado. Se o seu setor não estiver na lista, você pode criar um novo setor preenchendo o campo "Novo setor".</p>
+                    <p class="mb-0 small">Você pode editar apenas o título, descrição e setor do chamado. A prioridade só pode ser alterada pela equipe de TI.</p>
                 </div>
             </div>
         </div>
 
-        <form method="POST" action="{{ url_for('main.abrir_chamado') }}">
+        <form method="POST" action="{{ url_for('main.editar_chamado', id=chamado.id) }}">
             {{ form.hidden_tag() }}
-            
+
             <!-- Campo Título -->
             <div class="mb-4">
                 <label for="titulo" class="form-label text-muted mb-2">Título do Chamado <span class="text-danger">*</span></label>
@@ -64,24 +64,10 @@
                 {% endfor %}
             </div>
 
-            <!-- Campos em Linha - Prioridade, Setor e Novo Setor -->
+            <!-- Campos em Linha - Setor e Novo Setor -->
             <div class="row g-4 mb-4">
-                <!-- Prioridade -->
-                <div class="col-xl-3 col-lg-4 col-md-6">
-                    <label for="prioridade" class="form-label text-muted mb-2">Prioridade <span class="text-danger">*</span></label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light">
-                            <i class="fas fa-exclamation-circle text-muted"></i>
-                        </span>
-                        {{ form.prioridade(class="form-select" + (' is-invalid' if form.prioridade.errors else '')) }}
-                    </div>
-                    {% for error in form.prioridade.errors %}
-                        <div class="text-danger small mt-2"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
-                    {% endfor %}
-                </div>
-
                 <!-- Setor -->
-                <div class="col-xl-4 col-lg-4 col-md-6">
+                <div class="col-xl-6 col-lg-6 col-md-6">
                     <label for="setor_id" class="form-label text-muted mb-2">Setor <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <span class="input-group-text bg-light">
@@ -95,7 +81,7 @@
                 </div>
 
                 <!-- Novo Setor -->
-                <div class="col-xl-5 col-lg-4 col-md-12">
+                <div class="col-xl-6 col-lg-6 col-md-6">
                     <label for="new_sector" class="form-label text-muted mb-2">Ou cadastre um novo setor</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light">
@@ -108,11 +94,11 @@
 
             <!-- Botões de Ação -->
             <div class="d-flex justify-content-between pt-4 border-top">
-                <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary px-4">
+                <a href="{{ url_for('main.detalhe_chamado', id=chamado.id) }}" class="btn btn-outline-secondary px-4">
                     <i class="fas fa-times me-2"></i>Cancelar
                 </a>
                 <button type="submit" class="btn btn-success px-4">
-                    <i class="fas fa-paper-plane me-2"></i>Abrir Chamado
+                    <i class="fas fa-save me-2"></i>{{ form.submit.label.text }}
                 </button>
             </div>
         </form>

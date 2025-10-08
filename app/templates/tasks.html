@@ -1,154 +1,295 @@
 {% extends 'base.html' %}
 {% block title %}Lista de Tarefas | TI OSN System {% endblock %}
 {% block content %}
-<h1 class="mt-2 mb-3" style="padding-top:0.5rem;"><i class="fas fa-tasks me-2"></i>Tarefas</h1>
-<!-- Filtro e busca -->
-<form class="row g-2 mb-3" method="get">
-  <div class="col-md-2">
-    <select name="status" class="form-select">
-      <option value="">Todos status</option>
-      <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pendentes</option>
-      <option value="today" {% if status_filter == 'today' %}selected{% endif %}>Hoje</option>
-      <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>Vencidas</option>
-      <option value="done" {% if status_filter == 'done' %}selected{% endif %}>Concluídas</option>
-    </select>
-  </div>
-  <div class="col-md-3">
-    <input type="text" name="search" class="form-control" placeholder="Buscar descrição ou responsável" value="{{ search }}">
-  </div>
-  <div class="col-md-2">
-    <input type="date" name="date" class="form-control" value="{{ date_filter }}">
-  </div>
-  <div class="col-md-2">
-    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-  </div>
-  <div class="col-md-2">
-    <a href="{{ url_for('main.tasks') }}" class="btn btn-secondary w-100">Limpar</a>
-  </div>
-</form>
-<!-- Legenda dos ícones/status -->
-<div class="mb-2">
-  <span class="badge bg-danger"><i class="fas fa-exclamation-circle"></i> Vencida</span>
-  <span class="badge bg-warning text-dark"><i class="fas fa-calendar-day"></i> Hoje</span>
-  <span class="badge bg-success"><i class="fas fa-check-circle"></i> Concluída</span>
+
+<!-- Header da Página -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="text-primary mb-0"><i class="fas fa-tasks me-2"></i>Gerenciar Tarefas</h4>
+    <div class="badge bg-primary fs-6">
+        {{ tasks|length }} tarefa{{ 's' if tasks|length != 1 }}
+    </div>
 </div>
-<!-- Formulário de Cadastro de Tarefas -->
-{% if edit_id %}
-  <div class="alert alert-warning">Editando tarefa. <a href="{{ url_for('main.tasks') }}">Cancelar edição</a></div>
-{% endif %}
-<div class="card mb-3">
-  <div class="card-body">
-    <form method="POST">
-      {{ form.hidden_tag() }}
-      <div class="row">
-        <div class="col-md-5 mb-2">
-          {{ form.description.label }}{{ form.description(class_='form-control') }}
-          {% for error in form.description.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-        </div>
-        <div class="col-md-2 mb-2">
-          {{ form.date.label }}{{ form.date(class_='form-control') }}
-          {% for error in form.date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-        </div>
-        <div class="col-md-3 mb-2">
-          {{ form.responsible.label }}{{ form.responsible(class_='form-control') }}
-          {% for error in form.responsible.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-        </div>
-        <div class="col-md-2 mb-2">
-          {{ form.sector_id.label }}{{ form.sector_id(class_='form-select') }}
-          {% for error in form.sector_id.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-          <small class="text-muted">Ou cadastre um novo setor abaixo</small>
-          {{ form.new_sector(class_='form-control mt-1', placeholder='Novo setor') }}
-        </div>
-        <div class="col-md-1 mb-2 d-flex align-items-end">
-          {{ form.completed.label }}{{ form.completed(class_='form-check-input') }}
-          {% for error in form.completed.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-        </div>
-        <div class="col-md-1 mb-2 d-flex align-items-end">
-          {% if edit_id %}
-            <button type="submit" class="btn btn-warning w-100 p-2">Atualizar</button>
-          {% else %}
-            {{ form.submit(class_='btn btn-success w-100') }}
-          {% endif %}
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
-<div class="table-responsive" style="max-height: 400px;">
-<table class="table table-striped align-middle mb-0">
-  <thead class="table-light">
-    <tr>
-      <th><i class="fas fa-tasks"></i> Descrição</th>
-      <th><i class="fas fa-calendar-alt"></i> Data</th>
-      <th><i class="fas fa-user"></i> Responsável</th>
-      <th><i class="fas fa-sitemap"></i> Setor</th>
-      <th><i class="fas fa-check-circle"></i> Status</th>
-      <th><i class="fas fa-cogs"></i> Ações</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for task in tasks %}
-    <tr class="
-      {% if task.status == 'expired' %}table-danger{% elif task.status == 'today' %}table-warning{% elif task.status == 'done' %}table-success{% endif %}">
-      <td>
-        {% if task.status == 'expired' %}<span title="Vencida"><i class="fas fa-exclamation-circle"></i></span> {% elif task.status == 'today' %}<span title="Hoje"><i class="fas fa-calendar-day"></i></span> {% elif task.status == 'done' %}<span title="Concluída"><i class="fas fa-check-circle"></i></span> {% endif %}
-        {{ task.description }}
-      </td>
-      <td>{{ task.date }}</td>
-      <td>{{ task.responsible }}</td>
-      <td>{{ task.sector.name if task.sector else '' }}</td>
-      <td class="text-center">
-        {% if task.completed %}
-          <span class="badge bg-success d-flex align-items-center gap-1"><i class="fas fa-check-circle"></i> Concluída</span>
-        {% elif task.date < current_date %}
-          <span class="badge bg-danger d-flex align-items-center gap-1"><i class="fas fa-exclamation-circle"></i> Vencida</span>
-        {% elif task.date == current_date %}
-          <span class="badge bg-warning text-dark d-flex align-items-center gap-1"><i class="fas fa-calendar-day"></i> Hoje</span>
-        {% else %}
-          <span class="badge bg-secondary d-flex align-items-center gap-1"><i class="fas fa-clock"></i> Futura</span>
-        {% endif %}
-      </td>
-      <td class="text-nowrap">
-        <a href="{{ url_for('main.edit_task', id=task.id) }}" class="btn btn-sm btn-warning" title="Editar"><i class="fas fa-edit"></i></a>
-        {% if not task.completed %}
-        <form method="POST" action="{{ url_for('main.complete_task', id=task.id) }}" style="display:inline;">
-          <button type="submit" class="btn btn-sm btn-success" title="Marcar como concluída"><i class="fas fa-check"></i></button>
+
+<!-- Card de Filtros -->
+<div class="card shadow-sm mb-4 border-0">
+    <div class="card-header bg-light border-0 py-3">
+        <h6 class="mb-0 text-secondary"><i class="fas fa-filter me-2"></i>Filtros e Busca</h6>
+    </div>
+    <div class="card-body">
+        <form class="row g-3" method="get">
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <label class="form-label small text-muted mb-1">Status</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">Todos os status</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pendentes</option>
+                    <option value="today" {% if status_filter == 'today' %}selected{% endif %}>Para hoje</option>
+                    <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>Vencidas</option>
+                    <option value="done" {% if status_filter == 'done' %}selected{% endif %}>Concluídas</option>
+                </select>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <label class="form-label small text-muted mb-1">Buscar</label>
+                <input type="text" name="search" class="form-control form-control-sm" placeholder="Buscar descrição ou responsável..." value="{{ search }}">
+            </div>
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <label class="form-label small text-muted mb-1">Data específica</label>
+                <input type="date" name="date" class="form-control form-control-sm" value="{{ date_filter }}">
+            </div>
+            <div class="col-xl-2 col-lg-4 col-md-6 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="fas fa-filter me-1"></i>Filtrar
+                </button>
+            </div>
+            <div class="col-xl-2 col-lg-4 col-md-6 d-flex align-items-end">
+                <a href="{{ url_for('main.tasks') }}" class="btn btn-outline-secondary btn-sm w-100">
+                    <i class="fas fa-eraser me-1"></i>Limpar
+                </a>
+            </div>
         </form>
-        {% endif %}
-        <form method="POST" action="{{ url_for('main.delete_task', id=task.id) }}" style="display:inline;">
-          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir esta tarefa?');" title="Excluir"><i class="fas fa-trash-alt"></i></button>
+    </div>
+</div>
+
+<!-- Card de Nova Tarefa -->
+<div class="card shadow-sm mb-4 border-0">
+    <div class="card-header bg-light border-0 py-3">
+        <h6 class="mb-0 text-secondary">
+            <i class="fas fa-plus-circle me-2"></i>
+            {% if edit_id %}Editar{% else %}Nova{% endif %} Tarefa
+            {% if edit_id %}
+                <small class="text-warning ms-2">
+                    <i class="fas fa-edit me-1"></i>Editando tarefa
+                    <a href="{{ url_for('main.tasks') }}" class="text-warning text-decoration-none ms-2">
+                        <i class="fas fa-times me-1"></i>Cancelar
+                    </a>
+                </small>
+            {% endif %}
+        </h6>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="row g-3">
+                <div class="col-xl-5 col-lg-6">
+                    <label class="form-label small text-muted mb-1">Descrição da Tarefa</label>
+                    {{ form.description(class_='form-control form-control-sm', placeholder='Descreva a tarefa...') }}
+                    {% for error in form.description.errors %}
+                        <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-xl-2 col-lg-3 col-md-4">
+                    <label class="form-label small text-muted mb-1">Data Limite</label>
+                    {{ form.date(class_='form-control form-control-sm') }}
+                    {% for error in form.date.errors %}
+                        <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-xl-2 col-lg-3 col-md-4">
+                    <label class="form-label small text-muted mb-1">Responsável</label>
+                    {{ form.responsible(class_='form-control form-control-sm', placeholder='Nome do responsável') }}
+                    {% for error in form.responsible.errors %}
+                        <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-xl-2 col-lg-6 col-md-4">
+                    <label class="form-label small text-muted mb-1">Setor</label>
+                    {{ form.sector_id(class_='form-select form-select-sm') }}
+                    {% for error in form.sector_id.errors %}
+                        <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                    {% endfor %}
+                    <div class="mt-2">
+                        <label class="form-label small text-muted mb-1">Ou novo setor:</label>
+                        {{ form.new_sector(class_='form-control form-control-sm', placeholder='Digite um novo setor...') }}
+                    </div>
+                </div>
+                <div class="col-xl-1 col-lg-3 col-md-4 d-flex align-items-end">
+                    <div class="form-check form-switch">
+                        {{ form.completed(class_='form-check-input') }}
+                        <label class="form-check-label small text-muted" for="{{ form.completed.id }}">
+                            Concluída
+                        </label>
+                    </div>
+                </div>
+                <div class="col-xl-12">
+                    <hr class="my-3">
+                    <div class="d-flex justify-content-end">
+                        {% if edit_id %}
+                            <button type="submit" class="btn btn-warning btn-sm px-4">
+                                <i class="fas fa-save me-1"></i>Atualizar
+                            </button>
+                        {% else %}
+                            {{ form.submit(class_='btn btn-success btn-sm px-4') }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </form>
-      </td>
-    </tr>
-    {% else %}
-    <tr><td colspan="6">Nenhuma tarefa encontrada.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+    </div>
 </div>
+
+<!-- Card de Lista de Tarefas -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-light border-0 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-secondary"><i class="fas fa-list-check me-2"></i>Lista de Tarefas</h6>
+            <!-- Legenda de Status -->
+            <div class="d-flex gap-2 flex-wrap">
+                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+                    <i class="fas fa-exclamation-circle me-1"></i>Vencida
+                </span>
+                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">
+                    <i class="fas fa-calendar-day me-1"></i>Hoje
+                </span>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                    <i class="fas fa-check-circle me-1"></i>Concluída
+                </span>
+                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">
+                    <i class="fas fa-clock me-1"></i>Futura
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive" style="max-height: 500px;">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light sticky-top">
+                    <tr>
+                        <th class="ps-3"><i class="fas fa-tasks me-2 text-muted"></i>Descrição</th>
+                        <th><i class="fas fa-calendar-alt me-2 text-muted"></i>Data</th>
+                        <th><i class="fas fa-user me-2 text-muted"></i>Responsável</th>
+                        <th><i class="fas fa-sitemap me-2 text-muted"></i>Setor</th>
+                        <th class="text-center"><i class="fas fa-check-circle me-2 text-muted"></i>Status</th>
+                        <th class="text-center pe-3"><i class="fas fa-cogs me-2 text-muted"></i>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr class="
+                        {% if task.status == 'expired' %}table-danger{% elif task.status == 'today' %}table-warning{% elif task.status == 'done' %}table-success{% endif %}
+                        {% if task.completed %}opacity-75{% endif %}
+                    ">
+                        <td class="ps-3">
+                            <div class="d-flex align-items-center">
+                                {% if task.status == 'expired' %}
+                                    <i class="fas fa-exclamation-circle text-danger me-2" title="Tarefa vencida"></i>
+                                {% elif task.status == 'today' %}
+                                    <i class="fas fa-calendar-day text-warning me-2" title="Para hoje"></i>
+                                {% elif task.status == 'done' %}
+                                    <i class="fas fa-check-circle text-success me-2" title="Concluída"></i>
+                                {% else %}
+                                    <i class="fas fa-clock text-secondary me-2" title="Tarefa futura"></i>
+                                {% endif %}
+                                <span class="{% if task.completed %}text-decoration-line-through text-muted{% endif %}">
+                                    {{ task.description }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <small class="{% if task.status == 'expired' %}text-danger{% elif task.status == 'today' %}text-warning{% elif task.completed %}text-muted{% else %}text-dark{% endif %}">
+                                {{ task.date }}
+                            </small>
+                        </td>
+                        <td>
+                            <span class="{% if task.completed %}text-muted{% endif %}">
+                                {{ task.responsible }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border {% if task.completed %}opacity-50{% endif %}">
+                                {{ task.sector.name if task.sector else 'Sem setor' }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            {% if task.completed %}
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 d-inline-flex align-items-center gap-1">
+                                    <i class="fas fa-check-circle"></i> Concluída
+                                </span>
+                            {% elif task.date < current_date %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 d-inline-flex align-items-center gap-1">
+                                    <i class="fas fa-exclamation-circle"></i> Vencida
+                                </span>
+                            {% elif task.date == current_date %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 d-inline-flex align-items-center gap-1">
+                                    <i class="fas fa-calendar-day"></i> Hoje
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 d-inline-flex align-items-center gap-1">
+                                    <i class="fas fa-clock"></i> Futura
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center pe-3">
+                            <div class="d-flex gap-1 justify-content-center">
+                                <a href="{{ url_for('main.edit_task', id=task.id) }}" class="btn btn-sm btn-warning" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if not task.completed %}
+                                <form method="POST" action="{{ url_for('main.complete_task', id=task.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-success" title="Marcar como concluída">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                                <form method="POST" action="{{ url_for('main.delete_task', id=task.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir esta tarefa?');" title="Excluir">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                            Nenhuma tarefa encontrada
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
 <!-- Paginação -->
 {% if pagination.pages > 1 %}
-<nav aria-label="Paginação de tarefas">
-  <ul class="pagination justify-content-center mt-3">
-    {% if pagination.has_prev %}
-      <li class="page-item"><a class="page-link" href="{{ url_for('main.tasks', page=pagination.prev_num) }}">Anterior</a></li>
-    {% else %}
-      <li class="page-item disabled"><span class="page-link">Anterior</span></li>
-    {% endif %}
-    {% for p in range(1, pagination.pages + 1) %}
-      {% if p == pagination.page %}
-        <li class="page-item active"><span class="page-link">{{ p }}</span></li>
-      {% else %}
-        <li class="page-item"><a class="page-link" href="{{ url_for('main.tasks', page=p) }}">{{ p }}</a></li>
-      {% endif %}
-    {% endfor %}
-    {% if pagination.has_next %}
-      <li class="page-item"><a class="page-link" href="{{ url_for('main.tasks', page=pagination.next_num) }}">Próxima</a></li>
-    {% else %}
-      <li class="page-item disabled"><span class="page-link">Próxima</span></li>
-    {% endif %}
-  </ul>
-</nav>
+<div class="mt-4">
+    <nav aria-label="Navegação de páginas">
+        <ul class="pagination justify-content-center pagination-sm">
+            {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.tasks', page=pagination.prev_num) }}">
+                        <i class="fas fa-chevron-left me-1"></i>Anterior
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-chevron-left me-1"></i>Anterior</span>
+                </li>
+            {% endif %}
+            
+            {% for p in range(1, pagination.pages + 1) %}
+                {% if p == pagination.page %}
+                    <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('main.tasks', page=p) }}">{{ p }}</a></li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.tasks', page=pagination.next_num) }}">
+                        Próxima<i class="fas fa-chevron-right ms-1"></i>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Próxima<i class="fas fa-chevron-right ms-1"></i></span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
 {% endif %}
+
 {% endblock %}

@@ -1,125 +1,137 @@
-
 {% extends "base.html" %}
 {% block title %}Dashboard | TI OSN System{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h1 class="h3 fw-bold mb-1 text-primary">
-                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard de Ações Rápidas
-                </h1>
-                <p class="text-muted mb-0">Bem-vindo de volta, {{ session['username'] }}! Acompanhe as principais informações do sistema.</p>
-            </div>            
-        </div>
+
+<!-- Header da Página -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="text-primary mb-1"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h4>
+        <p class="text-muted mb-0 small">Bem-vindo de volta, {{ session['username'] }}! Acompanhe as principais informações do sistema.</p>
     </div>
 </div>
-<!-- Cards de resumo -->
-<div class="row g-4 mb-5">
+
+<!-- Cards de Resumo -->
+<div class="row g-3 mb-4">
     <!-- Card de Lembretes -->
     <div class="col-xl-3 col-md-6">
-        <div class="sla-card primary h-100 animate-on-scroll">
-            <div class="sla-value">{{ lembretes_count or 0 }}</div>
-            <div class="sla-label">Lembretes Ativos</div>
-            <div class="sla-description">Próximos vencimentos</div>
-            <div class="d-flex justify-content-center mt-3">
-                <i class="fas fa-bell fa-2x text-primary"></i>
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body text-center p-4">
+                <div class="mb-3">
+                    <i class="fas fa-bell fa-2x text-primary"></i>
+                </div>
+                <h3 class="text-primary mb-1">{{ lembretes_count or 0 }}</h3>
+                <p class="text-muted mb-1 small fw-medium">Lembretes Ativos</p>
+                <p class="text-muted small">Próximos vencimentos</p>
             </div>
         </div>
     </div>
     
     <!-- Card de Tarefas -->
     <div class="col-xl-3 col-md-6">
-        <div class="sla-card success h-100 animate-on-scroll">
-            <div class="sla-value">{{ tarefas_count or 0 }}</div>
-            <div class="sla-label">Tarefas Pendentes</div>
-            <div class="sla-description">Para hoje</div>
-            <div class="d-flex justify-content-center mt-3">
-                <i class="fas fa-tasks fa-2x text-success"></i>
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body text-center p-4">
+                <div class="mb-3">
+                    <i class="fas fa-tasks fa-2x text-success"></i>
+                </div>
+                <h3 class="text-success mb-1">{{ tarefas_count or 0 }}</h3>
+                <p class="text-muted mb-1 small fw-medium">Tarefas Pendentes</p>
+                <p class="text-muted small">Para hoje</p>
             </div>
         </div>
     </div>
     
     <!-- Card de Chamados -->
     <div class="col-xl-3 col-md-6">
-        <div class="sla-card warning h-100 animate-on-scroll">
-            <div class="sla-value">{{ chamados_count or 0 }}</div>
-            <div class="sla-label">Chamados Abertos</div>
-            <div class="sla-description">Aguardando solução</div>
-            <div class="d-flex justify-content-center mt-3">
-                <i class="fas fa-ticket-alt fa-2x text-warning"></i>
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body text-center p-4">
+                <div class="mb-3">
+                    <i class="fas fa-ticket-alt fa-2x text-warning"></i>
+                </div>
+                <h3 class="text-warning mb-1">{{ chamados_count or 0 }}</h3>
+                <p class="text-muted mb-1 small fw-medium">Chamados Abertos</p>
+                <p class="text-muted small">Aguardando solução</p>
             </div>
         </div>
     </div>
     
     <!-- Card de Equipamentos -->
     <div class="col-xl-3 col-md-6">
-        <div class="sla-card info h-100 animate-on-scroll">
-            <div class="sla-value">{{ equipamentos_count or 0 }}</div>
-            <div class="sla-label">Qtd.Equipamentos</div>
-            <div class="sla-description">Solicitados</div>
-            <div class="d-flex justify-content-center mt-3">
-                <i class="fas fa-laptop fa-2x text-info"></i>
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body text-center p-4">
+                <div class="mb-3">
+                    <i class="fas fa-laptop fa-2x text-info"></i>
+                </div>
+                <h3 class="text-info mb-1">{{ equipamentos_count or 0 }}</h3>
+                <p class="text-muted mb-1 small fw-medium">Qtd. Equipamentos</p>
+                <p class="text-muted small">Solicitados</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Cards de SLA -->
+<!-- Cards de SLA (Admin) -->
 {% if session.get('is_admin') %}
-<div class="row g-4 mb-5">
-    <div class="col-12">
-        <h2 class="h4 fw-bold text-secondary mb-4">
-            <i class="fas fa-clock me-2"></i>Monitoramento de SLA
-        </h2>
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-light border-0 py-3">
+        <h6 class="mb-0 text-secondary"><i class="fas fa-clock me-2"></i>Monitoramento de SLA</h6>
     </div>
-    
-    <!-- Card SLA Vencido -->
-    <div class="col-lg-3 col-md-6">
-        <div class="sla-card danger h-100 animate-on-scroll">
-            <div class="sla-value">{{ sla_vencidos or 0 }}</div>
-            <div class="sla-label">SLA Vencido</div>
-            <div class="sla-description">Chamados fora do prazo</div>
-            <div class="d-flex justify-content-center mt-3">
-                <i class="fas fa-exclamation-circle fa-2x text-danger"></i>
+    <div class="card-body">
+        <div class="row g-3">
+            <!-- Card SLA Vencido -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-0 h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-exclamation-circle fa-2x text-danger"></i>
+                        </div>
+                        <h3 class="text-danger mb-1">{{ sla_vencidos or 0 }}</h3>
+                        <p class="text-muted mb-1 small fw-medium">SLA Vencido</p>
+                        <p class="text-muted small">Chamados fora do prazo</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    
-    <!-- Card SLA Crítico -->
-    <div class="col-lg-3 col-md-6">
-        <div class="sla-card warning h-100 animate-on-scroll">
-            <div class="sla-value">{{ sla_criticos or 0 }}</div>
-            <div class="sla-label">SLA Crítico</div>
-            <div class="sla-description">Próximos ao vencimento</div>
-            <div class="d-flex justify-content-center mt-3">
-                <i class="fas fa-clock fa-2x text-warning"></i>
+            
+            <!-- Card SLA Crítico -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-0 h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-clock fa-2x text-warning"></i>
+                        </div>
+                        <h3 class="text-warning mb-1">{{ sla_criticos or 0 }}</h3>
+                        <p class="text-muted mb-1 small fw-medium">SLA Crítico</p>
+                        <p class="text-muted small">Próximos ao vencimento</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    
-    <!-- Card SLA OK -->
-    <div class="col-lg-3 col-md-6">
-        <div class="sla-card success h-100 animate-on-scroll">
-            <div class="sla-value">{{ sla_ok or 0 }}</div>
-            <div class="sla-label">SLA OK</div>
-            <div class="sla-description">Dentro do prazo</div>
-            <div class="d-flex justify-content-center mt-3">
-                <i class="fas fa-check-circle fa-2x text-success"></i>
+            
+            <!-- Card SLA OK -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-0 h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                        <h3 class="text-success mb-1">{{ sla_ok or 0 }}</h3>
+                        <p class="text-muted mb-1 small fw-medium">SLA OK</p>
+                        <p class="text-muted small">Dentro do prazo</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    
-    <!-- Card Performance SLA -->
-    <div class="col-lg-3 col-md-6">
-        <div class="performance-card h-100 animate-on-scroll">
-            <h3>Performance SLA</h3>
-            <div class="performance-value">{{ performance_sla or 0 }}%</div>
-            <div class="performance-label">Taxa de atendimento</div>
-            <div class="performance-description">Nos últimos 30 dias</div>
-            <div class="d-flex justify-content-center mt-3">
-                <i class="fas fa-chart-line fa-2x text-white-50"></i>
+            
+            <!-- Card Performance SLA -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-line fa-2x text-white-50"></i>
+                        </div>
+                        <h3 class="text-white mb-1">{{ performance_sla or 0 }}%</h3>
+                        <p class="text-white-50 mb-1 small fw-medium">Performance SLA</p>
+                        <p class="text-white-50 small">Taxa de atendimento</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -128,164 +140,162 @@
 
 <!-- Alertas de SLA -->
 {% if session.get('is_admin') and (sla_vencidos > 0 or sla_criticos > 0) %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="alert alert-{{ 'danger' if sla_vencidos > 0 else 'warning' }} alert-dismissible fade show" role="alert">
-            <div class="d-flex align-items-center">
-                <i class="fas fa-{{ 'exclamation-triangle' if sla_vencidos > 0 else 'clock' }} fa-2x me-3"></i>
-                <div class="flex-grow-1">
-                    <h5 class="alert-heading mb-1">
-                        {% if sla_vencidos > 0 %}
-                            ⚠️ Atenção: SLA Vencido!
-                        {% else %}
-                            🕐 Alerta: SLA Próximo ao Vencimento
-                        {% endif %}
-                    </h5>
-                    <p class="mb-1">
-                        {% if sla_vencidos > 0 %}
-                            Existem {{ sla_vencidos }} chamado(s) com SLA vencido que precisam de atenção imediata.
-                        {% endif %}
-                        {% if sla_criticos > 0 %}
-                            {% if sla_vencidos > 0 %}Além disso, há{% else %}Há{% endif %} {{ sla_criticos }} chamado(s) com SLA crítico (próximo ao vencimento).
-                        {% endif %}
-                    </p>
-                    <a href="{{ url_for('main.listar_chamados') }}" class="btn btn-{{ 'light' if sla_vencidos > 0 else 'dark' }} btn-sm">
-                        <i class="fas fa-list"></i> Ver Chamados
-                    </a>
-                </div>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="alert alert-{{ 'danger' if sla_vencidos > 0 else 'warning' }} alert-dismissible fade show mb-4" role="alert">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-{{ 'exclamation-triangle' if sla_vencidos > 0 else 'clock' }} me-3 fs-5"></i>
+        <div class="flex-grow-1">
+            <h6 class="alert-heading mb-1">
+                {% if sla_vencidos > 0 %}
+                    Atenção: SLA Vencido!
+                {% else %}
+                    Alerta: SLA Próximo ao Vencimento
+                {% endif %}
+            </h6>
+            <p class="mb-2 small">
+                {% if sla_vencidos > 0 %}
+                    Existem {{ sla_vencidos }} chamado(s) com SLA vencido que precisam de atenção imediata.
+                {% endif %}
+                {% if sla_criticos > 0 %}
+                    {% if sla_vencidos > 0 %}Além disso, há{% else %}Há{% endif %} {{ sla_criticos }} chamado(s) com SLA crítico (próximo ao vencimento).
+                {% endif %}
+            </p>
+            <a href="{{ url_for('main.listar_chamados') }}" class="btn btn-{{ 'outline-danger' if sla_vencidos > 0 else 'outline-warning' }} btn-sm">
+                <i class="fas fa-list me-1"></i> Ver Chamados
+            </a>
         </div>
     </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% endif %}
 
-<div class="container-fluid py-4 mb-5 page-transition">
-<!-- Ações rápidas -->
-<div class="row g-4 mb-5">
-    <div class="col-12">
-        <h2 class="h4 fw-bold text-secondary mb-4">
-            <i class="fas fa-rocket me-2"></i>Ações Rápidas
-        </h2>
+<!-- Ações Rápidas -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-light border-0 py-3">
+        <h6 class="mb-0 text-secondary"><i class="fas fa-rocket me-2"></i>Ações Rápidas</h6>
     </div>
-    
-    <div class="col-xl-2 col-md-4 col-sm-6">
-        <a href="{{ url_for('main.reminders') }}" class="text-decoration-none">
-            <div class="sla-card primary h-100 animate-on-scroll action-hover compact">
-                <div class="d-flex justify-content-center mb-2">
-                    <i class="fas fa-bell fa-lg text-primary"></i>
-                </div>
-                <div class="sla-value-compact">Lembrete</div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <a href="{{ url_for('main.reminders') }}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 text-center p-3 action-hover">
+                        <div class="mb-2">
+                            <i class="fas fa-bell fa-lg text-primary"></i>
+                        </div>
+                        <p class="text-muted mb-0 small fw-medium">Lembretes</p>
+                    </div>
+                </a>
             </div>
-        </a>
-    </div>
-    
-    <div class="col-xl-2 col-md-4 col-sm-6">
-        <a href="{{ url_for('main.tasks') }}" class="text-decoration-none">
-            <div class="sla-card success h-100 animate-on-scroll action-hover compact">
-                <div class="d-flex justify-content-center mb-2">
-                    <i class="fas fa-tasks fa-lg text-success"></i>
-                </div>
-                <div class="sla-value-compact">Tarefa</div>
+            
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <a href="{{ url_for('main.tasks') }}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 text-center p-3 action-hover">
+                        <div class="mb-2">
+                            <i class="fas fa-tasks fa-lg text-success"></i>
+                        </div>
+                        <p class="text-muted mb-0 small fw-medium">Tarefas</p>
+                    </div>
+                </a>
             </div>
-        </a>
-    </div>
-    
-    <div class="col-xl-2 col-md-4 col-sm-6">
-        <a href="{{ url_for('main.abrir_chamado') }}" class="text-decoration-none">
-            <div class="sla-card warning h-100 animate-on-scroll action-hover compact">
-                <div class="d-flex justify-content-center mb-2">
-                    <i class="fas fa-plus-circle fa-lg text-warning"></i>
-                </div>
-                <div class="sla-value-compact">Chamado</div>
+            
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <a href="{{ url_for('main.abrir_chamado') }}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 text-center p-3 action-hover">
+                        <div class="mb-2">
+                            <i class="fas fa-plus-circle fa-lg text-warning"></i>
+                        </div>
+                        <p class="text-muted mb-0 small fw-medium">Chamado</p>
+                    </div>
+                </a>
             </div>
-        </a>
-    </div>
-    
-    <div class="col-xl-2 col-md-4 col-sm-6">
-        <a href="{{ url_for('main.list_equipment') }}" class="text-decoration-none">
-            <div class="sla-card info h-100 animate-on-scroll action-hover compact">
-                <div class="d-flex justify-content-center mb-2">
-                    <i class="fas fa-laptop fa-lg text-info"></i>
-                </div>
-                <div class="sla-value-compact">Equipamento</div>
+            
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <a href="{{ url_for('main.list_equipment') }}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 text-center p-3 action-hover">
+                        <div class="mb-2">
+                            <i class="fas fa-laptop fa-lg text-info"></i>
+                        </div>
+                        <p class="text-muted mb-0 small fw-medium">Equipamento</p>
+                    </div>
+                </a>
             </div>
-        </a>
-    </div>
-   
-    <div class="col-xl-2 col-md-4 col-sm-6">
-        <a href="{{ url_for('main.listar_tutoriais') }}" class="text-decoration-none">
-            <div class="sla-card secondary h-100 animate-on-scroll action-hover compact">
-                <div class="d-flex justify-content-center mb-2">
-                    <i class="fas fa-book fa-lg text-secondary"></i>
-                </div>
-                <div class="sla-value-compact">Tutoriais</div>
+           
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <a href="{{ url_for('main.listar_tutoriais') }}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 text-center p-3 action-hover">
+                        <div class="mb-2">
+                            <i class="fas fa-book fa-lg text-secondary"></i>
+                        </div>
+                        <p class="text-muted mb-0 small fw-medium">Tutoriais</p>
+                    </div>
+                </a>
             </div>
-        </a>
-    </div>
-    
-    <div class="col-xl-2 col-md-4 col-sm-6">
-        <a href="{{ url_for('main.user_profile') }}" class="text-decoration-none">
-            <div class="sla-card dark h-100 animate-on-scroll action-hover compact">
-                <div class="d-flex justify-content-center mb-2">
-                    <i class="fas fa-cog fa-lg text-dark"></i>
-                </div>
-                <div class="sla-value-compact">Configurações</div>
+            
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <a href="{{ url_for('main.user_profile') }}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 text-center p-3 action-hover">
+                        <div class="mb-2">
+                            <i class="fas fa-cog fa-lg text-dark"></i>
+                        </div>
+                        <p class="text-muted mb-0 small fw-medium">Configurações</p>
+                    </div>
+                </a>
             </div>
-        </a>
+        </div>
     </div>
 </div>
 
-<!-- Atividades recentes -->
-<div class="row">
+<!-- Atividades Recentes e Sistema -->
+<div class="row g-4">
+    <!-- Atividades Recentes -->
     <div class="col-lg-8">
         <div class="card shadow-sm border-0 h-100">
-            <div class="card-header bg-transparent border-0 pb-0 pt-3 d-flex justify-content-between align-items-center">
-                <h2 class="h5 mb-0 text-secondary">
-                    <i class="fas fa-stream me-2 text-primary"></i>
-                    Atividades Recentes
-                </h2>
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="activityFilter" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-filter me-1"></i> Filtrar
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="activityFilter">
-                        <li><a class="dropdown-item active" href="#">Todas as atividades</a></li>
-                        <li><a class="dropdown-item" href="#">Minhas atividades</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Chamados</a></li>
-                        <li><a class="dropdown-item" href="#">Lembretes</a></li>
-                        <li><a class="dropdown-item" href="#">Sistema</a></li>
-                    </ul>
+            <div class="card-header bg-light border-0 py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 text-secondary"><i class="fas fa-stream me-2"></i>Atividades Recentes</h6>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="activityFilter" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-filter me-1"></i> Filtrar
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="activityFilter">
+                            <li><a class="dropdown-item active" href="#">Todas as atividades</a></li>
+                            <li><a class="dropdown-item" href="#">Minhas atividades</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">Chamados</a></li>
+                            <li><a class="dropdown-item" href="#">Lembretes</a></li>
+                            <li><a class="dropdown-item" href="#">Sistema</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-            <div class="card-body pt-3">
+            <div class="card-body">
                 {% if atividades_recentes %}
-                <div class="timeline">
+                <div class="list-group list-group-flush">
                     {% for atividade in atividades_recentes %}
-                    <div class="timeline-card mb-3 p-3 rounded-3 border-0 shadow-sm bg-white">
-                        <div class="d-flex">
-                            <div class="timeline-badge bg-{{ atividade.cor }}-light text-{{ atividade.cor }} d-flex align-items-center justify-content-center rounded-circle me-3" style="width: 40px; height: 40px;">
-                                <i class="fas fa-{{ atividade.icone }} fa-fw"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <h6 class="mb-0 fw-semibold">{{ atividade.titulo }}</h6>
-                                    <span class="badge bg-{{ atividade.cor }}-light text-{{ atividade.cor }} rounded-pill">{{ atividade.status }}</span>
+                    <div class="list-group-item border-0 px-0 py-3">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <div class="bg-{{ atividade.cor }}-light text-{{ atividade.cor }} rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-{{ atividade.icone }} fa-fw"></i>
                                 </div>
-                                <p class="text-muted small mb-1">{{ atividade.tipo|capitalize }}</p>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h6 class="mb-0 fw-medium">{{ atividade.titulo }}</h6>
+                                    <span class="badge bg-{{ atividade.cor }}-light text-{{ atividade.cor }} border border-{{ atividade.cor }} border-opacity-25">{{ atividade.status }}</span>
+                                </div>
+                                <p class="text-muted small mb-2">{{ atividade.tipo|capitalize }}</p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <small class="text-muted"><i class="far fa-clock me-1"></i> {{ atividade.data|local_date }}</small>
                                     {% if atividade.tipo == 'tarefa' %}
-                                        <a href="{{ url_for('main.tasks') }}" class="text-primary small">Detalhes <i class="fas fa-chevron-right ms-1"></i></a>
+                                        <a href="{{ url_for('main.tasks') }}" class="text-primary small text-decoration-none">Detalhes <i class="fas fa-chevron-right ms-1"></i></a>
                                     {% elif atividade.tipo == 'lembrete' %}
-                                        <a href="{{ url_for('main.reminders') }}" class="text-primary small">Detalhes <i class="fas fa-chevron-right ms-1"></i></a>
+                                        <a href="{{ url_for('main.reminders') }}" class="text-primary small text-decoration-none">Detalhes <i class="fas fa-chevron-right ms-1"></i></a>
                                     {% elif atividade.tipo == 'chamado' %}
-                                        <a href="{{ url_for('main.listar_chamados') }}" class="text-primary small">Detalhes <i class="fas fa-chevron-right ms-1"></i></a>
+                                        <a href="{{ url_for('main.listar_chamados') }}" class="text-primary small text-decoration-none">Detalhes <i class="fas fa-chevron-right ms-1"></i></a>
                                     {% elif atividade.tipo == 'equipamento' %}
-                                        <a href="{{ url_for('main.list_equipment') }}" class="text-primary small">Detalhes <i class="fas fa-chevron-right ms-1"></i></a>
+                                        <a href="{{ url_for('main.list_equipment') }}" class="text-primary small text-decoration-none">Detalhes <i class="fas fa-chevron-right ms-1"></i></a>
                                     {% else %}
-                                        <a href="{{ url_for('main.dashboard') }}" class="text-primary small">Detalhes <i class="fas fa-chevron-right ms-1"></i></a>
+                                        <a href="{{ url_for('main.dashboard') }}" class="text-primary small text-decoration-none">Detalhes <i class="fas fa-chevron-right ms-1"></i></a>
                                     {% endif %}
                                 </div>
                             </div>
@@ -293,19 +303,17 @@
                     </div>
                     {% endfor %}
                 </div>
-                <div class="text-center mt-4">
+                <div class="text-center mt-3">
                     <a href="{{ url_for('main.listar_chamados') }}" class="btn btn-outline-primary btn-sm">
                         <i class="fas fa-list-ul me-1"></i> Ver todas as atividades
                     </a>
                 </div>
                 {% else %}
-                <div class="d-flex flex-column align-items-center justify-content-center text-center p-5 bg-light rounded-3">
-                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-4 mb-3">
-                        <i class="fas fa-history fa-2x"></i>
-                    </div>
-                    <h6 class="mb-3">Nenhuma atividade recente</h6>
-                    <p class="text-muted small mb-3">As atividades aparecerão aqui conforme você usar o sistema.</p>
-                    <a href="#" class="btn btn-outline-primary btn-sm">
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-history fa-2x mb-3 d-block"></i>
+                    <h6 class="mb-2">Nenhuma atividade recente</h6>
+                    <p class="small mb-3">As atividades aparecerão aqui conforme você usar o sistema.</p>
+                    <a href="{{ url_for('main.abrir_chamado') }}" class="btn btn-outline-primary btn-sm">
                         <i class="fas fa-plus me-1"></i> Criar nova atividade
                     </a>
                 </div>
@@ -314,82 +322,78 @@
         </div>
     </div>
     
+    <!-- Sistema -->
     <div class="col-lg-4">
-        <div class="card shadow-sm border-0 animate-on-scroll h-100">
-            <div class="card-header bg-transparent border-0 pb-0 pt-3">
-                <h2 class="h5 mb-0 text-secondary">
-                    <i class="fas fa-info-circle me-2 text-primary"></i>
-                    Sistema
-                </h2>
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-light border-0 py-3">
+                <h6 class="mb-0 text-secondary"><i class="fas fa-info-circle me-2"></i>Sistema</h6>
             </div>
             <div class="card-body">
-                <div class="system-status-card p-3 mb-4 rounded-3">
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon me-3">
+                <div class="mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3">
                             <i class="fas fa-server"></i>
                         </div>
                         <div>
-                            <h6 class="mb-0 fw-semibold">Status do Sistema</h6>
-                            <span class="badge bg-success bg-opacity-10 text-success">
+                            <h6 class="mb-0 fw-medium">Status do Sistema</h6>
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
                                 <i class="fas fa-circle me-1"></i> Online
                             </span>
                         </div>
                     </div>
                 </div>
                 
-                <div class="system-info-item">
-                    <div class="icon bg-primary">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="info-text">
-                        <div class="d-flex justify-content-between align-items-center">
+                <div class="mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3">
+                                <i class="fas fa-users"></i>
+                            </div>
                             <span class="fw-medium">Usuários Conectados</span>
-                            <span class="badge bg-primary bg-opacity-10 text-primary">{{ usuarios_ativos or 0 }} ativos</span>
                         </div>
-                        <small>Última atualização: Agora</small>
-                        <small class="text-muted">{{ session['username'] }} (você)</small>
+                        <span class="badge bg-primary bg-opacity-10 text-primary">{{ usuarios_ativos or 0 }} ativos</span>
                     </div>
+                    <small class="text-muted d-block">{{ session['username'] }} (você)</small>
                 </div>
                 
-                <div class="system-info-item">
-                    <div class="icon bg-info">
-                        <i class="far fa-calendar-alt"></i>
-                    </div>
-                    <div class="info-text">
-                        <div class="d-flex justify-content-between align-items-center">
+                <div class="mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-info bg-opacity-10 text-info rounded-circle p-2 me-3">
+                                <i class="far fa-calendar-alt"></i>
+                            </div>
                             <span class="fw-medium">Último Acesso</span>
-                            <span class="badge bg-info bg-opacity-10 text-info">Hoje</span>
                         </div>
-                        <small>{{ ultimo_acesso }}</small>
+                        <span class="badge bg-info bg-opacity-10 text-info">Hoje</span>
                     </div>
+                    <small class="text-muted">{{ ultimo_acesso }}</small>
                 </div>
                 
-                <div class="system-info-item">
-                    <div class="icon bg-warning">
-                        <i class="fas fa-database"></i>
-                    </div>
-                    <div class="info-text">
-                        <div class="d-flex justify-content-between align-items-center">
+                <div class="mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2 me-3">
+                                <i class="fas fa-database"></i>
+                            </div>
                             <span class="fw-medium">Armazenamento</span>
-                            <span class="badge bg-warning bg-opacity-10 text-warning">{{ storage_percent }}% usado</span>
                         </div>
-                        <div class="progress mt-2" style="height: 6px;">
-                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ storage_percent }}%" aria-valuenow="{{ storage_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                        <small class="d-flex justify-content-between mt-1">
-                            <span>{{ "%.1f"|format(storage_used_gb) }} GB de {{ "%.1f"|format(storage_total_gb) }} GB</span>
-                            <a href="#" class="text-decoration-none">Gerenciar</a>
-                        </small>
+                        <span class="badge bg-warning bg-opacity-10 text-warning">{{ storage_percent }}% usado</span>
                     </div>
+                    <div class="progress mt-2" style="height: 6px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: {{ storage_percent }}%" aria-valuenow="{{ storage_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <small class="d-flex justify-content-between mt-1 text-muted">
+                        <span>{{ "%.1f"|format(storage_used_gb) }} GB de {{ "%.1f"|format(storage_total_gb) }} GB</span>
+                    </small>
                 </div>
                 
-                <div class="mt-4 pt-3 border-top">
+                <div class="pt-3 border-top">
                     <div class="d-flex justify-content-between align-items-center">
                         <a href="#" class="btn btn-sm btn-outline-primary">
                             <i class="fas fa-cog me-1"></i> Configurações
                         </a>
                         <div class="text-muted small">
-                            v2.4.1 • <a href="#" class="text-decoration-none">Ver atualizações</a>
+                            v2.4.1
                         </div>
                     </div>
                 </div>
@@ -399,99 +403,18 @@
 </div>
 
 <style>
-/* Estilos compactos para ações rápidas */
-.sla-card.compact {
-    padding: 1rem !important;
-    min-height: 80px !important;
+.action-hover:hover {
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
 }
 
-.sla-value-compact {
-    font-size: 0.9rem !important;
-    font-weight: 600 !important;
-    color: #495057 !important;
-    text-align: center !important;
-    margin: 0 !important;
-}
-
-.sla-card.compact .mb-2 {
-    margin-bottom: 0.5rem !important;
-}
-
-.sla-card.compact i.fa-lg {
-    font-size: 1.2rem !important;
-}
-
-/* Estilos para a timeline de atividades recentes */
-.timeline-container {
-    position: relative;
-    padding: 0;
-    margin: 0;
-}
-
-.timeline-item {
-    display: flex;
-    margin-bottom: 1rem;
-    position: relative;
-}
-
-.timeline-item:last-child {
-    margin-bottom: 0;
-}
-
-.timeline-marker {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: white;
-    margin-right: 15px;
-}
-
-.timeline-content {
-    flex-grow: 1;
-    background-color: rgba(0,0,0,0.03);
-    border-radius: 0.5rem;
-    padding: 0.75rem;
-}
-
-.timeline-content h6 {
-    font-weight: 600;
-}
+.bg-primary-light { background-color: rgba(13, 110, 253, 0.1); }
+.bg-success-light { background-color: rgba(25, 135, 84, 0.1); }
+.bg-warning-light { background-color: rgba(255, 193, 7, 0.1); }
+.bg-danger-light { background-color: rgba(220, 53, 69, 0.1); }
+.bg-info-light { background-color: rgba(13, 202, 240, 0.1); }
+.bg-secondary-light { background-color: rgba(108, 117, 125, 0.1); }
 </style>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Garante que as animações não afetem a visibilidade
-    const cards = document.querySelectorAll('.dashboard-card, .modern-card');
-    cards.forEach((card, index) => {
-        card.style.opacity = '1';
-        card.style.visibility = 'visible';
-        card.style.animationDelay = `${index * 0.1}s`;
-        if (!card.classList.contains('animate-on-scroll')) {
-            card.classList.add('fade-in');
-        }
-    });
-    
-    // Configura o Intersection Observer para as animações de scroll
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animate-on-scroll-visible');
-            }
-        });
-    }, { threshold: 0.1 });
-
-    // Observa todos os elementos com a classe animate-on-scroll
-    document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
-    
-    // Atualização automática dos contadores
-    setInterval(() => {
-        // Aqui você pode adicionar lógica para atualizar os contadores
-        console.log('Atualizando contadores...');
-    }, 300000); // 5 minutos
-});
-</script>
 {% endblock %}

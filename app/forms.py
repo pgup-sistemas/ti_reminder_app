@@ -78,6 +78,23 @@ class ChamadoForm(FlaskForm):
         ]
 
 
+class ChamadoEditForm(FlaskForm):
+    titulo = StringField("Título", validators=[DataRequired()])
+    descricao = TextAreaField("Descrição", validators=[DataRequired()])
+    setor_id = SelectField("Setor", coerce=int, validators=[Optional()])
+    new_sector = StringField("Novo setor")
+    submit = SubmitField("Salvar Alterações")
+
+    def __init__(self, *args, **kwargs):
+        super(ChamadoEditForm, self).__init__(*args, **kwargs)
+        from .models import Sector
+
+        # Carrega os setores disponíveis
+        self.setor_id.choices = [(0, "-- Selecione um setor --")] + [
+            (s.id, s.name) for s in Sector.query.order_by("name").all()
+        ]
+
+
 class UserRegisterForm(FlaskForm):
     username = StringField("Nome de Usuário", validators=[DataRequired()])
     email = StringField("Email", validators=[DataRequired()])
