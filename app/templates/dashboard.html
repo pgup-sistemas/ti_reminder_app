@@ -2,123 +2,104 @@
 {% block title %}Dashboard | TI OSN System{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4 mb-5">
+<div class="container-fluid py-3">
 
   <!-- Alertas Críticos -->
   {% if session.get('is_admin') and (sla_vencidos > 0 or sla_criticos > 0) %}
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="alert alert-danger border-0 shadow-sm" role="alert">
-        <div class="d-flex align-items-center">
-          <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
-          <div>
-            <h5 class="alert-heading mb-1">Atenção: Problemas de SLA Detectados!</h5>
-            <p class="mb-0">
-              {% if sla_vencidos > 0 %}<strong>{{ sla_vencidos }}</strong> chamado(s) com SLA vencido{% endif %}
-              {% if sla_vencidos > 0 and sla_criticos > 0 %} • {% endif %}
-              {% if sla_criticos > 0 %}<strong>{{ sla_criticos }}</strong> chamado(s) em situação crítica{% endif %}
-            </p>
-          </div>
-          <div class="ms-auto">
-            <a href="#sla-section" class="btn btn-light btn-sm">
-              <i class="fas fa-eye me-1"></i>Ver Detalhes
-            </a>
-          </div>
-        </div>
+  <div class="alert alert-danger border-0 mb-4" role="alert">
+    <div class="d-flex align-items-center">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      <div class="flex-grow-1">
+        <strong>Atenção: Problemas de SLA Detectados!</strong>
+        {% if sla_vencidos > 0 %}<strong>{{ sla_vencidos }}</strong> chamado(s) com SLA vencido{% endif %}
+        {% if sla_vencidos > 0 and sla_criticos > 0 %} • {% endif %}
+        {% if sla_criticos > 0 %}<strong>{{ sla_criticos }}</strong> chamado(s) em situação crítica{% endif %}
       </div>
+      <a href="#sla-section" class="btn btn-sm btn-light">Ver Detalhes</a>
     </div>
   </div>
   {% endif %}
 
-  <!-- Exportação -->
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="card shadow-sm">
-        <div class="card-header bg-light">
-          <h5 class="mb-0">Exportar Relatórios</h5>
-        </div>
-        <div class="card-body">
-          <form class="row g-3" method="get" action="">
-            <input type="hidden" name="task_status" value="{{ request.args.get('task_status', '') }}">
-            <input type="hidden" name="reminder_status" value="{{ request.args.get('reminder_status', '') }}">
-            <input type="hidden" name="chamado_status" value="{{ request.args.get('chamado_status', '') }}"> {# Adicionado #}
-            <input type="hidden" name="start_date" value="{{ request.args.get('start_date', '') }}">
-            <input type="hidden" name="end_date" value="{{ request.args.get('end_date', '') }}">
-            <input type="hidden" name="sector_id" value="{{ request.args.get('sector_id', '') }}">
-            <input type="hidden" name="user_id" value="{{ request.args.get('user_id', '') }}">
-            {# O input hidden para chamado_status já foi adicionado em uma etapa anterior, mas garantindo que está aqui: #}
-            <input type="hidden" name="chamado_status" value="{{ request.args.get('chamado_status', '') }}">
+  <!-- Exportação de Relatórios -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h6 class="card-title mb-3">Exportar Relatórios</h6>
+      <form class="row g-3" method="get" action="">
+        <input type="hidden" name="task_status" value="{{ request.args.get('task_status', '') }}">
+        <input type="hidden" name="reminder_status" value="{{ request.args.get('reminder_status', '') }}">
+        <input type="hidden" name="chamado_status" value="{{ request.args.get('chamado_status', '') }}">
+        <input type="hidden" name="start_date" value="{{ request.args.get('start_date', '') }}">
+        <input type="hidden" name="end_date" value="{{ request.args.get('end_date', '') }}">
+        <input type="hidden" name="sector_id" value="{{ request.args.get('sector_id', '') }}">
+        <input type="hidden" name="user_id" value="{{ request.args.get('user_id', '') }}">
 
-            <div class="col-md-4">
-              <label for="export_type" class="form-label">Tipo de Exportação</label>
-              <select id="export_type" name="export_type" class="form-select">
-                <option value="all" {% if request.args.get('export_type', 'all') == 'all' %}selected{% endif %}>Tarefas, Lembretes e Tutoriais</option>
-                <option value="tasks" {% if request.args.get('export_type') == 'tasks' %}selected{% endif %}>Somente Tarefas</option>
-                <option value="reminders" {% if request.args.get('export_type') == 'reminders' %}selected{% endif %}>Somente Lembretes</option>
-                <option value="chamados" {% if request.args.get('export_type') == 'chamados' %}selected{% endif %}>Somente Chamados</option>
-                <option value="equipamentos">Apenas Equipamentos</option>
-                <option value="tutoriais" {% if request.args.get('export_type') == 'tutoriais' %}selected{% endif %}>Somente Tutoriais</option>
-              </select>
-            </div>
-            <div class="col-md-8">
-              <label class="form-label">Formatos Disponíveis</label>
-              <div class="d-flex gap-2">
-                <button type="submit" formaction="{{ url_for('main.export_excel') }}" class="btn btn-success">
-                  <i class="bi bi-file-earmark-excel"></i> Exportar Excel
-                </button>
-                <button type="submit" formaction="{{ url_for('main.export_pdf') }}" class="btn btn-danger">
-                  <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
-                </button>
-              </div>
-            </div>
-          </form>
+        <div class="col-md-4">
+          <label for="export_type" class="form-label small fw-bold">Tipo de Relatório</label>
+          <select id="export_type" name="export_type" class="form-select form-select-sm">
+            <option value="all" {% if request.args.get('export_type', 'all') == 'all' %}selected{% endif %}>Todos os Dados</option>
+            <option value="tasks" {% if request.args.get('export_type') == 'tasks' %}selected{% endif %}>Apenas Tarefas</option>
+            <option value="reminders" {% if request.args.get('export_type') == 'reminders' %}selected{% endif %}>Apenas Lembretes</option>
+            <option value="chamados" {% if request.args.get('export_type') == 'chamados' %}selected{% endif %}>Apenas Chamados</option>
+            <option value="equipamentos">Apenas Equipamentos</option>
+            <option value="tutoriais" {% if request.args.get('export_type') == 'tutoriais' %}selected{% endif %}>Apenas Tutoriais</option>
+          </select>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Filtros Rápidos -->
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="card shadow-sm">
-        <div class="card-body py-3">
-          <div class="d-flex flex-wrap align-items-center justify-content-between">
-            <div class="d-flex flex-wrap gap-2 mb-2 mb-lg-0">
-              <span class="text-muted me-2">Filtros Rápidos:</span>
-              <a href="{{ url_for('main.dashboard', task_status='expired') }}" class="btn btn-outline-danger btn-sm">
-                <i class="fas fa-exclamation-circle me-1"></i>Tarefas Vencidas
-              </a>
-              <a href="{{ url_for('main.dashboard', reminder_status='pending') }}" class="btn btn-outline-warning btn-sm">
-                <i class="fas fa-bell me-1"></i>Lembretes Pendentes
-              </a>
-              <a href="{{ url_for('main.dashboard', chamado_status='Aberto') }}" class="btn btn-outline-info btn-sm">
-                <i class="fas fa-ticket-alt me-1"></i>Chamados Abertos
-              </a>
-            </div>
-            <div class="d-flex gap-2">
-              <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters" aria-expanded="false">
-                <i class="fas fa-filter me-1"></i>Filtros Avançados
-              </button>
-              <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-refresh me-1"></i>Limpar
-              </a>
-            </div>
+        <div class="col-md-8">
+          <label class="form-label small fw-bold">Formato de Exportação</label>
+          <div class="d-flex gap-2 flex-wrap">
+            <button type="submit" formaction="{{ url_for('main.export_excel') }}" class="btn btn-success btn-sm">
+              <i class="fas fa-file-excel me-1"></i> Exportar Excel
+            </button>
+            <button type="submit" formaction="{{ url_for('main.export_pdf') }}" class="btn btn-danger btn-sm">
+              <i class="fas fa-file-pdf me-1"></i> Exportar PDF
+            </button>
           </div>
         </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Header e Filtros -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+        <div>
+          <h1 class="h3 mb-1">Dashboard</h1>
+          <p class="text-muted mb-0">Visão geral do sistema</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <!-- Filtros Rápidos -->
+          <div class="d-flex flex-wrap gap-1">
+            <a href="{{ url_for('main.dashboard', task_status='expired') }}" class="btn btn-outline-danger btn-sm">
+              <i class="fas fa-exclamation-circle me-1"></i>Tarefas Vencidas
+            </a>
+            <a href="{{ url_for('main.dashboard', reminder_status='pending') }}" class="btn btn-outline-warning btn-sm">
+              <i class="fas fa-bell me-1"></i>Lembretes Pendentes
+            </a>
+            <a href="{{ url_for('main.dashboard', chamado_status='Aberto') }}" class="btn btn-outline-info btn-sm">
+              <i class="fas fa-ticket-alt me-1"></i>Chamados Abertos
+            </a>
+          </div>
+          
+          <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
+            <i class="fas fa-filter me-1"></i>Filtros Avançados
+          </button>
+          <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-refresh me-1"></i>Limpar
+          </a>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Filtros Avançados (Colapsável) -->
+  <!-- Filtros Avançados -->
   <div class="collapse mb-4" id="advancedFilters">
-    <div class="card shadow-sm">
-      <div class="card-header bg-light">
-        <h6 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Filtros Avançados</h6>
-      </div>
+    <div class="card">
       <div class="card-body">
+        <h6 class="card-title mb-3">Filtros Avançados</h6>
         <form class="row g-3" method="get" action="">
           <div class="col-lg-2 col-md-4 col-sm-6">
-            <label for="task_status" class="form-label">Status das Tarefas</label>
+            <label for="task_status" class="form-label small fw-bold">Status Tarefas</label>
             <select id="task_status" name="task_status" class="form-select form-select-sm">
               <option value="">Todas tarefas</option>
               <option value="done" {% if request.args.get('task_status') == 'done' %}selected{% endif %}>Concluídas</option>
@@ -127,7 +108,7 @@
             </select>
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
-            <label for="reminder_status" class="form-label">Status dos Lembretes</label>
+            <label for="reminder_status" class="form-label small fw-bold">Status Lembretes</label>
             <select id="reminder_status" name="reminder_status" class="form-select form-select-sm">
               <option value="">Todos lembretes</option>
               <option value="done" {% if request.args.get('reminder_status') == 'done' %}selected{% endif %}>Realizados</option>
@@ -135,7 +116,7 @@
             </select>
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
-            <label for="chamado_status" class="form-label">Status dos Chamados</label>
+            <label for="chamado_status" class="form-label small fw-bold">Status Chamados</label>
             <select id="chamado_status" name="chamado_status" class="form-select form-select-sm">
               <option value="">Todos status</option>
               <option value="Aberto" {% if request.args.get('chamado_status') == 'Aberto' %}selected{% endif %}>Aberto</option>
@@ -145,15 +126,15 @@
             </select>
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
-            <label for="start_date" class="form-label">Data Inicial</label>
+            <label for="start_date" class="form-label small fw-bold">Data Inicial</label>
             <input type="date" id="start_date" name="start_date" class="form-control form-control-sm" value="{{ request.args.get('start_date', '') }}">
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
-            <label for="end_date" class="form-label">Data Final</label>
+            <label for="end_date" class="form-label small fw-bold">Data Final</label>
             <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" value="{{ request.args.get('end_date', '') }}">
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
-            <label for="sector_id" class="form-label">Setor</label>
+            <label for="sector_id" class="form-label small fw-bold">Setor</label>
             <select id="sector_id" name="sector_id" class="form-select form-select-sm">
               <option value="">Todos setores</option>
               {% for sector in sectors %}
@@ -163,7 +144,7 @@
           </div>
           {% if session.is_admin %}
           <div class="col-lg-2 col-md-4 col-sm-6">
-            <label for="user_id" class="form-label">Usuário</label>
+            <label for="user_id" class="form-label small fw-bold">Usuário</label>
             <select id="user_id" name="user_id" class="form-select form-select-sm">
               <option value="">Todos usuários</option>
               {% for user in users %}
@@ -172,7 +153,7 @@
             </select>
           </div>
           {% endif %}
-          <div class="col-12 mt-3">
+          <div class="col-12 mt-2">
             <div class="d-flex gap-2">
               <button type="submit" class="btn btn-primary btn-sm">
                 <i class="fas fa-search me-1"></i> Aplicar Filtros
@@ -187,498 +168,203 @@
     </div>
   </div>
 
-  <!-- Cards de resumo modernos -->
-  <div class="row mb-5">
-    <!-- Card de Tarefas -->
-    <div class="col-xl-4 col-lg-4 col-md-6 mb-4">
-      <div class="modern-dashboard-card h-100">
-        <div class="card-header-modern bg-gradient-primary">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h5 class="text-white mb-1 fw-bold">Tarefas</h5>
-              <p class="text-white-50 mb-0 small">Gerenciamento de atividades</p>
-            </div>
-            <div class="icon-container-modern">
-              <i class="fas fa-tasks fa-2x text-white"></i>
-            </div>
-          </div>
-        </div>
-        <div class="card-body p-4">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="chart-container-modern">
-                <canvas id="grafico_tarefas" height="180"></canvas>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="stats-modern">
-                <div class="stat-item-modern">
-                  <span class="stat-label">Total</span>
-                  <span class="stat-value text-primary">{{ tasks_total }}</span>
-                </div>
-                <div class="stat-item-modern">
-                  <span class="stat-label">Concluídas</span>
-                  <span class="stat-value text-success">{{ tasks_done }}</span>
-                </div>
-                <div class="stat-item-modern">
-                  <span class="stat-label">Pendentes</span>
-                  <span class="stat-value text-danger">{{ tasks_pending }}</span>
-                </div>
-                <div class="stat-item-modern">
-                  <span class="stat-label">Vencidas</span>
-                  <span class="stat-value text-warning">{{ tasks_expired }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Card de Lembretes -->
-    <div class="col-xl-4 col-lg-4 col-md-6 mb-4">
-      <div class="modern-dashboard-card h-100">
-        <div class="card-header-modern bg-gradient-warning">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h5 class="text-white mb-1 fw-bold">Lembretes</h5>
-              <p class="text-white-50 mb-0 small">Notificações e alertas</p>
-            </div>
-            <div class="icon-container-modern">
-              <i class="fas fa-bell fa-2x text-white"></i>
-            </div>
-          </div>
-        </div>
-        <div class="card-body p-4">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="chart-container-modern">
-                <canvas id="grafico_lembretes" height="180"></canvas>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="stats-modern">
-                <div class="stat-item-modern">
-                  <span class="stat-label">Total</span>
-                  <span class="stat-value text-primary">{{ reminders_total }}</span>
-                </div>
-                <div class="stat-item-modern">
-                  <span class="stat-label">Realizados</span>
-                  <span class="stat-value text-success">{{ reminders_done }}</span>
-                </div>
-                <div class="stat-item-modern">
-                  <span class="stat-label">Pendentes</span>
-                  <span class="stat-value text-warning">{{ reminders_pending }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card de Chamados -->
-    <div class="col-xl-4 col-lg-4 col-md-6 mb-4">
-      <div class="modern-dashboard-card h-100">
-        <div class="card-header-modern bg-gradient-info">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h5 class="text-white mb-1 fw-bold">Chamados</h5>
-              <p class="text-white-50 mb-0 small">Suporte e atendimento</p>
-            </div>
-            <div class="icon-container-modern">
-              <i class="fas fa-ticket-alt fa-2x text-white"></i>
-            </div>
-          </div>
-        </div>
-        <div class="card-body p-4">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="chart-container-modern">
-                <canvas id="grafico_chamados" height="180"></canvas>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="stats-modern">
-                <div class="stat-item-modern">
-                  <span class="stat-label">Total</span>
-                  <span class="stat-value text-primary">{{ chamados_total }}</span>
-                </div>
-                <div class="stat-item-modern">
-                  <span class="stat-label">Abertos</span>
-                  <span class="stat-value text-info">{{ chamados_aberto }}</span>
-                </div>
-                <div class="stat-item-modern">
-                  <span class="stat-label">Andamento</span>
-                  <span class="stat-value text-warning">{{ chamados_em_andamento }}</span>
-                </div>
-                <div class="stat-item-modern">
-                  <span class="stat-label">Resolvidos</span>
-                  <span class="stat-value text-primary">{{ chamados_resolvido }}</span>
-                </div>
-                <div class="stat-item-modern">
-                  <span class="stat-label">Fechados</span>
-                  <span class="stat-value text-success">{{ chamados_fechado }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Seção específica de SLA (apenas para administradores) -->
-  {% if session.get('is_admin') %}
-  <div class="row mb-4" id="sla-section">
-    <div class="col-12">
-      <div class="card shadow-sm">
-        <div class="card-header bg-light">
-          <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">
-              <i class="fas fa-clock me-2"></i>Relatório de SLA
-            </h5>
-            <div class="d-flex gap-2">
-              <form method="get" action="{{ url_for('main.export_excel') }}" class="d-inline">
-                <input type="hidden" name="export_type" value="chamados">
-                <!-- Remover filtro automático que estava bloqueando a exportação -->
-                <button type="submit" class="btn btn-success btn-sm">
-                  <i class="fas fa-file-excel me-1"></i>Exportar SLA
-                </button>
-              </form>
-              <button class="btn btn-outline-secondary btn-sm" type="button" onclick="toggleSLAFilters()">
-                <i class="fas fa-filter me-1"></i>Filtros SLA
-              </button>
-            </div>
-          </div>
-        </div>
+  <!-- Cards Principais de Serviços -->
+  <div class="row g-3 mb-4">
+    <!-- Tarefas -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+      <div class="card card-service h-100">
         <div class="card-body">
-          <div class="row">
-            <!-- Card de SLA Vencidos -->
-            <div class="col-lg-3 col-md-6 mb-3">
-              <div class="card border-danger">
-                <div class="card-body text-center">
-                  <i class="fas fa-exclamation-circle text-danger fa-2x mb-2"></i>
-                  <h3 class="text-danger">{{ sla_vencidos or 0 }}</h3>
-                  <p class="card-text text-muted">SLA Vencidos</p>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Card de SLA Críticos -->
-            <div class="col-lg-3 col-md-6 mb-3">
-              <div class="card border-warning">
-                <div class="card-body text-center">
-                  <i class="fas fa-clock text-warning fa-2x mb-2"></i>
-                  <h3 class="text-warning">{{ sla_criticos or 0 }}</h3>
-                  <p class="card-text text-muted">SLA Críticos</p>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Card de SLA OK -->
-            <div class="col-lg-3 col-md-6 mb-3">
-              <div class="card border-success">
-                <div class="card-body text-center">
-                  <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
-                  <h3 class="text-success">{{ sla_ok or 0 }}</h3>
-                  <p class="card-text text-muted">SLA OK</p>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Card de Performance de SLA -->
-            <div class="col-lg-3 col-md-6 mb-3">
-              <div class="card border-primary">
-                <div class="card-body text-center">
-                  <i class="fas fa-chart-line text-primary fa-2x mb-2"></i>
-                  <h3 class="text-primary">{{ performance_sla or 0 }}%</h3>
-                  <p class="card-text text-muted">Performance SLA</p>
-                  <small class="text-muted">Últimos 30 dias</small>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Filtros SLA (Colapsável) -->
-          <div class="collapse mt-3" id="slaFilters">
-            <div class="row">
-              <div class="col-12">
-                <div class="card border-0 bg-light">
-                  <div class="card-body py-2">
-                    <div class="row g-2">
-                      <div class="col-md-3">
-                        <select class="form-select form-select-sm" id="slaStatusFilter">
-                          <option value="">Todos os Status SLA</option>
-                          <option value="vencido">Vencidos</option>
-                          <option value="atencao">Críticos</option>
-                          <option value="normal">OK</option>
-                        </select>
-                      </div>
-                      <div class="col-md-3">
-                        <select class="form-select form-select-sm" id="slaPriorityFilter">
-                          <option value="">Todas as Prioridades</option>
-                          <option value="Critica">Crítica</option>
-                          <option value="Alta">Alta</option>
-                          <option value="Media">Média</option>
-                          <option value="Baixa">Baixa</option>
-                        </select>
-                      </div>
-                      <div class="col-md-4">
-                        <input type="text" class="form-control form-control-sm" id="slaSearchFilter" placeholder="Buscar por título...">
-                      </div>
-                      <div class="col-md-2">
-                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="clearSLAFilters()">
-                          <i class="fas fa-times me-1"></i>Limpar
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tabela de Chamados por Status de SLA -->
-          <div class="row mt-4">
-            <div class="col-12">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0">Chamados por Status de SLA</h6>
-                <div class="d-flex align-items-center gap-2">
-                  <span class="text-muted small">Mostrando <span id="slaTableCount">{{ chamados_sla|length }}</span> chamados</span>
-                  <select class="form-select form-select-sm" id="slaPageSize" style="width: auto;">
-                    <option value="10">10 por página</option>
-                    <option value="25">25 por página</option>
-                    <option value="50">50 por página</option>
-                  </select>
-                </div>
-              </div>
-              <div class="table-responsive">
-                <table class="table table-sm table-striped" id="slaTable">
-                  <thead>
-                    <tr>
-                      <th style="cursor: pointer;" onclick="sortSLATable('id')">
-                        ID <i class="fas fa-sort text-muted"></i>
-                      </th>
-                      <th style="cursor: pointer;" onclick="sortSLATable('titulo')">
-                        Título <i class="fas fa-sort text-muted"></i>
-                      </th>
-                      <th style="cursor: pointer;" onclick="sortSLATable('prioridade')">
-                        Prioridade <i class="fas fa-sort text-muted"></i>
-                      </th>
-                      <th style="cursor: pointer;" onclick="sortSLATable('status')">
-                        Status <i class="fas fa-sort text-muted"></i>
-                      </th>
-                      <th style="cursor: pointer;" onclick="sortSLATable('prazo_sla')">
-                        Prazo SLA <i class="fas fa-sort text-muted"></i>
-                      </th>
-                      <th style="cursor: pointer;" onclick="sortSLATable('status_sla')">
-                        Status SLA <i class="fas fa-sort text-muted"></i>
-                      </th>
-                      <th>Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody id="slaTableBody">
-                    {% for chamado in chamados_sla %}
-                    <tr data-sla-status="{{ chamado.status_sla }}" data-priority="{{ chamado.prioridade }}" data-title="{{ chamado.titulo|lower }}">
-                      <td>{{ chamado.id }}</td>
-                      <td>
-                        <div class="text-truncate" style="max-width: 200px;" title="{{ chamado.titulo }}">
-                          {{ chamado.titulo[:30] }}{% if chamado.titulo|length > 30 %}...{% endif %}
-                        </div>
-                      </td>
-                      <td>
-                        <span class="badge bg-{{ 'dark' if chamado.prioridade == 'Critica' else ('danger' if chamado.prioridade == 'Alta' else ('warning' if chamado.prioridade == 'Media' else 'info')) }}">
-                          {{ chamado.prioridade }}
-                        </span>
-                      </td>
-                      <td>
-                        <span class="badge bg-{{ 'secondary' if chamado.status == 'Fechado' else ('success' if chamado.status == 'Resolvido' else ('warning' if chamado.status == 'Em Andamento' else 'primary')) }}">
-                          {{ chamado.status }}
-                        </span>
-                      </td>
-                      <td>
-                        {% if chamado.prazo_sla %}
-                          {{ chamado.prazo_sla | local_datetime }}
-                        {% else %}
-                          <span class="text-muted">N/A</span>
-                        {% endif %}
-                      </td>
-                      <td>
-                        {% if chamado.prazo_sla %}
-                          {% set status_sla = chamado.status_sla %}
-                          {% if status_sla == 'vencido' %}
-                            <span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>Vencido</span>
-                          {% elif status_sla == 'atencao' %}
-                            <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Crítico</span>
-                          {% elif status_sla == 'normal' %}
-                            <span class="badge bg-success"><i class="fas fa-check me-1"></i>OK</span>
-                          {% endif %}
-                        {% else %}
-                          <span class="text-muted">N/A</span>
-                        {% endif %}
-                      </td>
-                      <td>
-                        <a href="{{ url_for('main.detalhe_chamado', id=chamado.id) }}" class="btn btn-outline-primary btn-sm" title="Ver Detalhes">
-                          <i class="fas fa-eye"></i>
-                        </a>
-                      </td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-              
-              <!-- Paginação SLA -->
-              <div class="d-flex justify-content-between align-items-center mt-3">
-                <div class="text-muted small">
-                  Página <span id="slaCurrentPage">1</span> de <span id="slaTotalPages">1</span>
-                </div>
-                <nav>
-                  <ul class="pagination pagination-sm mb-0" id="slaPagination">
-                    <!-- Paginação será gerada via JavaScript -->
-                  </ul>
-                </nav>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- Cards secundários modernos -->
-  <div class="row mb-5">
-    <!-- Card de Equipamentos -->
-    <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
-      <div class="modern-dashboard-card h-100">
-        <div class="card-header-modern bg-gradient-purple">
-          <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-              <h5 class="text-white mb-1 fw-bold">Equipamentos</h5>
-              <p class="text-white-50 mb-0 small">Controle de ativos</p>
+              <h6 class="card-title mb-1">Tarefas</h6>
+              <p class="text-muted small mb-0">Gerenciamento de atividades</p>
             </div>
-            <div class="icon-container-modern">
-              <i class="fas fa-laptop fa-2x text-white"></i>
+            <div class="bg-primary bg-opacity-10 p-2 rounded">
+              <i class="fas fa-tasks text-primary"></i>
             </div>
           </div>
-        </div>
-        <div class="card-body p-4">
-          <div class="text-center mb-3">
-            <h2 class="display-6 fw-bold text-primary mb-0">{{ equipamentos_total }}</h2>
-            <small class="text-muted">Total de equipamentos</small>
-          </div>
-          <div class="stats-modern">
-            <div class="stat-item-modern">
-              <span class="stat-label">Solicitados</span>
-              <span class="stat-value text-warning">{{ equipamentos_solicitados }}</span>
+          <h3 class="text-primary mb-3">{{ tasks_total }}</h3>
+          <div class="service-stats">
+            <div class="d-flex justify-content-between small mb-1">
+              <span>Concluídas</span>
+              <span class="text-success fw-bold">{{ tasks_done }}</span>
             </div>
-            <div class="stat-item-modern">
-              <span class="stat-label">Aprovados</span>
-              <span class="stat-value text-info">{{ equipamentos_aprovados }}</span>
+            <div class="d-flex justify-content-between small mb-1">
+              <span>Pendentes</span>
+              <span class="text-warning fw-bold">{{ tasks_pending }}</span>
             </div>
-            <div class="stat-item-modern">
-              <span class="stat-label">Entregues</span>
-              <span class="stat-value text-success">{{ equipamentos_entregues }}</span>
-            </div>
-            <div class="stat-item-modern">
-              <span class="stat-label">Negados</span>
-              <span class="stat-value text-danger">{{ equipamentos_negados }}</span>
+            <div class="d-flex justify-content-between small">
+              <span>Vencidas</span>
+              <span class="text-danger fw-bold">{{ tasks_expired }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Card Tutoriais -->
-    <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
-      <div class="modern-dashboard-card h-100">
-        <div class="card-header-modern bg-gradient-success">
-          <div class="d-flex justify-content-between align-items-center">
+    <!-- Lembretes -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+      <div class="card card-service h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-              <h5 class="text-white mb-1 fw-bold">Tutoriais</h5>
-              <p class="text-white-50 mb-0 small">Base de conhecimento</p>
+              <h6 class="card-title mb-1">Lembretes</h6>
+              <p class="text-muted small mb-0">Notificações e alertas</p>
             </div>
-            <div class="icon-container-modern">
-              <i class="fas fa-book fa-2x text-white"></i>
+            <div class="bg-warning bg-opacity-10 p-2 rounded">
+              <i class="fas fa-bell text-warning"></i>
             </div>
           </div>
-        </div>
-        <div class="card-body p-4">
-          <div class="text-center mb-3">
-            <h2 class="display-6 fw-bold text-success mb-0">{{ total_tutoriais }}</h2>
-            <small class="text-muted">Total de tutoriais</small>
-          </div>
-          <div class="stats-modern">
-            <div class="stat-item-modern">
-              <span class="stat-label">Úteis</span>
-              <span class="stat-value text-success">{{ feedbacks_util }}</span>
+          <h3 class="text-warning mb-3">{{ reminders_total }}</h3>
+          <div class="service-stats">
+            <div class="d-flex justify-content-between small mb-1">
+              <span>Realizados</span>
+              <span class="text-success fw-bold">{{ reminders_done }}</span>
             </div>
-            <div class="stat-item-modern">
-              <span class="stat-label">Não úteis</span>
-              <span class="stat-value text-danger">{{ feedbacks_nao_util }}</span>
-            </div>
-            <div class="stat-item-modern">
-              <span class="stat-label">Total Feedbacks</span>
-              <span class="stat-value text-primary">{{ feedbacks_util + feedbacks_nao_util }}</span>
+            <div class="d-flex justify-content-between small">
+              <span>Pendentes</span>
+              <span class="text-warning fw-bold">{{ reminders_pending }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Card de Performance Geral -->
-    <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
-      <div class="modern-dashboard-card h-100">
-        <div class="card-header-modern bg-gradient-dark">
-          <div class="d-flex justify-content-between align-items-center">
+    <!-- Chamados -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+      <div class="card card-service h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-              <h5 class="text-white mb-1 fw-bold">Performance</h5>
-              <p class="text-white-50 mb-0 small">Indicadores gerais</p>
+              <h6 class="card-title mb-1">Chamados</h6>
+              <p class="text-muted small mb-0">Suporte e atendimento</p>
             </div>
-            <div class="icon-container-modern">
-              <i class="fas fa-chart-line fa-2x text-white"></i>
+            <div class="bg-info bg-opacity-10 p-2 rounded">
+              <i class="fas fa-ticket-alt text-info"></i>
             </div>
           </div>
-        </div>
-        <div class="card-body p-4">
-          <div class="text-center mb-3">
-            <h2 class="display-6 fw-bold text-dark mb-0">{{ ((tasks_done + reminders_done + chamados_fechado) / (tasks_total + reminders_total + chamados_total) * 100) | round(1) if (tasks_total + reminders_total + chamados_total) > 0 else 0 }}%</h2>
-            <small class="text-muted">Taxa de conclusão</small>
-          </div>
-          <div class="stats-modern">
-            <div class="stat-item-modern">
-              <span class="stat-label">Atividades</span>
-              <span class="stat-value text-primary">{{ tasks_total + reminders_total + chamados_total }}</span>
+          <h3 class="text-info mb-3">{{ chamados_total }}</h3>
+          <div class="service-stats">
+            <div class="d-flex justify-content-between small mb-1">
+              <span>Abertos</span>
+              <span class="text-info fw-bold">{{ chamados_aberto }}</span>
             </div>
-            <div class="stat-item-modern">
-              <span class="stat-label">Concluídas</span>
-              <span class="stat-value text-success">{{ tasks_done + reminders_done + chamados_fechado }}</span>
+            <div class="d-flex justify-content-between small mb-1">
+              <span>Andamento</span>
+              <span class="text-warning fw-bold">{{ chamados_em_andamento }}</span>
             </div>
-            <div class="stat-item-modern">
-              <span class="stat-label">Pendentes</span>
-              <span class="stat-value text-warning">{{ tasks_pending + reminders_pending + (chamados_total - chamados_fechado) }}</span>
+            <div class="d-flex justify-content-between small">
+              <span>Fechados</span>
+              <span class="text-success fw-bold">{{ chamados_fechado }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Card de Ações Rápidas -->
-    <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
-      <div class="modern-dashboard-card h-100">
-        <div class="card-header-modern bg-gradient-secondary">
-          <div class="d-flex justify-content-between align-items-center">
+    <!-- Equipamentos -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+      <div class="card card-service h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-              <h5 class="text-white mb-1 fw-bold">Ações Rápidas</h5>
-              <p class="text-white-50 mb-0 small">Acesso direto</p>
+              <h6 class="card-title mb-1">Equipamentos</h6>
+              <p class="text-muted small mb-0">Controle de ativos</p>
             </div>
-            <div class="icon-container-modern">
-              <i class="fas fa-bolt fa-2x text-white"></i>
+            <div class="bg-purple bg-opacity-10 p-2 rounded">
+              <i class="fas fa-laptop text-purple"></i>
+            </div>
+          </div>
+          <h3 class="text-purple mb-3">{{ equipamentos_total }}</h3>
+          <div class="service-stats">
+            <div class="d-flex justify-content-between small mb-1">
+              <span>Solicitados</span>
+              <span class="text-warning fw-bold">{{ equipamentos_solicitados }}</span>
+            </div>
+            <div class="d-flex justify-content-between small mb-1">
+              <span>Entregues</span>
+              <span class="text-success fw-bold">{{ equipamentos_entregues }}</span>
+            </div>
+            <div class="d-flex justify-content-between small">
+              <span>Negados</span>
+              <span class="text-danger fw-bold">{{ equipamentos_negados }}</span>
             </div>
           </div>
         </div>
-        <div class="card-body p-4">
+      </div>
+    </div>
+
+    <!-- Tutoriais -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+      <div class="card card-service h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h6 class="card-title mb-1">Tutoriais</h6>
+              <p class="text-muted small mb-0">Base de conhecimento</p>
+            </div>
+            <div class="bg-success bg-opacity-10 p-2 rounded">
+              <i class="fas fa-book text-success"></i>
+            </div>
+          </div>
+          <h3 class="text-success mb-3">{{ total_tutoriais }}</h3>
+          <div class="service-stats">
+            <div class="d-flex justify-content-between small mb-1">
+              <span>Feedbacks Úteis</span>
+              <span class="text-success fw-bold">{{ feedbacks_util }}</span>
+            </div>
+            <div class="d-flex justify-content-between small">
+              <span>Feedbacks Negativos</span>
+              <span class="text-danger fw-bold">{{ feedbacks_nao_util }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance Geral -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+      <div class="card card-service h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h6 class="card-title mb-1">Performance</h6>
+              <p class="text-muted small mb-0">Indicadores gerais</p>
+            </div>
+            <div class="bg-dark bg-opacity-10 p-2 rounded">
+              <i class="fas fa-chart-line text-dark"></i>
+            </div>
+          </div>
+          <h3 class="text-dark mb-3">
+            {{ ((tasks_done + reminders_done + chamados_fechado) / (tasks_total + reminders_total + chamados_total) * 100) | round(1) if (tasks_total + reminders_total + chamados_total) > 0 else 0 }}%
+          </h3>
+          <div class="service-stats">
+            <div class="d-flex justify-content-between small mb-1">
+              <span>Total Atividades</span>
+              <span class="text-primary fw-bold">{{ tasks_total + reminders_total + chamados_total }}</span>
+            </div>
+            <div class="d-flex justify-content-between small">
+              <span>Concluídas</span>
+              <span class="text-success fw-bold">{{ tasks_done + reminders_done + chamados_fechado }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+      <div class="card card-service h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h6 class="card-title mb-1">Ações Rápidas</h6>
+              <p class="text-muted small mb-0">Acesso direto</p>
+            </div>
+            <div class="bg-secondary bg-opacity-10 p-2 rounded">
+              <i class="fas fa-bolt text-secondary"></i>
+            </div>
+          </div>
           <div class="d-grid gap-2">
             <a href="{{ url_for('main.tasks') }}" class="btn btn-outline-primary btn-sm">
               <i class="fas fa-plus me-2"></i>Nova Tarefa
@@ -698,750 +384,251 @@
     </div>
   </div>
 
-  <!-- Gráficos Detalhados -->
-  <div class="row mb-4">
-    <!-- Gráfico de Linha -->
-    <div class="col-lg-6 mb-3">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-light">
-          <h5 class="mb-0">Evolução Mensal</h5>
-        </div>
+  <!-- Gráficos -->
+  <div class="row g-3 mb-4">
+    <div class="col-lg-6">
+      <div class="card">
         <div class="card-body">
-          <div style="width: 100%; height: 300px;">
-            <canvas id="grafico_linha"></canvas>
+          <h6 class="card-title mb-3">Evolução Mensal</h6>
+          <div style="height: 300px;">
+            <canvas id="chartEvolution"></canvas>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Gráfico de Barra -->
-    <div class="col-lg-6 mb-3">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-light">
-          <h5 class="mb-0">Distribuição por Setor</h5>
-        </div>
+    <div class="col-lg-6">
+      <div class="card">
         <div class="card-body">
-          <div style="width: 100%; height: 300px;">
-            <canvas id="grafico_barra"></canvas>
+          <h6 class="card-title mb-3">Distribuição por Setor</h6>
+          <div style="height: 300px;">
+            <canvas id="chartSector"></canvas>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Gráficos de Pizza -->
-  <div class="row mb-4">
-    <!-- Gráfico de Pizza - Status dos Equipamentos -->
-        <div class="col-md-6 mb-4">
-          <div class="card shadow-sm h-100">
-            <div class="card-header bg-light">
-              <h5 class="card-title mb-0">
-                <i class="fas fa-laptop me-2"></i>Status dos Equipamentos
-              </h5>
+  <!-- Seção SLA (Admin) -->
+  {% if session.get('is_admin') %}
+  <div class="row mb-4" id="sla-section">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-light">
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+              <i class="fas fa-clock me-2"></i>Relatório de SLA
+            </h6>
+            <form method="get" action="{{ url_for('main.export_excel') }}" class="d-inline">
+              <input type="hidden" name="export_type" value="chamados">
+              <button type="submit" class="btn btn-success btn-sm">
+                <i class="fas fa-file-excel me-1"></i>Exportar SLA
+              </button>
+            </form>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row g-3 mb-4">
+            <div class="col-md-3">
+              <div class="text-center p-3 border border-danger rounded">
+                <div class="text-danger h4 mb-1">{{ sla_vencidos or 0 }}</div>
+                <small class="text-muted">SLA Vencidos</small>
+              </div>
             </div>
-            <div class="card-body">
-              <div class="row">
-                <div class="col-md-6">
-                  <div style="width: 100%; height: 180px;">
-                    <canvas id="equipmentStatusChart"></canvas>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="list-group">
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                      Total
-                      <span class="badge bg-primary rounded-pill">{{ equipamentos_total }}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                      Solicitados
-                      <span class="badge bg-warning text-dark rounded-pill">{{ equipamentos_solicitados }}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                      Aprovados
-                      <span class="badge bg-info rounded-pill">{{ equipamentos_aprovados }}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                      Entregues
-                      <span class="badge bg-success rounded-pill">{{ equipamentos_entregues }}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                      Devolvidos
-                      <span class="badge bg-secondary rounded-pill">{{ equipamentos_devolvidos }}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                      Negados
-                      <span class="badge bg-danger rounded-pill">{{ equipamentos_negados }}</span>
-                    </div>
-                  </div>
-                </div>
+            <div class="col-md-3">
+              <div class="text-center p-3 border border-warning rounded">
+                <div class="text-warning h4 mb-1">{{ sla_criticos or 0 }}</div>
+                <small class="text-muted">SLA Críticos</small>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="text-center p-3 border border-success rounded">
+                <div class="text-success h4 mb-1">{{ sla_ok or 0 }}</div>
+                <small class="text-muted">SLA OK</small>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="text-center p-3 border border-primary rounded">
+                <div class="text-primary h4 mb-1">{{ performance_sla or 0 }}%</div>
+                <small class="text-muted">Performance SLA</small>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Gráfico de Pizza - Feedbacks dos Tutoriais -->
-        <div class="col-md-6 mb-4">
-          <div class="card shadow-sm h-100">
-            <div class="card-header bg-light">
-              <h5 class="card-title mb-0">
-                <i class="fas fa-thumbs-up me-2"></i>Feedbacks dos Tutoriais
-              </h5>
-            </div>
-            <div class="card-body">
-              <div class="row">
-                <div class="col-md-6">
-                  <div style="width: 100%; height: 180px;">
-                    <canvas id="feedbackChart"></canvas>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="list-group">
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                      Total
-                      <span class="badge bg-primary rounded-pill">{{ feedbacks_util + feedbacks_nao_util }}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                      Útil
-                      <span class="badge bg-success rounded-pill">{{ feedbacks_util }}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                      Não útil
-                      <span class="badge bg-danger rounded-pill">{{ feedbacks_nao_util }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <!-- Tabela SLA Simplificada -->
+          <div class="mt-4">
+            <h6 class="mb-3">Chamados por Status de SLA</h6>
+            <div class="table-responsive">
+              <table class="table table-sm table-striped">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Prioridade</th>
+                    <th>Status</th>
+                    <th>Prazo SLA</th>
+                    <th>Status SLA</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for chamado in chamados_sla %}
+                  <tr>
+                    <td>{{ chamado.id }}</td>
+                    <td>
+                      <div class="text-truncate" style="max-width: 200px;" title="{{ chamado.titulo }}">
+                        {{ chamado.titulo }}
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge bg-{{ 'dark' if chamado.prioridade == 'Critica' else ('danger' if chamado.prioridade == 'Alta' else ('warning' if chamado.prioridade == 'Media' else 'info')) }}">
+                        {{ chamado.prioridade }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge bg-{{ 'secondary' if chamado.status == 'Fechado' else ('success' if chamado.status == 'Resolvido' else ('warning' if chamado.status == 'Em Andamento' else 'primary')) }}">
+                        {{ chamado.status }}
+                      </span>
+                    </td>
+                    <td>
+                      {% if chamado.prazo_sla %}
+                        {{ chamado.prazo_sla | local_datetime }}
+                      {% else %}
+                        <span class="text-muted">N/A</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if chamado.prazo_sla %}
+                        {% set status_sla = chamado.status_sla %}
+                        {% if status_sla == 'vencido' %}
+                          <span class="badge bg-danger">Vencido</span>
+                        {% elif status_sla == 'atencao' %}
+                          <span class="badge bg-warning text-dark">Crítico</span>
+                        {% elif status_sla == 'normal' %}
+                          <span class="badge bg-success">OK</span>
+                        {% endif %}
+                      {% else %}
+                        <span class="text-muted">N/A</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
+      </div>
+    </div>
   </div>
+  {% endif %}
+
 </div>
 
-<!-- Scripts do Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  .text-purple {
-    color: #6f42c1 !important;
-  }
+.card-service {
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+}
+
+.card-service:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.bg-opacity-10 {
+  opacity: 0.1;
+}
+
+.text-purple {
+  color: #6f42c1 !important;
+}
+
+.bg-purple {
+  background-color: #6f42c1 !important;
+}
+
+.service-stats {
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+}
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  // Função para destruir gráficos existentes
-  function destroyChartIfExists(chartId) {
-    const canvas = document.getElementById(chartId);
-    if (canvas) {
-      const existingChart = Chart.getChart(canvas);
-      if (existingChart) {
-        existingChart.destroy();
-      }
-    }
-  }
-
-  // Configuração para os gráficos de pizza
-  const tarefasData = {
-    labels: ['Concluídas', 'Pendentes', 'Vencidas'],
-    datasets: [{
-      data: [{{ tasks_done }}, {{ tasks_pending }}, {{ tasks_expired }}],
-      backgroundColor: ['#198754', '#dc3545', '#ffc107'],
-      borderWidth: 1,
-    }]
-  };
-
-  const lembretesData = {
-    labels: ['Realizados', 'Pendentes'],
-    datasets: [{
-      data: [{{ reminders_done }}, {{ reminders_pending }}],
-      backgroundColor: ['#198754', '#dc3545'],
-      borderWidth: 1,
-    }]
-  };
-
-  // Destruir gráfico existente antes de criar um novo
-  destroyChartIfExists('grafico_tarefas');
-  new Chart(document.getElementById('grafico_tarefas'), {
-    type: 'pie',
-    data: tarefasData,
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            boxWidth: 12,
-            padding: 15
-          }
-        },
-        tooltip: {
-          callbacks: {
-            label: (context) => {
-              const label = context.label || '';
-              const value = context.raw || 0;
-              const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
-              const percentage = Math.round((value / total) * 100);
-              return `${label}: ${value} (${percentage}%)`;
-            }
-          }
-        }
-      }
-    }
-  });
-
-  // Destruir gráfico existente antes de criar um novo
-  destroyChartIfExists('grafico_lembretes');
-  new Chart(document.getElementById('grafico_lembretes'), {
-    type: 'pie',
-    data: lembretesData,
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            boxWidth: 12,
-            padding: 15
-          }
-        },
-        tooltip: {
-          callbacks: {
-            label: (context) => {
-              const label = context.label || '';
-              const value = context.raw || 0;
-              const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
-              const percentage = Math.round((value / total) * 100);
-              return `${label}: ${value} (${percentage}%)`;
-            }
-          }
-        }
-      }
-    }
-  });
-
-  // Gráfico de Pizza para Chamados
-  const chamadosData = {
-    labels: ['Abertos', 'Em Andamento', 'Resolvidos', 'Fechados'], // Adicionado Resolvidos
-    datasets: [{
-      data: [{{ chamados_aberto }}, {{ chamados_em_andamento }}, {{ chamados_resolvido }}, {{ chamados_fechado }}], // Adicionado chamados_resolvido
-      backgroundColor: ['#0dcaf0', '#ffc107', '#0d6efd', '#198754'], // Cores: Info, Warning, Primary (para Resolvido), Success
-      borderWidth: 1,
-    }]
-  };
-
-  // Destruir gráfico existente antes de criar um novo
-  destroyChartIfExists('grafico_chamados');
-  new Chart(document.getElementById('grafico_chamados'), {
-    type: 'pie',
-    data: chamadosData,
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            boxWidth: 12,
-            padding: 15
-          }
-        },
-        tooltip: {
-          callbacks: {
-            label: (context) => {
-              const label = context.label || '';
-              const value = context.raw || 0;
-              const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
-              const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-              return `${label}: ${value} (${percentage}%)`;
-            }
-          }
-        }
-      }
-    }
-  });
-
-  // Gráfico de Linha: Evolução mensal
-  const mesesLabels = {{ meses_labels|tojson }};
-  const tarefasPorMes = {{ tarefas_por_mes|tojson }};
-  const tarefasConcluidasPorMes = {{ tarefas_concluidas_por_mes|tojson }};
-  const lembretesPorMes = {{ lembretes_por_mes|tojson }};
-  const lembretesRealizadosPorMes = {{ lembretes_realizados_por_mes|tojson }};
-
-  // Destruir gráfico existente antes de criar um novo
-  destroyChartIfExists('grafico_linha');
-  new Chart(document.getElementById('grafico_linha'), {
-    type: 'line',
-    data: {
-      labels: mesesLabels,
-      datasets: [
-        {
-          label: 'Tarefas',
-          data: {{ tarefas_por_mes }},
-          borderColor: '#007bff',
-          backgroundColor: 'rgba(0, 123, 255, 0.1)',
-          tension: 0.1
-        }, {
-          label: 'Tarefas Concluídas',
-          data: {{ tarefas_concluidas_por_mes }},
-          borderColor: '#28a745',
-          backgroundColor: 'rgba(40, 167, 69, 0.1)',
-          tension: 0.1
-        }, {
-          label: 'Lembretes',
-          data: {{ lembretes_por_mes }},
-          borderColor: '#ffc107',
-          backgroundColor: 'rgba(255, 193, 7, 0.1)',
-          tension: 0.1
-        }, {
-          label: 'Lembretes Realizados',
-          data: {{ lembretes_realizados_por_mes }},
-          borderColor: '#17a2b8',
-          backgroundColor: 'rgba(23, 162, 184, 0.1)',
-          tension: 0.1
-        }, {
-          label: 'Equipamentos',
-          data: {{ equipamentos_por_mes }},
-          borderColor: '#6f42c1',
-          backgroundColor: 'rgba(111, 66, 193, 0.1)',
-          tension: 0.1
-        }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            boxWidth: 12,
-            padding: 15
-          }
-        },
-        tooltip: {
-          mode: 'index',
-          intersect: false
-        }
+// Gráfico de Evolução
+new Chart(document.getElementById('chartEvolution'), {
+  type: 'line',
+  data: {
+    labels: {{ meses_labels|tojson }},
+    datasets: [
+      {
+        label: 'Tarefas',
+        data: {{ tarefas_por_mes|tojson }},
+        borderColor: '#007bff',
+        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+        tension: 0.1,
+        fill: true
       },
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            drawBorder: false
-          }
-        },
-        x: {
-          grid: {
-            display: false
-          }
-        }
+      {
+        label: 'Lembretes',
+        data: {{ lembretes_por_mes|tojson }},
+        borderColor: '#ffc107',
+        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+        tension: 0.1,
+        fill: true
       },
-      interaction: {
-        mode: 'nearest',
-        axis: 'x',
-        intersect: false
+      {
+        label: 'Chamados',
+        data: {{ chamados_por_mes|tojson }},
+        borderColor: '#17a2b8',
+        backgroundColor: 'rgba(23, 162, 184, 0.1)',
+        tension: 0.1,
+        fill: true
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom'
       }
     }
-  });
+  }
+});
 
-  // Gráfico de Barra: Distribuição por setor
-  const setoresLabels = {{ setores_labels|tojson }};
-  const tarefasPorSetor = {{ tarefas_por_setor|tojson }};
-  const lembretesPorSetor = {{ lembretes_por_setor|tojson }};
-  const chamadosPorSetor = {{ chamados_por_setor|tojson }}; // Adicionado
-
-  // Destruir gráfico existente antes de criar um novo
-  destroyChartIfExists('grafico_barra');
-  new Chart(document.getElementById('grafico_barra'), {
-    type: 'bar',
-    data: {
-      labels: setoresLabels,
-      datasets: [
-        {
-          label: 'Tarefas',
-          data: tarefasPorSetor,
-          backgroundColor: 'rgba(13,110,253,0.7)',
-          borderColor: '#0d6efd',
-          borderWidth: 1,
-          borderRadius: 4
-        },
-        {
-          label: 'Lembretes',
-          data: lembretesPorSetor,
-          backgroundColor: 'rgba(255,193,7,0.7)',
-          borderColor: '#ffc107',
-          borderWidth: 1,
-          borderRadius: 4
-        },
-        { // Novo dataset para Chamados
-          label: 'Chamados',
-          data: chamadosPorSetor,
-          backgroundColor: 'rgba(25,135,84,0.7)', // Cor verde, por exemplo
-          borderColor: '#198754',
-          borderWidth: 1,
-          borderRadius: 4
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            boxWidth: 12,
-            padding: 15
-          }
-        }
+// Gráfico de Setores
+new Chart(document.getElementById('chartSector'), {
+  type: 'bar',
+  data: {
+    labels: {{ setores_labels|tojson }},
+    datasets: [
+      {
+        label: 'Tarefas',
+        data: {{ tarefas_por_setor|tojson }},
+        backgroundColor: '#007bff'
       },
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            drawBorder: false
-          }
-        },
-        x: {
-          grid: {
-            display: false
-          }
-        }
-      }
-    }
-  });
-
-  // Gráfico de feedbacks - definido mais abaixo como doughnut
-  // Gráfico de barras dos mais visualizados
-  const ctxTop = document.getElementById('grafico_top_tutoriais');
-  if (ctxTop) {
-    // Destruir gráfico existente antes de criar um novo
-    destroyChartIfExists('grafico_top_tutoriais');
-    new Chart(ctxTop, {
-      type: 'bar',
-      data: {
-        labels: {{ top_tutoriais_labels|tojson }},
-        datasets: [{
-          label: 'Visualizações',
-          data: {{ top_tutoriais_values|tojson }},
-          backgroundColor: '#0d6efd',
-          borderWidth: 1
-        }]
+      {
+        label: 'Lembretes',
+        data: {{ lembretes_por_setor|tojson }},
+        backgroundColor: '#ffc107'
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } }
+      {
+        label: 'Chamados',
+        data: {{ chamados_por_setor|tojson }},
+        backgroundColor: '#17a2b8'
       }
-    });
-  }
-  // Gráfico de barras dos mais feedbacks
-  const ctxTutoriais = document.getElementById('grafico_tutoriais');
-  if (ctxTutoriais) {
-    // Destruir gráfico existente antes de criar um novo
-    destroyChartIfExists('grafico_tutoriais');
-    new Chart(ctxTutoriais, {
-      type: 'bar',
-      data: {
-        labels: {{ top_feedback_labels|tojson }},
-        datasets: [{
-          label: 'Feedbacks',
-          data: {{ top_feedback_values|tojson }},
-          backgroundColor: '#ffc107',
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } }
-      }
-    });
-  }
-
-  // Gráfico de Pizza - Status dos Equipamentos
-    const equipmentStatusCtx = document.getElementById('equipmentStatusChart').getContext('2d');
-    // Destruir gráfico existente antes de criar um novo
-    destroyChartIfExists('equipmentStatusChart');
-    new Chart(equipmentStatusCtx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Solicitado', 'Aprovado', 'Entregue', 'Devolvido', 'Negado'],
-        datasets: [{
-          data: [
-            {{ equipamentos_solicitados }}, 
-            {{ equipamentos_aprovados }}, 
-            {{ equipamentos_entregues }}, 
-            {{ equipamentos_devolvidos }}, 
-            {{ equipamentos_negados }}
-          ],
-          backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#6c757d', '#dc3545'],
-          borderWidth: 2,
-          borderColor: '#ffffff',
-          hoverOffset: 4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '65%',
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              boxWidth: 12,
-              padding: 20,
-              font: {
-                size: 11
-              }
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: (context) => {
-                const label = context.label || '';
-                const value = context.raw || 0;
-                const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
-                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                return `${label}: ${value} (${percentage}%)`;
-              }
-            }
-          }
-        }
-      }
-    });
-
-    // Gráfico de Pizza - Feedbacks dos Tutoriais
-    const feedbackCtx = document.getElementById('feedbackChart').getContext('2d');
-    // Destruir gráfico existente antes de criar um novo
-    destroyChartIfExists('feedbackChart');
-    new Chart(feedbackCtx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Útil', 'Não útil'],
-        datasets: [{
-          data: [{{ feedbacks_util }}, {{ feedbacks_nao_util }}],
-          backgroundColor: ['#28a745', '#dc3545'],
-          borderWidth: 2,
-          borderColor: '#ffffff',
-          hoverOffset: 4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '65%',
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              boxWidth: 12,
-              padding: 20,
-              font: {
-                size: 11
-              }
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: (context) => {
-                const label = context.label || '';
-                const value = context.raw || 0;
-                const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
-                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                return `${label}: ${value} (${percentage}%)`;
-              }
-            }
-          }
-        }
-      }
-    });
-
-  // Funções para SLA
-  function toggleSLAFilters() {
-    const filters = document.getElementById('slaFilters');
-    const bsCollapse = new bootstrap.Collapse(filters, {
-      toggle: true
-    });
-  }
-
-  // Variáveis globais para paginação SLA
-  let slaCurrentPage = 1;
-  let slaPageSize = 10;
-  let slaData = [];
-  let slaFilteredData = [];
-  let slaSortColumn = '';
-  let slaSortDirection = 'asc';
-
-  // Inicializar dados SLA
-  document.addEventListener('DOMContentLoaded', function() {
-    // Coletar dados da tabela
-    const rows = document.querySelectorAll('#slaTableBody tr');
-    slaData = Array.from(rows).map(row => {
-      return {
-        element: row,
-        id: parseInt(row.cells[0].textContent),
-        titulo: row.cells[1].textContent.trim(),
-        prioridade: row.getAttribute('data-priority'),
-        status: row.cells[3].textContent.trim(),
-        prazo_sla: row.cells[4].textContent.trim(),
-        status_sla: row.getAttribute('data-sla-status')
-      };
-    });
-    slaFilteredData = [...slaData];
-    
-    // Configurar event listeners
-    document.getElementById('slaStatusFilter').addEventListener('change', filterSLATable);
-    document.getElementById('slaPriorityFilter').addEventListener('change', filterSLATable);
-    document.getElementById('slaSearchFilter').addEventListener('input', filterSLATable);
-    document.getElementById('slaPageSize').addEventListener('change', function() {
-      slaPageSize = parseInt(this.value);
-      slaCurrentPage = 1;
-      renderSLATable();
-    });
-    
-    renderSLATable();
-  });
-
-  function filterSLATable() {
-    const statusFilter = document.getElementById('slaStatusFilter').value;
-    const priorityFilter = document.getElementById('slaPriorityFilter').value;
-    const searchFilter = document.getElementById('slaSearchFilter').value.toLowerCase();
-    
-    slaFilteredData = slaData.filter(item => {
-      const matchStatus = !statusFilter || item.status_sla === statusFilter;
-      const matchPriority = !priorityFilter || item.prioridade === priorityFilter;
-      const matchSearch = !searchFilter || item.titulo.toLowerCase().includes(searchFilter);
-      return matchStatus && matchPriority && matchSearch;
-    });
-    
-    slaCurrentPage = 1;
-    renderSLATable();
-  }
-
-  function sortSLATable(column) {
-    if (slaSortColumn === column) {
-      slaSortDirection = slaSortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      slaSortColumn = column;
-      slaSortDirection = 'asc';
-    }
-    
-    slaFilteredData.sort((a, b) => {
-      let aVal = a[column];
-      let bVal = b[column];
-      
-      if (column === 'id') {
-        aVal = parseInt(aVal);
-        bVal = parseInt(bVal);
-      }
-      
-      if (aVal < bVal) return slaSortDirection === 'asc' ? -1 : 1;
-      if (aVal > bVal) return slaSortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-    
-    renderSLATable();
-    updateSortIcons(column, slaSortDirection);
-  }
-
-  function updateSortIcons(activeColumn, direction) {
-    // Reset all sort icons
-    document.querySelectorAll('#slaTable th i').forEach(icon => {
-      icon.className = 'fas fa-sort text-muted';
-    });
-    
-    // Update active column icon
-    const activeHeader = document.querySelector(`#slaTable th[onclick="sortSLATable('${activeColumn}')"] i`);
-    if (activeHeader) {
-      activeHeader.className = `fas fa-sort-${direction === 'asc' ? 'up' : 'down'} text-primary`;
-    }
-  }
-
-  function renderSLATable() {
-    const tbody = document.getElementById('slaTableBody');
-    const startIndex = (slaCurrentPage - 1) * slaPageSize;
-    const endIndex = startIndex + slaPageSize;
-    const pageData = slaFilteredData.slice(startIndex, endIndex);
-    
-    // Limpar tabela
-    tbody.innerHTML = '';
-    
-    // Adicionar linhas da página atual
-    pageData.forEach(item => {
-      tbody.appendChild(item.element.cloneNode(true));
-    });
-    
-    // Atualizar contadores
-    document.getElementById('slaTableCount').textContent = slaFilteredData.length;
-    
-    // Renderizar paginação
-    renderSLAPagination();
-  }
-
-  function renderSLAPagination() {
-    const totalPages = Math.ceil(slaFilteredData.length / slaPageSize);
-    const pagination = document.getElementById('slaPagination');
-    
-    document.getElementById('slaCurrentPage').textContent = slaCurrentPage;
-    document.getElementById('slaTotalPages').textContent = totalPages;
-    
-    let paginationHTML = '';
-    
-    // Botão Anterior
-    paginationHTML += `<li class="page-item ${slaCurrentPage === 1 ? 'disabled' : ''}">
-      <a class="page-link" href="#" onclick="changeSLAPage(${slaCurrentPage - 1})">
-        <i class="fas fa-chevron-left"></i>
-      </a>
-    </li>`;
-    
-    // Páginas
-    const startPage = Math.max(1, slaCurrentPage - 2);
-    const endPage = Math.min(totalPages, slaCurrentPage + 2);
-    
-    if (startPage > 1) {
-      paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changeSLAPage(1)">1</a></li>`;
-      if (startPage > 2) {
-        paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom'
       }
     }
-    
-    for (let i = startPage; i <= endPage; i++) {
-      paginationHTML += `<li class="page-item ${i === slaCurrentPage ? 'active' : ''}">
-        <a class="page-link" href="#" onclick="changeSLAPage(${i})">${i}</a>
-      </li>`;
-    }
-    
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
-      }
-      paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changeSLAPage(${totalPages})">${totalPages}</a></li>`;
-    }
-    
-    // Botão Próximo
-    paginationHTML += `<li class="page-item ${slaCurrentPage === totalPages ? 'disabled' : ''}">
-      <a class="page-link" href="#" onclick="changeSLAPage(${slaCurrentPage + 1})">
-        <i class="fas fa-chevron-right"></i>
-      </a>
-    </li>`;
-    
-    pagination.innerHTML = paginationHTML;
   }
-
-  function changeSLAPage(page) {
-    const totalPages = Math.ceil(slaFilteredData.length / slaPageSize);
-    if (page >= 1 && page <= totalPages) {
-      slaCurrentPage = page;
-      renderSLATable();
-    }
-  }
-
-  function clearSLAFilters() {
-    document.getElementById('slaStatusFilter').value = '';
-    document.getElementById('slaPriorityFilter').value = '';
-    document.getElementById('slaSearchFilter').value = '';
-    filterSLATable();
-  }
+});
 </script>
 {% endblock %}
