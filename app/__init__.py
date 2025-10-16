@@ -63,6 +63,57 @@ def create_app():
     migrate.init_app(app, db)
     bootstrap.init_app(app)
 
+    # Configurar tarefas agendadas para notificações
+    with app.app_context():
+        from .services.notification_service import NotificationService
+        from .services.satisfaction_service import SatisfactionService
+        from .services.certification_service import CertificationService
+        from .services.performance_service import PerformanceService
+
+        # Agendar verificação de notificações a cada hora
+        scheduler.add_job(
+            id='check_notifications',
+            func=NotificationService.run_notification_checks,
+            trigger='interval',
+            hours=1,
+            max_instances=1,
+            replace_existing=True
+        )
+
+        # Agendar tarefa de envio automático de pesquisas de satisfação
+        scheduler.add_job(
+            id='auto_send_satisfaction_surveys',
+            func=SatisfactionService.auto_send_satisfaction_surveys,
+            trigger='interval',
+            hours=6,  # A cada 6 horas
+            max_instances=1,
+            replace_existing=True
+        )
+
+        # Agendar tarefa de atualização automática de certificações
+        scheduler.add_job(
+            id='auto_update_certifications',
+            func=CertificationService.auto_update_certifications,
+            trigger='interval',
+            hours=1,  # A cada hora
+            max_instances=1,
+            replace_existing=True
+        )
+
+        # Agendar tarefa de monitoramento de performance
+        scheduler.add_job(
+            id='performance_monitoring',
+            func=PerformanceService.generate_performance_report,
+            trigger='interval',
+            hours=4,  # A cada 4 horas
+            max_instances=1,
+            replace_existing=True
+        )
+
+        app.logger.info("Tarefa agendada de notificações configurada (a cada 1 hora)")
+        app.logger.info("Tarefa agendada de pesquisas de satisfação configurada (a cada 6 horas)")
+        app.logger.info("Tarefa agendada de certificações configurada (a cada 1 hora)")
+
     from . import routes
     app.register_blueprint(routes.bp)
 

@@ -1,7 +1,29 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard | TI OSN System{% endblock %}
 
+{% block head %}
+<!-- Dashboard specific styles -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
 {% block content %}
+<!-- Dashboard Chart Data -->
+<script>
+window.dashboardChartData = {
+    evolution: {
+        labels: {{ meses_labels|tojson }},
+        tarefas: {{ tarefas_por_mes|tojson }},
+        lembretes: {{ lembretes_por_mes|tojson }},
+        chamados: {{ chamados_por_mes|tojson }}
+    },
+    sectors: {
+        labels: {{ setores_labels|tojson }},
+        tarefas: {{ tarefas_por_setor|tojson }},
+        lembretes: {{ lembretes_por_setor|tojson }},
+        chamados: {{ chamados_por_setor|tojson }}
+    }
+};
+</script>
 <div class="container-fluid py-3">
 
   <!-- Alertas Críticos -->
@@ -20,44 +42,6 @@
   </div>
   {% endif %}
 
-  <!-- Exportação de Relatórios -->
-  <div class="card mb-4">
-    <div class="card-body">
-      <h6 class="card-title mb-3">Exportar Relatórios</h6>
-      <form class="row g-3" method="get" action="">
-        <input type="hidden" name="task_status" value="{{ request.args.get('task_status', '') }}">
-        <input type="hidden" name="reminder_status" value="{{ request.args.get('reminder_status', '') }}">
-        <input type="hidden" name="chamado_status" value="{{ request.args.get('chamado_status', '') }}">
-        <input type="hidden" name="start_date" value="{{ request.args.get('start_date', '') }}">
-        <input type="hidden" name="end_date" value="{{ request.args.get('end_date', '') }}">
-        <input type="hidden" name="sector_id" value="{{ request.args.get('sector_id', '') }}">
-        <input type="hidden" name="user_id" value="{{ request.args.get('user_id', '') }}">
-
-        <div class="col-md-4">
-          <label for="export_type" class="form-label small fw-bold">Tipo de Relatório</label>
-          <select id="export_type" name="export_type" class="form-select form-select-sm">
-            <option value="all" {% if request.args.get('export_type', 'all') == 'all' %}selected{% endif %}>Todos os Dados</option>
-            <option value="tasks" {% if request.args.get('export_type') == 'tasks' %}selected{% endif %}>Apenas Tarefas</option>
-            <option value="reminders" {% if request.args.get('export_type') == 'reminders' %}selected{% endif %}>Apenas Lembretes</option>
-            <option value="chamados" {% if request.args.get('export_type') == 'chamados' %}selected{% endif %}>Apenas Chamados</option>
-            <option value="equipamentos">Apenas Equipamentos</option>
-            <option value="tutoriais" {% if request.args.get('export_type') == 'tutoriais' %}selected{% endif %}>Apenas Tutoriais</option>
-          </select>
-        </div>
-        <div class="col-md-8">
-          <label class="form-label small fw-bold">Formato de Exportação</label>
-          <div class="d-flex gap-2 flex-wrap">
-            <button type="submit" formaction="{{ url_for('main.export_excel') }}" class="btn btn-success btn-sm">
-              <i class="fas fa-file-excel me-1"></i> Exportar Excel
-            </button>
-            <button type="submit" formaction="{{ url_for('main.export_pdf') }}" class="btn btn-danger btn-sm">
-              <i class="fas fa-file-pdf me-1"></i> Exportar PDF
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <!-- Header e Filtros -->
   <div class="row mb-4">
@@ -98,32 +82,41 @@
       <div class="card-body">
         <h6 class="card-title mb-3">Filtros Avançados</h6>
         <form class="row g-3" method="get" action="">
+          <!-- Status Filters -->
+          <div class="col-12">
+            <h6 class="text-muted small mb-2"><i class="fas fa-filter me-1"></i>Status</h6>
+          </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
-            <label for="task_status" class="form-label small fw-bold">Status Tarefas</label>
+            <label for="task_status" class="form-label small fw-bold">Tarefas</label>
             <select id="task_status" name="task_status" class="form-select form-select-sm">
-              <option value="">Todas tarefas</option>
+              <option value="">Todas</option>
               <option value="done" {% if request.args.get('task_status') == 'done' %}selected{% endif %}>Concluídas</option>
               <option value="pending" {% if request.args.get('task_status') == 'pending' %}selected{% endif %}>Pendentes</option>
               <option value="expired" {% if request.args.get('task_status') == 'expired' %}selected{% endif %}>Vencidas</option>
             </select>
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
-            <label for="reminder_status" class="form-label small fw-bold">Status Lembretes</label>
+            <label for="reminder_status" class="form-label small fw-bold">Lembretes</label>
             <select id="reminder_status" name="reminder_status" class="form-select form-select-sm">
-              <option value="">Todos lembretes</option>
+              <option value="">Todos</option>
               <option value="done" {% if request.args.get('reminder_status') == 'done' %}selected{% endif %}>Realizados</option>
               <option value="pending" {% if request.args.get('reminder_status') == 'pending' %}selected{% endif %}>Pendentes</option>
             </select>
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
-            <label for="chamado_status" class="form-label small fw-bold">Status Chamados</label>
+            <label for="chamado_status" class="form-label small fw-bold">Chamados</label>
             <select id="chamado_status" name="chamado_status" class="form-select form-select-sm">
-              <option value="">Todos status</option>
+              <option value="">Todos</option>
               <option value="Aberto" {% if request.args.get('chamado_status') == 'Aberto' %}selected{% endif %}>Aberto</option>
               <option value="Em Andamento" {% if request.args.get('chamado_status') == 'Em Andamento' %}selected{% endif %}>Em Andamento</option>
               <option value="Resolvido" {% if request.args.get('chamado_status') == 'Resolvido' %}selected{% endif %}>Resolvido</option>
               <option value="Fechado" {% if request.args.get('chamado_status') == 'Fechado' %}selected{% endif %}>Fechado</option>
             </select>
+          </div>
+
+          <!-- Date Filters -->
+          <div class="col-12 mt-3">
+            <h6 class="text-muted small mb-2"><i class="fas fa-calendar me-1"></i>Período</h6>
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
             <label for="start_date" class="form-label small fw-bold">Data Inicial</label>
@@ -132,6 +125,11 @@
           <div class="col-lg-2 col-md-4 col-sm-6">
             <label for="end_date" class="form-label small fw-bold">Data Final</label>
             <input type="date" id="end_date" name="end_date" class="form-control form-control-sm" value="{{ request.args.get('end_date', '') }}">
+          </div>
+
+          <!-- Organization Filters -->
+          <div class="col-12 mt-3">
+            <h6 class="text-muted small mb-2"><i class="fas fa-building me-1"></i>Organização</h6>
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
             <label for="sector_id" class="form-label small fw-bold">Setor</label>
@@ -153,7 +151,35 @@
             </select>
           </div>
           {% endif %}
-          <div class="col-12 mt-2">
+          <div class="col-12 mt-3">
+            <hr class="my-3">
+            <h6 class="mb-3">Exportar Relatórios</h6>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="export_type" class="form-label small fw-bold">Tipo de Relatório</label>
+                <select id="export_type" name="export_type" class="form-select form-select-sm">
+                  <option value="all" {% if request.args.get('export_type', 'all') == 'all' %}selected{% endif %}>Todos os Dados</option>
+                  <option value="tasks" {% if request.args.get('export_type') == 'tasks' %}selected{% endif %}>Apenas Tarefas</option>
+                  <option value="reminders" {% if request.args.get('export_type') == 'reminders' %}selected{% endif %}>Apenas Lembretes</option>
+                  <option value="chamados" {% if request.args.get('export_type') == 'chamados' %}selected{% endif %}>Apenas Chamados</option>
+                  <option value="equipamentos">Apenas Equipamentos</option>
+                  <option value="tutoriais" {% if request.args.get('export_type') == 'tutoriais' %}selected{% endif %}>Apenas Tutoriais</option>
+                </select>
+              </div>
+              <div class="col-md-8">
+                <label class="form-label small fw-bold">Formato de Exportação</label>
+                <div class="d-flex gap-2 flex-wrap align-items-end">
+                  <button type="submit" formaction="{{ url_for('main.export_excel') }}" class="btn btn-success btn-sm">
+                    <i class="fas fa-file-excel me-1"></i> Exportar Excel
+                  </button>
+                  <button type="submit" formaction="{{ url_for('main.export_pdf') }}" class="btn btn-danger btn-sm">
+                    <i class="fas fa-file-pdf me-1"></i> Exportar PDF
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 mt-3">
             <div class="d-flex gap-2">
               <button type="submit" class="btn btn-primary btn-sm">
                 <i class="fas fa-search me-1"></i> Aplicar Filtros
@@ -335,8 +361,8 @@
               <i class="fas fa-chart-line text-dark"></i>
             </div>
           </div>
-          <h3 class="text-dark mb-3">
-            {{ ((tasks_done + reminders_done + chamados_fechado) / (tasks_total + reminders_total + chamados_total) * 100) | round(1) if (tasks_total + reminders_total + chamados_total) > 0 else 0 }}%
+          <h3 class="text-dark mb-3 performance-indicator">
+            {{ overall_performance }}%
           </h3>
           <div class="service-stats">
             <div class="d-flex justify-content-between small mb-1">
@@ -523,112 +549,11 @@
 
 </div>
 
-<style>
-.card-service {
-  border: 1px solid #e9ecef;
-  transition: all 0.2s ease;
-}
+{% endblock %}
 
-.card-service:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.bg-opacity-10 {
-  opacity: 0.1;
-}
-
-.text-purple {
-  color: #6f42c1 !important;
-}
-
-.bg-purple {
-  background-color: #6f42c1 !important;
-}
-
-.service-stats {
-  border-top: 1px solid #e9ecef;
-  padding-top: 1rem;
-}
-</style>
-
+{% block scripts %}
+<!-- Chart.js library -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-// Gráfico de Evolução
-new Chart(document.getElementById('chartEvolution'), {
-  type: 'line',
-  data: {
-    labels: {{ meses_labels|tojson }},
-    datasets: [
-      {
-        label: 'Tarefas',
-        data: {{ tarefas_por_mes|tojson }},
-        borderColor: '#007bff',
-        backgroundColor: 'rgba(0, 123, 255, 0.1)',
-        tension: 0.1,
-        fill: true
-      },
-      {
-        label: 'Lembretes',
-        data: {{ lembretes_por_mes|tojson }},
-        borderColor: '#ffc107',
-        backgroundColor: 'rgba(255, 193, 7, 0.1)',
-        tension: 0.1,
-        fill: true
-      },
-      {
-        label: 'Chamados',
-        data: {{ chamados_por_mes|tojson }},
-        borderColor: '#17a2b8',
-        backgroundColor: 'rgba(23, 162, 184, 0.1)',
-        tension: 0.1,
-        fill: true
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom'
-      }
-    }
-  }
-});
-
-// Gráfico de Setores
-new Chart(document.getElementById('chartSector'), {
-  type: 'bar',
-  data: {
-    labels: {{ setores_labels|tojson }},
-    datasets: [
-      {
-        label: 'Tarefas',
-        data: {{ tarefas_por_setor|tojson }},
-        backgroundColor: '#007bff'
-      },
-      {
-        label: 'Lembretes',
-        data: {{ lembretes_por_setor|tojson }},
-        backgroundColor: '#ffc107'
-      },
-      {
-        label: 'Chamados',
-        data: {{ chamados_por_setor|tojson }},
-        backgroundColor: '#17a2b8'
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom'
-      }
-    }
-  }
-});
-</script>
+<!-- Dashboard charts -->
+<script src="{{ url_for('static', filename='js/dashboard-charts.js') }}"></script>
 {% endblock %}

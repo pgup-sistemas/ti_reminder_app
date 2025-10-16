@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ESCALAÇÃO: Lembrete Atrasado</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }
+        .content { padding: 20px 0; }
+        .reminder-info { background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #fd7e14; }
+        .escalation { background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .urgent { color: #dc3545; font-weight: bold; font-size: 16px; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+        .button { display: inline-block; background-color: #fd7e14; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; margin: 10px 0; font-weight: bold; }
+        .level-badge { display: inline-block; background-color: #fd7e14; color: white; padding: 5px 10px; border-radius: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚠️ ESCALAÇÃO DE LEMBRETE</h1>
+            <div class="level-badge">NÍVEL {{ level }}</div>
+        </div>
+
+        <div class="content">
+            <p>Olá <strong>{{ user.username }}</strong>,</p>
+
+            <div class="escalation">
+                <strong>🚨 ESCALAÇÃO AUTOMÁTICA:</strong> Um lembrete crítico está atrasado e foi escalado para seu nível de atenção.
+            </div>
+
+            <div class="reminder-info">
+                <h3>{{ reminder.name }}</h3>
+                <p><strong>Tipo:</strong> {{ reminder.type }}</p>
+                <p><strong>Data de Vencimento:</strong> {{ reminder.due_date.strftime('%d/%m/%Y') }}</p>
+                <p><strong>Responsável:</strong> {{ reminder.responsible }}</p>
+                {% if reminder.sector %}
+                <p><strong>Setor:</strong> {{ reminder.sector.name }}</p>
+                {% endif %}
+                <p><strong>Frequência:</strong> {{ reminder.frequency if reminder.frequency else 'Única' }}</p>
+                <p><strong>Dias de Atraso:</strong> <span class="urgent">{{ ((reminder.due_date - reminder.created_at.date()).days) if reminder.created_at else 'N/A' }} dias</span></p>
+                <p><strong>Escalonado para:</strong> {{ target }}</p>
+            </div>
+
+            <p><strong>Este lembrete está atrasado há mais de {{ 7 if level == 1 else 14 }} dias</strong> e não foi realizado conforme esperado.</p>
+
+            <p><strong>Ações Recomendadas:</strong></p>
+            <ul>
+                <li>Verificar o status atual do lembrete</li>
+                <li>Entrar em contato com o responsável {{ reminder.responsible }}</li>
+                <li>Avaliar possíveis impedimentos ou bloqueios</li>
+                <li>Tomar medidas corretivas necessárias</li>
+                {% if level >= 2 %}
+                <li>Considerar reatribuição da responsabilidade</li>
+                <li>Implementar plano de ação corretiva</li>
+                {% endif %}
+            </ul>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ url_for('main.reminders', _external=True) }}" class="button">VERIFICAR LEMBRETES</a>
+            </div>
+
+            {% if level >= 3 %}
+            <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <strong>🚨 ALERTA MÁXIMO:</strong> Este lembrete atingiu o nível máximo de escalação. Ação imediata é necessária.
+            </div>
+            {% endif %}
+
+            <p>Atenciosamente,<br>
+            <strong>Sistema TI OSN</strong><br>
+            <em>Sistema Automático de Escalação</em></p>
+        </div>
+
+        <div class="footer">
+            <p>Esta é uma mensagem automática de escalação. Por favor, não responda este email.</p>
+            <p>Sistema de Gestão TI OSN - Escalação Automática - {{ reminder.created_at.strftime('%d/%m/%Y %H:%M') if reminder.created_at else '' }}</p>
+        </div>
+    </div>
+</body>
+</html>

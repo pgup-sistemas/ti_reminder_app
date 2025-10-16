@@ -41,6 +41,17 @@ class TaskForm(FlaskForm):
     date = DateField("Data", validators=[DataRequired()])
     responsible = StringField("Responsável", validators=[DataRequired()])
     completed = BooleanField("Concluída")
+    priority = SelectField(
+        "Prioridade",
+        choices=[
+            ("Baixa", "Baixa"),
+            ("Normal", "Normal"),
+            ("Alta", "Alta"),
+            ("Critica", "Crítica"),
+        ],
+        default="Normal",
+        validators=[DataRequired()],
+    )
     sector_id = SelectField("Setor", coerce=int, choices=[], validators=[])
     new_sector = StringField("Novo setor")
     submit = SubmitField("Salvar")

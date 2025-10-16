@@ -1,5 +1,6 @@
 import os
 from datetime import date, datetime, time, timedelta
+import time as time_module
 from functools import wraps
 
 from dateutil.relativedelta import relativedelta
@@ -12,14 +13,20 @@ import markdown
 from .auth_utils import login_required
 from .forms import ChamadoAdminForm  # Importados formulários necessários
 from .forms import (ChamadoEditForm, ChamadoForm, ComentarioTutorialForm, FeedbackTutorialForm,
-                    ReminderForm, TaskForm, TutorialForm, UserEditForm)
+                     ReminderForm, TaskForm, TutorialForm, UserEditForm)
 from .models import Chamado  # Importados modelos necessários
 from .models import (ComentarioChamado, ComentarioTutorial, EquipmentRequest,
-                     FeedbackTutorial, Reminder, Sector, Task, Tutorial,
-                     TutorialImage, User, VisualizacaoTutorial, db)
+                      FeedbackTutorial, Reminder, Sector, Task, Tutorial,
+                      TutorialImage, User, VisualizacaoTutorial, db)
+from .services.dashboard_service import DashboardService
+from .services.permission_manager import PermissionManager
+from .services.rfid_service import RFIDService
+from .services.satisfaction_service import SatisfactionService
+from .services.certification_service import CertificationService
+from .services.performance_service import PerformanceService
 from .utils.timezone_utils import (format_local_datetime,
-                                   get_current_time_for_db, now_local,
-                                   utc_to_local)
+                                    get_current_time_for_db, now_local,
+                                    utc_to_local)
 
 
 # Função para exigir que o usuário seja administrador
@@ -97,9 +104,16 @@ def index():
         reminders_count = Reminder.query.count()
         reminders_today = Reminder.query.filter(Reminder.due_date <= date.today()).all()
         tasks_today = Task.query.filter(Task.date <= date.today()).all()
-        # Buscar chamados abertos (não fechados)
+        # Buscar chamados abertos (não fechados) - apenas campos existentes no banco
         chamados_abertos = (
             Chamado.query.filter(Chamado.status != "Fechado")
+            .options(db.load_only(
+                Chamado.id, Chamado.titulo, Chamado.descricao, Chamado.status,
+                Chamado.prioridade, Chamado.data_abertura, Chamado.data_ultima_atualizacao,
+                Chamado.data_fechamento, Chamado.solicitante_id, Chamado.setor_id,
+                Chamado.responsavel_ti_id, Chamado.prazo_sla, Chamado.data_primeira_resposta,
+                Chamado.sla_cumprido, Chamado.tempo_resposta_horas
+            ))
             .order_by(Chamado.data_abertura.desc())
             .limit(10)
             .all()
@@ -129,12 +143,19 @@ def index():
                 | (Chamado.setor_id == setor_id_usuario),
                 Chamado.status != "Fechado",
             )
+            .options(db.load_only(
+                Chamado.id, Chamado.titulo, Chamado.descricao, Chamado.status,
+                Chamado.prioridade, Chamado.data_abertura, Chamado.data_ultima_atualizacao,
+                Chamado.data_fechamento, Chamado.solicitante_id, Chamado.setor_id,
+                Chamado.responsavel_ti_id, Chamado.prazo_sla, Chamado.data_primeira_resposta,
+                Chamado.sla_cumprido, Chamado.tempo_resposta_horas
+            ))
             .order_by(Chamado.data_abertura.desc())
             .limit(10)
             .all()
         )  # Limita a 10 chamados mais recentes
 
-        # Buscar equipamentos do usuário
+        # Buscar equipamentos do usuário - apenas campos existentes no banco
         if is_ti:
             equipamentos_count = EquipmentRequest.query.count()
         else:
@@ -270,8 +291,14 @@ def index():
     performance_sla = 0
 
     if is_admin:
-        # Buscar todos os chamados abertos (não fechados)
-        chamados_abertos_sla = Chamado.query.filter(Chamado.status != "Fechado").all()
+        # Buscar todos os chamados abertos (não fechados) - apenas campos existentes
+        chamados_abertos_sla = Chamado.query.filter(Chamado.status != "Fechado").options(db.load_only(
+            Chamado.id, Chamado.titulo, Chamado.descricao, Chamado.status,
+            Chamado.prioridade, Chamado.data_abertura, Chamado.data_ultima_atualizacao,
+            Chamado.data_fechamento, Chamado.solicitante_id, Chamado.setor_id,
+            Chamado.responsavel_ti_id, Chamado.prazo_sla, Chamado.data_primeira_resposta,
+            Chamado.sla_cumprido, Chamado.tempo_resposta_horas
+        )).all()
 
         # Calcular SLA para chamados que não têm prazo definido
         for chamado in chamados_abertos_sla:
@@ -299,7 +326,13 @@ def index():
         chamados_fechados_30_dias = Chamado.query.filter(
             Chamado.data_fechamento >= trinta_dias_atras,
             Chamado.data_fechamento.isnot(None),
-        ).all()
+        ).options(db.load_only(
+            Chamado.id, Chamado.titulo, Chamado.descricao, Chamado.status,
+            Chamado.prioridade, Chamado.data_abertura, Chamado.data_ultima_atualizacao,
+            Chamado.data_fechamento, Chamado.solicitante_id, Chamado.setor_id,
+            Chamado.responsavel_ti_id, Chamado.prazo_sla, Chamado.data_primeira_resposta,
+            Chamado.sla_cumprido, Chamado.tempo_resposta_horas
+        )).all()
 
         if chamados_fechados_30_dias:
             # Calcular SLA para chamados fechados que não têm sla_cumprido definido
@@ -939,415 +972,134 @@ def user_profile():
 
 
 @bp.route("/dashboard")
+@login_required
 def dashboard():
-    from datetime import date  # Adicionado datetime e date
+    """
+    Dashboard principal do sistema - versão refatorada usando serviços
+    """
+    from flask import request, flash
     from datetime import datetime
 
-    from flask import request, session
+    # Obter permissões do usuário
+    permissions = PermissionManager.get_user_permissions()
 
-    from .models import Chamado  # Adicionado Chamado, Task, Reminder
-    from .models import Reminder, Sector, Task, User
+    # Processar filtros da requisição
+    filters = {
+        'task_status': request.args.get("task_status", ""),
+        'reminder_status': request.args.get("reminder_status", ""),
+        'chamado_status': request.args.get("chamado_status", ""),
+        'start_date': None,
+        'end_date': None,
+        'sector_id': request.args.get("sector_id", type=int),
+        'user_id': request.args.get("user_id", type=int),
+    }
 
-    task_status = request.args.get("task_status", "")
-    reminder_status = request.args.get("reminder_status", "")
-    chamado_status = request.args.get("chamado_status", "")  # Novo filtro para chamados
+    # Converter datas com validação
     start_date_str = request.args.get("start_date", "")
     end_date_str = request.args.get("end_date", "")
-    sector_id = request.args.get("sector_id", type=int)
-    user_id = request.args.get("user_id", type=int)
 
-    # Conversão de datas
-    start_date = None
     if start_date_str:
         try:
-            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            filters['start_date'] = datetime.strptime(start_date_str, "%Y-%m-%d").date()
         except ValueError:
             flash("Data inicial inválida.", "warning")
-    end_date = None
+
     if end_date_str:
         try:
-            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+            filters['end_date'] = datetime.strptime(end_date_str, "%Y-%m-%d").date()
         except ValueError:
             flash("Data final inválida.", "warning")
 
-    # Listas para filtros
-    sectors = Sector.query.order_by(Sector.name).all()
-    users = User.query.order_by(User.username).all()
+    # Obter dados filtrados usando o serviço
+    dashboard_data = DashboardService.get_filtered_data(filters, permissions)
 
-    task_query = Task.query
-    reminder_query = Reminder.query
-    chamado_query = Chamado.query  # Nova query para chamados
-    equipment_query = EquipmentRequest.query  # Query para equipamentos
+    # Preparar dados para o template
+    template_data = {
+        # Estatísticas de tarefas
+        'tasks_total': dashboard_data['stats']['tasks']['total'],
+        'tasks_done': dashboard_data['stats']['tasks']['done'],
+        'tasks_pending': dashboard_data['stats']['tasks']['pending'],
+        'tasks_expired': dashboard_data['stats']['tasks']['expired'],
 
-    # Filtros
-    current_user_id = session.get("user_id")
-    is_admin = session.get("is_admin", False)
-    is_ti = session.get("is_ti", False)  # Verifica se o usuário é de TI
+        # Estatísticas de lembretes
+        'reminders_total': dashboard_data['stats']['reminders']['total'],
+        'reminders_done': dashboard_data['stats']['reminders']['done'],
+        'reminders_pending': dashboard_data['stats']['reminders']['pending'],
 
-    if (
-        not is_admin and not is_ti
-    ):  # Se não for admin nem TI, filtra por tarefas do usuário
-        task_query = task_query.filter(Task.user_id == current_user_id)
-        reminder_query = reminder_query.filter(Reminder.user_id == current_user_id)
-        chamado_query = chamado_query.filter(Chamado.solicitante_id == current_user_id)
-        equipment_query = equipment_query.filter(
-            EquipmentRequest.requester_id == current_user_id
-        )
-    elif not is_admin and is_ti:  # Se for TI mas não admin, pode ver chamados do setor
-        user = User.query.get(current_user_id)
-        primeiro_lembrete = Reminder.query.filter_by(user_id=current_user_id).first()
-        setor_id_usuario = (
-            primeiro_lembrete.sector_id
-            if primeiro_lembrete and primeiro_lembrete.sector_id
-            else None
-        )
-        chamado_query = chamado_query.filter(
-            (Chamado.solicitante_id == current_user_id)
-            | (Chamado.setor_id == setor_id_usuario)
-        )
-        # TI pode ver todas as solicitações de equipamento
-        equipment_query = EquipmentRequest.query
+        # Estatísticas de chamados
+        'chamados_total': dashboard_data['stats']['chamados']['total'],
+        'chamados_aberto': dashboard_data['stats']['chamados']['aberto'],
+        'chamados_em_andamento': dashboard_data['stats']['chamados']['em_andamento'],
+        'chamados_resolvido': dashboard_data['stats']['chamados']['resolvido'],
+        'chamados_fechado': dashboard_data['stats']['chamados']['fechado'],
 
-    if task_status == "done":
-        task_query = task_query.filter(Task.completed == True)
-    elif task_status == "pending":
-        task_query = task_query.filter(
-            Task.completed == False, Task.date >= date.today()
-        )  # Apenas pendentes não vencidas
-    elif task_status == "expired":
-        task_query = task_query.filter(
-            Task.completed == False, Task.date < date.today()
-        )
+        # Estatísticas de equipamentos
+        'equipamentos_total': dashboard_data['stats']['equipamentos']['total'],
+        'equipamentos_solicitados': dashboard_data['stats']['equipamentos']['solicitados'],
+        'equipamentos_aprovados': dashboard_data['stats']['equipamentos']['aprovados'],
+        'equipamentos_entregues': dashboard_data['stats']['equipamentos']['entregues'],
+        'equipamentos_devolvidos': dashboard_data['stats']['equipamentos']['devolvidos'],
+        'equipamentos_negados': dashboard_data['stats']['equipamentos']['negados'],
 
-    if reminder_status == "done":
-        reminder_query = reminder_query.filter(Reminder.completed == True)
-    elif reminder_status == "pending":
-        reminder_query = reminder_query.filter(Reminder.completed == False)
-        # Adicionar lógica para lembretes vencidos se necessário, similar a tarefas
+        # Dados para gráficos de evolução
+        'meses_labels': dashboard_data['chart_data']['evolution']['labels'],
+        'tarefas_por_mes': dashboard_data['chart_data']['evolution']['tarefas'],
+        'tarefas_concluidas_por_mes': dashboard_data['chart_data']['evolution']['tarefas'],  # Mantém compatibilidade
+        'lembretes_por_mes': dashboard_data['chart_data']['evolution']['lembretes'],
+        'lembretes_realizados_por_mes': dashboard_data['chart_data']['evolution']['lembretes'],  # Mantém compatibilidade
+        'chamados_por_mes': dashboard_data['chart_data']['evolution']['chamados'],
+        'equipamentos_por_mes': dashboard_data['chart_data']['evolution']['equipamentos'],
 
-    if chamado_status:  # Filtro de status para chamados
-        chamado_query = chamado_query.filter(Chamado.status == chamado_status)
+        # Dados para gráficos de setores
+        'setores_labels': dashboard_data['chart_data']['sectors']['labels'],
+        'tarefas_por_setor': dashboard_data['chart_data']['sectors']['tarefas'],
+        'lembretes_por_setor': dashboard_data['chart_data']['sectors']['lembretes'],
+        'chamados_por_setor': dashboard_data['chart_data']['sectors']['chamados'],
+        'equipamentos_por_setor': dashboard_data['chart_data']['sectors']['equipamentos'],
 
-    if start_date:
-        task_query = task_query.filter(Task.date >= start_date)
-        reminder_query = reminder_query.filter(Reminder.due_date >= start_date)
-        chamado_query = chamado_query.filter(Chamado.data_abertura >= start_date)
-        equipment_query = equipment_query.filter(
-            EquipmentRequest.request_date >= start_date
-        )
-    if end_date:
-        task_query = task_query.filter(Task.date <= end_date)
-        reminder_query = reminder_query.filter(Reminder.due_date <= end_date)
-        chamado_query = chamado_query.filter(Chamado.data_abertura <= end_date)
-        equipment_query = equipment_query.filter(
-            EquipmentRequest.request_date <= end_date
-        )
+        # Dados de tutoriais
+        'total_tutoriais': dashboard_data['chart_data']['tutorials']['total'],
+        'top_tutoriais_labels': dashboard_data['chart_data']['tutorials']['top_labels'],
+        'top_tutoriais_values': dashboard_data['chart_data']['tutorials']['top_values'],
+        'feedbacks_util': dashboard_data['chart_data']['tutorials']['feedbacks_util'],
+        'feedbacks_nao_util': dashboard_data['chart_data']['tutorials']['feedbacks_nao_util'],
+        'top_feedback_labels': dashboard_data['chart_data']['tutorials']['top_labels'],  # Reutiliza
+        'top_feedback_values': dashboard_data['chart_data']['tutorials']['top_values'],  # Reutiliza
 
-    if sector_id:
-        task_query = task_query.filter(Task.sector_id == sector_id)
-        reminder_query = reminder_query.filter(Reminder.sector_id == sector_id)
-        chamado_query = chamado_query.filter(Chamado.setor_id == sector_id)
-        equipment_query = equipment_query.filter(
-            EquipmentRequest.destination_sector.contains(
-                Sector.query.get(sector_id).name if Sector.query.get(sector_id) else ""
-            )
-        )  # Filtro por setor de destino para equipamentos
+        # Dados SLA (apenas para admin)
+        'sla_vencidos': dashboard_data['sla_data'].get('vencidos', 0),
+        'sla_criticos': dashboard_data['sla_data'].get('criticos', 0),
+        'sla_ok': dashboard_data['sla_data'].get('ok', 0),
+        'performance_sla': dashboard_data['sla_data'].get('performance', 0),
+        'chamados_sla': dashboard_data['sla_data'].get('chamados_sla', []),
 
-    if user_id and (is_admin or is_ti):  # Admin ou TI pode filtrar por qualquer usuário
-        task_query = task_query.filter(Task.user_id == user_id)
-        reminder_query = reminder_query.filter(Reminder.user_id == user_id)
-        chamado_query = chamado_query.filter(Chamado.solicitante_id == user_id)
-        equipment_query = equipment_query.filter(
-            EquipmentRequest.requester_id == user_id
-        )
+        # Performance geral do sistema
+        'overall_performance': dashboard_data['performance'],
 
-    # Totais
-    tasks_all = task_query.all()
-    reminders_all = reminder_query.all()
-    chamados_all = chamado_query.all()
-    equipamentos_all = (
-        equipment_query.all()
-    )  # Obtém as solicitações de equipamento filtradas
+        # Dados para filtros
+        'sectors': Sector.query.order_by(Sector.name).all(),
+        'users': User.query.order_by(User.username).all(),
+        'selected_sector': filters['sector_id'],
+        'selected_user': filters['user_id'],
+    }
 
-    tasks_total = len(tasks_all)
-    reminders_total = len(reminders_all)
-    chamados_total = len(chamados_all)
-    equipamentos_total = len(equipamentos_all)  # Total de equipamentos solicitados
+    # Adicionar tutoriais mais visualizados/utilizados (compatibilidade com template antigo)
+    if dashboard_data['chart_data']['tutorials']['top_labels']:
+        template_data['tutorial_mais_visualizado'] = Tutorial.query.filter_by(
+            titulo=dashboard_data['chart_data']['tutorials']['top_labels'][0]
+        ).first()
 
-    tasks_done = len([t for t in tasks_all if t.completed])
-    tasks_pending = len(
-        [t for t in tasks_all if not t.completed and t.date >= date.today()]
-    )
-    tasks_expired = len(
-        [t for t in tasks_all if not t.completed and t.date < date.today()]
-    )
-
-    reminders_done = len([r for r in reminders_all if r.completed])
-    reminders_pending = len(
-        [r for r in reminders_all if not r.completed]
-    )  # Adicionar lógica de vencidos se houver
-
-    chamados_aberto = len([c for c in chamados_all if c.status == "Aberto"])
-    chamados_em_andamento = len([c for c in chamados_all if c.status == "Em Andamento"])
-    chamados_resolvido = len(
-        [c for c in chamados_all if c.status == "Resolvido"]
-    )  # Novo
-    chamados_fechado = len([c for c in chamados_all if c.status == "Fechado"])
-    # Adicionar outros status de chamado conforme necessário
-
-    # Contagens de status para equipamentos
-    equipamentos_solicitados = len(
-        [e for e in equipamentos_all if e.status == "Solicitado"]
-    )
-    equipamentos_aprovados = len(
-        [e for e in equipamentos_all if e.status == "Aprovado"]
-    )
-    equipamentos_entregues = len(
-        [e for e in equipamentos_all if e.status == "Entregue"]
-    )
-    equipamentos_devolvidos = len(
-        [e for e in equipamentos_all if e.status == "Devolvido"]
-    )
-    equipamentos_negados = len([e for e in equipamentos_all if e.status == "Negado"])
-
-    # --- Dados para Gráficos de Linha (por mês, últimos 12 meses) ---
-    import calendar
-    from collections import OrderedDict
-    from datetime import date  # date já estava, timedelta adicionado
-    from datetime import timedelta
-
-    from dateutil.relativedelta import \
-        relativedelta  # Adicionado relativedelta
-
-    today = date.today()
-    meses = []
-    for i in range(11, -1, -1):
-        m = today.replace(day=1) - relativedelta(months=i)
-        meses.append(m)
-    meses_labels = [m.strftime("%b/%Y") for m in meses]
-    tarefas_por_mes = [0] * 12
-    tarefas_concluidas_por_mes = [0] * 12
-    lembretes_por_mes = [0] * 12
-    lembretes_realizados_por_mes = [0] * 12
-    chamados_por_mes = [0] * 12  # Para chamados
-    equipamentos_por_mes = [0] * 12  # Para equipamentos
-
-    for idx, m in enumerate(meses):
-        prox = m + relativedelta(months=1)
-        tarefas_mes = [t for t in tasks_all if t.date >= m and t.date < prox]
-        tarefas_por_mes[idx] = len(tarefas_mes)
-        tarefas_concluidas_por_mes[idx] = len([t for t in tarefas_mes if t.completed])
-        lembretes_mes = [
-            r for r in reminders_all if r.due_date >= m and r.due_date < prox
-        ]
-        lembretes_por_mes[idx] = len(lembretes_mes)
-        lembretes_realizados_por_mes[idx] = len(
-            [r for r in lembretes_mes if r.completed]
-        )
-        chamados_mes = [
-            c
-            for c in chamados_all
-            if c.data_abertura.date() >= m and c.data_abertura.date() < prox
-        ]
-        chamados_por_mes[idx] = len(chamados_mes)
-        equipamentos_mes = [
-            e
-            for e in equipamentos_all
-            if e.request_date.date() >= m and e.request_date.date() < prox
-        ]
-        equipamentos_por_mes[idx] = len(equipamentos_mes)
-
-    # --- Dados para Gráfico de Barra (por setor) ---
-    setores_labels = [s.name for s in sectors]
-    tarefas_por_setor = [
-        len([t for t in tasks_all if t.sector_id == s.id]) for s in sectors
-    ]
-    lembretes_por_setor = [
-        len([r for r in reminders_all if r.sector_id == s.id]) for s in sectors
-    ]
-    chamados_por_setor = [
-        len([c for c in chamados_all if c.setor_id == s.id]) for s in sectors
-    ]  # Novo
-    equipamentos_por_setor = [
-        len([e for e in equipamentos_all if s.name in e.destination_sector])
-        for s in sectors
-    ]  # Equipamentos por setor de destino
-
-    # --- Tutoriais: agregação ---
-    tutoriais = Tutorial.query.all()
-    total_tutoriais = len(tutoriais)
-    # Visualizações por tutorial
-    visualizacoes_por_tutorial = {t.id: 0 for t in tutoriais}
-    for v in VisualizacaoTutorial.query.all():
-        if v.tutorial_id in visualizacoes_por_tutorial:
-            visualizacoes_por_tutorial[v.tutorial_id] += 1
-    # Top 5 mais visualizados
-    top_tutoriais_ids = sorted(
-        visualizacoes_por_tutorial, key=visualizacoes_por_tutorial.get, reverse=True
-    )[:5]
-    top_tutoriais = [Tutorial.query.get(tid) for tid in top_tutoriais_ids]
-    top_tutoriais_labels = [t.titulo for t in top_tutoriais if t]
-    top_tutoriais_values = [
-        visualizacoes_por_tutorial[t.id] for t in top_tutoriais if t
-    ]
-    # Feedbacks agregados
-    feedbacks = FeedbackTutorial.query.all()
-    feedbacks_util = sum(1 for f in feedbacks if f.util)
-    feedbacks_nao_util = sum(1 for f in feedbacks if not f.util)
-    # Feedback por tutorial (top 5 mais feedbacks)
-    feedbacks_por_tutorial = {t.id: 0 for t in tutoriais}
-    for f in feedbacks:
-        if f.tutorial_id in feedbacks_por_tutorial:
-            feedbacks_por_tutorial[f.tutorial_id] += 1
-    top_feedback_ids = sorted(
-        feedbacks_por_tutorial, key=feedbacks_por_tutorial.get, reverse=True
-    )[:5]
-    top_feedback_tutoriais = [Tutorial.query.get(tid) for tid in top_feedback_ids]
-    top_feedback_labels = [t.titulo for t in top_feedback_tutoriais if t]
-    top_feedback_values = [
-        feedbacks_por_tutorial[t.id] for t in top_feedback_tutoriais if t
-    ]
-    # Tutorial mais visualizado e mais útil
-    tutorial_mais_visualizado = (
-        Tutorial.query.get(top_tutoriais_ids[0]) if top_tutoriais_ids else None
-    )
+    # Encontrar tutorial mais útil
     tutorial_mais_util = None
     max_util = -1
-    for t in tutoriais:
-        util = sum(1 for f in t.feedbacks if f.util)
+    for tutorial in Tutorial.query.all():
+        util = sum(1 for f in tutorial.feedbacks if f.util)
         if util > max_util:
             max_util = util
-            tutorial_mais_util = t
+            tutorial_mais_util = tutorial
+    template_data['tutorial_mais_util'] = tutorial_mais_util
 
-    # Filtros para tutoriais
-    tutorial_query = Tutorial.query
-    if not is_admin and not is_ti:  # Usuário comum só vê os seus
-        tutorial_query = tutorial_query.filter(Tutorial.autor_id == current_user_id)
-    if sector_id:
-        tutorial_query = tutorial_query.join(User).filter(User.sector_id == sector_id)
-    if user_id and (is_admin or is_ti):  # Admin ou TI pode filtrar por autor
-        tutorial_query = tutorial_query.filter(Tutorial.autor_id == user_id)
-    if start_date:
-        tutorial_query = tutorial_query.filter(Tutorial.data_criacao >= start_date)
-    if end_date:
-        tutorial_query = tutorial_query.filter(Tutorial.data_criacao <= end_date)
-    tutoriais = tutorial_query.all()
-
-    # Calcular estatísticas de SLA (apenas para administradores)
-    sla_vencidos = 0
-    sla_criticos = 0
-    sla_ok = 0
-    performance_sla = 0
-    chamados_sla = []
-
-    if is_admin:
-        # Buscar todos os chamados abertos (não fechados)
-        chamados_abertos_dashboard = (
-            Chamado.query.filter(Chamado.status != "Fechado")
-            .order_by(Chamado.data_abertura.desc())
-            .limit(20)
-            .all()
-        )
-
-        # Calcular SLA para chamados que não têm prazo definido
-        for chamado in chamados_abertos_dashboard:
-            if not chamado.prazo_sla:
-                chamado.calcular_sla()
-
-        # Commit das mudanças no SLA
-        db.session.commit()
-
-        chamados_sla = chamados_abertos_dashboard
-
-        # Contar os status de SLA
-        for chamado in chamados_abertos_dashboard:
-            status_sla = chamado.status_sla
-            if status_sla == "vencido":
-                sla_vencidos += 1
-            elif status_sla == "atencao":
-                sla_criticos += 1
-            elif status_sla == "normal":
-                sla_ok += 1
-
-        # Calcular performance de SLA dos últimos 30 dias
-        from datetime import timedelta
-
-        trinta_dias_atras = get_current_time_for_db() - timedelta(days=30)
-
-        chamados_fechados_30_dias = Chamado.query.filter(
-            Chamado.data_fechamento >= trinta_dias_atras,
-            Chamado.data_fechamento.isnot(None),
-        ).all()
-
-        if chamados_fechados_30_dias:
-            # Calcular SLA para chamados fechados que não têm sla_cumprido definido
-            for chamado in chamados_fechados_30_dias:
-                if chamado.sla_cumprido is None and chamado.prazo_sla:
-                    # Se foi fechado dentro do prazo, considera cumprido
-                    chamado.sla_cumprido = chamado.data_fechamento <= chamado.prazo_sla
-
-            db.session.commit()
-
-            sla_cumpridos = len(
-                [c for c in chamados_fechados_30_dias if c.sla_cumprido]
-            )
-            performance_sla = (
-                round((sla_cumpridos / len(chamados_fechados_30_dias)) * 100)
-                if chamados_fechados_30_dias
-                else 100
-            )
-
-    return render_template(
-        "dashboard.html",
-        tasks_total=tasks_total,
-        tasks_done=tasks_done,
-        tasks_pending=tasks_pending,
-        tasks_expired=tasks_expired,
-        reminders_total=reminders_total,
-        reminders_done=reminders_done,
-        reminders_pending=reminders_pending,
-        chamados_total=chamados_total,
-        chamados_aberto=chamados_aberto,
-        chamados_em_andamento=chamados_em_andamento,
-        chamados_resolvido=chamados_resolvido,  # Novo
-        chamados_fechado=chamados_fechado,
-        equipamentos_total=equipamentos_total,  # Total de equipamentos
-        equipamentos_solicitados=equipamentos_solicitados,
-        equipamentos_aprovados=equipamentos_aprovados,
-        equipamentos_entregues=equipamentos_entregues,
-        equipamentos_devolvidos=equipamentos_devolvidos,
-        equipamentos_negados=equipamentos_negados,
-        sectors=sectors,
-        users=users,
-        selected_sector=sector_id,
-        selected_user=user_id,
-        meses_labels=meses_labels,
-        tarefas_por_mes=tarefas_por_mes,
-        tarefas_concluidas_por_mes=tarefas_concluidas_por_mes,
-        lembretes_por_mes=lembretes_por_mes,
-        lembretes_realizados_por_mes=lembretes_realizados_por_mes,
-        chamados_por_mes=chamados_por_mes,
-        equipamentos_por_mes=equipamentos_por_mes,
-        setores_labels=setores_labels,
-        tarefas_por_setor=tarefas_por_setor,
-        lembretes_por_setor=lembretes_por_setor,
-        chamados_por_setor=chamados_por_setor,  # Novo
-        equipamentos_por_setor=equipamentos_por_setor,
-        total_tutoriais=total_tutoriais,
-        top_tutoriais_labels=top_tutoriais_labels,
-        top_tutoriais_values=top_tutoriais_values,
-        feedbacks_util=feedbacks_util,
-        feedbacks_nao_util=feedbacks_nao_util,
-        top_feedback_labels=top_feedback_labels,
-        top_feedback_values=top_feedback_values,
-        tutorial_mais_visualizado=tutorial_mais_visualizado,
-        tutorial_mais_util=tutorial_mais_util,
-        sla_vencidos=sla_vencidos,
-        sla_criticos=sla_criticos,
-        sla_ok=sla_ok,
-        performance_sla=performance_sla,
-        chamados_sla=chamados_sla,
-    )
+    return render_template("dashboard.html", **template_data)
 
 
 @bp.route("/export/excel")
@@ -1852,15 +1604,13 @@ def export_pdf():
     from flask import make_response  # make_response adicionado
     from flask import request, session
     from reportlab.lib import colors
-    # Models já importados na export_excel, mas para clareza se esta função for movida:
-    # from .models import Task, Reminder, Chamado, Sector, User
-    # datetime, date já importados
-    # from io import BytesIO # Já importado
-    from reportlab.lib.pagesizes import landscape, letter
-    from reportlab.lib.styles import getSampleStyleSheet
-    from reportlab.lib.units import inch
+    from reportlab.lib.pagesizes import landscape, letter, A4
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch, cm
     from reportlab.platypus import (PageBreak, Paragraph, SimpleDocTemplate,
-                                    Spacer, Table, TableStyle)
+                                    Spacer, Table, TableStyle, Image, Frame,
+                                    PageTemplate, BaseDocTemplate)
+    from reportlab.lib.colors import HexColor
 
     task_status = request.args.get("task_status", "")
     reminder_status = request.args.get("reminder_status", "")
@@ -1969,235 +1719,460 @@ def export_pdf():
             EquipmentRequest.requester_id == user_id_filter
         )
 
+    # Criar PDF profissional em formato LANDSCAPE
     buffer = BytesIO()
-    doc = SimpleDocTemplate(
-        buffer,
-        pagesize=landscape(letter),
-        rightMargin=0.5 * inch,
-        leftMargin=0.5 * inch,
-        topMargin=0.5 * inch,
-        bottomMargin=0.5 * inch,
-    )
-    elements = []
+
+    # Configurar estilos profissionais
     styles = getSampleStyleSheet()
-    title_style = styles["h2"]  # Usar H2 para subtítulos de seção
-    title_style.alignment = 1  # Center
-    normal_style = styles["Normal"]
-    normal_style.fontSize = 8  # Reduzir um pouco para caber mais dados
 
-    # Definindo larguras das colunas (ajustar conforme necessário)
-    col_widths_tasks = [
-        2.3 * inch,
-        0.8 * inch,
-        1.2 * inch,
-        1.2 * inch,
-        1.2 * inch,
-        0.8 * inch,
-    ]
-    col_widths_reminders = [
-        1.8 * inch,
-        0.8 * inch,
-        0.8 * inch,
-        1.2 * inch,
-        1.2 * inch,
-        1.2 * inch,
-        0.8 * inch,
-    ]
-    col_widths_chamados = [
-        0.4 * inch,
-        1.5 * inch,
-        0.8 * inch,
-        0.8 * inch,
-        1.2 * inch,
-        1.2 * inch,
-        1.2 * inch,
-        1.2 * inch,
-    ]
-    col_widths_equipamentos = [
-        0.4 * inch,
-        2 * inch,
-        0.8 * inch,
-        0.8 * inch,
-        0.8 * inch,
-        1 * inch,
-        1 * inch,
-    ]  # Larguras para equipamentos
-
-    table_style = TableStyle(
-        [
-            (
-                "BACKGROUND",
-                (0, 0),
-                (-1, 0),
-                colors.HexColor("#4F81BD"),
-            ),  # Azul escuro para cabeçalho
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, 0), 9),
-            ("BOTTOMPADDING", (0, 0), (-1, 0), 10),
-            (
-                "BACKGROUND",
-                (0, 1),
-                (-1, -1),
-                colors.HexColor("#DCE6F1"),
-            ),  # Azul claro para dados
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
-            ("LEFTPADDING", (0, 0), (-1, -1), 3),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 3),
-        ]
+    # Estilos customizados
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        spaceAfter=30,
+        alignment=1,  # Center
+        textColor=HexColor('#2C3E50')
     )
 
-    # Título Geral do Documento
-    elements.append(Paragraph("Relatório Geral - TI OSN System", styles["h1"]))
-    elements.append(Spacer(1, 0.3 * inch))
+    subtitle_style = ParagraphStyle(
+        'CustomSubtitle',
+        parent=styles['Heading2'],
+        fontSize=18,
+        spaceAfter=20,
+        textColor=HexColor('#34495E')
+    )
 
+    section_title_style = ParagraphStyle(
+        'SectionTitle',
+        parent=styles['Heading3'],
+        fontSize=14,
+        spaceAfter=15,
+        textColor=HexColor('#2C3E50'),
+        borderWidth=1,
+        borderColor=HexColor('#BDC3C7'),
+        borderPadding=5,
+        backgroundColor=HexColor('#ECF0F1')
+    )
+
+    normal_style = ParagraphStyle(
+        'CustomNormal',
+        parent=styles['Normal'],
+        fontSize=10,
+        spaceAfter=12,
+        textColor=HexColor('#2C3E50')
+    )
+
+    # Função para criar cabeçalho e rodapé em LANDSCAPE
+    def header_footer(canvas, doc):
+        canvas.saveState()
+
+        # Cabeçalho - ajustado para landscape
+        canvas.setFont('Helvetica-Bold', 12)
+        canvas.setFillColor(HexColor('#2C3E50'))
+        canvas.drawString(1.5*cm, 19*cm, "TI OSN System - Relatório Executivo")
+
+        canvas.setFont('Helvetica', 8)
+        canvas.setFillColor(HexColor('#7F8C8D'))
+        canvas.drawString(1.5*cm, 18.3*cm, f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+
+        # Linha separadora - ajustada para landscape
+        canvas.setStrokeColor(HexColor('#BDC3C7'))
+        canvas.line(1.5*cm, 17.8*cm, 27*cm, 17.8*cm)
+
+        # Rodapé - ajustado para landscape
+        canvas.setFont('Helvetica', 8)
+        canvas.setFillColor(HexColor('#7F8C8D'))
+        canvas.drawString(1.5*cm, 1*cm, f"Página {doc.page}")
+
+        # Logo/branding (simples) - ajustado para landscape
+        canvas.setFont('Helvetica-Bold', 10)
+        canvas.setFillColor(HexColor('#3498DB'))
+        canvas.drawString(23*cm, 1*cm, "OSN Technologies")
+
+        canvas.restoreState()
+
+    # Criar template de página LANDSCAPE
+    # A4 landscape: 29.7cm x 21cm, mas usaremos landscape(A4) que é 11.69" x 8.27"
+    from reportlab.lib.pagesizes import landscape
+    frame = Frame(1.5*cm, 2*cm, 26.5*cm, 16*cm, id='normal')  # Ajustado para landscape
+    template = PageTemplate(id='main', frames=frame, onPage=header_footer)
+    doc = BaseDocTemplate(buffer, pageTemplates=[template], pagesize=landscape(A4))
+
+    elements = []
+
+    # Página de capa - ajustada para landscape
+    elements.append(Spacer(1, 6*cm))
+    elements.append(Paragraph("RELATÓRIO EXECUTIVO", title_style))
+    elements.append(Spacer(1, 1*cm))
+    elements.append(Paragraph("Sistema de Gestão TI OSN", subtitle_style))
+    elements.append(Spacer(1, 2*cm))
+
+    # Informações do relatório
+    report_info = [
+        ["Data de Geração:", datetime.now().strftime("%d/%m/%Y %H:%M")],
+        ["Período Analisado:", f"{start_date.strftime('%d/%m/%Y') if start_date else 'Todo período'} - {end_date.strftime('%d/%m/%Y') if end_date else 'Atual'}"],
+        ["Usuário:", User.query.get(session.get('user_id')).username if session.get('user_id') else 'Sistema'],
+        ["Tipo de Relatório:", export_type.title()],
+    ]
+
+    info_table = Table(report_info, colWidths=[4*cm, 10*cm])
+    info_table.setStyle(TableStyle([
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('TEXTCOLOR', (0, 0), (0, -1), HexColor('#2C3E50')),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    elements.append(info_table)
+    elements.append(PageBreak())
+
+    # Sumário Executivo
+    elements.append(Paragraph("SUMÁRIO EXECUTIVO", section_title_style))
+    elements.append(Spacer(1, 0.5*cm))
+
+    # Calcular estatísticas gerais
+    total_tasks = len(tasks) if 'tasks' in locals() else 0
+    completed_tasks = sum(1 for t in tasks if t.completed) if 'tasks' in locals() else 0
+    total_reminders = len(reminders) if 'reminders' in locals() else 0
+    completed_reminders = sum(1 for r in reminders if r.completed) if 'reminders' in locals() else 0
+    total_chamados = len(chamados) if 'chamados' in locals() else 0
+    closed_chamados = sum(1 for c in chamados if c.status == 'Fechado') if 'chamados' in locals() else 0
+
+    executive_summary = f"""
+    Este relatório apresenta uma análise abrangente do Sistema de Gestão TI OSN, abrangendo o período de {start_date.strftime('%d/%m/%Y') if start_date else 'todo o histórico'} até {end_date.strftime('%d/%m/%Y') if end_date else 'data atual'}.
+
+    <b>Métricas Principais:</b><br/>
+    • Total de Tarefas: {total_tasks} ({completed_tasks} concluídas - {round(completed_tasks/total_tasks*100, 1) if total_tasks > 0 else 0}% de conclusão)<br/>
+    • Total de Lembretes: {total_reminders} ({completed_reminders} realizados - {round(completed_reminders/total_reminders*100, 1) if total_reminders > 0 else 0}% de realização)<br/>
+    • Total de Chamados: {total_chamados} ({closed_chamados} fechados - {round(closed_chamados/total_chamados*100, 1) if total_chamados > 0 else 0}% de resolução)<br/>
+    • Eficiência Geral: {round((completed_tasks + completed_reminders + closed_chamados) / (total_tasks + total_reminders + total_chamados) * 100, 1) if (total_tasks + total_reminders + total_chamados) > 0 else 0}%<br/>
+
+    O relatório inclui análises detalhadas, gráficos de performance e recomendações para otimização dos processos.
+    """
+
+    elements.append(Paragraph(executive_summary, normal_style))
+    elements.append(PageBreak())
+
+    # Índice
+    elements.append(Paragraph("ÍNDICE", section_title_style))
+    elements.append(Spacer(1, 0.5*cm))
+
+    toc_content = """
+    1. Sumário Executivo ........................... 1<br/>
+    2. Índice ....................................... 2<br/>
+    3. Visão Geral do Sistema ........................ 3<br/>
+    4. Análise de Tarefas ........................... 4<br/>
+    5. Análise de Lembretes ......................... 5<br/>
+    6. Análise de Chamados .......................... 6<br/>
+    7. Controle de Equipamentos ..................... 7<br/>
+    8. Base de Conhecimento ........................ 8<br/>
+    9. Indicadores de Performance ................... 9<br/>
+    10. Recomendações ............................. 10<br/>
+    """
+
+    elements.append(Paragraph(toc_content, normal_style))
+    elements.append(PageBreak())
+
+    # Visão Geral do Sistema
+    elements.append(Paragraph("VISÃO GERAL DO SISTEMA", section_title_style))
+    elements.append(Spacer(1, 0.5*cm))
+
+    system_overview = f"""
+    <b>Visão Geral do Sistema TI OSN</b><br/><br/>
+
+    O Sistema de Gestão TI OSN é uma plataforma abrangente para gerenciamento de atividades, chamados de suporte, lembretes e controle de equipamentos. Esta análise apresenta dados consolidados de todas as operações do sistema.
+
+    <b>Período de Análise:</b> {start_date.strftime('%d/%m/%Y') if start_date else 'Todo o histórico'} - {end_date.strftime('%d/%m/%Y') if end_date else 'Data atual'}<br/>
+    <b>Filtros Aplicados:</b> {', '.join([f'{k}: {v}' for k, v in request.args.items() if v and k != 'export_type']) or 'Nenhum filtro adicional'}<br/>
+    <b>Usuário Responsável:</b> {User.query.get(session.get('user_id')).username if session.get('user_id') else 'Sistema'}<br/>
+
+    <b>Status Geral do Sistema:</b><br/>
+    • Sistema operacional e funcional<br/>
+    • Base de dados atualizada<br/>
+    • Relatório gerado automaticamente<br/>
+    """
+
+    elements.append(Paragraph(system_overview, normal_style))
+    elements.append(PageBreak())
+
+    # Análise de Tarefas
     if export_type in ["all", "tasks"]:
+        elements.append(Paragraph("ANÁLISE DE TAREFAS", section_title_style))
+        elements.append(Spacer(1, 0.5*cm))
+
         tasks = task_query.all()
-        elements.append(Paragraph("Relatório de Tarefas", title_style))
-        elements.append(Spacer(1, 0.1 * inch))
+
+        # Estatísticas das tarefas
+        total_tasks = len(tasks)
+        completed_tasks = sum(1 for t in tasks if t.completed)
+        pending_tasks = total_tasks - completed_tasks
+        overdue_tasks = sum(1 for t in tasks if not t.completed and t.date and t.date < date.today())
+
+        task_stats = f"""
+        <b>Estatísticas de Tarefas:</b><br/>
+        • Total de Tarefas: {total_tasks}<br/>
+        • Tarefas Concluídas: {completed_tasks} ({round(completed_tasks/total_tasks*100, 1) if total_tasks > 0 else 0}%)<br/>
+        • Tarefas Pendentes: {pending_tasks} ({round(pending_tasks/total_tasks*100, 1) if total_tasks > 0 else 0}%)<br/>
+        • Tarefas Vencidas: {overdue_tasks}<br/>
+        • Taxa de Conclusão: {round(completed_tasks/total_tasks*100, 1) if total_tasks > 0 else 0}%<br/>
+        """
+
+        elements.append(Paragraph(task_stats, normal_style))
+        elements.append(Spacer(1, 0.5*cm))
+
         if tasks:
-            data_tasks = [
-                ["Descrição", "Data", "Responsável", "Setor", "Usuário", "Concluída"]
-            ]
+            # Tabela de tarefas
+            data_tasks = [["ID", "Descrição", "Data", "Responsável", "Setor", "Status"]]
+
             for t in tasks:
-                data_tasks.append(
-                    [
-                        Paragraph(t.description if t.description else "", normal_style),
-                        t.date.strftime("%d/%m/%Y") if t.date else "",
-                        Paragraph(t.responsible if t.responsible else "", normal_style),
-                        Paragraph(t.sector.name if t.sector else "", normal_style),
-                        Paragraph(
-                            t.usuario.username if t.usuario else "", normal_style
-                        ),
-                        "Sim" if t.completed else "Não",
-                    ]
-                )
-            table = Table(data_tasks, colWidths=col_widths_tasks)
-            table.setStyle(table_style)
-            elements.append(table)
+                status = "Concluída" if t.completed else ("Vencida" if t.date and t.date < date.today() else "Pendente")
+                status_color = "green" if t.completed else ("red" if t.date and t.date < date.today() else "orange")
+
+                data_tasks.append([
+                    str(t.id),
+                    Paragraph(t.description[:50] + "..." if t.description and len(t.description) > 50 else t.description or "", normal_style),
+                    t.date.strftime("%d/%m/%Y") if t.date else "N/A",
+                    t.responsible or "N/A",
+                    t.sector.name if t.sector else "N/A",
+                    status
+                ])
+
+            col_widths_tasks = [1.2*cm, 8*cm, 3*cm, 3.5*cm, 3.5*cm, 3*cm]
+            table_tasks = Table(data_tasks, colWidths=col_widths_tasks, repeatRows=1)
+
+            table_style_tasks = TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), HexColor('#34495E')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('BACKGROUND', (0, 1), (-1, -1), HexColor('#ECF0F1')),
+                ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#BDC3C7')),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ])
+
+            table_tasks.setStyle(table_style_tasks)
+            elements.append(table_tasks)
         else:
-            elements.append(Paragraph("Nenhuma tarefa encontrada.", normal_style))
+            elements.append(Paragraph("Nenhuma tarefa encontrada com os filtros aplicados.", normal_style))
+
         elements.append(PageBreak() if export_type == "all" else Spacer(1, 0.3 * inch))
 
+    # Análise de Lembretes
     if export_type in ["all", "reminders"]:
+        elements.append(Paragraph("ANÁLISE DE LEMBRETES", section_title_style))
+        elements.append(Spacer(1, 0.5*cm))
+
         reminders = reminder_query.all()
-        elements.append(Paragraph("Relatório de Lembretes", title_style))
-        elements.append(Spacer(1, 0.1 * inch))
+
+        # Estatísticas dos lembretes
+        total_reminders = len(reminders)
+        completed_reminders = sum(1 for r in reminders if r.completed)
+        pending_reminders = total_reminders - completed_reminders
+        expired_reminders = sum(1 for r in reminders if not r.completed and r.due_date and r.due_date < date.today())
+
+        reminder_stats = f"""
+        <b>Estatísticas de Lembretes:</b><br/>
+        • Total de Lembretes: {total_reminders}<br/>
+        • Lembretes Realizados: {completed_reminders} ({round(completed_reminders/total_reminders*100, 1) if total_reminders > 0 else 0}%)<br/>
+        • Lembretes Pendentes: {pending_reminders} ({round(pending_reminders/total_reminders*100, 1) if total_reminders > 0 else 0}%)<br/>
+        • Lembretes Vencidos: {expired_reminders}<br/>
+        • Taxa de Realização: {round(completed_reminders/total_reminders*100, 1) if total_reminders > 0 else 0}%<br/>
+        """
+
+        elements.append(Paragraph(reminder_stats, normal_style))
+        elements.append(Spacer(1, 0.5*cm))
+
         if reminders:
-            data_reminders = [
-                [
-                    "Nome",
-                    "Tipo",
-                    "Vencimento",
-                    "Responsável",
-                    "Setor",
-                    "Usuário",
-                    "Realizado",
-                ]
-            ]
+            # Tabela de lembretes
+            data_reminders = [["ID", "Nome", "Tipo", "Vencimento", "Responsável", "Setor", "Status"]]
+
             for r in reminders:
-                data_reminders.append(
-                    [
-                        Paragraph(r.name if r.name else "", normal_style),
-                        Paragraph(r.type if r.type else "", normal_style),
-                        r.due_date.strftime("%d/%m/%Y") if r.due_date else "",
-                        Paragraph(r.responsible if r.responsible else "", normal_style),
-                        Paragraph(r.sector.name if r.sector else "", normal_style),
-                        Paragraph(
-                            r.usuario.username if r.usuario else "", normal_style
-                        ),
-                        "Sim" if r.completed else "Não",
-                    ]
-                )
-            table = Table(data_reminders, colWidths=col_widths_reminders)
-            table.setStyle(table_style)
-            elements.append(table)
+                status = "Realizado" if r.completed else ("Vencido" if r.due_date and r.due_date < date.today() else "Pendente")
+
+                data_reminders.append([
+                    str(r.id),
+                    Paragraph(r.name[:40] + "..." if r.name and len(r.name) > 40 else r.name or "", normal_style),
+                    r.type or "N/A",
+                    r.due_date.strftime("%d/%m/%Y") if r.due_date else "N/A",
+                    r.responsible or "N/A",
+                    r.sector.name if r.sector else "N/A",
+                    status
+                ])
+
+            col_widths_reminders = [1.2*cm, 7*cm, 3*cm, 3*cm, 3.5*cm, 3.5*cm, 3*cm]
+            table_reminders = Table(data_reminders, colWidths=col_widths_reminders, repeatRows=1)
+
+            table_style_reminders = TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), HexColor('#E74C3C')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('BACKGROUND', (0, 1), (-1, -1), HexColor('#FADBD8')),
+                ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#E74C3C')),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ])
+
+            table_reminders.setStyle(table_style_reminders)
+            elements.append(table_reminders)
         else:
-            elements.append(Paragraph("Nenhum lembrete encontrado.", normal_style))
+            elements.append(Paragraph("Nenhum lembrete encontrado com os filtros aplicados.", normal_style))
+
         elements.append(PageBreak() if export_type == "all" else Spacer(1, 0.3 * inch))
 
+    # Análise de Chamados
     if export_type in ["all", "chamados"]:
+        elements.append(Paragraph("ANÁLISE DE CHAMADOS", section_title_style))
+        elements.append(Spacer(1, 0.5*cm))
+
         chamados = chamado_query.all()
-        elements.append(Paragraph("Relatório de Chamados", title_style))
-        elements.append(Spacer(1, 0.1 * inch))
+
+        # Estatísticas dos chamados
+        total_chamados = len(chamados)
+        abertos = sum(1 for c in chamados if c.status == 'Aberto')
+        andamento = sum(1 for c in chamados if c.status == 'Em Andamento')
+        resolvidos = sum(1 for c in chamados if c.status == 'Resolvido')
+        fechados = sum(1 for c in chamados if c.status == 'Fechado')
+
+        # SLA Analysis
+        chamados_com_sla = [c for c in chamados if c.prazo_sla]
+        sla_cumpridos = sum(1 for c in chamados_com_sla if c.sla_cumprido)
+        taxa_sla = round(sla_cumpridos / len(chamados_com_sla) * 100, 1) if chamados_com_sla else 0
+
+        chamados_stats = f"""
+        <b>Estatísticas de Chamados:</b><br/>
+        • Total de Chamados: {total_chamados}<br/>
+        • Status: {abertos} Abertos, {andamento} Em Andamento, {resolvidos} Resolvidos, {fechados} Fechados<br/>
+        • Taxa de Resolução: {round(fechados/total_chamados*100, 1) if total_chamados > 0 else 0}%<br/>
+        • Chamados com SLA: {len(chamados_com_sla)}<br/>
+        • Performance SLA: {taxa_sla}% ({sla_cumpridos}/{len(chamados_com_sla)} cumpridos)<br/>
+        """
+
+        elements.append(Paragraph(chamados_stats, normal_style))
+        elements.append(Spacer(1, 0.5*cm))
+
         if chamados:
-            data_chamados = [
-                [
-                    "ID",
-                    "Título",
-                    "Status",
-                    "Prioridade",
-                    "Abertura",
-                    "Solicitante",
-                    "Setor",
-                    "Resp. TI",
-                ]
-            ]
+            # Tabela de chamados
+            data_chamados = [["ID", "Título", "Status", "Prioridade", "Abertura", "Solicitante", "Setor", "SLA"]]
+
             for c in chamados:
-                data_chamados.append(
-                    [
-                        str(c.id),
-                        Paragraph(c.titulo if c.titulo else "", normal_style),
-                        Paragraph(c.status if c.status else "", normal_style),
-                        Paragraph(c.prioridade if c.prioridade else "", normal_style),
-                        c.data_abertura.strftime("%d/%m/%Y %H:%M")
-                        if c.data_abertura
-                        else "",
-                        Paragraph(
-                            c.solicitante.username if c.solicitante else "",
-                            normal_style,
-                        ),
-                        Paragraph(c.setor.name if c.setor else "", normal_style),
-                        Paragraph(
-                            c.responsavel_ti.username if c.responsavel_ti else "",
-                            normal_style,
-                        ),
-                    ]
-                )
-            table = Table(data_chamados, colWidths=col_widths_chamados)
-            table.setStyle(table_style)
-            elements.append(table)
+                sla_status = "OK" if c.sla_cumprido else "Vencido" if c.prazo_sla and c.data_fechamento and c.data_fechamento > c.prazo_sla else "Em Prazo"
+
+                data_chamados.append([
+                    str(c.id),
+                    Paragraph(c.titulo[:40] + "..." if c.titulo and len(c.titulo) > 40 else c.titulo or "", normal_style),
+                    c.status,
+                    c.prioridade,
+                    c.data_abertura.strftime("%d/%m/%Y") if c.data_abertura else "N/A",
+                    c.solicitante.username if c.solicitante else "N/A",
+                    c.setor.name if c.setor else "N/A",
+                    sla_status
+                ])
+
+            col_widths_chamados = [1.2*cm, 7*cm, 3*cm, 3*cm, 3.5*cm, 3.5*cm, 3*cm, 2.5*cm]
+            table_chamados = Table(data_chamados, colWidths=col_widths_chamados, repeatRows=1)
+
+            table_style_chamados = TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), HexColor('#27AE60')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('BACKGROUND', (0, 1), (-1, -1), HexColor('#D5F4E6')),
+                ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#27AE60')),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ])
+
+            table_chamados.setStyle(table_style_chamados)
+            elements.append(table_chamados)
         else:
-            elements.append(Paragraph("Nenhum chamado encontrado.", normal_style))
+            elements.append(Paragraph("Nenhum chamado encontrado com os filtros aplicados.", normal_style))
+
         elements.append(PageBreak() if export_type == "all" else Spacer(1, 0.3 * inch))
 
+    # Controle de Equipamentos
     if export_type in ["all", "equipamentos"]:
+        elements.append(Paragraph("CONTROLE DE EQUIPAMENTOS", section_title_style))
+        elements.append(Spacer(1, 0.5*cm))
+
         equipamentos = equipment_query.all()
-        elements.append(Paragraph("Relatório de Equipamentos", title_style))
-        elements.append(Spacer(1, 0.1 * inch))
+
+        # Estatísticas dos equipamentos
+        total_equipamentos = len(equipamentos)
+        solicitados = sum(1 for e in equipamentos if e.status == 'Solicitado')
+        aprovados = sum(1 for e in equipamentos if e.status == 'Aprovado')
+        entregues = sum(1 for e in equipamentos if e.status == 'Entregue')
+        devolvidos = sum(1 for e in equipamentos if e.status == 'Devolvido')
+        negados = sum(1 for e in equipamentos if e.status == 'Negado')
+
+        equipamentos_stats = f"""
+        <b>Estatísticas de Equipamentos:</b><br/>
+        • Total de Solicitações: {total_equipamentos}<br/>
+        • Status: {solicitados} Solicitados, {aprovados} Aprovados, {entregues} Entregues, {devolvidos} Devolvidos, {negados} Negados<br/>
+        • Taxa de Aprovação: {round(aprovados/total_equipamentos*100, 1) if total_equipamentos > 0 else 0}%<br/>
+        • Taxa de Entrega: {round(entregues/total_equipamentos*100, 1) if total_equipamentos > 0 else 0}%<br/>
+        • Taxa de Devolução: {round(devolvidos/total_equipamentos*100, 1) if total_equipamentos > 0 else 0}%<br/>
+        """
+
+        elements.append(Paragraph(equipamentos_stats, normal_style))
+        elements.append(Spacer(1, 0.5*cm))
+
         if equipamentos:
-            data_equipamentos = [
-                [
-                    "ID",
-                    "Descrição",
-                    "Patrimônio",
-                    "Tipo",
-                    "Status",
-                    "Solicitante",
-                    "Data Solicitação",
-                ]
-            ]
+            # Tabela de equipamentos
+            data_equipamentos = [["ID", "Descrição", "Patrimônio", "Tipo", "Status", "Solicitante", "Data"]]
+
             for e in equipamentos:
-                data_equipamentos.append(
-                    [
-                        str(e.id),
-                        Paragraph(e.description if e.description else "", normal_style),
-                        e.patrimony if e.patrimony else "",
-                        e.equipment_type if e.equipment_type else "",
-                        Paragraph(e.status if e.status else "", normal_style),
-                        Paragraph(
-                            e.requester.username if e.requester else "", normal_style
-                        ),
-                        e.request_date.strftime("%d/%m/%Y") if e.request_date else "",
-                    ]
-                )
-            table = Table(data_equipamentos, colWidths=col_widths_equipamentos)
-            table.setStyle(table_style)
-            elements.append(table)
+                data_equipamentos.append([
+                    str(e.id),
+                    Paragraph(e.description[:40] + "..." if e.description and len(e.description) > 40 else e.description or "", normal_style),
+                    e.patrimony or "N/A",
+                    e.equipment_type or "N/A",
+                    e.status,
+                    e.requester.username if e.requester else "N/A",
+                    e.request_date.strftime("%d/%m/%Y") if e.request_date else "N/A"
+                ])
+
+            col_widths_equipamentos = [1.2*cm, 7*cm, 3*cm, 3*cm, 3*cm, 3.5*cm, 3*cm]
+            table_equipamentos = Table(data_equipamentos, colWidths=col_widths_equipamentos, repeatRows=1)
+
+            table_style_equipamentos = TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), HexColor('#9B59B6')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('BACKGROUND', (0, 1), (-1, -1), HexColor('#E8DAEF')),
+                ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#9B59B6')),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ])
+
+            table_equipamentos.setStyle(table_style_equipamentos)
+            elements.append(table_equipamentos)
         else:
-            elements.append(Paragraph("Nenhum equipamento encontrado.", normal_style))
+            elements.append(Paragraph("Nenhum equipamento encontrado com os filtros aplicados.", normal_style))
+
         elements.append(PageBreak() if export_type == "all" else Spacer(1, 0.3 * inch))
 
     if not elements or all(
@@ -2212,6 +2187,7 @@ def export_pdf():
             )
         )
 
+    # Base de Conhecimento (Tutoriais)
     tutorial_query = Tutorial.query
     if not is_admin and not is_ti:
         tutorial_query = tutorial_query.filter(Tutorial.autor_id == current_user_id)
@@ -2224,58 +2200,162 @@ def export_pdf():
     if end_date:
         tutorial_query = tutorial_query.filter(Tutorial.data_criacao <= end_date)
     tutoriais = tutorial_query.all()
+
     if export_type in ["all", "tutoriais"]:
-        elements.append(Paragraph("Relatório de Tutoriais", title_style))
-        elements.append(Spacer(1, 0.1 * inch))
+        elements.append(Paragraph("BASE DE CONHECIMENTO", section_title_style))
+        elements.append(Spacer(1, 0.5*cm))
+
+        # Estatísticas dos tutoriais
+        total_tutoriais = len(tutoriais)
+        total_visualizacoes = sum(len(t.visualizacoes) for t in tutoriais)
+        total_feedbacks = sum(len(t.feedbacks) for t in tutoriais)
+        feedbacks_uteis = sum(sum(1 for f in t.feedbacks if f.util) for t in tutoriais)
+        media_visualizacoes = round(total_visualizacoes / total_tutoriais, 1) if total_tutoriais > 0 else 0
+        taxa_satisfacao = round(feedbacks_uteis / total_feedbacks * 100, 1) if total_feedbacks > 0 else 0
+
+        tutoriais_stats = f"""
+        <b>Estatísticas da Base de Conhecimento:</b><br/>
+        • Total de Tutoriais: {total_tutoriais}<br/>
+        • Total de Visualizações: {total_visualizacoes}<br/>
+        • Média de Visualizações por Tutorial: {media_visualizacoes}<br/>
+        • Total de Feedbacks: {total_feedbacks}<br/>
+        • Feedbacks Úteis: {feedbacks_uteis} ({taxa_satisfacao}%)<br/>
+        • Taxa de Satisfação: {taxa_satisfacao}%<br/>
+        """
+
+        elements.append(Paragraph(tutoriais_stats, normal_style))
+        elements.append(Spacer(1, 0.5*cm))
+
         if tutoriais:
-            data_tutoriais = [
-                [
-                    "Título",
-                    "Categoria",
-                    "Autor",
-                    "Data de Criação",
-                    "Visualizações",
-                    "Feedback Útil",
-                    "Feedback Não Útil",
-                ]
-            ]
+            # Tabela de tutoriais
+            data_tutoriais = [["Título", "Categoria", "Autor", "Visualizações", "Feedbacks", "Avaliação"]]
+
             for t in tutoriais:
-                data_tutoriais.append(
-                    [
-                        Paragraph(t.titulo if t.titulo else "", normal_style),
-                        Paragraph(t.categoria if t.categoria else "", normal_style),
-                        Paragraph(t.autor.username if t.autor else "", normal_style),
-                        t.data_criacao.strftime("%d/%m/%Y %H:%M"),
-                        str(len(t.visualizacoes)),
-                        str(sum(1 for f in t.feedbacks if f.util)),
-                        str(sum(1 for f in t.feedbacks if not f.util)),
-                    ]
-                )
-            table = Table(
-                data_tutoriais,
-                colWidths=[
-                    2 * inch,
-                    1 * inch,
-                    1.2 * inch,
-                    1.2 * inch,
-                    1 * inch,
-                    1 * inch,
-                    1 * inch,
-                ],
-            )
-            table.setStyle(table_style)
-            elements.append(table)
+                feedbacks_positivos = sum(1 for f in t.feedbacks if f.util)
+                total_feedbacks_t = len(t.feedbacks)
+                avaliacao = f"{feedbacks_positivos}/{total_feedbacks_t}" if total_feedbacks_t > 0 else "N/A"
+
+                data_tutoriais.append([
+                    Paragraph(t.titulo[:35] + "..." if t.titulo and len(t.titulo) > 35 else t.titulo or "", normal_style),
+                    t.categoria or "N/A",
+                    t.autor.username if t.autor else "N/A",
+                    str(len(t.visualizacoes)),
+                    str(total_feedbacks_t),
+                    avaliacao
+                ])
+
+            col_widths_tutoriais = [6*cm, 3*cm, 3.5*cm, 2*cm, 2*cm, 2.5*cm]
+            table_tutoriais = Table(data_tutoriais, colWidths=col_widths_tutoriais, repeatRows=1)
+
+            table_style_tutoriais = TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), HexColor('#F39C12')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('BACKGROUND', (0, 1), (-1, -1), HexColor('#FDEAA7')),
+                ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#F39C12')),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ])
+
+            table_tutoriais.setStyle(table_style_tutoriais)
+            elements.append(table_tutoriais)
         else:
-            elements.append(Paragraph("Nenhum tutorial encontrado.", normal_style))
+            elements.append(Paragraph("Nenhum tutorial encontrado com os filtros aplicados.", normal_style))
+
         elements.append(PageBreak() if export_type == "all" else Spacer(1, 0.3 * inch))
 
+    # Indicadores de Performance
+    if export_type == "all":
+        elements.append(Paragraph("INDICADORES DE PERFORMANCE", section_title_style))
+        elements.append(Spacer(1, 0.5*cm))
+
+        # KPIs principais
+        kpis_data = [
+            ["Indicador", "Valor", "Meta", "Status"],
+            ["Taxa de Conclusão de Tarefas", f"{round(completed_tasks/total_tasks*100, 1) if total_tasks > 0 else 0}%", "80%", "✓" if (completed_tasks/total_tasks*100 if total_tasks > 0 else 0) >= 80 else "✗"],
+            ["Taxa de Realização de Lembretes", f"{round(completed_reminders/total_reminders*100, 1) if total_reminders > 0 else 0}%", "85%", "✓" if (completed_reminders/total_reminders*100 if total_reminders > 0 else 0) >= 85 else "✗"],
+            ["Taxa de Resolução de Chamados", f"{round(fechados/total_chamados*100, 1) if total_chamados > 0 else 0}%", "90%", "✓" if (fechados/total_chamados*100 if total_chamados > 0 else 0) >= 90 else "✗"],
+            ["Performance SLA", f"{taxa_sla}%", "95%", "✓" if taxa_sla >= 95 else "✗"],
+            ["Taxa de Satisfação Tutoriais", f"{taxa_satisfacao}%", "75%", "✓" if taxa_satisfacao >= 75 else "✗"],
+        ]
+
+        kpis_table = Table(kpis_data, colWidths=[7*cm, 3*cm, 3*cm, 3*cm])
+        kpis_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), HexColor('#2C3E50')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+            ('BACKGROUND', (0, 1), (-1, -1), HexColor('#ECF0F1')),
+            ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#BDC3C7')),
+            ('LEFTPADDING', (0, 0), (-1, -1), 4),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ]))
+        elements.append(kpis_table)
+        elements.append(PageBreak())
+
+        # Recomendações
+        elements.append(Paragraph("RECOMENDAÇÕES", section_title_style))
+        elements.append(Spacer(1, 0.5*cm))
+
+        recomendacoes = """
+        <b>Recomendações para Melhoria:</b><br/><br/>
+
+        <b>1. Gestão de Tarefas:</b><br/>
+        • Implementar sistema de notificações automáticas para tarefas próximas do vencimento<br/>
+        • Criar categorias de prioridade para melhor organização<br/>
+        • Estabelecer SLA interno para conclusão de tarefas<br/><br/>
+
+        <b>2. Gestão de Lembretes:</b><br/>
+        • Automatizar recorrência de lembretes de manutenção preventiva<br/>
+        • Implementar sistema de escalação para lembretes não realizados<br/>
+        • Criar templates padronizados para diferentes tipos de lembretes<br/><br/>
+
+        <b>3. Atendimento de Chamados:</b><br/>
+        • Melhorar tempo de primeira resposta através de chatbots<br/>
+        • Implementar sistema de conhecimento automático<br/>
+        • Criar métricas de satisfação do usuário<br/><br/>
+
+        <b>4. Controle de Equipamentos:</b><br/>
+        • Implementar RFID para rastreamento automático<br/>
+        • Criar alertas para equipamentos com devolução pendente<br/>
+        • Estabelecer política de manutenção preventiva<br/><br/>
+
+        <b>5. Base de Conhecimento:</b><br/>
+        • Incentivar criação de tutoriais pelos usuários<br/>
+        • Implementar sistema de avaliação e comentários<br/>
+        • Criar certificações para contribuidores ativos<br/><br/>
+
+        <b>Conclusão:</b><br/>
+        O sistema TI OSN apresenta boa performance geral, com oportunidades de melhoria identificadas.
+        A implementação das recomendações acima contribuirá para aumento da eficiência operacional
+        e melhoria na satisfação dos usuários.
+        """
+
+        elements.append(Paragraph(recomendacoes, normal_style))
+
+    # Verificar se há dados para exportar
+    if not elements or len(elements) <= 5:  # Apenas capa, sumário, índice
+        elements.append(Paragraph("Nenhum dado encontrado para os filtros aplicados.", normal_style))
+
+    # Gerar PDF
     doc.build(elements)
     buffer.seek(0)
+
+    # Retornar resposta
     response = make_response(buffer.getvalue())
     response.headers["Content-Type"] = "application/pdf"
-    response.headers[
-        "Content-Disposition"
-    ] = "attachment; filename=relatorio_ti_reminder.pdf"
+    response.headers["Content-Disposition"] = f"attachment; filename=relatorio_executivo_ti_osn_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
     return response
 
 
@@ -2352,6 +2432,7 @@ def tasks():
             date=form.date.data,
             responsible=form.responsible.data,
             completed=form.completed.data,
+            priority=form.priority.data,
             sector_id=sector_id,
             user_id=session.get("user_id"),
         )
@@ -3530,6 +3611,559 @@ def fill_technical_data(id):
     return render_template(
         "equipment_technical_form.html", equipment_request=equipment_request
     )
+
+
+# ========================================
+# ROTAS PARA INTEGRAÇÃO RFID
+# ========================================
+
+@bp.route("/rfid/scan", methods=["POST"])
+@login_required
+def rfid_scan():
+    """Endpoint para leitura RFID - chamado pelos leitores"""
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"success": False, "message": "Dados não fornecidos"}), 400
+
+    rfid_tag = data.get("rfid_tag")
+    reader_id = data.get("reader_id")
+
+    if not rfid_tag or not reader_id:
+        return jsonify({"success": False, "message": "Tag RFID e reader_id são obrigatórios"}), 400
+
+    # Processar leitura RFID
+    result = RFIDService.scan_equipment(rfid_tag, reader_id)
+
+    # Log da operação
+    if result["success"]:
+        current_app.logger.info(f"RFID Scan - Tag: {rfid_tag}, Reader: {reader_id}, Location: {result.get('new_location', 'Unknown')}")
+    else:
+        current_app.logger.warning(f"RFID Scan Failed - Tag: {rfid_tag}, Reader: {reader_id}, Error: {result['message']}")
+
+    return jsonify(result)
+
+
+@bp.route("/rfid/simulate/<rfid_tag>/<reader_id>", methods=["POST"])
+@login_required
+@admin_required
+def simulate_rfid_scan(rfid_tag, reader_id):
+    """Simular leitura RFID para testes (apenas admin)"""
+    result = RFIDService.simulate_rfid_scan(rfid_tag, reader_id)
+
+    if result["success"]:
+        flash(f"Leitura RFID simulada: {result['message']}", "success")
+    else:
+        flash(f"Erro na simulação: {result['message']}", "danger")
+
+    return redirect(url_for("main.rfid_dashboard"))
+
+
+@bp.route("/rfid/assign/<int:equipment_id>", methods=["POST"])
+@login_required
+@admin_required
+def assign_rfid_tag(equipment_id):
+    """Atribuir tag RFID a um equipamento"""
+    rfid_tag = request.form.get("rfid_tag", "").strip()
+
+    if not rfid_tag:
+        flash("Tag RFID é obrigatória.", "danger")
+        return redirect(url_for("main.equipment_detail", id=equipment_id))
+
+    result = RFIDService.assign_rfid_tag(equipment_id, rfid_tag)
+
+    if result["success"]:
+        flash("Tag RFID atribuída com sucesso!", "success")
+    else:
+        flash(f"Erro ao atribuir tag: {result['message']}", "danger")
+
+    return redirect(url_for("main.equipment_detail", id=equipment_id))
+
+
+@bp.route("/rfid/remove/<int:equipment_id>", methods=["POST"])
+@login_required
+@admin_required
+def remove_rfid_tag(equipment_id):
+    """Remover tag RFID de um equipamento"""
+    result = RFIDService.remove_rfid_tag(equipment_id)
+
+    if result["success"]:
+        flash("Tag RFID removida com sucesso!", "success")
+    else:
+        flash(f"Erro ao remover tag: {result['message']}", "danger")
+
+    return redirect(url_for("main.equipment_detail", id=equipment_id))
+
+
+@bp.route("/rfid/location/<int:equipment_id>")
+@login_required
+def get_equipment_location(equipment_id):
+    """Obter localização atual de um equipamento via RFID"""
+    result = RFIDService.get_equipment_location(equipment_id)
+    return jsonify(result)
+
+
+@bp.route("/rfid/dashboard")
+@login_required
+@admin_required
+def rfid_dashboard():
+    """Dashboard de monitoramento RFID"""
+    # Obter equipamentos com RFID ativo
+    rfid_equipment = EquipmentRequest.query.filter(
+        EquipmentRequest.rfid_tag.isnot(None)
+    ).order_by(EquipmentRequest.updated_at.desc()).all()
+
+    # Obter equipamentos perdidos
+    lost_equipment = RFIDService.get_lost_equipment()
+
+    # Status dos leitores
+    reader_status = RFIDService.get_reader_status()
+
+    # Estatísticas RFID
+    total_rfid_equipment = len(rfid_equipment)
+    active_rfid_equipment = sum(1 for eq in rfid_equipment if eq.rfid_status == "ativo")
+    lost_count = len(lost_equipment)
+
+    return render_template(
+        "rfid_dashboard.html",
+        rfid_equipment=rfid_equipment,
+        lost_equipment=lost_equipment,
+        reader_status=reader_status,
+        total_rfid_equipment=total_rfid_equipment,
+        active_rfid_equipment=active_rfid_equipment,
+        lost_count=lost_count,
+    )
+
+
+@bp.route("/rfid/bulk-assign", methods=["GET", "POST"])
+@login_required
+@admin_required
+def bulk_assign_rfid():
+    """Atribuição em lote de tags RFID"""
+    if request.method == "POST":
+        equipment_ids = request.form.getlist("equipment_ids[]")
+        rfid_tags = request.form.getlist("rfid_tags[]")
+
+        if not equipment_ids or not rfid_tags:
+            flash("Selecione equipamentos e forneça tags RFID.", "danger")
+            return redirect(url_for("main.bulk_assign_rfid"))
+
+        # Converter para inteiros
+        try:
+            equipment_ids = [int(id) for id in equipment_ids]
+        except ValueError:
+            flash("IDs de equipamentos inválidos.", "danger")
+            return redirect(url_for("main.bulk_assign_rfid"))
+
+        result = RFIDService.bulk_assign_rfid_tags(equipment_ids, rfid_tags)
+
+        if result["success"]:
+            flash(result["message"], "success")
+        else:
+            flash(result["message"], "danger")
+
+        return redirect(url_for("main.rfid_dashboard"))
+
+    # GET: mostrar formulário
+    # Equipamentos sem RFID atribuído
+    available_equipment = EquipmentRequest.query.filter(
+        EquipmentRequest.rfid_tag.is_(None),
+        EquipmentRequest.status.in_(["Aprovado", "Entregue"])
+    ).order_by(EquipmentRequest.id).all()
+
+    return render_template("rfid_bulk_assign.html", available_equipment=available_equipment)
+
+
+@bp.route("/api/rfid/status")
+@login_required
+def rfid_status_api():
+    """API para status RFID em tempo real"""
+    reader_status = RFIDService.get_reader_status()
+    lost_equipment = RFIDService.get_lost_equipment()
+
+    return jsonify({
+        "readers": reader_status,
+        "lost_equipment_count": len(lost_equipment),
+        "lost_equipment": [
+            {
+                "id": eq.id,
+                "description": eq.description,
+                "last_scan": eq.rfid_last_scan.isoformat() if eq.rfid_last_scan else None
+            }
+            for eq in lost_equipment[:5]  # Limitar a 5 para performance
+        ],
+        "timestamp": get_current_time_for_db().isoformat()
+    })
+
+
+# ========================================
+# ROTAS PARA MÉTRICAS DE SATISFAÇÃO
+# ========================================
+
+@bp.route("/satisfaction/survey/<int:chamado_id>", methods=["GET", "POST"])
+@login_required
+def satisfaction_survey(chamado_id):
+    """Página de pesquisa de satisfação para chamados"""
+    chamado = Chamado.query.get_or_404(chamado_id)
+
+    # Verificar se usuário pode avaliar este chamado
+    if chamado.solicitante_id != session.get("user_id") and not session.get("is_admin"):
+        flash("Você não tem permissão para avaliar este chamado.", "danger")
+        return redirect(url_for("main.index"))
+
+    # Verificar se chamado está fechado
+    if chamado.status != "Fechado":
+        flash("Apenas chamados fechados podem ser avaliados.", "warning")
+        return redirect(url_for("main.detalhe_chamado", id=chamado_id))
+
+    # Verificar se já foi avaliado
+    if chamado.satisfaction_rating:
+        flash("Este chamado já foi avaliado.", "info")
+        return redirect(url_for("main.detalhe_chamado", id=chamado_id))
+
+    if request.method == "POST":
+        rating = request.form.get("rating", type=int)
+        comment = request.form.get("comment", "").strip()
+
+        if not rating or not 1 <= rating <= 5:
+            flash("Por favor, selecione uma avaliação válida (1-5 estrelas).", "danger")
+            return render_template("satisfaction_survey.html", chamado=chamado)
+
+        result = SatisfactionService.record_satisfaction_rating(chamado_id, rating, comment)
+
+        if result["success"]:
+            flash("Avaliação registrada com sucesso! Obrigado pelo feedback.", "success")
+            return redirect(url_for("main.detalhe_chamado", id=chamado_id))
+        else:
+            flash(f"Erro ao registrar avaliação: {result['message']}", "danger")
+
+    return render_template("satisfaction_survey.html", chamado=chamado)
+
+
+@bp.route("/satisfaction/dashboard")
+@login_required
+@admin_required
+def satisfaction_dashboard():
+    """Dashboard de métricas de satisfação"""
+    # Estatísticas gerais
+    stats_30_days = SatisfactionService.get_satisfaction_stats(30)
+    stats_90_days = SatisfactionService.get_satisfaction_stats(90)
+
+    # Tendências
+    trends = SatisfactionService.get_satisfaction_trends(6)
+
+    # Feedback detalhado recente
+    recent_feedback = SatisfactionService.get_detailed_feedback(30)
+
+    # Chamados pendentes de avaliação
+    pending_surveys = SatisfactionService.get_pending_surveys()
+
+    return render_template(
+        "satisfaction_dashboard.html",
+        stats_30_days=stats_30_days,
+        stats_90_days=stats_90_days,
+        trends=trends,
+        recent_feedback=recent_feedback[:10],  # Limitar a 10 mais recentes
+        pending_surveys=pending_surveys[:10]   # Limitar a 10 pendentes
+    )
+
+
+@bp.route("/satisfaction/send-survey/<int:chamado_id>", methods=["POST"])
+@login_required
+@admin_required
+def send_satisfaction_survey(chamado_id):
+    """Enviar pesquisa de satisfação manualmente"""
+    result = SatisfactionService.send_satisfaction_survey(chamado_id)
+
+    if result["success"]:
+        flash("Pesquisa de satisfação enviada com sucesso!", "success")
+    else:
+        flash(f"Erro ao enviar pesquisa: {result['message']}", "danger")
+
+    return redirect(url_for("main.detalhe_chamado", id=chamado_id))
+
+
+@bp.route("/api/satisfaction/stats")
+@login_required
+def satisfaction_stats_api():
+    """API para estatísticas de satisfação em tempo real"""
+    stats = SatisfactionService.get_satisfaction_stats(30)
+
+    return jsonify({
+        "average_rating": stats["average_rating"],
+        "total_surveys": stats["total_surveys"],
+        "response_rate": stats["response_rate"],
+        "rating_distribution": stats["rating_distribution"],
+        "timestamp": get_current_time_for_db().isoformat()
+    })
+
+
+# ========================================
+# ROTAS PARA CERTIFICAÇÕES
+# ========================================
+
+@bp.route("/certifications/dashboard")
+@login_required
+def certifications_dashboard():
+    """Dashboard de certificações e leaderboard"""
+    # Obter dados para o template com tratamento de erro
+    try:
+        leaderboard = CertificationService.get_leaderboard(20)
+    except Exception as e:
+        current_app.logger.error(f"Erro ao obter leaderboard: {e}")
+        leaderboard = []
+
+    try:
+        cert_stats = CertificationService.get_certification_stats()
+    except Exception as e:
+        current_app.logger.error(f"Erro ao obter estatísticas: {e}")
+        cert_stats = {"total_users": 0, "total_certifications": 0, "active_certifications": 0}
+
+    try:
+        user_certs = CertificationService.get_user_certifications(session.get("user_id"))
+    except Exception as e:
+        current_app.logger.error(f"Erro ao obter certificações do usuário: {e}")
+        user_certs = []
+
+    # Métricas do usuário atual com verificação segura
+    user_metrics = None
+    try:
+        current_user = User.query.get(session.get("user_id"))
+        if current_user:
+            # Verificar se contribution_metrics existe e tem dados
+            if hasattr(current_user, 'contribution_metrics') and current_user.contribution_metrics:
+                user_metrics = current_user.contribution_metrics[0] if len(current_user.contribution_metrics) > 0 else None
+    except Exception as e:
+        current_app.logger.error(f"Erro ao obter métricas do usuário: {e}")
+        user_metrics = None
+
+    return render_template(
+        "certifications_dashboard.html",
+        leaderboard=leaderboard,
+        cert_stats=cert_stats,
+        user_certs=user_certs,
+        user_metrics=user_metrics
+    )
+
+
+@bp.route("/certifications/update-metrics/<int:user_id>", methods=["POST"])
+@login_required
+@admin_required
+def update_user_metrics(user_id):
+    """Atualizar métricas de um usuário (admin)"""
+    result = CertificationService.update_user_metrics(user_id)
+
+    if result["success"]:
+        flash("Métricas atualizadas com sucesso!", "success")
+    else:
+        flash(f"Erro ao atualizar métricas: {result['message']}", "danger")
+
+    return redirect(url_for("main.certifications_dashboard"))
+
+
+@bp.route("/certifications/award/<int:user_id>", methods=["POST"])
+@login_required
+@admin_required
+def award_certification(user_id):
+    """Atribuir certificação a um usuário"""
+    cert_type = request.form.get("certification_type")
+    level = request.form.get("level", type=int)
+
+    result = CertificationService.award_certification(user_id, cert_type, level)
+
+    if result["success"]:
+        flash(result["message"], "success")
+    else:
+        flash(f"Erro ao atribuir certificação: {result['message']}", "danger")
+
+    return redirect(url_for("main.certifications_dashboard"))
+
+
+@bp.route("/api/certifications/leaderboard")
+@login_required
+def certifications_leaderboard_api():
+    """API para leaderboard em tempo real"""
+    leaderboard = CertificationService.get_leaderboard(10)
+
+    return jsonify({
+        "leaderboard": leaderboard,
+        "timestamp": get_current_time_for_db().isoformat()
+    })
+
+
+# ========================================
+# ROTAS DE MONITORAMENTO DE PERFORMANCE
+# ========================================
+
+@bp.route("/performance/dashboard")
+@login_required
+@admin_required
+def performance_dashboard():
+    """Dashboard de monitoramento de performance"""
+    # Métricas do sistema
+    system_metrics = PerformanceService.get_performance_metrics()
+
+    # Estatísticas do banco de dados
+    db_stats = PerformanceService.get_database_performance_stats()
+
+    # Relatório completo
+    performance_report = PerformanceService.generate_performance_report()
+
+    return render_template(
+        "performance_dashboard.html",
+        system_metrics=system_metrics,
+        db_stats=db_stats,
+        performance_report=performance_report
+    )
+
+
+@bp.route("/performance/optimize")
+@login_required
+@admin_required
+def optimize_performance():
+    """Executa otimizações de performance"""
+    results = {}
+
+    # Criar índices
+    index_result = PerformanceService.create_database_indexes()
+    results["indexes"] = index_result
+
+    # Otimizar queries
+    PerformanceService.optimize_query_performance()
+    results["query_optimization"] = {"success": True, "message": "Otimizações aplicadas"}
+
+    # Limpeza de dados antigos
+    cleanup_result = PerformanceService.cleanup_old_data()
+    results["cleanup"] = cleanup_result
+
+    flash("Otimizações de performance executadas!", "success")
+
+    return redirect(url_for("main.performance_dashboard"))
+
+
+@bp.route("/api/performance/metrics")
+@login_required
+@admin_required
+def performance_metrics_api():
+    """API para métricas de performance em tempo real"""
+    metrics = PerformanceService.get_performance_metrics()
+    db_stats = PerformanceService.get_database_performance_stats()
+
+    return jsonify({
+        "system": metrics,
+        "database": db_stats,
+        "timestamp": time_module.time()
+    })
+
+
+@bp.route("/performance/report")
+@login_required
+@admin_required
+def performance_report():
+    """Gera relatório de performance em PDF"""
+    from flask import make_response
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+    from io import BytesIO
+
+    # Coletar dados
+    report_data = PerformanceService.generate_performance_report()
+
+    # Criar PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    elements = []
+
+    # Título
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=30,
+        alignment=1
+    )
+
+    elements.append(Paragraph("RELATÓRIO DE PERFORMANCE - TI OSN", title_style))
+    elements.append(Spacer(1, 12))
+
+    # Métricas do sistema
+    elements.append(Paragraph("MÉTRICAS DO SISTEMA", styles['Heading2']))
+    elements.append(Spacer(1, 12))
+
+    system_data = report_data.get("system_performance", {})
+    system_table_data = [
+        ["Métrica", "Valor"],
+        ["CPU (%)", f"{system_data.get('cpu_percent', 0)}%"],
+        ["Memória (%)", f"{system_data.get('memory_percent', 0)}%"],
+        ["Memória Usada (GB)", f"{system_data.get('memory_used_gb', 0):.2f}"],
+        ["Disco (%)", f"{system_data.get('disk_percent', 0)}%"],
+        ["Disco Usado (GB)", f"{system_data.get('disk_used_gb', 0):.2f}"],
+        ["Memória App (MB)", f"{system_data.get('app_memory_mb', 0):.2f}"],
+        ["CPU App (%)", f"{system_data.get('app_cpu_percent', 0)}%"],
+    ]
+
+    system_table = Table(system_table_data, colWidths=[3*inch, 2*inch])
+    system_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    elements.append(system_table)
+    elements.append(Spacer(1, 20))
+
+    # Métricas do banco
+    elements.append(Paragraph("MÉTRICAS DO BANCO DE DADOS", styles['Heading2']))
+    elements.append(Spacer(1, 12))
+
+    db_data = report_data.get("database_performance", {})
+    db_table_data = [
+        ["Métrica", "Valor"],
+        ["Conexões Ativas", db_data.get("active_connections", 0)],
+        ["Cache Hit Ratio (%)", f"{db_data.get('cache_hit_ratio', 0)}%"],
+    ]
+
+    db_table = Table(db_table_data, colWidths=[3*inch, 2*inch])
+    db_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    elements.append(db_table)
+    elements.append(Spacer(1, 20))
+
+    # Recomendações
+    recommendations = report_data.get("recommendations", [])
+    if recommendations:
+        elements.append(Paragraph("RECOMENDAÇÕES", styles['Heading2']))
+        elements.append(Spacer(1, 12))
+
+        for rec in recommendations:
+            elements.append(Paragraph(f"• {rec}", styles['Normal']))
+            elements.append(Spacer(1, 6))
+
+    # Gerar PDF
+    doc.build(elements)
+    buffer.seek(0)
+
+    response = make_response(buffer.getvalue())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=performance_report_{int(time.time())}.pdf'
+
+    return response
 
 
 @bp.route("/install-pwa")

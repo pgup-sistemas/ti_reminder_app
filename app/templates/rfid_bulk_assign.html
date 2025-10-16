@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Atribuição em Lote RFID - Sistema TI OSN{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-tags"></i> Atribuição em Lote de Tags RFID
+                    </h3>
+                    <div class="card-tools">
+                        <a href="{{ url_for('main.rfid_dashboard') }}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    {% if available_equipment %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Instruções:</strong> Selecione os equipamentos e forneça as tags RFID correspondentes.
+                        As tags devem ser únicas e seguir o padrão do seu sistema RFID.
+                    </div>
+
+                    <form method="POST" id="bulkAssignForm">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="bulkAssignTable">
+                                <thead>
+                                    <tr>
+                                        <th width="5%">
+                                            <input type="checkbox" id="selectAll" class="form-check-input">
+                                        </th>
+                                        <th width="10%">ID</th>
+                                        <th width="35%">Descrição</th>
+                                        <th width="20%">Tipo</th>
+                                        <th width="15%">Status</th>
+                                        <th width="15%">Tag RFID</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for equipment in available_equipment %}
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" name="equipment_ids[]" value="{{ equipment.id }}"
+                                                   class="form-check-input equipment-checkbox">
+                                        </td>
+                                        <td>{{ equipment.id }}</td>
+                                        <td>{{ equipment.description[:50] }}...</td>
+                                        <td>{{ equipment.equipment_type or 'N/A' }}</td>
+                                        <td>
+                                            <span class="badge badge-warning">{{ equipment.status }}</span>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="rfid_tags[]" class="form-control form-control-sm rfid-input"
+                                                   placeholder="Ex: RFID001" maxlength="50" disabled>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="card-title mb-0">
+                                            <i class="fas fa-cogs"></i> Opções de Atribuição
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="prefix">Prefixo da Tag:</label>
+                                                    <input type="text" id="prefix" class="form-control" placeholder="Ex: RFID" value="RFID">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="startNumber">Número Inicial:</label>
+                                                    <input type="number" id="startNumber" class="form-control" value="1" min="1">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="digits">Dígitos:</label>
+                                                    <input type="number" id="digits" class="form-control" value="3" min="1" max="10">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="autoFillTags()">
+                                            <i class="fas fa-magic"></i> Preencher Automaticamente
+                                        </button>
+                                        <small class="form-text text-muted">
+                                            Exemplo: RFID001, RFID002, etc.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
+                                    <i class="fas fa-save"></i> Atribuir Tags RFID
+                                </button>
+                                <a href="{{ url_for('main.rfid_dashboard') }}" class="btn btn-secondary btn-lg ml-2">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Nenhum equipamento disponível:</strong> Todos os equipamentos elegíveis já possuem tags RFID atribuídas.
+                    </div>
+                    <div class="text-center">
+                        <a href="{{ url_for('main.rfid_dashboard') }}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left"></i> Voltar ao Dashboard RFID
+                        </a>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const equipmentCheckboxes = document.querySelectorAll('.equipment-checkbox');
+    const rfidInputs = document.querySelectorAll('.rfid-input');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Função para atualizar estado dos campos
+    function updateFields() {
+        const checkedBoxes = document.querySelectorAll('.equipment-checkbox:checked');
+        const hasSelection = checkedBoxes.length > 0;
+
+        // Habilitar/desabilitar campos RFID
+        equipmentCheckboxes.forEach((checkbox, index) => {
+            const rfidInput = rfidInputs[index];
+            if (checkbox.checked) {
+                rfidInput.disabled = false;
+                rfidInput.required = true;
+            } else {
+                rfidInput.disabled = true;
+                rfidInput.required = false;
+                rfidInput.value = '';
+            }
+        });
+
+        // Atualizar botão submit
+        submitBtn.disabled = !hasSelection;
+        submitBtn.textContent = hasSelection ?
+            `Atribuir Tags RFID (${checkedBoxes.length})` :
+            'Atribuir Tags RFID';
+    }
+
+    // Event listener para "selecionar todos"
+    selectAllCheckbox.addEventListener('change', function() {
+        equipmentCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateFields();
+    });
+
+    // Event listeners para checkboxes individuais
+    equipmentCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const allChecked = Array.from(equipmentCheckboxes).every(cb => cb.checked);
+            const someChecked = Array.from(equipmentCheckboxes).some(cb => cb.checked);
+
+            selectAllCheckbox.checked = allChecked;
+            selectAllCheckbox.indeterminate = someChecked && !allChecked;
+
+            updateFields();
+        });
+    });
+
+    // Validação do formulário
+    document.getElementById('bulkAssignForm').addEventListener('submit', function(e) {
+        const checkedBoxes = document.querySelectorAll('.equipment-checkbox:checked');
+        let hasErrors = false;
+
+        checkedBoxes.forEach((checkbox, index) => {
+            const rfidInput = rfidInputs[index];
+            const equipmentId = checkbox.value;
+
+            // Verificar se tag RFID foi fornecida
+            if (!rfidInput.value.trim()) {
+                rfidInput.classList.add('is-invalid');
+                hasErrors = true;
+            } else {
+                rfidInput.classList.remove('is-invalid');
+            }
+        });
+
+        if (hasErrors) {
+            e.preventDefault();
+            alert('Por favor, forneça tags RFID para todos os equipamentos selecionados.');
+        }
+    });
+});
+
+// Função para preenchimento automático de tags
+function autoFillTags() {
+    const prefix = document.getElementById('prefix').value || 'RFID';
+    const startNumber = parseInt(document.getElementById('startNumber').value) || 1;
+    const digits = parseInt(document.getElementById('digits').value) || 3;
+
+    const checkedBoxes = document.querySelectorAll('.equipment-checkbox:checked');
+    const rfidInputs = document.querySelectorAll('.rfid-input');
+
+    checkedBoxes.forEach((checkbox, index) => {
+        const rfidInput = rfidInputs[index];
+        const number = startNumber + index;
+        const paddedNumber = number.toString().padStart(digits, '0');
+        rfidInput.value = `${prefix}${paddedNumber}`;
+    });
+}
+
+// Validação em tempo real dos campos RFID
+document.addEventListener('input', function(e) {
+    if (e.target.classList.contains('rfid-input')) {
+        const value = e.target.value.trim();
+        if (value) {
+            e.target.classList.remove('is-invalid');
+        }
+    }
+});
+</script>
+
+<style>
+.table th, .table td {
+    vertical-align: middle;
+}
+
+.form-control:disabled {
+    background-color: #f8f9fa;
+    opacity: 0.6;
+}
+
+.btn-lg {
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+}
+
+.card-tools .btn {
+    margin-left: 5px;
+}
+
+.is-invalid {
+    border-color: #dc3545;
+}
+
+.alert {
+    border-radius: 0.375rem;
+}
+</style>
+{% endblock %}

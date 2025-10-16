@@ -45,6 +45,26 @@ O **TI OSN System** é uma solução completa e profissional para gerenciamento 
 
     Banco de dados robusto e confiável para ambientes corporativos
 
+-   :material-rfid:
+    **Sistema RFID**
+
+    Rastreamento automático de equipamentos com alertas de perda
+
+-   :material-star:
+    **Satisfação do Cliente**
+
+    Pesquisas automáticas e métricas de qualidade de serviço
+
+-   :material-trophy:
+    **Gamificação**
+
+    Sistema de certificações e reconhecimento por contribuição
+
+-   :material-speedometer:
+    **Monitoramento Avançado**
+
+    Dashboard de performance com otimização automática
+
 </div>
 
 ## 🚀 Início Rápido
@@ -103,6 +123,42 @@ O **TI OSN System** é uma solução completa e profissional para gerenciamento 
 
     :octicons-arrow-right-24: [Ver Tarefas](user-guide/tasks.md)
 
+-   :material-rfid:
+    **[Sistema RFID](user-guide/rfid.md)**
+
+    ---
+
+    Rastreamento automático de equipamentos com tecnologia RFID
+
+    :octicons-arrow-right-24: [Ver RFID](user-guide/rfid.md)
+
+-   :material-star:
+    **[Satisfação](user-guide/satisfaction.md)**
+
+    ---
+
+    Sistema de avaliação de serviços e métricas de qualidade
+
+    :octicons-arrow-right-24: [Ver Satisfação](user-guide/satisfaction.md)
+
+-   :material-trophy:
+    **[Certificações](user-guide/certifications.md)**
+
+    ---
+
+    Gamificação e reconhecimento por contribuição na plataforma
+
+    :octicons-arrow-right-24: [Ver Certificações](user-guide/certifications.md)
+
+-   :material-speedometer:
+    **[Performance](user-guide/performance.md)**
+
+    ---
+
+    Monitoramento e otimização de performance do sistema
+
+    :octicons-arrow-right-24: [Ver Performance](user-guide/performance.md)
+
 </div>
 
 ## 🎨 Recursos Visuais
@@ -156,6 +212,30 @@ O sistema utiliza **Material Design** com:
 - ✅ **Dados Técnicos**: Especificações completas
 - ✅ **Rastreamento**: Histórico de movimentações
 
+### 📡 Sistema RFID
+
+- ✅ **Rastreamento Automático**: Localização em tempo real
+- ✅ **Alertas de Perda**: Notificações automáticas
+- ✅ **Dashboard Visual**: Mapa de localização
+- ✅ **Atribuição em Lote**: Configuração massiva
+- ✅ **Integração IoT**: Leitores conectados
+
+### ⭐ Sistema de Satisfação
+
+- ✅ **Pesquisas Automáticas**: Envio pós-atendimento
+- ✅ **Avaliação por Estrelas**: Métricas objetivas
+- ✅ **Dashboard Executivo**: Análise de performance
+- ✅ **Tendências**: Evolução temporal
+- ✅ **Feedback Detalhado**: Comentários dos usuários
+
+### 🏆 Gamificação e Certificações
+
+- ✅ **Sistema de Pontos**: Recompensa por contribuição
+- ✅ **Certificações Automáticas**: Níveis por expertise
+- ✅ **Leaderboard**: Ranking de contribuidores
+- ✅ **Badges e Reconhecimento**: Motivação visual
+- ✅ **Validade Temporal**: Renovação automática
+
 ### 📊 Dashboard e Relatórios
 
 - ✅ **Métricas em Tempo Real**: Contadores de atividades
@@ -197,9 +277,11 @@ O sistema utiliza **Material Design** com:
 ---
 
 <div class="info">
-    **Última atualização**: Dezembro 2024
+    **Última atualização**: Outubro 2025
     <br>
-    **Versão**: 2.0.0 - Sistema Pronto para Produção
+    **Versão**: 2.1.0 - Recursos Avançados Implementados
     <br>
-    **Desenvolvido por**: Equipe TI OSN
+    **Novidades**: RFID, Satisfação, Certificações, Performance
+    <br>
+    **Desenvolvido por**: Oézios Normando
 </div>

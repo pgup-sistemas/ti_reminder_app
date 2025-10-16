@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Tarefa Próxima do Vencimento</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }
+        .content { padding: 20px 0; }
+        .task-info { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107; }
+        .priority { display: inline-block; padding: 3px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .priority-baixa { background-color: #28a745; color: white; }
+        .priority-normal { background-color: #17a2b8; color: white; }
+        .priority-alta { background-color: #fd7e14; color: white; }
+        .priority-critica { background-color: #dc3545; color: white; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+        .button { display: inline-block; background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+        .urgent { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔔 Tarefa Próxima do Vencimento</h1>
+        </div>
+
+        <div class="content">
+            <p>Olá <strong>{{ user.username }}</strong>,</p>
+
+            <p>Uma tarefa sob sua responsabilidade está próxima do vencimento:</p>
+
+            <div class="task-info">
+                <h3>{{ task.description }}</h3>
+                <p><strong>Data de Vencimento:</strong> {{ task.date.strftime('%d/%m/%Y') }}</p>
+                <p><strong>Responsável:</strong> {{ task.responsible }}</p>
+                {% if task.sector %}
+                <p><strong>Setor:</strong> {{ task.sector.name }}</p>
+                {% endif %}
+                <p><strong>Prioridade:</strong>
+                    <span class="priority priority-{{ task.priority.lower() if task.priority else 'normal' }}">
+                        {{ task.priority if task.priority else 'Normal' }}
+                    </span>
+                </p>
+                {% if task.sla_deadline %}
+                <p><strong>Prazo SLA:</strong> {{ task.sla_deadline.strftime('%d/%m/%Y %H:%M') }}</p>
+                {% endif %}
+            </div>
+
+            <p class="urgent">⚠️ Esta tarefa vence em menos de 24 horas. Por favor, tome as medidas necessárias.</p>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ url_for('main.tasks', _external=True) }}" class="button">Ver Todas as Tarefas</a>
+            </div>
+
+            <p>Atenciosamente,<br>
+            <strong>Sistema TI OSN</strong></p>
+        </div>
+
+        <div class="footer">
+            <p>Esta é uma mensagem automática. Por favor, não responda este email.</p>
+            <p>Sistema de Gestão TI OSN - {{ task.created_at.strftime('%d/%m/%Y %H:%M') if task.created_at else '' }}</p>
+        </div>
+    </div>
+</body>
+</html>

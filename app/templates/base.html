@@ -213,14 +213,14 @@
         
         <!-- Dropdown Recursos -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.list_equipment', 'main.request_equipment', 'main.listar_tutoriais'] %}active{% endif %}" 
-           href="#" 
-           role="button" 
-           data-bs-toggle="dropdown" 
+          <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.list_equipment', 'main.request_equipment', 'main.listar_tutoriais', 'main.rfid_dashboard', 'main.satisfaction_dashboard', 'main.certifications_dashboard', 'main.performance_dashboard'] %}active{% endif %}"
+           href="#"
+           role="button"
+           data-bs-toggle="dropdown"
            aria-expanded="false"
            aria-haspopup="true"
            id="recursosDropdown">
-            <i class="fas fa-cube me-2" aria-hidden="true"></i> 
+            <i class="fas fa-cube me-2" aria-hidden="true"></i>
             <span>Recursos</span>
           </a>
           <ul class="dropdown-menu" aria-labelledby="recursosDropdown">
@@ -228,14 +228,14 @@
             <li><h6 class="dropdown-header"><i class="fas fa-cube me-2" aria-hidden="true"></i>Recursos e Conhecimento</h6></li>
             <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
             <li>
-              <a class="dropdown-item {% if request.endpoint == 'main.list_equipment' %}active{% endif %}" 
+              <a class="dropdown-item {% if request.endpoint == 'main.list_equipment' %}active{% endif %}"
                  href="{{ url_for('main.list_equipment') }}"
                  role="menuitem">
                 <i class="fas fa-laptop me-2" aria-hidden="true"></i> Equipamentos
               </a>
             </li>
             <li>
-              <a class="dropdown-item" 
+              <a class="dropdown-item"
                  href="{{ url_for('main.new_equipment_request') }}"
                  role="menuitem">
                 <i class="fas fa-plus-circle me-2" aria-hidden="true"></i> Solicitar Equipamento
@@ -243,12 +243,44 @@
             </li>
             <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
             <li>
-              <a class="dropdown-item {% if request.endpoint == 'main.listar_tutoriais' %}active{% endif %}" 
+              <a class="dropdown-item {% if request.endpoint == 'main.listar_tutoriais' %}active{% endif %}"
                  href="{{ url_for('main.listar_tutoriais') }}"
                  role="menuitem">
                 <i class="fas fa-book me-2" aria-hidden="true"></i> Tutoriais
               </a>
             </li>
+            {% if session.get('is_admin') %}
+            <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
+            <li><h6 class="dropdown-header"><i class="fas fa-cogs me-2" aria-hidden="true"></i>Sistemas Avançados</h6></li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'main.rfid_dashboard' %}active{% endif %}"
+                 href="{{ url_for('main.rfid_dashboard') }}"
+                 role="menuitem">
+                <i class="fas fa-rss me-2" aria-hidden="true"></i> RFID Dashboard
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'main.satisfaction_dashboard' %}active{% endif %}"
+                 href="{{ url_for('main.satisfaction_dashboard') }}"
+                 role="menuitem">
+                <i class="fas fa-star me-2" aria-hidden="true"></i> Satisfação
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'main.certifications_dashboard' %}active{% endif %}"
+                 href="{{ url_for('main.certifications_dashboard') }}"
+                 role="menuitem">
+                <i class="fas fa-trophy me-2" aria-hidden="true"></i> Certificações
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'main.performance_dashboard' %}active{% endif %}"
+                 href="{{ url_for('main.performance_dashboard') }}"
+                 role="menuitem">
+                <i class="fas fa-chart-line me-2" aria-hidden="true"></i> Performance
+              </a>
+            </li>
+            {% endif %}
           </ul>
         </li>
         
@@ -399,7 +431,7 @@
           <hr class="my-2">
           <i class="fas fa-code me-1"></i>
           <strong>TI OSN System</strong> - Todos os direitos reservados.
-          &copy; 2024 PageUp Sistemas | Versão 2.0
+          &copy; 2025 PageUp Sistemas | Versão 2.0
           Desenvolvido por <strong>Oézios Normando</strong><br>
         </small>
       </div>

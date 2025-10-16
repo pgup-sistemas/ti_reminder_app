@@ -101,6 +101,8 @@ class Chamado(db.Model):
     prioridade = db.Column(
         db.String(50), nullable=False, default="Media"
     )  # Ex: Baixa, Media, Alta, Critica
+
+
     data_abertura = db.Column(
         db.DateTime, nullable=False, default=get_current_time_for_db
     )
@@ -349,6 +351,11 @@ class EquipmentRequest(db.Model):
         onupdate=get_current_time_for_db,
     )
 
+    # Campos RFID
+    rfid_tag = db.Column(db.String(100), nullable=True, unique=True)  # Tag RFID única
+    last_location = db.Column(db.String(100), nullable=True)  # Última localização
+    return_alert_sent = db.Column(db.Boolean, default=False)  # Alerta de devolução enviado
+
     # Relacionamentos
     requester = db.relationship(
         "User", foreign_keys=[requester_id], backref="equipment_requests_solicitadas"
@@ -423,3 +430,98 @@ class SlaConfig(db.Model):
                 db.session.add(nova_config)
 
         db.session.commit()
+
+
+class NotificationSettings(db.Model):
+    """Configurações de notificação dos usuários"""
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
+    # Notificações por email
+    email_reminders = db.Column(db.Boolean, default=True)
+    email_tasks = db.Column(db.Boolean, default=True)
+    email_chamados = db.Column(db.Boolean, default=True)
+    email_equipment = db.Column(db.Boolean, default=True)
+
+    # Notificações push/web
+    push_reminders = db.Column(db.Boolean, default=True)
+    push_tasks = db.Column(db.Boolean, default=True)
+    push_chamados = db.Column(db.Boolean, default=True)
+    push_equipment = db.Column(db.Boolean, default=True)
+
+    # Frequência de resumos
+    summary_frequency = db.Column(db.String(20), default="daily")  # never, daily, weekly
+
+    user = db.relationship("User", backref=db.backref("notification_settings", uselist=False))
+
+    def __repr__(self):
+        return f"<NotificationSettings {self.user.username}>"
+
+
+class TaskSlaConfig(db.Model):
+    """Configuração de SLA para tarefas por prioridade"""
+    id = db.Column(db.Integer, primary_key=True)
+    priority = db.Column(db.String(50), nullable=False, unique=True)  # baixa, media, alta, critica
+    sla_hours = db.Column(db.Integer, nullable=False)  # Horas para conclusão
+    active = db.Column(db.Boolean, default=True)
+
+    def __repr__(self):
+        return f"<TaskSlaConfig {self.priority}: {self.sla_hours}h>"
+
+
+class UserCertification(db.Model):
+    """Certificações de contribuidores da base de conhecimento"""
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    certification_type = db.Column(db.String(50), nullable=False)  # Ex: "Contribuidor Ativo", "Especialista", "Moderador"
+    level = db.Column(db.Integer, default=1)  # Nível da certificação (1-5)
+    points = db.Column(db.Integer, default=0)  # Pontos acumulados
+    awarded_date = db.Column(db.DateTime, default=get_current_time_for_db)
+    expires_at = db.Column(db.DateTime, nullable=True)  # Data de expiração
+    is_active = db.Column(db.Boolean, default=True)
+
+    user = db.relationship("User", backref=db.backref("certifications", lazy=True))
+
+    def __repr__(self):
+        return f"<UserCertification {self.user.username} - {self.certification_type} Level {self.level}>"
+
+
+class ContributionMetrics(db.Model):
+    """Métricas de contribuição dos usuários"""
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    tutorials_created = db.Column(db.Integer, default=0)
+    tutorial_views = db.Column(db.Integer, default=0)  # Visualizações dos tutoriais do usuário
+    comments_made = db.Column(db.Integer, default=0)
+    helpful_votes = db.Column(db.Integer, default=0)  # Votos "útil" recebidos
+    total_points = db.Column(db.Integer, default=0)
+    last_updated = db.Column(db.DateTime, default=get_current_time_for_db, onupdate=get_current_time_for_db)
+
+    user = db.relationship("User", backref=db.backref("contribution_metrics", uselist=False))
+
+    def calculate_points(self):
+        """Calcula pontos baseado nas contribuições"""
+        points = (
+            self.tutorials_created * 10 +      # 10 pontos por tutorial
+            self.tutorial_views * 0.1 +        # 0.1 ponto por visualização
+            self.comments_made * 2 +          # 2 pontos por comentário
+            self.helpful_votes * 5            # 5 pontos por voto útil
+        )
+        self.total_points = int(points)
+        return self.total_points
+
+    def get_certification_level(self):
+        """Retorna nível de certificação baseado nos pontos"""
+        if self.total_points >= 1000:
+            return "Especialista", 5
+        elif self.total_points >= 500:
+            return "Contribuidor Sênior", 4
+        elif self.total_points >= 200:
+            return "Contribuidor Ativo", 3
+        elif self.total_points >= 50:
+            return "Contribuidor", 2
+        else:
+            return "Iniciante", 1
+
+    def __repr__(self):
+        return f"<ContributionMetrics {self.user.username} - {self.total_points} points>"

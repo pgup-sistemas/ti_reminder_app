@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Pesquisa de Satisfação - Sistema TI OSN{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-star"></i> Pesquisa de Satisfação
+                    </h3>
+                </div>
+                <div class="card-body">
+
+                    <!-- Informações do Chamado -->
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-ticket-alt"></i> Chamado #{{ chamado.id }}</h6>
+                        <p class="mb-1"><strong>Título:</strong> {{ chamado.titulo }}</p>
+                        <p class="mb-1"><strong>Data de Abertura:</strong> {{ chamado.data_abertura.strftime('%d/%m/%Y %H:%M') if chamado.data_abertura else 'N/A' }}</p>
+                        <p class="mb-1"><strong>Data de Fechamento:</strong> {{ chamado.data_fechamento.strftime('%d/%m/%Y %H:%M') if chamado.data_fechamento else 'N/A' }}</p>
+                        <p class="mb-0"><strong>Responsável TI:</strong> {{ chamado.responsavel_ti.username if chamado.responsavel_ti else 'Não atribuído' }}</p>
+                    </div>
+
+                    <p class="lead text-center mb-4">
+                        Sua opinião é muito importante para melhorarmos nossos serviços!
+                        <br>
+                        <small class="text-muted">Por favor, avalie o atendimento recebido neste chamado.</small>
+                    </p>
+
+                    <form method="POST" id="satisfactionForm">
+                        <!-- Avaliação por Estrelas -->
+                        <div class="form-group text-center">
+                            <label class="h5 mb-3">Qual sua avaliação geral do atendimento?</label>
+                            <div class="rating-stars mb-3">
+                                <input type="radio" id="star5" name="rating" value="5" required>
+                                <label for="star5" title="5 estrelas">
+                                    <i class="fas fa-star"></i>
+                                </label>
+                                <input type="radio" id="star4" name="rating" value="4">
+                                <label for="star4" title="4 estrelas">
+                                    <i class="fas fa-star"></i>
+                                </label>
+                                <input type="radio" id="star3" name="rating" value="3">
+                                <label for="star3" title="3 estrelas">
+                                    <i class="fas fa-star"></i>
+                                </label>
+                                <input type="radio" id="star2" name="rating" value="2">
+                                <label for="star2" title="2 estrelas">
+                                    <i class="fas fa-star"></i>
+                                </label>
+                                <input type="radio" id="star1" name="rating" value="1">
+                                <label for="star1" title="1 estrela">
+                                    <i class="fas fa-star"></i>
+                                </label>
+                            </div>
+                            <div class="rating-labels">
+                                <span class="text-danger">Muito Insatisfeito</span>
+                                <span class="text-muted mx-2">• • •</span>
+                                <span class="text-success">Muito Satisfeito</span>
+                            </div>
+                        </div>
+
+                        <!-- Comentário Opcional -->
+                        <div class="form-group">
+                            <label for="comment" class="h6">
+                                <i class="fas fa-comment"></i> Comentários (opcional)
+                            </label>
+                            <textarea
+                                class="form-control"
+                                id="comment"
+                                name="comment"
+                                rows="4"
+                                placeholder="Conte-nos mais sobre sua experiência. O que podemos melhorar? O que foi bom?"
+                                maxlength="500"
+                            ></textarea>
+                            <small class="form-text text-muted">
+                                Máximo de 500 caracteres. Seus comentários nos ajudam a melhorar nossos serviços.
+                            </small>
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="row mt-4">
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-success btn-lg px-5">
+                                    <i class="fas fa-paper-plane"></i> Enviar Avaliação
+                                </button>
+                                <a href="{{ url_for('main.detalhe_chamado', id=chamado.id) }}" class="btn btn-secondary btn-lg ml-3">
+                                    <i class="fas fa-arrow-left"></i> Voltar ao Chamado
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.rating-stars {
+    display: inline-block;
+    position: relative;
+}
+
+.rating-stars input {
+    display: none;
+}
+
+.rating-stars label {
+    float: right;
+    cursor: pointer;
+    color: #ddd;
+    font-size: 2rem;
+    transition: color 0.3s;
+    margin: 0 2px;
+}
+
+.rating-stars input:checked ~ label,
+.rating-stars label:hover,
+.rating-stars label:hover ~ label {
+    color: #ffc107;
+}
+
+.rating-stars input:checked ~ label {
+    color: #ffc107;
+}
+
+.rating-labels {
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+.btn-lg {
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+}
+
+.alert {
+    border-radius: 0.375rem;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validação do formulário
+    const form = document.getElementById('satisfactionForm');
+    const ratingInputs = document.querySelectorAll('input[name="rating"]');
+
+    form.addEventListener('submit', function(e) {
+        const ratingSelected = Array.from(ratingInputs).some(input => input.checked);
+
+        if (!ratingSelected) {
+            e.preventDefault();
+            alert('Por favor, selecione uma avaliação em estrelas.');
+            return false;
+        }
+
+        // Mostrar indicador de carregamento
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+        submitBtn.disabled = true;
+
+        // Reverter se houver erro (será feito pelo backend)
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 3000);
+    });
+
+    // Contador de caracteres para o comentário
+    const commentTextarea = document.getElementById('comment');
+    const maxLength = 500;
+
+    commentTextarea.addEventListener('input', function() {
+        const currentLength = this.value.length;
+        if (currentLength > maxLength) {
+            this.value = this.value.substring(0, maxLength);
+        }
+    });
+});
+</script>
+{% endblock %}
