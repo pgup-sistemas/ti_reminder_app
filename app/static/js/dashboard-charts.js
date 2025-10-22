@@ -7,6 +7,88 @@ class DashboardCharts {
     constructor() {
         this.charts = new Map();
         this.initialized = false;
+        this.setupThemeListener();
+    }
+
+    /**
+     * Get theme-aware color palette from CSS variables
+     */
+    getThemePalette() {
+        const root = getComputedStyle(document.documentElement);
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        
+        return {
+            primary: root.getPropertyValue('--primary-500').trim() || '#007bff',
+            warning: root.getPropertyValue('--warning').trim() || '#ffc107',
+            info: root.getPropertyValue('--info').trim() || '#17a2b8',
+            secondary: isDark ? '#8b5cf6' : '#6f42c1',
+            textColor: root.getPropertyValue('--text-primary').trim() || (isDark ? '#f8f9fa' : '#212529'),
+            gridColor: root.getPropertyValue('--border-color').trim() || (isDark ? '#495057' : '#dee2e6'),
+        };
+    }
+
+    /**
+     * Setup theme change listener
+     */
+    setupThemeListener() {
+        document.addEventListener('themeChanged', (e) => {
+            this.updateChartsTheme();
+        });
+    }
+
+    /**
+     * Update all charts to match current theme
+     */
+    updateChartsTheme() {
+        const palette = this.getThemePalette();
+        
+        this.charts.forEach((chart, name) => {
+            // Update datasets colors
+            chart.data.datasets.forEach((dataset, index) => {
+                const colors = [palette.primary, palette.warning, palette.info, palette.secondary];
+                const baseColor = colors[index % colors.length];
+                
+                if (chart.config.type === 'line') {
+                    dataset.borderColor = baseColor;
+                    dataset.backgroundColor = this.hexToRgba(baseColor, 0.1);
+                } else {
+                    dataset.backgroundColor = baseColor;
+                }
+            });
+
+            // Update grid and text colors
+            if (chart.options.scales) {
+                const axisColor = palette.textColor;
+                const gridColor = palette.gridColor;
+                
+                Object.keys(chart.options.scales).forEach(axis => {
+                    if (chart.options.scales[axis].ticks) {
+                        chart.options.scales[axis].ticks.color = axisColor;
+                    }
+                    if (chart.options.scales[axis].grid) {
+                        chart.options.scales[axis].grid.color = gridColor;
+                    }
+                });
+            }
+
+            // Update legend colors
+            if (chart.options.plugins?.legend?.labels) {
+                chart.options.plugins.legend.labels.color = palette.textColor;
+            }
+
+            chart.update('none');
+        });
+    }
+
+    /**
+     * Convert hex color to rgba
+     */
+    hexToRgba(hex, alpha = 1) {
+        hex = hex.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     /**
@@ -27,38 +109,41 @@ class DashboardCharts {
         const canvas = document.getElementById('chartEvolution');
         if (!canvas) return;
 
+        const palette = this.getThemePalette();
+        const colors = [palette.primary, palette.warning, palette.info, palette.secondary];
+
         // Get data from global variables (set by template)
         const labels = window.dashboardChartData?.evolution?.labels || [];
         const datasets = [
             {
                 label: 'Tarefas',
                 data: window.dashboardChartData?.evolution?.tarefas || [],
-                borderColor: '#007bff',
-                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                borderColor: colors[0],
+                backgroundColor: this.hexToRgba(colors[0], 0.1),
                 tension: 0.1,
                 fill: true
             },
             {
                 label: 'Lembretes',
                 data: window.dashboardChartData?.evolution?.lembretes || [],
-                borderColor: '#ffc107',
-                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                borderColor: colors[1],
+                backgroundColor: this.hexToRgba(colors[1], 0.1),
                 tension: 0.1,
                 fill: true
             },
             {
                 label: 'Chamados',
                 data: window.dashboardChartData?.evolution?.chamados || [],
-                borderColor: '#17a2b8',
-                backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                borderColor: colors[2],
+                backgroundColor: this.hexToRgba(colors[2], 0.1),
                 tension: 0.1,
                 fill: true
             },
             {
                 label: 'Equipamentos',
                 data: window.dashboardChartData?.evolution?.equipamentos || [],
-                borderColor: '#6f42c1',
-                backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                borderColor: colors[3],
+                backgroundColor: this.hexToRgba(colors[3], 0.1),
                 tension: 0.1,
                 fill: true
             }
@@ -75,14 +160,29 @@ class DashboardCharts {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: {
+                            color: palette.textColor
+                        }
                     }
                 },
                 scales: {
+                    x: {
+                        ticks: {
+                            color: palette.textColor
+                        },
+                        grid: {
+                            color: palette.gridColor
+                        }
+                    },
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            precision: 0
+                            precision: 0,
+                            color: palette.textColor
+                        },
+                        grid: {
+                            color: palette.gridColor
                         }
                     }
                 },
@@ -103,28 +203,31 @@ class DashboardCharts {
         const canvas = document.getElementById('chartSector');
         if (!canvas) return;
 
+        const palette = this.getThemePalette();
+        const colors = [palette.primary, palette.warning, palette.info, palette.secondary];
+
         // Get data from global variables
         const labels = window.dashboardChartData?.sectors?.labels || [];
         const datasets = [
             {
                 label: 'Tarefas',
                 data: window.dashboardChartData?.sectors?.tarefas || [],
-                backgroundColor: '#007bff'
+                backgroundColor: colors[0]
             },
             {
                 label: 'Lembretes',
                 data: window.dashboardChartData?.sectors?.lembretes || [],
-                backgroundColor: '#ffc107'
+                backgroundColor: colors[1]
             },
             {
                 label: 'Chamados',
                 data: window.dashboardChartData?.sectors?.chamados || [],
-                backgroundColor: '#17a2b8'
+                backgroundColor: colors[2]
             },
             {
                 label: 'Equipamentos',
                 data: window.dashboardChartData?.sectors?.equipamentos || [],
-                backgroundColor: '#6f42c1'
+                backgroundColor: colors[3]
             }
         ];
 
@@ -139,14 +242,29 @@ class DashboardCharts {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: {
+                            color: palette.textColor
+                        }
                     }
                 },
                 scales: {
+                    x: {
+                        ticks: {
+                            color: palette.textColor
+                        },
+                        grid: {
+                            color: palette.gridColor
+                        }
+                    },
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            precision: 0
+                            precision: 0,
+                            color: palette.textColor
+                        },
+                        grid: {
+                            color: palette.gridColor
                         }
                     }
                 }

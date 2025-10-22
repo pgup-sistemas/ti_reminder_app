@@ -1,0 +1,183 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Configurações de Segurança{% endblock %}
+
+{% block config_content %}
+<div class="config-card">
+    <div class="config-card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    Configurações de Segurança
+                </h3>
+                <p class="text-muted mb-0 mt-1">Gerencie políticas de segurança e autenticação</p>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST">
+        <div class="config-card-body">
+            <!-- Políticas de Senha -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3">
+                        <i class="fas fa-key me-2"></i>
+                        Políticas de Senha
+                    </h5>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="min_password_length" class="form-label">Comprimento Mínimo</label>
+                        <input type="number" class="form-control" id="min_password_length" 
+                               name="min_password_length" value="6" min="6" max="20">
+                        <small class="form-text text-muted">Número mínimo de caracteres (atual: 6)</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="password_expiry_days" class="form-label">Expiração de Senha (dias)</label>
+                        <input type="number" class="form-control" id="password_expiry_days" 
+                               name="password_expiry_days" value="90" min="0" max="365">
+                        <small class="form-text text-muted">0 = sem expiração</small>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="require_uppercase" 
+                                       name="require_uppercase" checked>
+                                <label class="form-check-label" for="require_uppercase">
+                                    Exigir letras maiúsculas
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="require_lowercase" 
+                                       name="require_lowercase" checked>
+                                <label class="form-check-label" for="require_lowercase">
+                                    Exigir letras minúsculas
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="require_numbers" 
+                                       name="require_numbers" checked>
+                                <label class="form-check-label" for="require_numbers">
+                                    Exigir números
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="require_special" 
+                                       name="require_special">
+                                <label class="form-check-label" for="require_special">
+                                    Exigir caracteres especiais
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sessão e Autenticação -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3">
+                        <i class="fas fa-user-lock me-2"></i>
+                        Sessão e Autenticação
+                    </h5>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="session_timeout" class="form-label">Tempo de Sessão (minutos)</label>
+                        <input type="number" class="form-control" id="session_timeout" 
+                               name="session_timeout" value="60" min="5" max="1440">
+                        <small class="form-text text-muted">Tempo de inatividade antes do logout automático</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="max_login_attempts" class="form-label">Tentativas Máximas de Login</label>
+                        <input type="number" class="form-control" id="max_login_attempts" 
+                               name="max_login_attempts" value="5" min="3" max="10">
+                        <small class="form-text text-muted">Bloqueio temporário após exceder</small>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="enable_2fa" 
+                                       name="enable_2fa">
+                                <label class="form-check-label" for="enable_2fa">
+                                    <strong>Habilitar Autenticação de Dois Fatores (2FA)</strong>
+                                </label>
+                                <small class="form-text text-muted d-block">
+                                    Adiciona uma camada extra de segurança (em desenvolvimento)
+                                </small>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="remember_me" 
+                                       name="remember_me" checked>
+                                <label class="form-check-label" for="remember_me">
+                                    Permitir "Lembrar-me"
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Segurança Avançada -->
+            <div class="row">
+                <div class="col-12">
+                    <h5 class="mb-3">
+                        <i class="fas fa-lock me-2"></i>
+                        Segurança Avançada
+                    </h5>
+                </div>
+                <div class="col-12">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="enable_ip_whitelist" 
+                                       name="enable_ip_whitelist">
+                                <label class="form-check-label" for="enable_ip_whitelist">
+                                    <strong>Habilitar Lista Branca de IPs</strong>
+                                </label>
+                                <small class="form-text text-muted d-block">
+                                    Restringe acesso apenas a IPs autorizados (em desenvolvimento)
+                                </small>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="log_all_access" 
+                                       name="log_all_access" checked>
+                                <label class="form-check-label" for="log_all_access">
+                                    Registrar todos os acessos
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="enable_audit_trail" 
+                                       name="enable_audit_trail" checked>
+                                <label class="form-check-label" for="enable_audit_trail">
+                                    Trilha de auditoria completa
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="config-actions">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="alert alert-info mb-0 py-2 px-3" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <small>Algumas configurações requerem reinicialização do sistema</small>
+                </div>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save me-1"></i> Salvar Configurações
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

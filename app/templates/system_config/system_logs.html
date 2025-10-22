@@ -1,0 +1,860 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Logs do Sistema{% endblock %}
+
+{% block config_content %}
+<!-- Abas de Navegação -->
+<div class="config-tabs mb-4">
+    <ul class="nav nav-tabs" id="logsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="live-logs-tab" data-bs-toggle="tab" data-bs-target="#live-logs" type="button" role="tab">
+                <i class="fas fa-play-circle me-1"></i> Logs Ao Vivo
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="historical-logs-tab" data-bs-toggle="tab" data-bs-target="#historical-logs" type="button" role="tab">
+                <i class="fas fa-history me-1"></i> Histórico
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="error-analysis-tab" data-bs-toggle="tab" data-bs-target="#error-analysis" type="button" role="tab">
+                <i class="fas fa-chart-line me-1"></i> Análise
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="log-config-tab" data-bs-toggle="tab" data-bs-target="#log-config" type="button" role="tab">
+                <i class="fas fa-cogs me-1"></i> Configuração
+            </button>
+        </li>
+    </ul>
+</div>
+
+<div class="tab-content" id="logsTabsContent">
+    <!-- Aba Logs Ao Vivo -->
+    <div class="tab-pane fade show active" id="live-logs" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Logs do Sistema - Ao Vivo
+                        </h3>
+                        <p class="text-muted mb-0 mt-1">Monitoramento em tempo real das atividades do sistema</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="autoScroll" checked>
+                            <label class="form-check-label" for="autoScroll">Auto-scroll</label>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" onclick="refreshLogs()">
+                            <i class="fas fa-sync me-1"></i> Atualizar
+                        </button>
+                        <button type="button" class="btn btn-outline-success" onclick="downloadLogs()">
+                            <i class="fas fa-download me-1"></i> Baixar
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" onclick="clearLogs()">
+                            <i class="fas fa-trash me-1"></i> Limpar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-card-body">
+                <!-- Dashboard de Status -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-tachometer-alt me-2"></i>
+                                    Status do Sistema de Logs
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-circle text-success fa-2x mb-2"></i>
+                                            <h4 class="mb-0 text-success">Online</h4>
+                                            <small class="text-muted">Sistema Ativo</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-file-alt fa-2x text-primary mb-2"></i>
+                                            <h4 class="mb-0 text-primary">2.4MB</h4>
+                                            <small class="text-muted">Logs Hoje</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                                            <h4 class="mb-0 text-warning">12</h4>
+                                            <small class="text-muted">Avisos (1h)</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-times-circle fa-2x text-danger mb-2"></i>
+                                            <h4 class="mb-0 text-danger">3</h4>
+                                            <small class="text-muted">Erros (1h)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros Avançados -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-filter me-2"></i>
+                                    Filtros de Pesquisa
+                                    <button class="btn btn-sm btn-outline-secondary float-end" onclick="toggleFilters()">
+                                        <i class="fas fa-chevron-up" id="filterToggleIcon"></i>
+                                    </button>
+                                </h6>
+                            </div>
+                            <div class="card-body" id="filtersContent">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <label for="log_level" class="form-label">Nível</label>
+                                        <select class="form-select form-select-sm" id="log_level">
+                                            <option value="">Todos</option>
+                                            <option value="ERROR">ERROR</option>
+                                            <option value="WARNING">WARNING</option>
+                                            <option value="INFO" selected>INFO</option>
+                                            <option value="DEBUG">DEBUG</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="log_module" class="form-label">Módulo</label>
+                                        <select class="form-select form-select-sm" id="log_module">
+                                            <option value="">Todos</option>
+                                            <option value="auth">Autenticação</option>
+                                            <option value="api">API</option>
+                                            <option value="database">Banco</option>
+                                            <option value="email">Email</option>
+                                            <option value="rfid">RFID</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="log_date_start" class="form-label">Data Inicial</label>
+                                        <input type="datetime-local" class="form-control form-control-sm" id="log_date_start">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="log_date_end" class="form-label">Data Final</label>
+                                        <input type="datetime-local" class="form-control form-control-sm" id="log_date_end">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="log_user" class="form-label">Usuário</label>
+                                        <input type="text" class="form-control form-control-sm" id="log_user" placeholder="ID ou nome...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="log_search" class="form-label">Buscar</label>
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                            <input type="text" class="form-control" id="log_search" placeholder="Buscar nos logs...">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-primary" onclick="applyFilters()">
+                                                <i class="fas fa-search me-1"></i> Aplicar Filtros
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearFilters()">
+                                                <i class="fas fa-times me-1"></i> Limpar
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-info" onclick="saveFilterPreset()">
+                                                <i class="fas fa-save me-1"></i> Salvar Preset
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline de Eventos Recentes -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-stream me-2"></i>
+                                    Eventos Recentes
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="timeline">
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-success"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Login realizado</h6>
+                                            <p class="mb-1 small text-muted">Usuário admin logou no sistema</p>
+                                            <small class="text-success">há 2 min</small>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-info"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Backup automático</h6>
+                                            <p class="mb-1 small text-muted">Backup diário concluído com sucesso</p>
+                                            <small class="text-info">há 15 min</small>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-warning"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Alto uso de CPU</h6>
+                                            <p class="mb-1 small text-muted">CPU em 85% por 5 minutos</p>
+                                            <small class="text-warning">há 32 min</small>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-danger"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Falha de autenticação</h6>
+                                            <p class="mb-1 small text-muted">Tentativa de login com credenciais inválidas</p>
+                                            <small class="text-danger">há 45 min</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terminal Interativo de Logs -->
+                <div class="card border-0 bg-dark text-light">
+                    <div class="card-header bg-secondary d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-terminal me-2"></i>Terminal de Logs - Ao Vivo</span>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-success text-dark" id="connectionStatus">
+                                <i class="fas fa-circle me-1"></i>Conectado
+                            </span>
+                            <span class="badge bg-light text-dark" id="logCount">247 entradas</span>
+                        </div>
+                    </div>
+                    <div class="card-body position-relative" style="max-height: 500px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.85rem;">
+                        <!-- Barra de Controle -->
+                        <div class="log-controls mb-2 d-flex justify-content-between align-items-center">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-light" onclick="pauseLogs()">
+                                    <i class="fas fa-pause me-1"></i>Pausar
+                                </button>
+                                <button class="btn btn-sm btn-outline-light" onclick="clearTerminal()">
+                                    <i class="fas fa-trash me-1"></i>Limpar
+                                </button>
+                            </div>
+                            <div class="d-flex gap-2 align-items-center">
+                                <small class="text-muted">Auto-scroll:</small>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="autoScrollSwitch" checked>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Área de Logs -->
+                        <div id="logContainer" class="log-container">
+                            <div class="log-entry text-info">
+                                <span class="text-muted">[2024-01-20 15:30:25]</span>
+                                <span class="badge bg-info">INFO</span>
+                                Sistema de logs inicializado - Monitoramento ativo
+                            </div>
+                            <div class="log-entry text-success">
+                                <span class="text-muted">[2024-01-20 15:30:22]</span>
+                                <span class="badge bg-success">INFO</span>
+                                Conexão com banco de dados estabelecida
+                            </div>
+                            <div class="log-entry text-warning">
+                                <span class="text-muted">[2024-01-20 15:29:45]</span>
+                                <span class="badge bg-warning text-dark">WARNING</span>
+                                Uso de CPU elevado detectado: 78%
+                            </div>
+                            <div class="log-entry text-info">
+                                <span class="text-muted">[2024-01-20 15:29:30]</span>
+                                <span class="badge bg-info">INFO</span>
+                                Backup automático iniciado
+                            </div>
+                            <div class="log-entry text-success">
+                                <span class="text-muted">[2024-01-20 15:28:15]</span>
+                                <span class="badge bg-success">INFO</span>
+                                Notificação enviada com sucesso - ID: 12345
+                            </div>
+                            <div class="log-entry text-danger">
+                                <span class="text-muted">[2024-01-20 15:27:33]</span>
+                                <span class="badge bg-danger">ERROR</span>
+                                Falha na autenticação: Credenciais inválidas - IP: 192.168.1.100
+                            </div>
+                            <div class="log-entry text-info">
+                                <span class="text-muted">[2024-01-20 15:27:10]</span>
+                                <span class="badge bg-info">INFO</span>
+                                RFID Reader-001: Tag detectada - ID: ABC123
+                            </div>
+                            <div class="log-entry text-warning">
+                                <span class="text-muted">[2024-01-20 15:26:45]</span>
+                                <span class="badge bg-warning text-dark">WARNING</span>
+                                Memória RAM em 85% de utilização
+                            </div>
+                            <div class="log-entry text-info">
+                                <span class="text-muted">[2024-01-20 15:26:20]</span>
+                                <span class="badge bg-info">INFO</span>
+                                Chamado #456 criado - Prioridade: Alta
+                            </div>
+                            <div class="log-entry text-success">
+                                <span class="text-muted">[2024-01-20 15:25:55]</span>
+                                <span class="badge bg-success">INFO</span>
+                                Certificação renovada automaticamente - Equipamento: SRV-001
+                            </div>
+                        </div>
+
+                        <!-- Indicador de Loading -->
+                        <div id="logLoader" class="text-center py-3" style="display: none;">
+                            <div class="spinner-border spinner-border-sm text-light" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                            <small class="d-block text-muted mt-1">Carregando mais logs...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Aba Histórico de Logs -->
+    <div class="tab-pane fade" id="historical-logs" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-history me-2"></i>
+                    Histórico de Logs
+                </h3>
+                <p class="text-muted mb-0 mt-1">Pesquisa avançada em logs históricos</p>
+            </div>
+            <div class="config-card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" id="historicalLogsTable">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Nível</th>
+                                <th>Módulo</th>
+                                <th>Mensagem</th>
+                                <th>Usuário</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2024-01-19 23:45:12</td>
+                                <td><span class="badge bg-danger">ERROR</span></td>
+                                <td>Database</td>
+                                <td class="text-truncate" style="max-width: 300px;" title="Connection timeout to PostgreSQL server">Connection timeout to PostgreSQL server</td>
+                                <td>system</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" onclick="viewLogDetails(this)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-19 22:30:45</td>
+                                <td><span class="badge bg-warning">WARNING</span></td>
+                                <td>Auth</td>
+                                <td class="text-truncate" style="max-width: 300px;" title="Multiple failed login attempts from IP 192.168.1.50">Multiple failed login attempts from IP 192.168.1.50</td>
+                                <td>unknown</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" onclick="viewLogDetails(this)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-19 20:15:33</td>
+                                <td><span class="badge bg-info">INFO</span></td>
+                                <td>Backup</td>
+                                <td class="text-truncate" style="max-width: 300px;" title="Automated backup completed successfully - Size: 2.4GB">Automated backup completed successfully - Size: 2.4GB</td>
+                                <td>system</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" onclick="viewLogDetails(this)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <nav aria-label="Paginação de logs">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Próximo</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba Análise de Erros -->
+    <div class="tab-pane fade" id="error-analysis" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Análise de Logs
+                </h3>
+                <p class="text-muted mb-0 mt-1">Estatísticas e tendências dos logs do sistema</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Distribuição por Nível (7 dias)</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="logLevelChart" width="100%" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Erros por Módulo</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="errorModuleChart" width="100%" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Top 10 Erros Mais Frequentes</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Erro</th>
+                                                <th>Ocorrências</th>
+                                                <th>Última Ocorrência</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Connection timeout</td>
+                                                <td><span class="badge bg-danger">47</span></td>
+                                                <td>2024-01-20 08:30</td>
+                                                <td><span class="badge bg-warning">Investigando</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Authentication failed</td>
+                                                <td><span class="badge bg-warning">23</span></td>
+                                                <td>2024-01-20 12:15</td>
+                                                <td><span class="badge bg-success">Resolvido</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Memory limit exceeded</td>
+                                                <td><span class="badge bg-info">12</span></td>
+                                                <td>2024-01-19 16:45</td>
+                                                <td><span class="badge bg-info">Monitorando</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba Configuração -->
+    <div class="tab-pane fade" id="log-config" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    Configuração de Logs
+                </h3>
+                <p class="text-muted mb-0 mt-1">Gerencie níveis de log e retenção</p>
+            </div>
+            <div class="config-card-body">
+                <form>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Níveis de Log por Módulo</h5>
+                            <div class="mb-3">
+                                <label class="form-label">Autenticação</label>
+                                <select class="form-select">
+                                    <option value="DEBUG">DEBUG</option>
+                                    <option value="INFO" selected>INFO</option>
+                                    <option value="WARNING">WARNING</option>
+                                    <option value="ERROR">ERROR</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Banco de Dados</label>
+                                <select class="form-select">
+                                    <option value="DEBUG">DEBUG</option>
+                                    <option value="INFO" selected>INFO</option>
+                                    <option value="WARNING">WARNING</option>
+                                    <option value="ERROR">ERROR</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">API</label>
+                                <select class="form-select">
+                                    <option value="DEBUG">DEBUG</option>
+                                    <option value="INFO" selected>INFO</option>
+                                    <option value="WARNING">WARNING</option>
+                                    <option value="ERROR">ERROR</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Retenção e Armazenamento</h5>
+                            <div class="mb-3">
+                                <label class="form-label">Retenção de Logs (dias)</label>
+                                <input type="number" class="form-control" value="30" min="1" max="365">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Tamanho Máximo do Arquivo (MB)</label>
+                                <input type="number" class="form-control" value="100" min="10" max="1000">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Rotação de Arquivos</label>
+                                <select class="form-select">
+                                    <option value="daily" selected>Diária</option>
+                                    <option value="weekly">Semanal</option>
+                                    <option value="monthly">Mensal</option>
+                                </select>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" checked>
+                                <label class="form-check-label">Compressão automática de logs antigos</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i> Salvar Configurações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Variáveis globais
+let autoRefreshInterval = null;
+let isPaused = false;
+let logBuffer = [];
+
+// Funções de Controle de Logs Ao Vivo
+function refreshLogs() {
+    if (isPaused) return;
+
+    const btn = event.target.closest('button');
+    const originalHTML = btn ? btn.innerHTML : '<i class="fas fa-sync me-1"></i> Atualizar';
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Atualizando...';
+    }
+
+    // Simular busca de novos logs
+    setTimeout(() => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        }
+
+        // Adicionar alguns logs de exemplo
+        addLogEntry('INFO', 'Logs atualizados - 3 novas entradas');
+        updateLogCount();
+
+        // Auto-scroll se habilitado
+        if (document.getElementById('autoScrollSwitch').checked) {
+            scrollToBottom();
+        }
+    }, 1000);
+}
+
+function pauseLogs() {
+    isPaused = !isPaused;
+    const btn = event.target.closest('button');
+
+    if (isPaused) {
+        btn.innerHTML = '<i class="fas fa-play me-1"></i>Continuar';
+        btn.classList.remove('btn-outline-light');
+        btn.classList.add('btn-warning');
+        document.getElementById('connectionStatus').innerHTML = '<i class="fas fa-pause me-1"></i>Pausado';
+        document.getElementById('connectionStatus').className = 'badge bg-warning text-dark';
+    } else {
+        btn.innerHTML = '<i class="fas fa-pause me-1"></i>Pausar';
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-outline-light');
+        document.getElementById('connectionStatus').innerHTML = '<i class="fas fa-circle me-1"></i>Conectado';
+        document.getElementById('connectionStatus').className = 'badge bg-success text-dark';
+    }
+}
+
+function clearTerminal() {
+    if (confirm('Limpar todos os logs do terminal? Esta ação não afeta os logs salvos.')) {
+        document.getElementById('logContainer').innerHTML = '';
+        updateLogCount();
+    }
+}
+
+function addLogEntry(level, message, module = 'System') {
+    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const logContainer = document.getElementById('logContainer');
+
+    const logEntry = document.createElement('div');
+    logEntry.className = `log-entry text-${getLogColor(level)}`;
+
+    const levelBadge = getLevelBadge(level);
+
+    logEntry.innerHTML = `
+        <span class="text-muted">[${timestamp}]</span>
+        ${levelBadge}
+        <span class="text-muted">[${module}]</span>
+        ${message}
+    `;
+
+    logContainer.appendChild(logEntry);
+    updateLogCount();
+
+    // Limitar número de entradas visíveis
+    const entries = logContainer.querySelectorAll('.log-entry');
+    if (entries.length > 100) {
+        entries[0].remove();
+    }
+}
+
+function getLogColor(level) {
+    switch(level) {
+        case 'ERROR': return 'danger';
+        case 'WARNING': return 'warning';
+        case 'INFO': return 'info';
+        case 'DEBUG': return 'muted';
+        default: return 'secondary';
+    }
+}
+
+function getLevelBadge(level) {
+    const colors = {
+        'ERROR': 'bg-danger',
+        'WARNING': 'bg-warning text-dark',
+        'INFO': 'bg-info',
+        'DEBUG': 'bg-secondary'
+    };
+
+    return `<span class="badge ${colors[level] || 'bg-secondary'}">${level}</span>`;
+}
+
+function updateLogCount() {
+    const count = document.getElementById('logContainer').querySelectorAll('.log-entry').length;
+    document.getElementById('logCount').textContent = `${count} entradas`;
+}
+
+function scrollToBottom() {
+    const container = document.getElementById('logContainer');
+    container.scrollTop = container.scrollHeight;
+}
+
+// Funções de Filtros
+function toggleFilters() {
+    const content = document.getElementById('filtersContent');
+    const icon = document.getElementById('filterToggleIcon');
+
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';
+    } else {
+        content.style.display = 'none';
+        icon.className = 'fas fa-chevron-down';
+    }
+}
+
+function applyFilters() {
+    Feedback.info('', 'Filtros aplicados!\n\nFiltrando logs por: Nível, Módulo, Data, Usuário');
+}
+
+function clearFilters() {
+    document.getElementById('log_level').value = '';
+    document.getElementById('log_module').value = '';
+    document.getElementById('log_date_start').value = '';
+    document.getElementById('log_date_end').value = '';
+    document.getElementById('log_user').value = '';
+    document.getElementById('log_search').value = '';
+    Feedback.info('', 'Filtros limpos!');
+}
+
+function saveFilterPreset() {
+    const presetName = prompt('Nome do preset de filtros:');
+    if (presetName) {
+        alert(`Preset "${presetName}" salvo com sucesso!\n\nPoderá ser reutilizado posteriormente.`);
+    }
+}
+
+// Funções de Download e Limpeza
+function downloadLogs() {
+    const format = prompt('Formato de download:', 'TXT');
+    if (format) {
+        alert(`Download iniciado!\n\nFormato: ${format.toUpperCase()}\nPeríodo: Últimas 24 horas\nArquivo: logs_${new Date().toISOString().split('T')[0]}.${format.toLowerCase()}\n\nO download começará automaticamente.`);
+    }
+}
+
+function clearLogs() {
+    const confirmText = `ATENÇÃO: Esta ação irá limpar TODOS os logs do sistema!
+
+• Logs de erro e warning serão removidos
+• Histórico de auditoria será perdido
+• Não será possível recuperar os dados
+
+Tem certeza de que deseja continuar?`;
+
+    if (confirm(confirmText)) {
+        const password = prompt('Digite sua senha para confirmar:');
+        if (password) {
+            Feedback.success('Sucesso', 'Logs sendo limpos...\n\nEsta operação pode levar alguns minutos.\nVocê será notificado quando concluída.');
+        }
+    }
+}
+
+// Funções de Visualização de Detalhes
+function viewLogDetails(button) {
+    const row = button.closest('tr');
+    const cells = row.querySelectorAll('td');
+
+    const details = `
+DETALHES DO LOG
+
+Timestamp: ${cells[0].textContent}
+Nível: ${cells[1].textContent}
+Módulo: ${cells[2].textContent}
+Mensagem: ${cells[3].title || cells[3].textContent}
+Usuário: ${cells[4].textContent}
+
+INFORMAÇÕES TÉCNICAS:
+- ID do Log: LOG-${Date.now()}
+- Sessão: WEB-${Math.random().toString(36).substr(2, 9)}
+- IP: 192.168.1.100
+- User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+
+STACK TRACE:
+${cells[2].textContent === 'Database' ? `
+  File "app/models.py", line 245, in get_user
+    user = User.query.filter_by(username=username).first()
+  File "sqlalchemy/orm/query.py", line 1234, in first
+    return self.limit(1).all()[0]
+IndexError: list index out of range
+` : 'N/A'}
+
+AÇÕES RECOMENDADAS:
+${cells[1].textContent.includes('ERROR') ? '• Verificar conectividade com banco de dados\n• Revisar configurações de rede\n• Consultar documentação de troubleshooting' : '• Monitorar comportamento do sistema\n• Verificar logs relacionados'}
+    `;
+
+    showModal('Detalhes do Log', `<pre class="bg-light p-3 small">${details}</pre>`);
+}
+
+// Função auxiliar para modal
+function showModal(title, content, confirmText = 'OK', confirmCallback = null) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">${title}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">${content}</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    ${confirmText !== 'OK' ? `<button type="button" class="btn btn-primary" id="modalConfirm">${confirmText}</button>` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+
+    if (confirmCallback) {
+        document.getElementById('modalConfirm').onclick = () => {
+            confirmCallback();
+            bsModal.hide();
+        };
+    }
+
+    modal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(modal);
+    });
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-scroll inicial
+    scrollToBottom();
+
+    // Simular logs chegando em tempo real
+    setInterval(() => {
+        if (!isPaused && Math.random() < 0.3) { // 30% de chance a cada 5 segundos
+            const levels = ['INFO', 'WARNING', 'ERROR'];
+            const messages = [
+                'Usuário admin fez login',
+                'Backup automático concluído',
+                'CPU em 45% de utilização',
+                'Novo chamado criado #123',
+                'RFID tag detectada: ABC123',
+                'Email enviado com sucesso',
+                'Tentativa de login falhou',
+                'Certificação renovada',
+                'Uso de memória em 67%'
+            ];
+            const modules = ['Auth', 'Backup', 'System', 'API', 'RFID', 'Email'];
+
+            const level = levels[Math.floor(Math.random() * levels.length)];
+            const message = messages[Math.floor(Math.random() * messages.length)];
+            const module = modules[Math.floor(Math.random() * modules.length)];
+
+            addLogEntry(level, message, module);
+
+            if (document.getElementById('autoScrollSwitch').checked) {
+                scrollToBottom();
+            }
+        }
+    }, 5000);
+
+    // Toggle auto-scroll
+    document.getElementById('autoScrollSwitch').addEventListener('change', function() {
+        if (this.checked) {
+            scrollToBottom();
+        }
+    });
+});
+</script>
+{% endblock %}

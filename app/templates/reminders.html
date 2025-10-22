@@ -2,12 +2,247 @@
 {% block title %}Gestão de Lembretes | TI OSN System {% endblock %}
 
 {% block content %}
+<style>
+    /* Estilo para a tabela */
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    /* Estilo para as células da tabela */
+    .table td, .table th {
+        vertical-align: middle;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* Estilo para os badges de prioridade */
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        padding: 0.35em 0.5em;
+    }
+    
+    /* Estilo para os botões de ação */
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        margin: 0 2px;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-action i {
+        font-size: 0.85rem;
+    }
+    
+    .btn-action.btn-sm {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .btn-action.btn-sm i {
+        font-size: 0.75rem;
+    }
+    
+    /* Efeito hover nas linhas da tabela */
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    /* Estilos padronizados para modais */
+    .modal {
+        --bs-modal-width: 500px;
+        --bs-modal-bg: #ffffff;
+        --bs-modal-header-border-color: #e9ecef;
+        --bs-modal-footer-border-color: #e9ecef;
+    }
+    
+    .modal-dialog {
+        max-width: var(--bs-modal-width);
+        margin: 1.75rem auto;
+    }
+    
+    .modal-content {
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .modal-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid var(--bs-modal-header-border-color);
+        padding: 1rem 1.5rem;
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+    }
+    
+    .modal-title {
+        font-weight: 600;
+        color: #343a40;
+        display: flex;
+        align-items: center;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-footer {
+        background-color: #f8f9fa;
+        border-top: 1px solid var(--bs-modal-footer-border-color);
+        padding: 1rem 1.5rem;
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+    }
+    
+    /* Estilo para títulos de seção nos modais */
+    .modal-body h6 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 0.5rem;
+        margin: 1.5rem 0 1rem 0;
+    }
+    
+    .modal-body h6:first-child {
+        margin-top: 0;
+    }
+    
+    /* Estilo para itens de lista nos modais */
+    .modal-body .list-unstyled li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f1f3f5;
+    }
+    
+    .modal-body .list-unstyled li:last-child {
+        border-bottom: none;
+    }
+    
+    /* Estilo para os cards no modal */
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    /* Melhorias na responsividade */
+    @media (max-width: 1200px) {
+        .table-responsive {
+            font-size: 0.85rem;
+        }
+        .btn-sm {
+            padding: 0.15rem 0.4rem;
+            font-size: 0.7rem;
+        }
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.25em 0.4em;
+        }
+    }
+    
+    /* Estilo para o botão de detalhes */
+    .btn-details {
+        background-color: #0dcaf0;
+        color: white;
+        border: none;
+    }
+    
+    .btn-details:hover {
+        background-color: #0db8e0;
+        color: white;
+    }
+    
+    /* Estilo para o cabeçalho fixo da tabela */
+    .table thead th {
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa;
+        z-index: 10;
+    }
+    
+    /* Melhorias no modal para telas pequenas */
+    @media (max-width: 768px) {
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+        .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+    }
+</style>
 
 <!-- Header da Página -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="text-primary mb-0"><i class="fas fa-bell me-2"></i>Gerenciar Lembretes</h4>
-    <div class="badge bg-primary fs-6" id="reminders-count">
-        Carregando...
+    <div>
+        <h4 class="text-primary mb-0"><i class="fas fa-bell me-2"></i>Gerenciar Lembretes</h4>
+        <small class="text-muted">Clique no nome de um lembrete ou no ícone de olho para ver mais detalhes</small>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#helpModal">
+            <i class="fas fa-question-circle me-1"></i> Ajuda
+        </button>
+        <span class="badge bg-primary fs-6" id="reminders-count">
+            Carregando...
+        </span>
+    </div>
+</div>
+
+<!-- Modal de Ajuda -->
+<div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="helpModalLabel">
+                    <i class="fas fa-question-circle me-2"></i>Ajuda - Gerenciamento de Lembretes
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="text-primary">Como usar:</h6>
+                <ul class="mb-4">
+                    <li>Clique no <strong>nome do lembrete</strong> ou no botão <i class="fas fa-eye text-info"></i> para ver os detalhes completos</li>
+                    <li>Use os ícones de ação para <i class="fas fa-edit text-warning"></i> editar, <i class="fas fa-check text-success"></i> finalizar, <i class="fas fa-pause text-secondary"></i> pausar ou <i class="fas fa-trash-alt text-danger"></i> excluir</li>
+                    <li>As cores dos indicadores de prioridade mostram a urgência de cada lembrete</li>
+                </ul>
+                
+                <h6 class="text-primary">Legenda de Prioridades:</h6>
+                <div class="d-flex flex-column gap-2 mb-3">
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 me-2">
+                            <i class="fas fa-exclamation-triangle"></i> Crítica
+                        </span>
+                        <small>Prioridade máxima, ação imediata necessária</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 me-2">
+                            <i class="fas fa-arrow-up"></i> Alta
+                        </span>
+                        <small>Importante, requer atenção em breve</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-info-subtle text-info border border-info border-opacity-25 me-2">
+                            <i class="fas fa-minus"></i> Média
+                        </span>
+                        <small>Importante, mas não urgente</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-success-subtle text-success border border-success border-opacity-25 me-2">
+                            <i class="fas fa-arrow-down"></i> Baixa
+                        </span>
+                        <small>Baixa prioridade, pode ser tratado depois</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Fechar
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -98,6 +333,61 @@
                         <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
                     {% endfor %}
                 </div>
+                
+                <!-- Novos Campos Profissionais -->
+                <div class="col-12">
+                    <hr class="my-3">
+                    <h6 class="text-muted mb-3"><i class="fas fa-star me-2"></i>Informações Adicionais (Opcional)</h6>
+                </div>
+                
+                <div class="col-xl-2 col-lg-3 col-md-4">
+                    <label class="form-label small text-muted mb-1"><i class="fas fa-exclamation-triangle me-1"></i>Prioridade</label>
+                    {{ form.priority(class_='form-select form-select-sm') }}
+                    {% for error in form.priority.errors %}
+                        <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <label class="form-label small text-muted mb-1"><i class="fas fa-folder me-1"></i>Categoria</label>
+                    {{ form.category(class_='form-select form-select-sm') }}
+                    {% for error in form.category.errors %}
+                        <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="col-xl-2 col-lg-3 col-md-4">
+                    <label class="form-label small text-muted mb-1"><i class="fas fa-file-contract me-1"></i>Nº Contrato/Licença</label>
+                    {{ form.contract_number(class_='form-control form-control-sm', placeholder='Ex: LIC-2025-001') }}
+                    {% for error in form.contract_number.errors %}
+                        <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="col-xl-2 col-lg-3 col-md-4">
+                    <label class="form-label small text-muted mb-1"><i class="fas fa-dollar-sign me-1"></i>Valor/Custo (R$)</label>
+                    {{ form.cost(class_='form-control form-control-sm', placeholder='Ex: 45000.00') }}
+                    {% for error in form.cost.errors %}
+                        <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <label class="form-label small text-muted mb-1"><i class="fas fa-industry me-1"></i>Fornecedor/Fabricante</label>
+                    {{ form.supplier(class_='form-control form-control-sm', placeholder='Ex: Microsoft Brasil') }}
+                    {% for error in form.supplier.errors %}
+                        <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="col-12">
+                    <label class="form-label small text-muted mb-1"><i class="fas fa-sticky-note me-1"></i>Observações</label>
+                    {{ form.notes(class_='form-control form-control-sm', placeholder='Notas adicionais, instruções, contatos...', rows='2') }}
+                    {% for error in form.notes.errors %}
+                        <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
                 <div class="col-xl-12">
                     <hr class="my-3">
                     <div class="d-flex justify-content-end">
@@ -137,19 +427,21 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light sticky-top">
                     <tr>
-                        <th class="ps-3"><i class="fas fa-tag me-2 text-muted"></i>Nome</th>
-                        <th><i class="fas fa-list me-2 text-muted"></i>Tipo</th>
-                        <th><i class="fas fa-calendar-alt me-2 text-muted"></i>Vencimento</th>
-                        <th><i class="fas fa-user me-2 text-muted"></i>Responsável</th>
-                        <th><i class="fas fa-sync-alt me-2 text-muted"></i>Frequência</th>
-                        <th><i class="fas fa-sitemap me-2 text-muted"></i>Setor</th>
-                        <th class="text-center"><i class="fas fa-check-circle me-2 text-muted"></i>Status</th>
-                        <th class="text-center pe-3"><i class="fas fa-cogs me-2 text-muted"></i>Ações</th>
+                        <th class="ps-3" style="width: 20%;"><i class="fas fa-tag me-2 text-muted"></i>Nome</th>
+                        <th style="width: 10%;"><i class="fas fa-list me-2 text-muted"></i>Tipo</th>
+                        <th style="width: 12%;"><i class="fas fa-calendar-alt me-2 text-muted"></i>Vencimento</th>
+                        <th style="width: 10%;"><i class="fas fa-user me-2 text-muted"></i>Responsável</th>
+                        <th style="width: 10%;"><i class="fas fa-sync-alt me-2 text-muted"></i>Frequência</th>
+                        <th style="width: 10%;"><i class="fas fa-sitemap me-2 text-muted"></i>Setor</th>
+                        <th style="width: 8%;" class="text-center"><i class="fas fa-exclamation-triangle me-2 text-muted"></i>Prioridade</th>
+                        <th style="width: 10%;" class="text-center"><i class="fas fa-folder me-2 text-muted"></i>Categoria</th>
+                        <th style="width: 10%;" class="text-center"><i class="fas fa-check-circle me-2 text-muted"></i>Status</th>
+                        <th class="text-center pe-3" style="width: 10%;"><i class="fas fa-cogs me-2 text-muted"></i>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td colspan="8" class="text-center py-4 text-muted">
+                        <td colspan="10" class="text-center py-4 text-muted">
                             <i class="fas fa-spinner fa-spin me-2"></i>Carregando lembretes...
                         </td>
                     </tr>
@@ -170,85 +462,336 @@
 </div>
 
 <script>
+// Função para renderizar a prioridade com ícones e cores
+function renderPriority(priority) {
+    const priorityMap = {
+        'critica': { icon: 'exclamation-triangle', color: 'danger', label: 'Crítica' },
+        'alta': { icon: 'arrow-up', color: 'warning', label: 'Alta' },
+        'media': { icon: 'minus', color: 'info', label: 'Média' },
+        'baixa': { icon: 'arrow-down', color: 'success', label: 'Baixa' }
+    };
+    const p = priority?.toLowerCase() || 'media';
+    const { icon, color, label } = priorityMap[p] || priorityMap['media'];
+    
+    return `<span class="badge bg-${color}-subtle text-${color} border border-${color} border-opacity-25 d-inline-flex align-items-center gap-1">
+        <i class="fas fa-${icon}"></i> ${label}
+    </span>`;
+}
+
 function renderStatus(reminder) {
-    if (reminder.completed) {
-        return '<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 d-inline-flex align-items-center gap-1">' +
-               '<i class="fas fa-check-circle"></i> Concluído</span>';
-    } else if (reminder.status_control === 'pausado') {
-        let pauseInfo = '';
-        if (reminder.pause_until) {
-            pauseInfo = ` até ${new Date(reminder.pause_until).toLocaleDateString('pt-BR')}`;
+    // Mapeamento de status para estilos
+    const statusMap = {
+        'concluido': {
+            text: 'Concluído',
+            class: 'success',
+            icon: 'check-circle'
+        },
+        'encerrado': {
+            text: 'Encerrado',
+            class: 'secondary',
+            icon: 'minus-circle'
+        },
+        'pausado': {
+            text: 'Pausado',
+            class: 'secondary',
+            icon: 'pause'
+        },
+        'cancelado': {
+            text: 'Cancelado',
+            class: 'danger',
+            icon: 'ban'
+        },
+        'expirado': {
+            text: 'Atrasado',
+            class: 'danger',
+            icon: 'exclamation-triangle'
+        },
+        'alerta': {
+            text: 'Alerta',
+            class: 'warning',
+            icon: 'exclamation-circle'
+        },
+        'ativo': {
+            text: 'Ativo',
+            class: 'info',
+            icon: 'check-circle'
+        },
+        'pendente': {
+            text: 'Pendente',
+            class: 'secondary',
+            icon: 'clock'
+        },
+        'default': {
+            text: 'Em dia',
+            class: 'success',
+            icon: 'check-circle'
         }
-        return `<span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 d-inline-flex align-items-center gap-1">
-               <i class="fas fa-pause-circle"></i> Pausado${pauseInfo}</span>`;
+    };
+    
+    // Determina o status com base nos dados do lembrete
+    let statusKey = 'default';
+    
+    if (reminder.completed) {
+        statusKey = 'concluido';
+    } else if (reminder.status_control === 'encerrado') {
+        statusKey = 'encerrado';
+    } else if (reminder.status_control === 'pausado') {
+        statusKey = 'pausado';
+        // Adiciona informação de data de pausa se disponível
+        if (reminder.pause_until) {
+            statusMap.pausado.text = `Pausado até ${new Date(reminder.pause_until).toLocaleDateString('pt-BR')}`;
+        }
     } else if (reminder.status_control === 'cancelado') {
-        return '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 d-inline-flex align-items-center gap-1">' +
-               '<i class="fas fa-ban"></i> Cancelado</span>';
-    } else if (reminder.status === 'ok') {
-        return '<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 d-inline-flex align-items-center gap-1">' +
-               '<i class="fas fa-check"></i> Ok</span>';
-    } else if (reminder.status === 'alert') {
-        return '<span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 d-inline-flex align-items-center gap-1">' +
-               '<i class="fas fa-calendar-day"></i> Em breve</span>';
+        statusKey = 'cancelado';
     } else if (reminder.status === 'expired') {
-        return '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 d-inline-flex align-items-center gap-1">' +
-               '<i class="fas fa-exclamation-circle"></i> Vencido</span>';
+        statusKey = 'expirado';
+    } else if (reminder.status === 'alert') {
+        statusKey = 'alerta';
+    } else if (reminder.status_control === 'ativo') {
+        statusKey = 'ativo';
+    } else if (reminder.status_control === 'pendente') {
+        statusKey = 'pendente';
     }
-    return '<span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 d-inline-flex align-items-center gap-1">' +
-           '<i class="fas fa-clock"></i> Pendente</span>';
+    
+    const status = statusMap[statusKey] || statusMap['default'];
+    
+    // Retorna o HTML do status formatado
+    return `<span class="badge bg-${status.class}-subtle text-${status.class} border border-${status.class} border-opacity-25 d-inline-flex align-items-center gap-1">
+        <i class="fas fa-${status.icon} me-1"></i> ${status.text}
+    </span>`;
+}
+
+// Função para formatar valores monetários
+function formatCurrency(value) {
+    if (!value) return 'Não informado';
+    return new Intl.NumberFormat('pt-BR', { 
+        style: 'currency', 
+        currency: 'BRL',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(parseFloat(value));
+}
+
+// Função para formatar a data
+function formatDate(dateString) {
+    if (!dateString) return 'Não informado';
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    return new Date(dateString).toLocaleDateString('pt-BR', options);
+}
+
+// Função para formatar o nome da categoria de forma amigável
+function formatCategory(category) {
+    if (!category) return 'Não especificada';
+    return category
+        .replace(/_/g, ' ')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
+
+// Função para exibir os detalhes do lembrete em um modal
+function showReminderDetails(reminder) {
+    // Formatar os dados
+    const dueDate = formatDate(reminder.due_date);
+    const createdAt = formatDate(reminder.created_at);
+    const category = reminder.category ? formatCategory(reminder.category) : 'Não especificada';
+    const pauseUntil = reminder.pause_until ? formatDate(reminder.pause_until) : 'Não informado';
+    const endDate = reminder.end_date ? formatDate(reminder.end_date) : 'Não informado';
+    const cost = formatCurrency(reminder.cost);
+    
+    // Criar o HTML do modal
+    const modalHtml = `
+    <div class="modal fade" id="reminderDetailsModal" tabindex="-1" aria-labelledby="reminderDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reminderDetailsModalLabel">
+                        <i class="fas fa-info-circle me-2"></i>Detalhes do Lembrete
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Informações Básicas
+                            </h6>
+                            <p><strong>Nome:</strong> ${reminder.name}</p>
+                            <p><strong>Tipo:</strong> ${reminder.type || 'Não informado'}</p>
+                            <p><strong>Vencimento:</strong> ${dueDate}</p>
+                            <p><strong>Status:</strong> ${renderStatus(reminder)}</p>
+                            <p><strong>Prioridade:</strong> ${renderPriority(reminder.priority)}</p>
+                            <p><strong>Categoria:</strong> ${category}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-users me-2"></i>Responsáveis
+                            </h6>
+                            <p><strong>Responsável:</strong> ${reminder.responsible || 'Não informado'}</p>
+                            <p><strong>Setor:</strong> ${reminder.sector || 'Não informado'}</p>
+                            
+                            <h6 class="text-muted mt-4 mb-3">
+                                <i class="fas fa-calendar-alt me-2"></i>Datas
+                            </h6>
+                            <p><strong>Pausado até:</strong> ${pauseUntil}</p>
+                            <p><strong>Data Final:</strong> ${endDate}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-file-invoice-dollar me-2"></i>Informações Financeiras
+                            </h6>
+                            <p><strong>Nº Contrato/Licença:</strong> ${reminder.contract_number || 'Não informado'}</p>
+                            <p><strong>Valor:</strong> ${cost}</p>
+                            <p><strong>Fornecedor:</strong> ${reminder.supplier || 'Não informado'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-sync-alt me-2"></i>Recorrência
+                            </h6>
+                            <p><strong>Frequência:</strong> ${reminder.frequency || 'Não recorrente'}</p>
+                            <p><strong>Status:</strong> ${reminder.status_control || 'Ativo'}</p>
+                        </div>
+                    </div>
+                    
+                    ${reminder.notes ? `
+                    <div class="card bg-light border-0 mb-3">
+                        <div class="card-body p-3">
+                            <h6 class="text-muted mb-2">
+                                <i class="fas fa-sticky-note me-2"></i>Observações
+                            </h6>
+                            <p class="mb-0">${reminder.notes}</p>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Fechar
+                    </button>
+                    <a href="/reminders/edit/${reminder.id}" class="btn btn-primary">
+                        <i class="fas fa-edit me-1"></i> Editar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>`;
+    
+    // Remove o modal existente se houver
+    const existingModal = document.getElementById('reminderDetailsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Adiciona o novo modal ao corpo do documento
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Inicializa e exibe o modal
+    const modal = new bootstrap.Modal(document.getElementById('reminderDetailsModal'));
+    modal.show();
+}
+
+// Função auxiliar para escapar strings com segurança
+function escapeString(str) {
+    if (!str || str === null || str === undefined) return '';
+    return String(str).replace(/'/g, "\\'");
 }
 
 function renderActions(reminder) {
-    let actions = `<div class="d-flex gap-1 justify-content-center">
-        <a href="/reminders/edit/${reminder.id}" class="btn btn-sm btn-warning" title="Editar">
+    // Cria um objeto seguro com valores padrão para evitar erros
+    const safeReminder = {
+        id: reminder.id || '',
+        name: reminder.name || 'Sem nome',
+        completed: reminder.completed || false,
+        status_control: reminder.status_control || 'ativo'
+    };
+    
+    // Inicia o HTML das ações
+    let actions = `<div class="d-flex justify-content-center" style="min-width: 200px;">
+        <!-- Botão de Detalhes -->
+        <button class="btn btn-info text-white btn-action" 
+                onclick="showReminderDetails(${JSON.stringify(reminder).replace(/"/g, '&quot;')})" 
+                title="Ver Detalhes"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top">
+            <i class="fas fa-eye"></i>
+        </button>
+        
+        <!-- Botão de Editar -->
+        <a href="/reminders/edit/${safeReminder.id}" 
+           class="btn btn-warning btn-action" 
+           title="Editar"
+           data-bs-toggle="tooltip"
+           data-bs-placement="top">
             <i class="fas fa-edit"></i>
         </a>`;
     
-    if (!reminder.completed) {
+    // Se o lembrete não estiver concluído e não estiver encerrado, mostra os botões de ação
+    if (!safeReminder.completed && safeReminder.status_control !== 'encerrado') {
+        // Botão de Finalizar
         actions += `
-        <form method="POST" action="/reminders/complete/${reminder.id}" style="display:inline;">
-            <button type="submit" class="btn btn-sm btn-success" title="Finalizar">
+        <button type="button" 
+                class="btn btn-success btn-action" 
+                title="Finalizar"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                onclick="completeReminder(${safeReminder.id}, '${escapeString(safeReminder.name)}')">
                 <i class="fas fa-check"></i>
-            </button>
-        </form>`;
+            </button>`;
         
-        // Botão de pausar/reativar/cancelar
-        if (reminder.status_control === 'ativo') {
+        // Botão de Pausar/Reativar
+        if (safeReminder.status_control === 'ativo') {
             actions += `
-        <form method="POST" action="/reminders/toggle_status/${reminder.id}" style="display:inline;">
-            <button type="submit" class="btn btn-sm btn-secondary" title="Pausar">
+        <form method="POST" action="/reminders/toggle_status/${safeReminder.id}" style="display:inline;">
+            <button type="submit" 
+                    class="btn btn-secondary btn-action" 
+                    title="Pausar"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top">
                 <i class="fas fa-pause"></i>
             </button>
         </form>`;
-        } else if (reminder.status_control === 'pausado' || reminder.status_control === 'cancelado') {
+        } else if (safeReminder.status_control === 'pausado' || safeReminder.status_control === 'cancelado') {
             actions += `
-        <form method="POST" action="/reminders/toggle_status/${reminder.id}" style="display:inline;">
-            <button type="submit" class="btn btn-sm btn-info" title="Reativar">
+        <form method="POST" action="/reminders/toggle_status/${safeReminder.id}" style="display:inline;">
+            <button type="submit" 
+                    class="btn btn-info text-white btn-action" 
+                    title="Reativar"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top">
                 <i class="fas fa-play"></i>
             </button>
         </form>`;
         }
         
-        // Botão de cancelar (apenas para lembretes ativos ou pausados)
-        if (reminder.status_control !== 'cancelado') {
+        // Botão de Cancelar (apenas para lembretes ativos ou pausados)
+        if (safeReminder.status_control !== 'cancelado') {
             actions += `
-        <form method="POST" action="/reminders/toggle_status/${reminder.id}" style="display:inline;">
-            <input type="hidden" name="target_status" value="cancelado">
-            <button type="submit" class="btn btn-sm btn-danger" title="Cancelar" 
-                    onclick="return confirm('Tem certeza que deseja cancelar este lembrete?');">
+        <button type="button" 
+                class="btn btn-danger btn-action" 
+                title="Cancelar"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                onclick="cancelReminder(${safeReminder.id}, '${escapeString(safeReminder.name)}')">
                 <i class="fas fa-ban"></i>
-            </button>
-        </form>`;
+            </button>`;
         }
     }
     
+    // Botão de Excluir (sempre visível)
     actions += `
-        <form method="POST" action="/reminders/delete/${reminder.id}" style="display:inline;">
-            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Excluir este lembrete?');" title="Excluir">
+        <button type="button" 
+                class="btn btn-outline-danger btn-action" 
+                title="Excluir"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                onclick="deleteReminder(${safeReminder.id}, '${escapeString(safeReminder.name)}')">
                 <i class="fas fa-trash-alt"></i>
             </button>
-        </form>
     </div>`;
+    
     return actions;
 }
 
@@ -260,7 +803,12 @@ function updateRemindersTable() {
     const order = params.get('order') || 'desc';
     
     fetch(`/reminders/json?page=${page}&order_by=${orderBy}&order=${order}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             const reminders = data.reminders;
             const tbody = document.querySelector('table.table tbody');
@@ -277,42 +825,82 @@ function updateRemindersTable() {
             
             // Atualiza a tabela
             if (reminders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">' +
+                tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-muted">' +
                     '<i class="fas fa-inbox fa-2x mb-2 d-block"></i>Nenhum lembrete cadastrado</td></tr>';
             } else {
-                tbody.innerHTML = reminders.map(reminder => `
-                    <tr class="${reminder.completed ? 'table-success' : ''}">
+                tbody.innerHTML = reminders.map(reminder => {
+                    // Garante que todos os campos necessários existam
+                    const safeReminder = {
+                        id: reminder.id || '',
+                        name: reminder.name || 'Sem nome',
+                        type: reminder.type || '-',
+                        due_date: reminder.due_date || '-',
+                        responsible: reminder.responsible || '-',
+                        frequency: reminder.frequency || 'Nenhuma',
+                        sector: reminder.sector || '-',
+                        priority: reminder.priority || 'media',
+                        category: reminder.category || '',
+                        status: reminder.status || 'ok',
+                        status_control: reminder.status_control || 'ativo',
+                        completed: reminder.completed || false,
+                        pause_until: reminder.pause_until || null,
+                        end_date: reminder.end_date || null,
+                        contract_number: reminder.contract_number || '',
+                        cost: reminder.cost || null,
+                        supplier: reminder.supplier || '',
+                        notes: reminder.notes || ''
+                    };
+                    
+                    return `
+                    <tr class="${safeReminder.completed ? 'table-success' : ''} ${safeReminder.status === 'expired' ? 'table-danger' : safeReminder.status === 'alert' ? 'table-warning' : ''}">
                         <td class="ps-3">
                             <div class="d-flex align-items-center">
-                                <i class="fas fa-bell text-muted me-2"></i>
-                                <span class="${reminder.completed ? 'text-decoration-line-through text-muted' : ''}">
-                                    ${reminder.name}
+                                <i class="fas ${safeReminder.completed ? 'fa-check-circle text-success' : 'fa-bell'} ${safeReminder.status === 'expired' ? 'text-danger' : safeReminder.status === 'alert' ? 'text-warning' : 'text-muted'} me-2"></i>
+                                <span class="${safeReminder.completed ? 'text-decoration-line-through text-muted' : ''}" 
+                                      style="cursor: pointer;"
+                                      onclick="showReminderDetails(${JSON.stringify(safeReminder).replace(/"/g, '&quot;')})"
+                                      title="Clique para ver detalhes">
+                                    ${safeReminder.name}
                                 </span>
                             </div>
                         </td>
-                        <td>${reminder.type}</td>
+                        <td>${safeReminder.type}</td>
                         <td>
-                            <small class="${reminder.status === 'expired' ? 'text-danger' : reminder.status === 'alert' ? 'text-warning' : 'text-dark'}">
-                                ${reminder.due_date}
+                            <small class="${safeReminder.status === 'expired' ? 'text-danger fw-bold' : safeReminder.status === 'alert' ? 'text-warning fw-bold' : 'text-dark'}">
+                                ${formatDate(safeReminder.due_date)}
                             </small>
                         </td>
-                        <td>${reminder.responsible}</td>
+                        <td>${safeReminder.responsible}</td>
                         <td>
-                            <span class="badge bg-light text-dark border">${reminder.frequency || ''}</span>
+                            <span class="badge bg-light text-dark border">${safeReminder.frequency}</span>
                         </td>
                         <td>
-                            <span class="badge bg-light text-dark border">${reminder.sector || ''}</span>
+                            <span class="badge bg-light text-dark border">${safeReminder.sector}</span>
                         </td>
-                        <td class="text-center">${renderStatus(reminder)}</td>
-                        <td class="text-center pe-3">${renderActions(reminder)}</td>
-                    </tr>
-                `).join('');
+                        <td class="text-center">
+                            ${renderPriority(safeReminder.priority)}
+                        </td>
+                        <td class="text-center">
+                            ${safeReminder.category ? formatCategory(safeReminder.category) : '-'}
+                        </td>
+                        <td class="text-center">
+                            ${renderStatus(safeReminder)}
+                        </td>
+                        <td class="text-center pe-3">
+                            ${renderActions(safeReminder)}
+                        </td>
+                    </tr>`;
+                }).join('');
             }
             
             // Atualiza a paginação
             if (pageInfo) {
                 pageInfo.innerHTML = `Mostrando ${reminders.length} de ${data.total} lembretes`;
             }
+            
+            // Dispara um evento personalizado para notificar que a tabela foi atualizada
+            const event = new Event('remindersTableUpdated');
+            document.dispatchEvent(event);
             
             if (pagination && data.pages > 1) {
                 let paginationHtml = '';
@@ -372,20 +960,130 @@ function updateRemindersTable() {
             console.error('Erro ao carregar lembretes:', error);
             const tbody = document.querySelector('table.table tbody');
             if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger">' +
-                    '<i class="fas fa-exclamation-triangle me-2"></i>Erro ao carregar lembretes</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-4">
+                    <div class="alert alert-danger d-inline-block">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Erro ao carregar lembretes</strong><br>
+                        <small>${error.message || 'Erro desconhecido'}</small><br>
+                        <small class="text-muted">Verifique o console para mais detalhes</small>
+                    </div>
+                </td></tr>`;
             }
         });
+}
+
+// Inicializa os tooltips do Bootstrap
+function initializeTooltips() {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
 }
 
 // Atualiza a cada 3 minutos (180000 ms)
 setInterval(updateRemindersTable, 180000);
 
 // Atualiza ao carregar a página também
-window.addEventListener('DOMContentLoaded', updateRemindersTable);
+document.addEventListener('DOMContentLoaded', function() {
+    updateRemindersTable();
+    initializeTooltips();
+    
+    // Re-inicializa os tooltips após atualizar a tabela
+    document.addEventListener('remindersTableUpdated', function() {
+        initializeTooltips();
+    });
+});
 
 // Atualiza a tabela quando os parâmetros da URL mudam
 window.addEventListener('popstate', updateRemindersTable);
+
+// ============================================
+// FUNÇÕES DO SISTEMA DE MODAIS MODERNOS
+// ============================================
+
+/**
+ * Finalizar lembrete com modal moderno
+ */
+async function completeReminder(reminderId, titulo) {
+    const confirmed = await window.Modal.show({
+        type: 'success',
+        title: 'Finalizar Lembrete',
+        message: `
+            <p>Deseja marcar o lembrete como concluído?</p>
+            <div class="alert alert-success border-success mb-0">
+                <strong><i class="fas fa-bell me-2"></i>${titulo}</strong>
+            </div>
+        `,
+        html: true,
+        buttons: [
+            { text: 'Cancelar', action: 'cancel', class: 'btn-outline-secondary' },
+            { text: 'Finalizar', action: 'confirm', class: 'btn-success', icon: 'fas fa-check' }
+        ]
+    });
+    
+    if (confirmed.action === 'confirm') {
+        // Criar formulário e submeter
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/reminders/complete/${reminderId}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+/**
+ * Cancelar lembrete com modal moderno
+ */
+async function cancelReminder(reminderId, titulo) {
+    const confirmed = await window.Modal.show({
+        type: 'warning',
+        title: 'Cancelar Lembrete',
+        message: `
+            <p>Tem certeza que deseja <strong>cancelar</strong> este lembrete?</p>
+            <div class="alert alert-warning border-warning mb-0">
+                <strong><i class="fas fa-bell me-2"></i>${titulo}</strong>
+            </div>
+        `,
+        html: true,
+        buttons: [
+            { text: 'Não', action: 'cancel', class: 'btn-outline-secondary' },
+            { text: 'Sim, Cancelar', action: 'confirm', class: 'btn-danger', icon: 'fas fa-ban' }
+        ]
+    });
+    
+    if (confirmed.action === 'confirm') {
+        // Criar formulário e submeter
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/reminders/toggle_status/${reminderId}`;
+        
+        // Adicionar input hidden para target_status
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'target_status';
+        input.value = 'cancelado';
+        form.appendChild(input);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+/**
+ * Excluir lembrete com modal moderno
+ */
+async function deleteReminder(reminderId, titulo) {
+    const confirmed = await confirmDelete(titulo, 'lembrete');
+    
+    if (confirmed) {
+        // Criar formulário e submeter
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/reminders/delete/${reminderId}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
 </script>
 
 {% endblock %}

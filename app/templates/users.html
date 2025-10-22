@@ -70,19 +70,19 @@
                   </button>
                 </form>
 
-                <form method="POST" action="{{ url_for('main.reset_user_password', id=user.id) }}" class="d-inline">
-                  <button type="submit" class="btn btn-sm btn-primary" title="Redefinir Senha"
-                    onclick="return confirm('Tem certeza que deseja redefinir a senha deste usuário? Uma nova senha será gerada e exibida na tela.');">
-                    <i class="fas fa-key"></i>
-                  </button>
-                </form>
+                <button type="button" 
+                        class="btn btn-sm btn-primary" 
+                        title="Redefinir Senha"
+                        onclick="resetUserPassword({{ user.id }}, '{{ user.username }}')">
+                  <i class="fas fa-key"></i>
+                </button>
 
-                <form method="POST" action="{{ url_for('main.delete_user', id=user.id) }}" class="d-inline">
-                  <button type="submit" class="btn btn-sm btn-danger" title="Excluir"
-                    onclick="return confirm('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.');">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </form>
+                <button type="button" 
+                        class="btn btn-sm btn-danger" 
+                        title="Excluir"
+                        onclick="deleteUser({{ user.id }}, '{{ user.username }}')">
+                  <i class="fas fa-trash"></i>
+                </button>
               </div>
             </td>
           </tr>
@@ -131,46 +131,41 @@
   </div>
 </div>
 
-<!-- Modal para redefinir senha -->
-<div class="modal fade" id="resetPasswordModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-key me-2"></i>
-                    Redefinir Senha
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Tem certeza de que deseja redefinir a senha deste usuário?</p>
-                <p class="text-muted small">Uma nova senha temporária será gerada e o usuário deverá alterá-la no próximo login.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-warning" id="confirmResetPassword">Redefinir Senha</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
-let userToResetPassword = null;
+// ============================================
+// FUNÇÕES DO SISTEMA DE MODAIS MODERNOS
+// ============================================
 
-function resetPassword(userId, username) {
-    userToResetPassword = userId;
-    document.getElementById('resetPasswordModal').querySelector('.modal-body p').innerHTML =
-        `Tem certeza de que deseja redefinir a senha do usuário <strong>${username}</strong>?`;
-    new bootstrap.Modal(document.getElementById('resetPasswordModal')).show();
-}
-
-document.getElementById('confirmResetPassword').addEventListener('click', function() {
-    if (userToResetPassword) {
-        // Criar um formulário temporário para enviar a requisição
+/**
+ * Redefinir senha do usuário
+ */
+async function resetUserPassword(userId, username) {
+    const confirmed = await window.Modal.show({
+        type: 'warning',
+        title: 'Redefinir Senha',
+        message: `
+            <p>Deseja redefinir a senha do usuário?</p>
+            <div class="alert alert-warning border-warning mb-3">
+                <strong><i class="fas fa-user me-2"></i>${username}</strong>
+            </div>
+            <p class="text-muted small mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                Uma nova senha será gerada e exibida na tela.
+            </p>
+        `,
+        html: true,
+        buttons: [
+            { text: 'Cancelar', action: 'cancel', class: 'btn-outline-secondary' },
+            { text: 'Redefinir Senha', action: 'confirm', class: 'btn-warning', icon: 'fas fa-key' }
+        ]
+    });
+    
+    if (confirmed.action === 'confirm') {
+        // Criar formulário e submeter
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `/admin/users/${userToResetPassword}/reset-password`;
-
+        form.action = `/admin/users/${userId}/reset-password`;
+        
         // Adicionar token CSRF se necessário
         const csrfToken = document.querySelector('meta[name="csrf-token"]');
         if (csrfToken) {
@@ -180,10 +175,26 @@ document.getElementById('confirmResetPassword').addEventListener('click', functi
             csrfInput.value = csrfToken.getAttribute('content');
             form.appendChild(csrfInput);
         }
-
+        
         document.body.appendChild(form);
         form.submit();
     }
-});
+}
+
+/**
+ * Excluir usuário
+ */
+async function deleteUser(userId, username) {
+    const confirmed = await confirmDelete(username, 'usuário');
+    
+    if (confirmed) {
+        // Criar formulário e submeter
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/users/${userId}/delete`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
 </script>
 {% endblock %}

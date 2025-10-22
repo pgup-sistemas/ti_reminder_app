@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileField
 from wtforms import (BooleanField, DateField, PasswordField, SelectField,
-                     StringField, SubmitField, TextAreaField, ValidationError)
+                      StringField, SubmitField, TextAreaField, ValidationError)
 from wtforms.validators import DataRequired, EqualTo, Length, Optional
+from markupsafe import Markup
 
 
 class ReminderForm(FlaskForm):
@@ -33,6 +34,39 @@ class ReminderForm(FlaskForm):
     )
     pause_until = DateField("Pausar até", validators=[Optional()])
     end_date = DateField("Data de fim", validators=[Optional()])
+    
+    # Novos campos para melhorias profissionais
+    priority = SelectField(
+        "Prioridade",
+        choices=[
+            ("baixa", "Baixa"),
+            ("media", "Média"),
+            ("alta", "Alta"),
+            ("critica", "Crítica"),
+        ],
+        default="media",
+    )
+    category = SelectField(
+        "Categoria",
+        choices=[
+            ("", "Selecione"),
+            ("licenca_software", "Licença de Software"),
+            ("licenca_banco", "Licença de Banco de Dados"),
+            ("contrato", "Contrato"),
+            ("certificado", "Certificado SSL/Digital"),
+            ("manutencao", "Manutenção"),
+            ("backup", "Backup"),
+            ("atualizacao", "Atualização"),
+            ("auditoria", "Auditoria"),
+            ("outro", "Outro"),
+        ],
+        validators=[Optional()],
+    )
+    contract_number = StringField("Nº Contrato/Licença", validators=[Optional()])
+    cost = StringField("Valor/Custo (R$)", validators=[Optional()])
+    supplier = StringField("Fornecedor/Fabricante", validators=[Optional()])
+    notes = TextAreaField("Observações", validators=[Optional()])
+    
     submit = SubmitField("Salvar")
 
 

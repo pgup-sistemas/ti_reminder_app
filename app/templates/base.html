@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}TI OSN System - Sistema Profissional de Gerenciamento{% endblock %}</title>
 
+    <script>
+    (function() {
+        try {
+            var saved = localStorage.getItem('theme');
+            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var theme = saved || (prefersDark ? 'dark' : 'light');
+            var html = document.documentElement;
+            html.setAttribute('data-theme', theme);
+            html.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
+        } catch (e) { /* no-op */ }
+    })();
+    </script>
+
     <!-- Preload crítico -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" as="style">
 
@@ -16,6 +29,30 @@
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 
+    <!-- Estilos críticos inline para footer dark mode -->
+    <style>
+      /* Footer Dark Mode - Crítico */
+      [data-theme="dark"] footer,
+      [data-theme="dark"] .footer,
+      html[data-theme="dark"] footer,
+      html[data-theme="dark"] .footer {
+        background: #212529 !important;
+        background-color: #212529 !important;
+        color: #adb5bd !important;
+        border-top: 2px solid #495057 !important;
+      }
+      [data-theme="dark"] footer *,
+      [data-theme="dark"] .footer * {
+        background-color: transparent !important;
+      }
+      [data-theme="dark"] .footer a {
+        color: #adb5bd !important;
+      }
+      [data-theme="dark"] .footer .text-muted {
+        color: #6c757d !important;
+      }
+    </style>
+    
     <!-- CSS Crítico (render-blocking) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/_variables.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}">
@@ -33,7 +70,9 @@
     <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" 
           href="{{ url_for('static', filename='breadcrumb-styles.css') }}">
     <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" 
-          href="{{ url_for('static', filename='feedback-styles.css') }}">
+          href="{{ url_for('static', filename='css/toast-notifications.css') }}">
+    <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" 
+          href="{{ url_for('static', filename='css/modern-modals.css') }}">
     <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" 
           href="{{ url_for('static', filename='responsive-tables.css') }}">
     <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" 
@@ -47,11 +86,15 @@
       <link rel="stylesheet" href="{{ url_for('static', filename='form-styles.css') }}">
       <link rel="stylesheet" href="{{ url_for('static', filename='modal-styles.css') }}">
       <link rel="stylesheet" href="{{ url_for('static', filename='breadcrumb-styles.css') }}">
-      <link rel="stylesheet" href="{{ url_for('static', filename='feedback-styles.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/toast-notifications.css') }}">
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-modals.css') }}">
       <link rel="stylesheet" href="{{ url_for('static', filename='responsive-tables.css') }}">
       <link rel="stylesheet" href="{{ url_for('static', filename='mobile-forms.css') }}">
       <link rel="stylesheet" href="{{ url_for('static', filename='animations.css') }}">
     </noscript>
+    
+    <!-- Theme overrides - carregado por último para garantir precedência -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/_theme-overrides.css') }}">
     
     <!-- Load fonts with font-display: swap -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -127,13 +170,13 @@
     
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
-        <!-- Dashboard Principal -->
+        <!-- Visão Geral -->
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" 
            href="{{ url_for('main.index') }}"
            aria-current="{% if request.endpoint == 'main.index' %}page{% else %}false{% endif %}">
-            <i class="fas fa-home me-2" aria-hidden="true"></i> 
-            <span>Dashboard</span>
+            <i class="fas fa-chart-pie me-2" aria-hidden="true"></i> 
+            <span>Visão Geral</span>
           </a>
         </li>
         
@@ -153,7 +196,7 @@
             <li class="mb-1">
               <h2 class="visually-hidden">Menu de Atividades</h2>
               <h6 class="dropdown-header px-3 py-2 mb-1">
-                <i class="fas fa-clipboard-list me-2" aria-hidden="true"></i>Gerenciar Atividades
+                <i class="fas fa-clipboard-list me-2 text-primary" aria-hidden="true"></i>Gerenciar Atividades
               </h6>
             </li>
             <li class="mb-1"><hr class="dropdown-divider mx-2 my-1" role="separator" aria-label="Separador de seção"></li>
@@ -161,14 +204,14 @@
               <a class="dropdown-item px-3 py-2 d-flex align-items-center {% if request.endpoint == 'main.tasks' %}active{% endif %}" 
                  href="{{ url_for('main.tasks') }}"
                  role="menuitem">
-                <i class="fas fa-tasks me-2" aria-hidden="true"></i> Tarefas
+                <i class="fas fa-tasks me-2 text-primary" aria-hidden="true"></i> Tarefas
               </a>
             </li>
             <li>
               <a class="dropdown-item px-3 py-2 d-flex align-items-center {% if request.endpoint == 'main.reminders' %}active{% endif %}" 
                  href="{{ url_for('main.reminders') }}"
                  role="menuitem">
-                <i class="fas fa-bell me-2" aria-hidden="true"></i> Lembretes
+                <i class="fas fa-bell me-2 text-primary" aria-hidden="true"></i> Lembretes
               </a>
             </li>
           </ul>
@@ -190,7 +233,7 @@
             <li class="mb-1">
               <h2 class="visually-hidden">Menu de Suporte</h2>
               <h6 class="dropdown-header px-3 py-2 mb-1">
-                <i class="fas fa-headset me-2" aria-hidden="true"></i>Central de Suporte
+                <i class="fas fa-headset me-2 text-info" aria-hidden="true"></i>Central de Suporte
               </h6>
             </li>
             <li class="mb-1"><hr class="dropdown-divider mx-2 my-1" role="separator" aria-label="Separador de seção"></li>
@@ -198,22 +241,111 @@
               <a class="dropdown-item px-3 py-2 d-flex align-items-center" 
                  href="{{ url_for('main.abrir_chamado') }}"
                  role="menuitem">
-                <i class="fas fa-plus-circle me-2" aria-hidden="true"></i> Abrir Chamado
+                <i class="fas fa-plus-circle me-2 text-info" aria-hidden="true"></i> Abrir Chamado
               </a>
             </li>
             <li>
               <a class="dropdown-item px-3 py-2 d-flex align-items-center {% if request.endpoint == 'main.listar_chamados' %}active{% endif %}" 
                  href="{{ url_for('main.listar_chamados') }}"
                  role="menuitem">
-                <i class="fas fa-ticket-alt me-2" aria-hidden="true"></i> Meus Chamados
+                <i class="fas fa-ticket-alt me-2 text-info" aria-hidden="true"></i> Meus Chamados
               </a>
             </li>
           </ul>
         </li>
         
+        <!-- Dropdown Equipamentos - REFATORADO -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle {% if request.endpoint and (request.endpoint.startswith('equipment_v2.') or request.endpoint.startswith('equipment.')) %}active{% endif %}"
+           href="#"
+           role="button"
+           data-bs-toggle="dropdown"
+           aria-expanded="false"
+           aria-haspopup="true"
+           id="equipamentosDropdown">
+            <i class="fas fa-laptop me-2" aria-hidden="true"></i>
+            <span>Equipamentos</span>
+          </a>
+          <ul class="dropdown-menu py-2" aria-labelledby="equipamentosDropdown" style="min-width: 300px;">
+            <li class="mb-1">
+              <h2 class="visually-hidden">Menu de Equipamentos</h2>
+            </li>
+          
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'equipment_v2.index' %}active{% endif %}"
+                 href="{{ url_for('equipment_v2.index') }}"
+                 role="menuitem">
+                <i class="fas fa-tachometer-alt me-2 text-primary" aria-hidden="true"></i> 
+                <strong>Dashboard de Equipamentos</strong>
+              </a>
+            </li>
+            
+            <!-- Seção do Usuário -->
+            <li><hr class="dropdown-divider mt-2" role="separator" aria-label="Separador de seção"></li>
+            <li><h6 class="dropdown-header"><i class="fas fa-user me-2 text-success" aria-hidden="true"></i>Minhas Ações</h6></li>
+            <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
+            
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'equipment_v2.catalog' %}active{% endif %}"
+                 href="{{ url_for('equipment_v2.catalog') }}"
+                 role="menuitem">
+                <i class="fas fa-calendar-alt me-2 text-success" aria-hidden="true"></i> Solicitar Equipamento
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'equipment_v2.my_requests' %}active{% endif %}"
+                 href="{{ url_for('equipment_v2.my_requests') }}"
+                 role="menuitem">
+                <i class="fas fa-th me-2" aria-hidden="true"></i> Minhas Solicitações
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'equipment_v2.my_loans' %}active{% endif %}"
+                 href="{{ url_for('equipment_v2.my_loans') }}"
+                 role="menuitem">
+                <i class="fas fa-box me-2" aria-hidden="true"></i> Meus Empréstimos
+              </a>
+            </li>
+            
+            <!-- Seção Administrativa -->
+            {% if session.get('is_admin') or session.get('is_ti') %}
+            <li><hr class="dropdown-divider mt-2" role="separator" aria-label="Separador de seção"></li>
+            <li><h6 class="dropdown-header"><i class="fas fa-user-shield me-2 text-warning" aria-hidden="true"></i>Administração</h6></li>
+            <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'equipment_v2.admin_equipment' %}active{% endif %}"
+                 href="{{ url_for('equipment_v2.admin_equipment') }}"
+                 role="menuitem">
+                <i class="fas fa-chart-line me-2 text-warning" aria-hidden="true"></i> Gerenciar Equipamentos
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item position-relative {% if request.endpoint == 'equipment_v2.admin_pending' %}active{% endif %}"
+                 href="{{ url_for('equipment_v2.admin_pending') }}"
+                 role="menuitem">
+                <i class="fas fa-clock me-2 text-warning" aria-hidden="true"></i> Aprovar Solicitações
+                {% if pending_approvals_count and pending_approvals_count > 0 %}
+                <span class="badge rounded-pill bg-danger position-absolute top-10 start-100 translate-middle">
+                  {{ pending_approvals_count }}
+                  <span class="visually-hidden">aprovações pendentes</span>
+                </span>
+                {% endif %}
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'equipment_v2.admin_loans' %}active{% endif %}"
+                 href="{{ url_for('equipment_v2.admin_loans') }}"
+                 role="menuitem">
+                <i class="fas fa-plus-circle me-2 text-warning" aria-hidden="true"></i> Gerenciar Empréstimos
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </li>
+
         <!-- Dropdown Recursos -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.list_equipment', 'main.request_equipment', 'main.listar_tutoriais', 'main.rfid_dashboard', 'main.satisfaction_dashboard', 'main.certifications_dashboard', 'main.performance_dashboard'] %}active{% endif %}"
+          <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.listar_tutoriais'] %}active{% endif %}"
            href="#"
            role="button"
            data-bs-toggle="dropdown"
@@ -225,74 +357,194 @@
           </a>
           <ul class="dropdown-menu" aria-labelledby="recursosDropdown">
             <li><h2 class="visually-hidden">Menu de Recursos</h2></li>
-            <li><h6 class="dropdown-header"><i class="fas fa-cube me-2" aria-hidden="true"></i>Recursos e Conhecimento</h6></li>
-            <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
-            <li>
-              <a class="dropdown-item {% if request.endpoint == 'main.list_equipment' %}active{% endif %}"
-                 href="{{ url_for('main.list_equipment') }}"
-                 role="menuitem">
-                <i class="fas fa-laptop me-2" aria-hidden="true"></i> Equipamentos
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item"
-                 href="{{ url_for('main.new_equipment_request') }}"
-                 role="menuitem">
-                <i class="fas fa-plus-circle me-2" aria-hidden="true"></i> Solicitar Equipamento
-              </a>
-            </li>
+            <li><h6 class="dropdown-header"><i class="fas fa-cube me-2 text-secondary" aria-hidden="true"></i>Recursos e Conhecimento</h6></li>
             <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
             <li>
               <a class="dropdown-item {% if request.endpoint == 'main.listar_tutoriais' %}active{% endif %}"
                  href="{{ url_for('main.listar_tutoriais') }}"
                  role="menuitem">
-                <i class="fas fa-book me-2" aria-hidden="true"></i> Tutoriais
+                <i class="fas fa-book me-2 text-secondary" aria-hidden="true"></i> Tutoriais
               </a>
             </li>
-            {% if session.get('is_admin') %}
+          </ul>
+        </li>
+
+        <!-- Dropdown Monitoramento (Admin Only) -->
+        {% if session.get('is_admin') %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.rfid_dashboard', 'main.satisfaction_dashboard', 'main.certifications_dashboard', 'main.performance_dashboard'] %}active{% endif %}"
+           href="#"
+           role="button"
+           data-bs-toggle="dropdown"
+           aria-expanded="false"
+           aria-haspopup="true"
+           id="monitoramentoDropdown">
+            <i class="fas fa-chart-line me-2" aria-hidden="true"></i>
+            <span>Monitoramento</span>
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="monitoramentoDropdown">
+            <li><h2 class="visually-hidden">Menu de Monitoramento</h2></li>
+            <li><h6 class="dropdown-header"><i class="fas fa-chart-line me-2 text-danger" aria-hidden="true"></i>Dashboards Especializados</h6></li>
             <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
-            <li><h6 class="dropdown-header"><i class="fas fa-cogs me-2" aria-hidden="true"></i>Sistemas Avançados</h6></li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'main.performance_dashboard' %}active{% endif %}"
+                 href="{{ url_for('main.performance_dashboard') }}"
+                 role="menuitem">
+                <i class="fas fa-tachometer-alt me-2 text-danger" aria-hidden="true"></i> Performance do Sistema
+              </a>
+            </li>
             <li>
               <a class="dropdown-item {% if request.endpoint == 'main.rfid_dashboard' %}active{% endif %}"
                  href="{{ url_for('main.rfid_dashboard') }}"
                  role="menuitem">
-                <i class="fas fa-rss me-2" aria-hidden="true"></i> RFID Dashboard
+                <i class="fas fa-rss me-2 text-danger" aria-hidden="true"></i> Controle RFID
               </a>
             </li>
             <li>
               <a class="dropdown-item {% if request.endpoint == 'main.satisfaction_dashboard' %}active{% endif %}"
                  href="{{ url_for('main.satisfaction_dashboard') }}"
                  role="menuitem">
-                <i class="fas fa-star me-2" aria-hidden="true"></i> Satisfação
+                <i class="fas fa-star me-2 text-danger" aria-hidden="true"></i> Satisfação do Cliente
               </a>
             </li>
             <li>
               <a class="dropdown-item {% if request.endpoint == 'main.certifications_dashboard' %}active{% endif %}"
                  href="{{ url_for('main.certifications_dashboard') }}"
                  role="menuitem">
-                <i class="fas fa-trophy me-2" aria-hidden="true"></i> Certificações
+                <i class="fas fa-trophy me-2 text-danger" aria-hidden="true"></i> Certificações
+              </a>
+            </li>
+          </ul>
+        </li>
+        {% endif %}
+        
+        <!-- Análises e SLA -->
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}"
+           href="{{ url_for('main.dashboard') }}"
+           aria-current="{% if request.endpoint == 'main.dashboard' %}page{% else %}false{% endif %}">
+            <i class="fas fa-chart-bar me-2" aria-hidden="true"></i>
+            <span>Análises e SLA</span>
+          </a>
+        </li>
+
+        <!-- Administração (Admin Only) -->
+        {% if session.get('is_admin') %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle {% if request.endpoint and request.endpoint.startswith('system_config') %}active{% endif %}"
+           href="#"
+           role="button"
+           data-bs-toggle="dropdown"
+           aria-expanded="false"
+           aria-haspopup="true"
+           id="adminDropdown">
+            <i class="fas fa-cogs me-2" aria-hidden="true"></i>
+            <span>Administração</span>
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+            <li><h2 class="visually-hidden">Menu de Administração</h2></li>
+            <li><h6 class="dropdown-header"><i class="fas fa-cogs me-2 text-dark" aria-hidden="true"></i>Gerenciamento do Sistema</h6></li>
+            <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'system_config.list_users' %}active{% endif %}"
+                 href="{{ url_for('system_config.list_users') }}"
+                 role="menuitem">
+                <i class="fas fa-users me-2 text-dark" aria-hidden="true"></i> Gerenciar Usuários
               </a>
             </li>
             <li>
-              <a class="dropdown-item {% if request.endpoint == 'main.performance_dashboard' %}active{% endif %}"
-                 href="{{ url_for('main.performance_dashboard') }}"
+              <a class="dropdown-item {% if request.endpoint == 'system_config.general_settings' %}active{% endif %}"
+                 href="{{ url_for('system_config.general_settings') }}"
                  role="menuitem">
-                <i class="fas fa-chart-line me-2" aria-hidden="true"></i> Performance
+                <i class="fas fa-sliders-h me-2 text-dark" aria-hidden="true"></i> Configurações Gerais
               </a>
             </li>
-            {% endif %}
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'system_config.security_settings' %}active{% endif %}"
+                 href="{{ url_for('system_config.security_settings') }}"
+                 role="menuitem">
+                <i class="fas fa-shield-alt me-2 text-dark" aria-hidden="true"></i> Segurança
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'system_config.backup_settings' %}active{% endif %}"
+                 href="{{ url_for('system_config.backup_settings') }}"
+                 role="menuitem">
+                <i class="fas fa-save me-2 text-dark" aria-hidden="true"></i> Backup
+              </a>
+            </li>
+            <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
+            <li><h6 class="dropdown-header"><i class="fas fa-plug me-2 text-purple" aria-hidden="true"></i>Integrações</h6></li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'system_config.email_integration' %}active{% endif %}"
+                 href="{{ url_for('system_config.email_integration') }}"
+                 role="menuitem">
+                <i class="fas fa-envelope me-2 text-purple" aria-hidden="true"></i> Email
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'system_config.api_integrations' %}active{% endif %}"
+                 href="{{ url_for('system_config.api_integrations') }}"
+                 role="menuitem">
+                <i class="fas fa-code-branch me-2 text-purple" aria-hidden="true"></i> APIs Externas
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'system_config.rfid_integration' %}active{% endif %}"
+                 href="{{ url_for('system_config.rfid_integration') }}"
+                 role="menuitem">
+                <i class="fas fa-rss me-2 text-purple" aria-hidden="true"></i> RFID
+              </a>
+            </li>
+            <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
+            <li><h6 class="dropdown-header"><i class="fas fa-bell me-2 text-warning" aria-hidden="true"></i>Notificações</h6></li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'system_config.notification_templates' %}active{% endif %}"
+                 href="{{ url_for('system_config.notification_templates') }}"
+                 role="menuitem">
+                <i class="fas fa-file-alt me-2 text-warning" aria-hidden="true"></i> Templates
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'system_config.notification_rules' %}active{% endif %}"
+                 href="{{ url_for('system_config.notification_rules') }}"
+                 role="menuitem">
+                <i class="fas fa-filter me-2 text-warning" aria-hidden="true"></i> Regras
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'system_config.notification_history' %}active{% endif %}"
+                 href="{{ url_for('system_config.notification_history') }}"
+                 role="menuitem">
+                <i class="fas fa-history me-2 text-warning" aria-hidden="true"></i> Histórico
+              </a>
+            </li>
+            <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
+            <li><h6 class="dropdown-header"><i class="fas fa-tools me-2 text-info" aria-hidden="true"></i>Ferramentas</h6></li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'system_config.system_logs' %}active{% endif %}"
+                 href="{{ url_for('system_config.system_logs') }}"
+                 role="menuitem">
+                <i class="fas fa-file-code me-2 text-info" aria-hidden="true"></i> Logs do Sistema
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'system_config.performance_optimization' %}active{% endif %}"
+                 href="{{ url_for('system_config.performance_optimization') }}"
+                 role="menuitem">
+                <i class="fas fa-tachometer-alt me-2 text-info" aria-hidden="true"></i> Otimização
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item {% if request.endpoint == 'system_config.system_alerts' %}active{% endif %}"
+                 href="{{ url_for('system_config.system_alerts') }}"
+                 role="menuitem">
+                <i class="fas fa-exclamation-triangle me-2 text-info" aria-hidden="true"></i> Alertas
+              </a>
+            </li>
           </ul>
         </li>
-        
-        <!-- Relatórios -->
-        <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}" 
-           href="{{ url_for('main.dashboard') }}"
-           aria-current="{% if request.endpoint == 'main.dashboard' %}page{% else %}false{% endif %}">
-            <i class="fas fa-chart-bar me-2" aria-hidden="true"></i> 
-            <span>Relatórios</span>
-          </a>
-        </li>
+        {% endif %}
       </ul>
       
       <ul class="navbar-nav">
@@ -345,22 +597,15 @@
               <a class="dropdown-item" 
                  href="{{ url_for('main.index') }}"
                  role="menuitem">
-                <i class="fas fa-tachometer-alt me-2" aria-hidden="true"></i> Meu Dashboard
+                <i class="fas fa-chart-pie me-2" aria-hidden="true"></i> Visão Geral
               </a>
             </li>
             {% if session.get('is_admin') %}
             <li role="none">
-              <a class="dropdown-item {% if request.endpoint == 'main.users_admin' %}active{% endif %}" 
-                 href="{{ url_for('main.users_admin') }}"
-                 role="menuitem">
-                <i class="fas fa-users-cog me-2" aria-hidden="true"></i> Gerenciar Usuários
-              </a>
-            </li>
-            <li role="none">
-              <a class="dropdown-item" 
+              <a class="dropdown-item"
                  href="{{ url_for('main.dashboard') }}"
                  role="menuitem">
-                <i class="fas fa-chart-line me-2" aria-hidden="true"></i> Relatórios Avançados
+                <i class="fas fa-chart-bar me-2" aria-hidden="true"></i> Análises e SLA
               </a>
             </li>
             <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
@@ -389,21 +634,14 @@
   <div class="container-fluid py-4">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <div class="row mb-4">
-          <div class="col-12">
-            {% for category, message in messages %}
-              {% if message != "Faça login para acessar esta página." %}
-              <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show fade-in" role="alert">
-                <div class="d-flex align-items-center">
-                  <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }} me-2"></i>
-                  {{ message }}
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-              </div>
-              {% endif %}
-            {% endfor %}
-          </div>
-        </div>
+        <!-- Flash messages serão convertidos em toasts pelo adapter -->
+        <div id="flask-messages" data-messages='[
+          {% for category, message in messages %}
+            {% if message != "Faça login para acessar esta página." %}
+              {"type": "{{ category }}", "message": "{{ message|safe }}"}{{ "," if not loop.last else "" }}
+            {% endif %}
+          {% endfor %}
+        ]' style="display:none;"></div>
       {% endif %}
     {% endwith %}
     
@@ -411,7 +649,7 @@
   </div>
 </main>
 
-<footer class="footer mt-auto py-3 bg-light" role="contentinfo">
+<footer class="footer mt-auto py-3" role="contentinfo">
     <div class="container">
       <div class="text-center">
         <p class="mb-0">
@@ -454,7 +692,11 @@
     <script src="{{ url_for('static', filename='js/notifications.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/breadcrumbs.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/feedback.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/flash-to-toast-adapter.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/notification-request.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/modals.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/modal-helpers.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/modal-actions.js') }}" defer></script>
     
     <!-- Inicialização do Service Worker -->
     <script>

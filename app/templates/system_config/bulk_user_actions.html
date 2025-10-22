@@ -1,0 +1,179 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Ações em Lote - Usuários{% endblock %}
+
+{% block config_content %}
+<div class="config-card">
+    <div class="config-card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-0">
+                    <i class="fas fa-tasks me-2"></i>
+                    Ações em Lote
+                </h3>
+                <p class="text-muted mb-0 mt-1">Execute ações em múltiplos usuários simultaneamente</p>
+            </div>
+            <a href="{{ url_for('system_config.list_users') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <form method="POST">
+        <div class="config-card-body">
+            <!-- Seleção de Ação -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label for="action" class="form-label fw-bold">Ação a Executar</label>
+                    <select name="action" id="action" class="form-select" required>
+                        <option value="">Selecione uma ação...</option>
+                        <option value="activate">Ativar Usuários</option>
+                        <option value="deactivate">Desativar Usuários</option>
+                        <option value="delete">Excluir Usuários</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Seleção de Usuários -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <label class="form-label fw-bold mb-0">Selecionar Usuários</label>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleAllUsers()">
+                        <i class="fas fa-check-double me-1"></i> Selecionar Todos
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="50">
+                                    <input type="checkbox" class="form-check-input" id="selectAll">
+                                </th>
+                                <th>ID</th>
+                                <th>Usuário</th>
+                                <th>Email</th>
+                                <th>Função</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="form-check-input user-checkbox" 
+                                           name="user_ids[]" value="{{ user.id }}"
+                                           {% if user.id == session.get('user_id') %}disabled title="Não é possível selecionar sua própria conta"{% endif %}>
+                                </td>
+                                <td>{{ user.id }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user-circle me-2 text-muted"></i>
+                                        <div>
+                                            <div class="fw-bold">{{ user.username }}</div>
+                                            {% if user.sector %}
+                                            <small class="text-muted">{{ user.sector.name }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    {% if user.is_admin %}
+                                        <span class="badge bg-primary"><i class="fas fa-crown me-1"></i>Admin</span>
+                                    {% elif user.is_ti %}
+                                        <span class="badge bg-info"><i class="fas fa-user-shield me-1"></i>TI</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary"><i class="fas fa-user me-1"></i>Usuário</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.ativo %}
+                                        <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Ativo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i>Inativo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Avisos -->
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Atenção:</strong> As ações em lote são irreversíveis. Verifique cuidadosamente os usuários selecionados antes de prosseguir.
+            </div>
+        </div>
+
+        <div class="config-actions">
+            <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    <span id="selectedCount">0</span> usuário(s) selecionado(s)
+                </small>
+                <div class="btn-group">
+                    <a href="{{ url_for('system_config.list_users') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                        <i class="fas fa-check me-1"></i> Executar Ação
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('selectAll');
+    const userCheckboxes = document.querySelectorAll('.user-checkbox:not([disabled])');
+    const selectedCount = document.getElementById('selectedCount');
+    const submitBtn = document.getElementById('submitBtn');
+    const actionSelect = document.getElementById('action');
+
+    function updateSelectedCount() {
+        const count = document.querySelectorAll('.user-checkbox:checked').length;
+        selectedCount.textContent = count;
+        submitBtn.disabled = count === 0 || !actionSelect.value;
+    }
+
+    selectAll.addEventListener('change', function() {
+        userCheckboxes.forEach(cb => cb.checked = this.checked);
+        updateSelectedCount();
+    });
+
+    userCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateSelectedCount);
+    });
+
+    actionSelect.addEventListener('change', updateSelectedCount);
+
+    // Confirmação antes de submeter
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const action = actionSelect.value;
+        const count = document.querySelectorAll('.user-checkbox:checked').length;
+        
+        let message = '';
+        if (action === 'activate') {
+            message = `Tem certeza de que deseja ativar ${count} usuário(s)?`;
+        } else if (action === 'deactivate') {
+            message = `Tem certeza de que deseja desativar ${count} usuário(s)?`;
+        } else if (action === 'delete') {
+            message = `ATENÇÃO: Tem certeza de que deseja EXCLUIR ${count} usuário(s)? Esta ação não pode ser desfeita!`;
+        }
+
+        if (!confirm(message)) {
+            e.preventDefault();
+        }
+    });
+});
+
+function toggleAllUsers() {
+    const selectAll = document.getElementById('selectAll');
+    selectAll.checked = !selectAll.checked;
+    selectAll.dispatchEvent(new Event('change'));
+}
+</script>
+{% endblock %}

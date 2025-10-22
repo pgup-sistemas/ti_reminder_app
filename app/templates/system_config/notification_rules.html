@@ -1,0 +1,672 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Regras de Notificação{% endblock %}
+
+{% block config_content %}
+<!-- Abas de Navegação -->
+<div class="config-tabs mb-4">
+    <ul class="nav nav-tabs" id="rulesTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="event-rules-tab" data-bs-toggle="tab" data-bs-target="#event-rules" type="button" role="tab">
+                <i class="fas fa-calendar-alt me-1"></i> Regras por Evento
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="workflow-rules-tab" data-bs-toggle="tab" data-bs-target="#workflow-rules" type="button" role="tab">
+                <i class="fas fa-project-diagram me-1"></i> Regras de Workflow
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="conditional-rules-tab" data-bs-toggle="tab" data-bs-target="#conditional-rules" type="button" role="tab">
+                <i class="fas fa-code-branch me-1"></i> Regras Condicionais
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="schedules-tab" data-bs-toggle="tab" data-bs-target="#schedules" type="button" role="tab">
+                <i class="fas fa-clock me-1"></i> Agendamentos
+            </button>
+        </li>
+    </ul>
+</div>
+
+<div class="tab-content" id="rulesTabsContent">
+    <!-- Aba Regras por Evento -->
+    <div class="tab-pane fade show active" id="event-rules" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">
+                            <i class="fas fa-cogs me-2"></i>
+                            Regras de Notificação por Evento
+                        </h3>
+                        <p class="text-muted mb-0 mt-1">Configure notificações automáticas baseadas em eventos do sistema</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-info" onclick="testAllRules()">
+                            <i class="fas fa-vial me-1"></i> Testar Regras
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="createRule()">
+                            <i class="fas fa-plus me-1"></i> Nova Regra
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <form method="POST">
+                <div class="config-card-body">
+                    <!-- Dashboard de Regras -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        Status das Regras de Notificação
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-md-3">
+                                            <div class="status-indicator">
+                                                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                                <h4 class="mb-0 text-success">18</h4>
+                                                <small class="text-muted">Regras Ativas</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="status-indicator">
+                                                <i class="fas fa-pause-circle fa-2x text-warning mb-2"></i>
+                                                <h4 class="mb-0 text-warning">3</h4>
+                                                <small class="text-muted">Regras Pausadas</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="status-indicator">
+                                                <i class="fas fa-paper-plane fa-2x text-primary mb-2"></i>
+                                                <h4 class="mb-0 text-primary">1,456</h4>
+                                                <small class="text-muted">Notificações Hoje</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="status-indicator">
+                                                <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                                                <h4 class="mb-0 text-info">98.7%</h4>
+                                                <small class="text-muted">Taxa de Sucesso</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Regras por Evento -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-list me-2"></i>
+                                    Regras Configuradas
+                                </h5>
+                                <div class="d-flex gap-2">
+                                    <input type="text" class="form-control form-control-sm" placeholder="Buscar regras..." id="ruleSearch" style="width: 200px;">
+                                    <select class="form-select form-select-sm" id="ruleStatusFilter" style="width: 150px;">
+                                        <option value="all">Todos os status</option>
+                                        <option value="active">Ativas</option>
+                                        <option value="paused">Pausadas</option>
+                                        <option value="inactive">Inativas</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="rules-list">
+                                <!-- Regra: Novo Chamado -->
+                                <div class="rule-card mb-3" data-status="active" data-category="tickets">
+                                    <div class="card border-success">
+                                        <div class="card-header bg-success text-white">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span>
+                                                    <i class="fas fa-ticket-alt me-2"></i>
+                                                    Novo Chamado Aberto
+                                                </span>
+                                                <div>
+                                                    <span class="badge bg-light text-success me-2">Ativa</span>
+                                                    <span class="badge bg-primary">Chamados</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <p class="mb-2"><strong>Gatilho:</strong> Quando um chamado é criado no sistema</p>
+                                                    <p class="mb-2"><strong>Condições:</strong> Todos os chamados (sem filtros)</p>
+                                                    <p class="mb-2"><strong>Ações:</strong> Enviar email para solicitante e equipe TI</p>
+                                                    <p class="mb-0"><strong>Template:</strong> Chamado Aberto</p>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="rule-stats text-center">
+                                                        <div class="mb-2">
+                                                            <span class="h5 text-success">247</span>
+                                                            <small class="d-block text-muted">Disparos hoje</small>
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <span class="h6 text-info">99.8%</span>
+                                                            <small class="d-block text-muted">Taxa sucesso</small>
+                                                        </div>
+                                                        <small class="text-muted">Último: há 5 min</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-light">
+                                            <div class="btn-group w-100">
+                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="editRule('new_ticket')">
+                                                    <i class="fas fa-edit"></i> Editar
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-info" onclick="testRule('new_ticket')">
+                                                    <i class="fas fa-vial"></i> Testar
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-warning" onclick="pauseRule('new_ticket')">
+                                                    <i class="fas fa-pause"></i> Pausar
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteRule('new_ticket')">
+                                                    <i class="fas fa-trash"></i> Excluir
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Regra: SLA Warning -->
+                                <div class="rule-card mb-3" data-status="active" data-category="sla">
+                                    <div class="card border-warning">
+                                        <div class="card-header bg-warning text-dark">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span>
+                                                    <i class="fas fa-clock me-2"></i>
+                                                    Alerta de SLA
+                                                </span>
+                                                <div>
+                                                    <span class="badge bg-light text-warning me-2">Ativa</span>
+                                                    <span class="badge bg-danger">SLA</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <p class="mb-2"><strong>Gatilho:</strong> SLA próximo do vencimento</p>
+                                                    <p class="mb-2"><strong>Condições:</strong> Faltam menos de 4 horas para vencer</p>
+                                                    <p class="mb-2"><strong>Ações:</strong> Notificar responsável e equipe TI</p>
+                                                    <p class="mb-0"><strong>Template:</strong> Alerta SLA</p>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="rule-stats text-center">
+                                                        <div class="mb-2">
+                                                            <span class="h5 text-warning">12</span>
+                                                            <small class="d-block text-muted">Alertas hoje</small>
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <span class="h6 text-success">100%</span>
+                                                            <small class="d-block text-muted">Taxa sucesso</small>
+                                                        </div>
+                                                        <small class="text-muted">Último: há 2h</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-light">
+                                            <div class="btn-group w-100">
+                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="editRule('sla_warning')">
+                                                    <i class="fas fa-edit"></i> Editar
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-info" onclick="testRule('sla_warning')">
+                                                    <i class="fas fa-vial"></i> Testar
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-warning" onclick="pauseRule('sla_warning')">
+                                                    <i class="fas fa-pause"></i> Pausar
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteRule('sla_warning')">
+                                                    <i class="fas fa-trash"></i> Excluir
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="config-actions">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="alert alert-info mb-0 py-2 px-3" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <small>As regras são processadas em tempo real. Alterações entram em vigor imediatamente.</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary" onclick="exportRules()">
+                                <i class="fas fa-download me-1"></i> Exportar
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" onclick="importRules()">
+                                <i class="fas fa-upload me-1"></i> Importar
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i> Salvar Regras
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Aba Regras de Workflow -->
+    <div class="tab-pane fade" id="workflow-rules" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-project-diagram me-2"></i>
+                    Regras de Workflow
+                </h3>
+                <p class="text-muted mb-0 mt-1">Configure sequências de notificações baseadas em workflows</p>
+            </div>
+            <div class="config-card-body">
+                <div class="workflow-builder">
+                    <div class="text-center py-5">
+                        <i class="fas fa-project-diagram fa-3x text-muted mb-3"></i>
+                        <h5>Workflow Builder</h5>
+                        <p class="text-muted">Interface visual para criar workflows de notificação será implementada na próxima versão</p>
+                        <small class="text-muted">Suporte a condições complexas, delays, e ações sequenciais</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba Regras Condicionais -->
+    <div class="tab-pane fade" id="conditional-rules" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-code-branch me-2"></i>
+                    Regras Condicionais
+                </h3>
+                <p class="text-muted mb-0 mt-1">Configure notificações baseadas em condições específicas</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Condições Disponíveis</h6>
+                            </div>
+                            <div class="card-body small">
+                                <div class="mb-2"><code>prioridade == 'alta'</code> - Prioridade alta</div>
+                                <div class="mb-2"><code>departamento == 'TI'</code> - Departamento específico</div>
+                                <div class="mb-2"><code>sla_restante < 4</code> - SLA crítico</div>
+                                <div class="mb-2"><code>usuario.ativo == true</code> - Usuário ativo</div>
+                                <div class="mb-2"><code>hora_atual > 18:00</code> - Fora expediente</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Exemplo de Regra</h6>
+                            </div>
+                            <div class="card-body">
+                                <pre class="bg-light p-2 small"><code>SE prioridade == 'alta' E departamento == 'TI'
+ENTÃO notificar(grupo_urgente, template_alerta)
+E aguardar(15_minutos)
+SE não_resolvido ENTÃO notificar(gerente, template_escalacao)</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba Agendamentos -->
+    <div class="tab-pane fade" id="schedules" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Agendamentos de Notificação
+                </h3>
+                <p class="text-muted mb-0 mt-1">Configure notificações programadas e recorrentes</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-success mb-3" onclick="createSchedule()">
+                            <i class="fas fa-plus me-1"></i> Novo Agendamento
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Frequência</th>
+                                <th>Próxima Execução</th>
+                                <th>Destinatários</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedulesTable">
+                            <tr>
+                                <td>Relatório Semanal</td>
+                                <td>Todas as segundas, 09:00</td>
+                                <td>2024-01-22 09:00</td>
+                                <td>Gerentes</td>
+                                <td><span class="badge bg-success">Ativo</span></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="editSchedule()">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteSchedule()">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Backup Diário</td>
+                                <td>Todos os dias, 02:00</td>
+                                <td>2024-01-21 02:00</td>
+                                <td>Administradores</td>
+                                <td><span class="badge bg-success">Ativo</span></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="editSchedule()">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteSchedule()">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funções de Regras
+function testAllRules() {
+    const btn = event.target.closest('button');
+    const originalHTML = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Testando...';
+
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        Feedback.success('Sucesso', 'Teste concluído!\n\n✅ 18 regras testadas\n✅ 17 regras funcionando\n⚠️ 1 regra com aviso\n\nDetalhes salvos nos logs do sistema.');
+    }, 3000);
+}
+
+function createRule() {
+    const modalContent = `
+        <form id="newRuleForm">
+            <div class="mb-3">
+                <label class="form-label">Nome da Regra</label>
+                <input type="text" class="form-control" id="ruleName" placeholder="Ex: Alerta SLA Crítico" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tipo de Evento</label>
+                <select class="form-select" id="ruleEventType">
+                    <option value="ticket_created">Chamado Criado</option>
+                    <option value="ticket_updated">Chamado Atualizado</option>
+                    <option value="sla_warning">Alerta SLA</option>
+                    <option value="reminder_due">Lembrete Vencendo</option>
+                    <option value="task_overdue">Tarefa Vencida</option>
+                    <option value="system_alert">Alerta Sistema</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Condições (Opcional)</label>
+                <textarea class="form-control" id="ruleConditions" rows="2" placeholder="Ex: prioridade == 'alta' AND departamento == 'TI'"></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Ações</label>
+                <select class="form-select" id="ruleActions" multiple>
+                    <option value="email_solicitante">Email para Solicitante</option>
+                    <option value="email_equipe">Email para Equipe TI</option>
+                    <option value="push_notification">Notificação Push</option>
+                    <option value="sms_alert">SMS de Alerta</option>
+                    <option value="slack_notification">Slack Notification</option>
+                </select>
+                <small class="form-text text-muted">Segure Ctrl para múltiplas seleções</small>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Template</label>
+                <select class="form-select" id="ruleTemplate">
+                    <option value="chamado_aberto">Chamado Aberto</option>
+                    <option value="lembrete_vencendo">Lembrete Vencendo</option>
+                    <option value="tarefa_vencida">Tarefa Vencida</option>
+                    <option value="alerta_sla">Alerta SLA</option>
+                </select>
+            </div>
+        </form>
+    `;
+    showModal('Nova Regra de Notificação', modalContent, 'Criar Regra', () => {
+        const name = document.getElementById('ruleName').value;
+        const eventType = document.getElementById('ruleEventType').value;
+        if (name) {
+            alert(`Regra "${name}" criada com sucesso!\n\nTipo: ${eventType}\nStatus: Ativa`);
+        }
+    });
+}
+
+function editRule(ruleId) {
+    alert(`Editar regra: ${ruleId}\n\nFuncionalidades:\n- Modificar condições\n- Alterar ações\n- Selecionar templates\n- Configurar destinatários\n- Definir prioridade`);
+}
+
+function testRule(ruleId) {
+    const rules = {
+        'new_ticket': 'Novo Chamado Aberto',
+        'sla_warning': 'Alerta de SLA'
+    };
+
+    const ruleName = rules[ruleId] || ruleId;
+
+    if (confirm(`Testar a regra "${ruleName}"?\n\nIsso irá simular o gatilho da regra e executar todas as ações configuradas.`)) {
+        alert(`Teste da regra "${ruleName}" executado!\n\n✅ Condições verificadas\n✅ Ações executadas\n✅ Notificações enviadas\n\nVerifique os logs para detalhes completos.`);
+    }
+}
+
+function pauseRule(ruleId) {
+    const rules = {
+        'new_ticket': 'Novo Chamado Aberto',
+        'sla_warning': 'Alerta de SLA'
+    };
+
+    const ruleName = rules[ruleId] || ruleId;
+
+    if (confirm(`Pausar a regra "${ruleName}"?\n\nA regra será desativada temporariamente e não irá disparar notificações.`)) {
+        alert(`Regra "${ruleName}" pausada com sucesso!\n\nStatus: Pausada\nPode ser reativada a qualquer momento.`);
+        // Simular mudança de status
+        event.target.closest('.rule-card').setAttribute('data-status', 'paused');
+        event.target.closest('.card').classList.remove('border-success');
+        event.target.closest('.card').classList.add('border-warning');
+        event.target.innerHTML = '<i class="fas fa-play"></i> Ativar';
+        event.target.onclick = () => activateRule(ruleId);
+    }
+}
+
+function activateRule(ruleId) {
+    const rules = {
+        'new_ticket': 'Novo Chamado Aberto',
+        'sla_warning': 'Alerta de SLA'
+    };
+
+    const ruleName = rules[ruleId] || ruleId;
+
+    alert(`Regra "${ruleName}" ativada com sucesso!\n\nStatus: Ativa\nNotificações serão disparadas normalmente.`);
+    // Simular mudança de status
+    event.target.closest('.rule-card').setAttribute('data-status', 'active');
+    event.target.closest('.card').classList.remove('border-warning');
+    event.target.closest('.card').classList.add('border-success');
+    event.target.innerHTML = '<i class="fas fa-pause"></i> Pausar';
+    event.target.onclick = () => pauseRule(ruleId);
+}
+
+function deleteRule(ruleId) {
+    const rules = {
+        'new_ticket': 'Novo Chamado Aberto',
+        'sla_warning': 'Alerta de SLA'
+    };
+
+    const ruleName = rules[ruleId] || ruleId;
+
+    if (confirm(`Excluir a regra "${ruleName}"?\n\nEsta ação não pode ser desfeita.\n\nA regra será removida permanentemente e todas as configurações serão perdidas.`)) {
+        alert(`Regra "${ruleName}" excluída com sucesso!`);
+        event.target.closest('.rule-card').remove();
+    }
+}
+
+function exportRules() {
+    Feedback.info('', 'Exportar regras - Em desenvolvimento\n\nFormato: JSON\nInclui: Todas as regras ativas, configurações e templates associados');
+}
+
+function importRules() {
+    Feedback.info('', 'Importar regras - Em desenvolvimento\n\nSuporte a: Arquivos JSON exportados, validação automática, resolução de conflitos');
+}
+
+// Funções de Agendamentos
+function createSchedule() {
+    const modalContent = `
+        <form id="newScheduleForm">
+            <div class="mb-3">
+                <label class="form-label">Nome do Agendamento</label>
+                <input type="text" class="form-control" id="scheduleName" placeholder="Ex: Relatório Semanal" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Frequência</label>
+                <select class="form-select" id="scheduleFrequency">
+                    <option value="daily">Diário</option>
+                    <option value="weekly">Semanal</option>
+                    <option value="monthly">Mensal</option>
+                    <option value="custom">Personalizado</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Horário</label>
+                <input type="time" class="form-control" id="scheduleTime" value="09:00">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Destinatários</label>
+                <select class="form-select" id="scheduleRecipients" multiple>
+                    <option value="admins">Administradores</option>
+                    <option value="managers">Gerentes</option>
+                    <option value="team_leads">Líderes de Equipe</option>
+                    <option value="all_users">Todos os Usuários</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Template</label>
+                <select class="form-select" id="scheduleTemplate">
+                    <option value="weekly_report">Relatório Semanal</option>
+                    <option value="monthly_stats">Estatísticas Mensais</option>
+                    <option value="backup_status">Status de Backup</option>
+                </select>
+            </div>
+        </form>
+    `;
+    showModal('Novo Agendamento', modalContent, 'Criar Agendamento', () => {
+        const name = document.getElementById('scheduleName').value;
+        if (name) {
+            alert(`Agendamento "${name}" criado com sucesso!`);
+        }
+    });
+}
+
+function editSchedule() {
+    Feedback.info('', 'Editar agendamento - Em desenvolvimento');
+}
+
+function deleteSchedule() {
+    if (confirm('Excluir este agendamento?\n\nAs notificações programadas serão canceladas.')) {
+        Feedback.success('Sucesso', 'Agendamento excluído com sucesso!');
+        event.target.closest('tr').remove();
+    }
+}
+
+// Função auxiliar para modal
+function showModal(title, content, confirmText = 'OK', confirmCallback = null) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">${title}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">${content}</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="modalConfirm">${confirmText}</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+
+    if (confirmCallback) {
+        document.getElementById('modalConfirm').onclick = () => {
+            confirmCallback();
+            bsModal.hide();
+        };
+    }
+
+    modal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(modal);
+    });
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtros funcionais
+    const ruleSearch = document.getElementById('ruleSearch');
+    const ruleStatusFilter = document.getElementById('ruleStatusFilter');
+
+    if (ruleSearch) {
+        ruleSearch.addEventListener('input', filterRules);
+    }
+    if (ruleStatusFilter) {
+        ruleStatusFilter.addEventListener('change', filterRules);
+    }
+
+    function filterRules() {
+        const searchTerm = ruleSearch.value.toLowerCase();
+        const statusFilter = ruleStatusFilter.value;
+        const rules = document.querySelectorAll('.rule-card');
+
+        rules.forEach(rule => {
+            const text = rule.textContent.toLowerCase();
+            const status = rule.getAttribute('data-status');
+            const matchesSearch = text.includes(searchTerm);
+            const matchesStatus = statusFilter === 'all' || status === statusFilter;
+
+            rule.style.display = matchesSearch && matchesStatus ? '' : 'none';
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if equipment %}Editar{% else %}Novo{% endif %} Equipamento | TI OSN System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2>
+                        <i class="fas fa-{% if equipment %}edit{% else %}plus{% endif %} me-2 text-primary"></i>
+                        {% if equipment %}Editar Equipamento{% else %}Novo Equipamento{% endif %}
+                    </h2>
+                    <p class="text-muted mb-0">Preencha as informações do equipamento</p>
+                </div>
+                <a href="{{ url_for('equipment_v2.admin_equipment') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form method="POST">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-8">
+                                <label for="name" class="form-label fw-medium">
+                                    <i class="fas fa-laptop me-1"></i>Nome do Equipamento <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ equipment.name if equipment else '' }}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="patrimony" class="form-label fw-medium">
+                                    <i class="fas fa-barcode me-1"></i>Patrimônio
+                                </label>
+                                <input type="text" class="form-control" id="patrimony" name="patrimony" 
+                                       value="{{ equipment.patrimony if equipment else '' }}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-medium">
+                                <i class="fas fa-align-left me-1"></i>Descrição
+                            </label>
+                            <textarea class="form-control" id="description" name="description" rows="3" 
+                                      placeholder="Descreva as características do equipamento...">{{ equipment.description if equipment else '' }}</textarea>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label for="category" class="form-label fw-medium">
+                                    <i class="fas fa-tag me-1"></i>Categoria <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="category" name="category" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Notebook" {% if equipment and equipment.category == 'Notebook' %}selected{% endif %}>Notebook</option>
+                                    <option value="Desktop" {% if equipment and equipment.category == 'Desktop' %}selected{% endif %}>Desktop</option>
+                                    <option value="Monitor" {% if equipment and equipment.category == 'Monitor' %}selected{% endif %}>Monitor</option>
+                                    <option value="Impressora" {% if equipment and equipment.category == 'Impressora' %}selected{% endif %}>Impressora</option>
+                                    <option value="Scanner" {% if equipment and equipment.category == 'Scanner' %}selected{% endif %}>Scanner</option>
+                                    <option value="Projetor" {% if equipment and equipment.category == 'Projetor' %}selected{% endif %}>Projetor</option>
+                                    <option value="Telefone" {% if equipment and equipment.category == 'Telefone' %}selected{% endif %}>Telefone</option>
+                                    <option value="Tablet" {% if equipment and equipment.category == 'Tablet' %}selected{% endif %}>Tablet</option>
+                                    <option value="Periférico" {% if equipment and equipment.category == 'Periférico' %}selected{% endif %}>Periférico</option>
+                                    <option value="Outro" {% if equipment and equipment.category == 'Outro' %}selected{% endif %}>Outro</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="brand" class="form-label fw-medium">
+                                    <i class="fas fa-building me-1"></i>Marca
+                                </label>
+                                <input type="text" class="form-control" id="brand" name="brand" 
+                                       value="{{ equipment.brand if equipment else '' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="model" class="form-label fw-medium">
+                                    <i class="fas fa-info-circle me-1"></i>Modelo
+                                </label>
+                                <input type="text" class="form-control" id="model" name="model" 
+                                       value="{{ equipment.model if equipment else '' }}">
+                            </div>
+                        </div>
+
+                        {% if equipment %}
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="status" class="form-label fw-medium">
+                                    <i class="fas fa-circle me-1"></i>Status <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="status" name="status" required>
+                                    <option value="disponivel" {% if equipment.status == 'disponivel' %}selected{% endif %}>Disponível</option>
+                                    <option value="emprestado" {% if equipment.status == 'emprestado' %}selected{% endif %}>Emprestado</option>
+                                    <option value="manutencao" {% if equipment.status == 'manutencao' %}selected{% endif %}>Manutenção</option>
+                                    <option value="danificado" {% if equipment.status == 'danificado' %}selected{% endif %}>Danificado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="condition" class="form-label fw-medium">
+                                    <i class="fas fa-check-circle me-1"></i>Condição <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="condition" name="condition" required>
+                                    <option value="novo" {% if equipment.condition == 'novo' %}selected{% endif %}>Novo</option>
+                                    <option value="bom" {% if equipment.condition == 'bom' %}selected{% endif %}>Bom</option>
+                                    <option value="regular" {% if equipment.condition == 'regular' %}selected{% endif %}>Regular</option>
+                                    <option value="danificado" {% if equipment.condition == 'danificado' %}selected{% endif %}>Danificado</option>
+                                </select>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-4">
+                            <label for="location" class="form-label fw-medium">
+                                <i class="fas fa-map-marker-alt me-1"></i>Localização
+                            </label>
+                            <input type="text" class="form-control" id="location" name="location" 
+                                   value="{{ equipment.location if equipment else '' }}"
+                                   placeholder="Ex: Sala de TI, Almoxarifado, etc.">
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end pt-3 border-top">
+                            <a href="{{ url_for('equipment_v2.admin_equipment') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check me-1"></i>Salvar Equipamento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

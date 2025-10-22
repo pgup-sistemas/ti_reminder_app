@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Meus Empréstimos | TI OSN System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-hand-holding me-2 text-primary"></i>Meus Empréstimos</h2>
+                    <p class="text-muted mb-0">Equipamentos que você está utilizando</p>
+                </div>
+                <a href="{{ url_for('equipment_v2.index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if loans %}
+    <div class="row g-3">
+        {% for loan in loans %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card {% if loan.status == 'ativo' %}border-success{% else %}border-secondary{% endif %}">
+                <div class="card-header {% if loan.status == 'ativo' %}bg-success text-white{% else %}bg-secondary text-white{% endif %}">
+                    <h5 class="mb-0">
+                        <i class="fas fa-laptop me-2"></i>{{ loan.equipment.name }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-3">
+                        {% if loan.equipment.patrimony %}
+                        <li><i class="fas fa-barcode me-2"></i><strong>Patrimônio:</strong> {{ loan.equipment.patrimony }}</li>
+                        {% endif %}
+                        {% if loan.equipment.category %}
+                        <li><i class="fas fa-tag me-2"></i><strong>Categoria:</strong> {{ loan.equipment.category }}</li>
+                        {% endif %}
+                        {% if loan.equipment.location %}
+                        <li><i class="fas fa-map-marker-alt me-2"></i><strong>Local:</strong> {{ loan.equipment.location }}</li>
+                        {% endif %}
+                    </ul>
+
+                    <hr>
+
+                    <div class="mb-2">
+                        <strong><i class="fas fa-calendar-check me-2"></i>Emprestado em:</strong><br>
+                        <small>{{ loan.loan_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                    </div>
+
+                    <div class="mb-2">
+                        <strong><i class="fas fa-calendar-times me-2"></i>Devolução prevista:</strong><br>
+                        <small>
+                            {{ loan.expected_return_date.strftime('%d/%m/%Y') }}
+                            {% if loan.expected_return_time %}
+                            às {{ loan.expected_return_time.strftime('%H:%M') }}
+                            {% endif %}
+                        </small>
+                        
+                        {% if loan.status == 'ativo' %}
+                            {% if loan.is_overdue() %}
+                            <span class="badge bg-danger ms-2">Atrasado!</span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    {% if loan.status == 'devolvido' %}
+                    <div class="mb-2">
+                        <strong><i class="fas fa-check-circle me-2 text-success"></i>Devolvido em:</strong><br>
+                        <small>{{ loan.actual_return_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                    </div>
+                    {% endif %}
+
+                    {% if loan.purpose %}
+                    <div class="mt-3">
+                        <strong><i class="fas fa-comment me-2"></i>Finalidade:</strong><br>
+                        <small class="text-muted">{{ loan.purpose }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    {% if loan.status == 'ativo' %}
+                    <span class="badge bg-success w-100">
+                        <i class="fas fa-check-circle me-1"></i>Empréstimo Ativo
+                    </span>
+                    {% else %}
+                    <span class="badge bg-secondary w-100">
+                        <i class="fas fa-archive me-1"></i>Devolvido
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        Você não possui empréstimos ativos no momento.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

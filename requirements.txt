@@ -2,7 +2,7 @@
 Flask==2.3.3
 Flask-SQLAlchemy==3.0.5
 Flask-Migrate==4.0.5
-Flask-WTF==1.2.1
+Flask-WTF==1.2.2
 Flask-Login==0.6.3
 Flask-Mail==0.10.0
 Werkzeug==2.3.7
@@ -16,6 +16,7 @@ alembic==1.16.5
 bcrypt==4.1.2
 email-validator==2.2.0
 WTForms==3.1.1
+Flask-JWT-Extended==4.6.0
 
 # === SCHEDULING & BACKGROUND TASKS ===
 APScheduler==3.11.0
@@ -59,7 +60,8 @@ isort==5.12.0
 
 # === DOCUMENTATION ===
 mkdocs==1.5.3
-mkdocs-material==9.4.8
+# mkdocs-material==9.4.8  # Opcional - requer instalação separada se desejar tema Material
+# pymdown-extensions==10.3  # Opcional - extensões avançadas de Markdown
 
 # === OPTIONAL DEPENDENCIES ===
 Pillow==10.1.0

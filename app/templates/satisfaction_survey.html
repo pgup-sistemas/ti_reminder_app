@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!ratingSelected) {
             e.preventDefault();
-            alert('Por favor, selecione uma avaliação em estrelas.');
+            Feedback.info('', 'Por favor, selecione uma avaliação em estrelas.');
             return false;
         }
 

@@ -1,0 +1,963 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Sistema RFID{% endblock %}
+
+{% block config_content %}
+<!-- Abas de Navegação -->
+<div class="config-tabs mb-4">
+    <ul class="nav nav-tabs" id="rfidTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="readers-tab" data-bs-toggle="tab" data-bs-target="#readers" type="button" role="tab">
+                <i class="fas fa-broadcast-tower me-1"></i> Leitores
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="zones-tab" data-bs-toggle="tab" data-bs-target="#zones" type="button" role="tab">
+                <i class="fas fa-map-marked-alt me-1"></i> Zonas
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tags-tab" data-bs-toggle="tab" data-bs-target="#tags" type="button" role="tab">
+                <i class="fas fa-tags me-1"></i> Tags
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="monitoring-tab" data-bs-toggle="tab" data-bs-target="#monitoring" type="button" role="tab">
+                <i class="fas fa-eye me-1"></i> Monitoramento
+            </button>
+        </li>
+    </ul>
+</div>
+
+<div class="tab-content" id="rfidTabsContent">
+    <!-- Aba Leitores -->
+    <div class="tab-pane fade show active" id="readers" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">
+                            <i class="fas fa-rss me-2"></i>
+                            Leitores RFID
+                        </h3>
+                        <p class="text-muted mb-0 mt-1">Gerencie dispositivos de leitura RFID</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-info" onclick="scanNetwork()">
+                            <i class="fas fa-search me-1"></i> Buscar Leitores
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="addReader()">
+                            <i class="fas fa-plus me-1"></i> Novo Leitor
+                        </button>
+                        <a href="{{ url_for('main.rfid_dashboard') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-chart-line me-1"></i> Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <form method="POST">
+                <div class="config-card-body">
+                    <!-- Dashboard de Status -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-tachometer-alt me-2"></i>
+                                        Status do Sistema RFID
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-md-3">
+                                            <div class="status-indicator">
+                                                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                                <h4 class="mb-0 text-success">Online</h4>
+                                                <small class="text-muted">Sistema Ativo</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="status-indicator">
+                                                <i class="fas fa-broadcast-tower fa-2x text-primary mb-2"></i>
+                                                <h4 class="mb-0 text-primary">5</h4>
+                                                <small class="text-muted">Leitores Ativos</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="status-indicator">
+                                                <i class="fas fa-tags fa-2x text-info mb-2"></i>
+                                                <h4 class="mb-0 text-info">127</h4>
+                                                <small class="text-muted">Tags Registradas</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="status-indicator">
+                                                <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                                                <h4 class="mb-0 text-warning">2</h4>
+                                                <small class="text-muted">Alertas Ativos</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mapa Visual dos Leitores -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-map-marked-alt me-2"></i>
+                                        Mapa dos Leitores
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="rfid-floor-plan">
+                                        <div class="floor-plan-container">
+                                            <!-- Simulação de mapa do prédio -->
+                                            <svg width="100%" height="300" viewBox="0 0 600 300">
+                                                <!-- Fundo do prédio -->
+                                                <rect x="50" y="50" width="500" height="200" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
+                                                <!-- Divisórias -->
+                                                <line x1="200" y1="50" x2="200" y2="250" stroke="#dee2e6" stroke-width="1"/>
+                                                <line x1="350" y1="50" x2="350" y2="250" stroke="#dee2e6" stroke-width="1"/>
+                                                <line x1="50" y1="150" x2="550" y2="150" stroke="#dee2e6" stroke-width="1"/>
+
+                                                <!-- Leitores -->
+                                                <circle cx="100" cy="100" r="8" fill="#28a745" title="READER-001 - Entrada Principal"/>
+                                                <circle cx="250" cy="100" r="8" fill="#28a745" title="READER-002 - Almoxarifado"/>
+                                                <circle cx="400" cy="100" r="8" fill="#dc3545" title="READER-003 - Sala TI (Offline)"/>
+                                                <circle cx="100" cy="200" r="8" fill="#28a745" title="READER-004 - Laboratório"/>
+                                                <circle cx="250" cy="200" r="8" fill="#28a745" title="READER-005 - Escritórios"/>
+
+                                                <!-- Labels -->
+                                                <text x="100" y="75" text-anchor="middle" font-size="10" fill="#6c757d">Entrada</text>
+                                                <text x="250" y="75" text-anchor="middle" font-size="10" fill="#6c757d">Almox.</text>
+                                                <text x="400" y="75" text-anchor="middle" font-size="10" fill="#6c757d">TI</text>
+                                                <text x="100" y="175" text-anchor="middle" font-size="10" fill="#6c757d">Lab</text>
+                                                <text x="250" y="175" text-anchor="middle" font-size="10" fill="#6c757d">Escrit.</text>
+                                            </svg>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-circle text-success me-1"></i>Online
+                                                <i class="fas fa-circle text-danger ms-3 me-1"></i>Offline
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Leitores -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-broadcast-tower me-2"></i>
+                                    Leitores RFID
+                                </h5>
+                                <div class="d-flex gap-2">
+                                    <input type="text" class="form-control form-control-sm" placeholder="Buscar leitores..." id="readerSearch" style="width: 200px;">
+                                    <select class="form-select form-select-sm" id="readerStatusFilter" style="width: 150px;">
+                                        <option value="all">Todos os status</option>
+                                        <option value="online">Online</option>
+                                        <option value="offline">Offline</option>
+                                        <option value="maintenance">Manutenção</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nome</th>
+                                            <th>Localização</th>
+                                            <th>Zona</th>
+                                            <th>Status</th>
+                                            <th>Última Leitura</th>
+                                            <th>Leituras Hoje</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="readersTable">
+                                        <tr data-status="online">
+                                            <td>READER-001</td>
+                                            <td>Entrada Principal</td>
+                                            <td>Recepção</td>
+                                            <td>Entrada/Saída</td>
+                                            <td><span class="badge bg-success"><i class="fas fa-circle me-1"></i>Online</span></td>
+                                            <td>Há 2 minutos</td>
+                                            <td>47</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" title="Configurar" onclick="configureReader('READER-001')">
+                                                        <i class="fas fa-cog"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-info" title="Testar" onclick="testReader('READER-001')">
+                                                        <i class="fas fa-vial"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-success" title="Logs" onclick="viewReaderLogs('READER-001')">
+                                                        <i class="fas fa-history"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr data-status="online">
+                                            <td>READER-002</td>
+                                            <td>Almoxarifado</td>
+                                            <td>Depósito</td>
+                                            <td>Armazenamento</td>
+                                            <td><span class="badge bg-success"><i class="fas fa-circle me-1"></i>Online</span></td>
+                                            <td>Há 5 minutos</td>
+                                            <td>23</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" title="Configurar" onclick="configureReader('READER-002')">
+                                                        <i class="fas fa-cog"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-info" title="Testar" onclick="testReader('READER-002')">
+                                                        <i class="fas fa-vial"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-success" title="Logs" onclick="viewReaderLogs('READER-002')">
+                                                        <i class="fas fa-history"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr data-status="offline">
+                                            <td>READER-003</td>
+                                            <td>Sala TI</td>
+                                            <td>Setor TI</td>
+                                            <td>TI/Servidores</td>
+                                            <td><span class="badge bg-danger"><i class="fas fa-circle me-1"></i>Offline</span></td>
+                                            <td>Há 2 horas</td>
+                                            <td>0</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" title="Configurar" onclick="configureReader('READER-003')">
+                                                        <i class="fas fa-cog"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-warning" title="Reconectar" onclick="reconnectReader('READER-003')">
+                                                        <i class="fas fa-sync"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Remover" onclick="removeReader('READER-003')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr data-status="online">
+                                            <td>READER-004</td>
+                                            <td>Laboratório</td>
+                                            <td>Laboratório</td>
+                                            <td>Pesquisa</td>
+                                            <td><span class="badge bg-success"><i class="fas fa-circle me-1"></i>Online</span></td>
+                                            <td>Há 1 minuto</td>
+                                            <td>156</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" title="Configurar" onclick="configureReader('READER-004')">
+                                                        <i class="fas fa-cog"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-info" title="Testar" onclick="testReader('READER-004')">
+                                                        <i class="fas fa-vial"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-success" title="Logs" onclick="viewReaderLogs('READER-004')">
+                                                        <i class="fas fa-history"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr data-status="maintenance">
+                                            <td>READER-005</td>
+                                            <td>Escritórios</td>
+                                            <td>Administrativo</td>
+                                            <td>Escritório</td>
+                                            <td><span class="badge bg-warning"><i class="fas fa-tools me-1"></i>Manutenção</span></td>
+                                            <td>Há 1 dia</td>
+                                            <td>0</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" title="Configurar" onclick="configureReader('READER-005')">
+                                                        <i class="fas fa-cog"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-success" title="Ativar" onclick="activateReader('READER-005')">
+                                                        <i class="fas fa-play"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Remover" onclick="removeReader('READER-005')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="text-muted small">
+                                    Mostrando 5 de 5 leitores
+                                </div>
+                                <button type="button" class="btn btn-success" onclick="addReader()">
+                                    <i class="fas fa-plus me-1"></i> Adicionar Leitor
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configurações Avançadas -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="mb-3">
+                                <i class="fas fa-sliders-h me-2"></i>
+                                Configurações Avançadas
+                            </h5>
+                        </div>
+                        <div class="col-12">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="scan_interval" class="form-label">Intervalo de Leitura (segundos)</label>
+                                                <input type="number" class="form-control" id="scan_interval"
+                                                       name="scan_interval" value="5" min="1" max="60">
+                                                <small class="form-text text-muted">Frequência de varredura dos leitores</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="lost_threshold_hours" class="form-label">Limite para Equipamento Perdido (horas)</label>
+                                                <input type="number" class="form-control" id="lost_threshold_hours"
+                                                       name="lost_threshold_hours" value="24" min="1" max="168">
+                                                <small class="form-text text-muted">Tempo sem leitura para marcar como perdido</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="reader_timeout" class="form-label">Timeout do Leitor (segundos)</label>
+                                                <input type="number" class="form-control" id="reader_timeout"
+                                                       name="reader_timeout" value="30" min="5" max="300">
+                                                <small class="form-text text-muted">Tempo para considerar leitor offline</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="max_read_distance" class="form-label">Distância Máxima de Leitura (cm)</label>
+                                                <input type="number" class="form-control" id="max_read_distance"
+                                                       name="max_read_distance" value="300" min="50" max="1000">
+                                                <small class="form-text text-muted">Alcance máximo dos leitores RFID</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="auto_alert_lost"
+                                               name="auto_alert_lost" checked>
+                                        <label class="form-check-label" for="auto_alert_lost">
+                                            <strong>Alertar automaticamente sobre equipamentos perdidos</strong>
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="track_movement"
+                                               name="track_movement" checked>
+                                        <label class="form-check-label" for="track_movement">
+                                            Rastrear movimentação de equipamentos
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="enable_anti_collision"
+                                               name="enable_anti_collision" checked>
+                                        <label class="form-check-label" for="enable_anti_collision">
+                                            Habilitar anti-colisão (múltiplas tags simultâneas)
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="log_all_reads"
+                                               name="log_all_reads">
+                                        <label class="form-check-label" for="log_all_reads">
+                                            Registrar todas as leituras (aumenta uso de armazenamento)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-actions">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="alert alert-info mb-0 py-2 px-3" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <small>Alterações nas configurações RFID podem afetar o desempenho do sistema</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary" onclick="resetToDefaults()">
+                                <i class="fas fa-undo me-1"></i> Restaurar Padrões
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i> Salvar Configurações
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Aba Zonas -->
+    <div class="tab-pane fade" id="zones" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-map-marked-alt me-2"></i>
+                    Configuração de Zonas
+                </h3>
+                <p class="text-muted mb-0 mt-1">Defina áreas de monitoramento e regras de acesso</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-success mb-3" onclick="addZone()">
+                            <i class="fas fa-plus me-1"></i> Nova Zona
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nome da Zona</th>
+                                <th>Leitores Associados</th>
+                                <th>Tipo de Acesso</th>
+                                <th>Horário Restrito</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="zonesTable">
+                            <tr>
+                                <td>Entrada/Saída</td>
+                                <td>READER-001</td>
+                                <td><span class="badge bg-success">Livre</span></td>
+                                <td>24/7</td>
+                                <td><span class="badge bg-success">Ativa</span></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="editZone()">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="configureZoneRules()">
+                                            <i class="fas fa-cogs"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteZone()">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>TI/Servidores</td>
+                                <td>READER-003</td>
+                                <td><span class="badge bg-warning">Restrito</span></td>
+                                <td>08:00-18:00</td>
+                                <td><span class="badge bg-danger">Inativa</span></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="editZone()">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="configureZoneRules()">
+                                            <i class="fas fa-cogs"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteZone()">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba Tags -->
+    <div class="tab-pane fade" id="tags" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-tags me-2"></i>
+                    Gerenciamento de Tags
+                </h3>
+                <p class="text-muted mb-0 mt-1">Controle de tags RFID registradas no sistema</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" placeholder="Buscar tags..." id="tagSearch">
+                    </div>
+                    <div class="col-md-6">
+                        <select class="form-select" id="tagFilter">
+                            <option value="all">Todas as tags</option>
+                            <option value="active">Ativas</option>
+                            <option value="inactive">Inativas</option>
+                            <option value="lost">Perdidas</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID da Tag</th>
+                                <th>Equipamento</th>
+                                <th>Status</th>
+                                <th>Última Localização</th>
+                                <th>Última Leitura</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tagsTable">
+                            <tr>
+                                <td><code>EPC:1234567890ABCDEF</code></td>
+                                <td>Notebook Dell Latitude 5420</td>
+                                <td><span class="badge bg-success">Ativa</span></td>
+                                <td>Sala TI</td>
+                                <td>Há 5 minutos</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewTagHistory()">
+                                            <i class="fas fa-history"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" onclick="editTag()">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deactivateTag()">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>EPC:FEDCBA0987654321</code></td>
+                                <td>Projetor Epson EB-S41</td>
+                                <td><span class="badge bg-warning">Perdida</span></td>
+                                <td>Almoxarifado</td>
+                                <td>Há 2 dias</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewTagHistory()">
+                                            <i class="fas fa-history"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success" onclick="markAsFound()">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="reportLost()">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba Monitoramento -->
+    <div class="tab-pane fade" id="monitoring" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-eye me-2"></i>
+                    Monitoramento em Tempo Real
+                </h3>
+                <p class="text-muted mb-0 mt-1">Visualização de leituras e alertas do sistema RFID</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Leituras Recentes</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Hora</th>
+                                                <th>Tag ID</th>
+                                                <th>Equipamento</th>
+                                                <th>Leitor</th>
+                                                <th>Localização</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recentReads">
+                                            <tr>
+                                                <td>14:32:15</td>
+                                                <td><code>...ABCDEF</code></td>
+                                                <td>Notebook Dell</td>
+                                                <td>READER-001</td>
+                                                <td>Entrada Principal</td>
+                                            </tr>
+                                            <tr>
+                                                <td>14:31:42</td>
+                                                <td><code>...FEDCBA</code></td>
+                                                <td>Projetor Epson</td>
+                                                <td>READER-002</td>
+                                                <td>Almoxarifado</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Alertas Ativos</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-warning">
+                                    <strong>Equipamento Perdido:</strong> Projetor Epson EB-S41 não foi localizado há 48 horas
+                                </div>
+                                <div class="alert alert-danger">
+                                    <strong>Leitor Offline:</strong> READER-003 (Sala TI) está desconectado
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Estatísticas Hoje</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <h4 class="text-primary">247</h4>
+                                        <small class="text-muted">Leituras</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <h4 class="text-success">89%</h4>
+                                        <small class="text-muted">Uptime</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funções de Leitores
+function scanNetwork() {
+    const btn = event.target.closest('button');
+    const originalHTML = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Buscando...';
+
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        Feedback.success('Sucesso', 'Busca concluída!\n\nEncontrados:\n- 2 novos leitores na rede\n- 1 leitor com firmware desatualizado\n\nDeseja adicionar os novos leitores automaticamente?');
+    }, 3000);
+}
+
+function addReader() {
+    const modalContent = `
+        <form id="readerForm">
+            <div class="mb-3">
+                <label class="form-label">ID do Leitor</label>
+                <input type="text" class="form-control" id="readerId" placeholder="READER-006" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Nome</label>
+                <input type="text" class="form-control" id="readerName" placeholder="Novo Leitor" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Endereço IP</label>
+                <input type="text" class="form-control" id="readerIp" placeholder="192.168.1.100" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Localização</label>
+                <input type="text" class="form-control" id="readerLocation" placeholder="Sala de Reuniões" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Zona</label>
+                <select class="form-select" id="readerZone">
+                    <option value="Entrada/Saída">Entrada/Saída</option>
+                    <option value="Armazenamento">Armazenamento</option>
+                    <option value="TI/Servidores">TI/Servidores</option>
+                    <option value="Pesquisa">Pesquisa</option>
+                    <option value="Escritório">Escritório</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tipo de Leitor</label>
+                <select class="form-select" id="readerType">
+                    <option value="fixed">Fixo</option>
+                    <option value="handheld">Portátil</option>
+                    <option value="portal">Portal</option>
+                </select>
+            </div>
+        </form>
+    `;
+    showModal('Adicionar Leitor RFID', modalContent, 'Adicionar', () => {
+        const id = document.getElementById('readerId').value;
+        const name = document.getElementById('readerName').value;
+        if (id && name) {
+            alert(`Leitor "${name}" (ID: ${id}) adicionado com sucesso!`);
+        }
+    });
+}
+
+function configureReader(readerId) {
+    alert(`Configurar leitor: ${readerId}\n\nFuncionalidades:\n- Ajuste de potência de transmissão\n- Configuração de antenas\n- Definição de filtros de tag\n- Parâmetros de anti-colisão`);
+}
+
+function testReader(readerId) {
+    const btn = event.target;
+    const originalHTML = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Testando...';
+
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+
+        if (readerId === 'READER-003') {
+            alert(`Teste do ${readerId}: FALHA\n\nErro: Leitor desconectado\nSolução sugerida: Verificar conexão de rede e energia`);
+        } else {
+            alert(`Teste do ${readerId}: SUCESSO\n\n- Conectividade: OK\n- Leitura de teste: OK\n- Tempo de resposta: 45ms`);
+        }
+    }, 2000);
+}
+
+function reconnectReader(readerId) {
+    alert(`Tentando reconectar ${readerId}...\n\nStatus: Conectado com sucesso!\nO leitor agora está online.`);
+    // Simular mudança de status
+    location.reload();
+}
+
+function removeReader(readerId) {
+    if (confirm(`Remover o leitor ${readerId}?\n\nEsta ação irá:\n- Desconectar o dispositivo\n- Remover todas as associações\n- Parar o monitoramento da zona\n\nEsta ação não pode ser desfeita.`)) {
+        alert(`Leitor ${readerId} removido com sucesso!`);
+        event.target.closest('tr').remove();
+    }
+}
+
+function activateReader(readerId) {
+    alert(`Leitor ${readerId} ativado com sucesso!\n\nStatus: Online\nÚltima leitura: Agora`);
+}
+
+function viewReaderLogs(readerId) {
+    alert(`Logs do Leitor: ${readerId}\n\nÚltimas 24 horas:\n- 247 leituras bem-sucedidas\n- 3 falhas temporárias\n- 1 reconexão automática\n- Uptime: 98.7%`);
+}
+
+// Funções de Zonas
+function addZone() {
+    const modalContent = `
+        <form id="zoneForm">
+            <div class="mb-3">
+                <label class="form-label">Nome da Zona</label>
+                <input type="text" class="form-control" id="zoneName" placeholder="Nova Zona" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Descrição</label>
+                <textarea class="form-control" id="zoneDescription" rows="2" placeholder="Descrição da zona..."></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Leitores Associados</label>
+                <select class="form-select" id="zoneReaders" multiple>
+                    <option value="READER-001">READER-001 - Entrada Principal</option>
+                    <option value="READER-002">READER-002 - Almoxarifado</option>
+                    <option value="READER-004">READER-004 - Laboratório</option>
+                </select>
+                <small class="form-text text-muted">Segure Ctrl para selecionar múltiplos</small>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tipo de Acesso</label>
+                <select class="form-select" id="zoneAccessType">
+                    <option value="free">Livre</option>
+                    <option value="restricted">Restrito</option>
+                    <option value="secure">Seguro</option>
+                </select>
+            </div>
+        </form>
+    `;
+    showModal('Nova Zona', modalContent, 'Criar', () => {
+        const name = document.getElementById('zoneName').value;
+        if (name) {
+            alert(`Zona "${name}" criada com sucesso!`);
+        }
+    });
+}
+
+function editZone() {
+    Feedback.info('', 'Editar zona - Em desenvolvimento');
+}
+
+function configureZoneRules() {
+    Feedback.info('', 'Configurar regras da zona - Em desenvolvimento\n\nRegras disponíveis:\n- Controle de horário\n- Lista de acesso\n- Notificações de entrada/saída\n- Integração com alarmes');
+}
+
+function deleteZone() {
+    if (confirm('Excluir esta zona?\n\nTodos os leitores associados serão desassociados.')) {
+        Feedback.success('Sucesso', 'Zona excluída com sucesso!');
+        event.target.closest('tr').remove();
+    }
+}
+
+// Funções de Tags
+function viewTagHistory() {
+    Feedback.info('', 'Histórico da Tag\n\nÚltimas localizações:\n- 14:32: Entrada Principal\n- 14:15: Almoxarifado\n- 13:45: Laboratório\n- 09:30: Escritórios\n\nMovimentação: 4 locais hoje');
+}
+
+function editTag() {
+    Feedback.info('', 'Editar tag - Em desenvolvimento\n\nPermite:\n- Alterar nome do equipamento\n- Atualizar categoria\n- Modificar permissões\n- Adicionar notas');
+}
+
+function deactivateTag() {
+    if (confirm('Desativar esta tag?\n\nA tag não será mais rastreada pelo sistema.')) {
+        Feedback.success('Sucesso', 'Tag desativada com sucesso!');
+    }
+}
+
+function markAsFound() {
+    Feedback.info('', 'Equipamento marcado como encontrado!\n\nNotificação enviada para responsável.');
+}
+
+function reportLost() {
+    Feedback.info('', 'Alerta de equipamento perdido emitido!\n\nNotificações enviadas para:\n- Responsável pelo equipamento\n- Segurança\n- Administração');
+}
+
+// Funções Gerais
+function resetToDefaults() {
+    if (confirm('Restaurar configurações padrão?\n\nIsso irá redefinir:\n- Intervalo de leitura: 5s\n- Timeout: 30s\n- Distância máxima: 300cm\n- Alertas automáticos: Habilitados')) {
+        // Resetar valores
+        document.getElementById('scan_interval').value = '5';
+        document.getElementById('reader_timeout').value = '30';
+        document.getElementById('max_read_distance').value = '300';
+        document.getElementById('lost_threshold_hours').value = '24';
+        document.getElementById('auto_alert_lost').checked = true;
+        document.getElementById('track_movement').checked = true;
+        document.getElementById('enable_anti_collision').checked = true;
+        document.getElementById('log_all_reads').checked = false;
+
+        Feedback.info('', 'Configurações restauradas para os padrões!');
+    }
+}
+
+// Função auxiliar para modal
+function showModal(title, content, confirmText = 'OK', confirmCallback = null) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">${title}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">${content}</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="modalConfirm">${confirmText}</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+
+    if (confirmCallback) {
+        document.getElementById('modalConfirm').onclick = () => {
+            confirmCallback();
+            bsModal.hide();
+        };
+    }
+
+    modal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(modal);
+    });
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtros funcionais
+    const readerSearch = document.getElementById('readerSearch');
+    const readerStatusFilter = document.getElementById('readerStatusFilter');
+
+    if (readerSearch) {
+        readerSearch.addEventListener('input', filterReaders);
+    }
+    if (readerStatusFilter) {
+        readerStatusFilter.addEventListener('change', filterReaders);
+    }
+
+    function filterReaders() {
+        const searchTerm = readerSearch.value.toLowerCase();
+        const statusFilter = readerStatusFilter.value;
+        const rows = document.querySelectorAll('#readersTable tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const status = row.getAttribute('data-status');
+            const matchesSearch = text.includes(searchTerm);
+            const matchesStatus = statusFilter === 'all' || status === statusFilter;
+
+            row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+        });
+    }
+
+    // Filtros de tags
+    const tagSearch = document.getElementById('tagSearch');
+    const tagFilter = document.getElementById('tagFilter');
+
+    if (tagSearch) {
+        tagSearch.addEventListener('input', filterTags);
+    }
+    if (tagFilter) {
+        tagFilter.addEventListener('change', filterTags);
+    }
+
+    function filterTags() {
+        const searchTerm = tagSearch.value.toLowerCase();
+        const statusFilter = tagFilter.value;
+        const rows = document.querySelectorAll('#tagsTable tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const status = row.querySelector('.badge').textContent.toLowerCase();
+            const matchesSearch = text.includes(searchTerm);
+            const matchesStatus = statusFilter === 'all' ||
+                                (statusFilter === 'active' && status === 'ativa') ||
+                                (statusFilter === 'inactive' && status === 'inativa') ||
+                                (statusFilter === 'lost' && status === 'perdida');
+
+            row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,13 +1,20 @@
+#!/usr/bin/env python
+"""
+Script de inicialização do banco de dados.
+NOTA: Este script está sendo substituído por scripts/db_manager.py
+Mantido por compatibilidade, mas use: python scripts/db_manager.py init
+"""
 import os
 import sys
-import psycopg2
-from urllib.parse import urlparse
-from flask import Flask
-from flask_migrate import Migrate
+import subprocess
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Carregar variáveis de ambiente
 load_dotenv()
+
+# Importar utilitários
+from app.utils.db_utils import DatabaseManager
 
 def init_postgres_db():
     """
@@ -18,48 +25,15 @@ def init_postgres_db():
         bool: True se a inicialização foi bem-sucedida, False caso contrário.
     """
     try:
-        # Obter a URL do banco de dados do arquivo .env
-        database_url = os.environ.get('DATABASE_URL')
+        params = DatabaseManager.parse_database_url()
+        dbname = params['dbname']
         
-        if not database_url or not database_url.startswith('postgresql'):
-            print("Erro: DATABASE_URL não configurada ou não é PostgreSQL.")
-            print("Verifique o arquivo .env e configure DATABASE_URL=postgresql://usuario:senha@localhost:5432/ti_reminder_db")
-            return False
+        print(f"Inicializando banco de dados '{dbname}'...")
+        return DatabaseManager.create_database(dbname)
         
-        # Parsear a URL do banco de dados
-        url = urlparse(database_url)
-        dbname = url.path[1:]
-        user = url.username
-        password = url.password
-        host = url.hostname
-        port = url.port
-        
-        # Conectar ao servidor PostgreSQL (banco postgres padrão)
-        conn = psycopg2.connect(
-            dbname="postgres",
-            user=user,
-            password=password,
-            host=host,
-            port=port
-        )
-        conn.autocommit = True
-        cursor = conn.cursor()
-        
-        # Verificar se o banco de dados já existe
-        cursor.execute(f"SELECT 1 FROM pg_catalog.pg_database WHERE datname = '{dbname}'")
-        exists = cursor.fetchone()
-        
-        if not exists:
-            # Criar o banco de dados
-            cursor.execute(f"CREATE DATABASE {dbname}")
-            print(f"Banco de dados '{dbname}' criado com sucesso!")
-        else:
-            print(f"Banco de dados '{dbname}' já existe.")
-        
-        cursor.close()
-        conn.close()
-        
-        return True
+    except ValueError as e:
+        print(f"Erro de configuração: {e}")
+        return False
     except Exception as e:
         print(f"Erro ao inicializar banco de dados PostgreSQL: {str(e)}")
         return False
@@ -72,35 +46,27 @@ def init_migrations():
         bool: True se a inicialização foi bem-sucedida, False caso contrário.
     """
     try:
-        # Criar uma aplicação Flask temporária para inicializar as migrações
-        app = Flask(__name__)
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
-        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        from app import create_app
+        from flask_migrate import upgrade
         
-        # Importar os modelos e inicializar o banco de dados
-        from app.models import db
-        db.init_app(app)
-        
-        # Inicializar o Flask-Migrate
-        migrate = Migrate(app, db)
+        app = create_app()
         
         with app.app_context():
-            # Verificar se a pasta migrations/versions existe
-            if not os.path.exists('migrations/versions'):
-                # Se não existir, criar a estrutura de migrações
-                os.system('flask db init')
+            migrations_dir = Path('migrations/versions')
+            
+            # Verificar se migrations existem
+            if not migrations_dir.exists():
+                print("Inicializando estrutura de migrações...")
+                subprocess.run(['flask', 'db', 'init'], check=True)
                 
-                # Criar uma migração inicial se não houver nenhuma
-                if not os.listdir('migrations/versions'):
-                    os.system('flask db migrate -m "initial"')
-                
-                # Aplicar as migrações
-                os.system('flask db upgrade')
-            else:
-                # Se já existem migrações, apenas verificar se há alterações pendentes
-                # e aplicar as migrações existentes sem criar novas
-                print("Migrações já existem. Aplicando migrações existentes...")
-                os.system('flask db upgrade')
+                # Criar migração inicial
+                if not list(migrations_dir.glob('*.py')):
+                    print("Criando migração inicial...")
+                    subprocess.run(['flask', 'db', 'migrate', '-m', 'initial'], check=True)
+            
+            # Aplicar migrações
+            print("Aplicando migrações...")
+            upgrade()
             
             # Inicializar configurações padrão de SLA
             from app.models import SlaConfig
@@ -108,8 +74,13 @@ def init_migrations():
             print("Configurações padrão de SLA inicializadas!")
         
         return True
+    except subprocess.CalledProcessError as e:
+        print(f"Erro ao executar comando flask: {e}")
+        return False
     except Exception as e:
         print(f"Erro ao inicializar migrações: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return False
 
 if __name__ == "__main__":

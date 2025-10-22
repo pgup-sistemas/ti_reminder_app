@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Catálogo de Equipamentos | TI OSN System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-laptop me-2 text-primary"></i>Equipamentos Disponíveis</h2>
+                    <p class="text-muted mb-0">Clique em "Solicitar" para fazer um pedido de empréstimo</p>
+                </div>
+                <a href="{{ url_for('equipment_v2.index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if equipments %}
+    <div class="row g-3">
+        {% for equipment in equipments %}
+        <div class="col-md-4 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-laptop me-2 text-primary"></i>{{ equipment.name }}
+                    </h5>
+                    
+                    {% if equipment.description %}
+                    <p class="card-text text-muted small">{{ equipment.description[:100] }}...</p>
+                    {% endif %}
+                    
+                    <ul class="list-unstyled small">
+                        {% if equipment.category %}
+                        <li><i class="fas fa-tag me-2"></i><strong>Categoria:</strong> {{ equipment.category }}</li>
+                        {% endif %}
+                        {% if equipment.brand %}
+                        <li><i class="fas fa-building me-2"></i><strong>Marca:</strong> {{ equipment.brand }}</li>
+                        {% endif %}
+                        {% if equipment.model %}
+                        <li><i class="fas fa-info-circle me-2"></i><strong>Modelo:</strong> {{ equipment.model }}</li>
+                        {% endif %}
+                        {% if equipment.patrimony %}
+                        <li><i class="fas fa-barcode me-2"></i><strong>Patrimônio:</strong> {{ equipment.patrimony }}</li>
+                        {% endif %}
+                        {% if equipment.location %}
+                        <li><i class="fas fa-map-marker-alt me-2"></i><strong>Local:</strong> {{ equipment.location }}</li>
+                        {% endif %}
+                    </ul>
+                    
+                    <span class="badge bg-success mb-3">
+                        <i class="fas fa-check me-1"></i>Disponível
+                    </span>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('equipment_v2.request_equipment', equipment_id=equipment.id) }}" 
+                       class="btn btn-primary w-100">
+                        <i class="fas fa-paper-plane me-2"></i>Solicitar Empréstimo
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        Nenhum equipamento disponível no momento.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

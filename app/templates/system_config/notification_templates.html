@@ -1,0 +1,723 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Templates de Notificação{% endblock %}
+
+{% block config_content %}
+<!-- Abas de Navegação -->
+<div class="config-tabs mb-4">
+    <ul class="nav nav-tabs" id="templatesTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="email-templates-tab" data-bs-toggle="tab" data-bs-target="#email-templates" type="button" role="tab">
+                <i class="fas fa-envelope me-1"></i> Email
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="push-templates-tab" data-bs-toggle="tab" data-bs-target="#push-templates" type="button" role="tab">
+                <i class="fas fa-bell me-1"></i> Push
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="sms-templates-tab" data-bs-toggle="tab" data-bs-target="#sms-templates" type="button" role="tab">
+                <i class="fas fa-sms me-1"></i> SMS
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="editor-tab" data-bs-toggle="tab" data-bs-target="#editor" type="button" role="tab">
+                <i class="fas fa-edit me-1"></i> Editor
+            </button>
+        </li>
+    </ul>
+</div>
+
+<div class="tab-content" id="templatesTabsContent">
+    <!-- Aba Templates de Email -->
+    <div class="tab-pane fade show active" id="email-templates" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">
+                            <i class="fas fa-envelope me-2"></i>
+                            Templates de Email
+                        </h3>
+                        <p class="text-muted mb-0 mt-1">Personalize os templates de notificações por email</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-info" onclick="duplicateTemplate()">
+                            <i class="fas fa-copy me-1"></i> Duplicar
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="createTemplate()">
+                            <i class="fas fa-plus me-1"></i> Novo Template
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-card-body">
+                <!-- Dashboard de Templates -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-chart-bar me-2"></i>
+                                    Estatísticas dos Templates
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-envelope fa-2x text-primary mb-2"></i>
+                                            <h4 class="mb-0 text-primary">12</h4>
+                                            <small class="text-muted">Templates Ativos</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-paper-plane fa-2x text-success mb-2"></i>
+                                            <h4 class="mb-0 text-success">1,247</h4>
+                                            <small class="text-muted">Emails Enviados (Hoje)</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                                            <h4 class="mb-0 text-warning">98.5%</h4>
+                                            <small class="text-muted">Taxa de Entrega</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-users fa-2x text-info mb-2"></i>
+                                            <h4 class="mb-0 text-info">89</h4>
+                                            <small class="text-muted">Destinatários Únicos</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros e Busca -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" placeholder="Buscar templates..." id="templateSearch">
+                    </div>
+                    <div class="col-md-6">
+                        <select class="form-select" id="templateFilter">
+                            <option value="all">Todos os templates</option>
+                            <option value="active">Ativos</option>
+                            <option value="inactive">Inativos</option>
+                            <option value="system">Sistema</option>
+                            <option value="custom">Personalizados</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Lista de Templates -->
+                <div class="row g-3" id="templatesGrid">
+                    <!-- Template: Chamado Aberto -->
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 template-card" data-category="system" data-status="active">
+                            <div class="card-header bg-primary text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-ticket-alt me-2"></i>Chamado Aberto</span>
+                                    <div>
+                                        <span class="badge bg-light text-primary me-1">Sistema</span>
+                                        <span class="badge bg-success">Ativo</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text text-muted small mb-3">
+                                    Enviado quando um novo chamado é aberto no sistema
+                                </p>
+                                <div class="mb-2">
+                                    <strong>Assunto:</strong>
+                                    <code class="d-block mt-1 p-2 bg-light rounded small">Chamado #{{ '{' }}id{{ '}' }} Aberto: {{ '{' }}titulo{{ '}' }}</code>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Destinatários:</strong>
+                                    <div class="mt-1">
+                                        <span class="badge bg-secondary me-1">Solicitante</span>
+                                        <span class="badge bg-info">Equipe TI</span>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Usado hoje:</strong>
+                                    <span class="text-success fw-bold">47 vezes</span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-light">
+                                <div class="btn-group w-100">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editTemplate('chamado_aberto')">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="previewTemplate('chamado_aberto')">
+                                        <i class="fas fa-eye"></i> Visualizar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="testTemplate('chamado_aberto')">
+                                        <i class="fas fa-paper-plane"></i> Testar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Template: Chamado Atualizado -->
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 template-card" data-category="system" data-status="active">
+                            <div class="card-header bg-warning text-dark">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-sync me-2"></i>Chamado Atualizado</span>
+                                    <div>
+                                        <span class="badge bg-light text-dark me-1">Sistema</span>
+                                        <span class="badge bg-success">Ativo</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text text-muted small mb-3">
+                                    Enviado quando há atualizações em um chamado
+                                </p>
+                                <div class="mb-2">
+                                    <strong>Assunto:</strong>
+                                    <code class="d-block mt-1 p-2 bg-light rounded small">Atualização: Chamado #{{ '{' }}id{{ '}' }}</code>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Destinatários:</strong>
+                                    <div class="mt-1">
+                                        <span class="badge bg-secondary">Solicitante</span>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Usado hoje:</strong>
+                                    <span class="text-success fw-bold">23 vezes</span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-light">
+                                <div class="btn-group w-100">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editTemplate('chamado_atualizado')">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="previewTemplate('chamado_atualizado')">
+                                        <i class="fas fa-eye"></i> Visualizar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="testTemplate('chamado_atualizado')">
+                                        <i class="fas fa-paper-plane"></i> Testar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Template: Lembrete Vencendo -->
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 template-card" data-category="system" data-status="active">
+                            <div class="card-header bg-danger text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-bell me-2"></i>Lembrete Vencendo</span>
+                                    <div>
+                                        <span class="badge bg-light text-danger me-1">Sistema</span>
+                                        <span class="badge bg-success">Ativo</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text text-muted small mb-3">
+                                    Enviado quando um lembrete está próximo do vencimento
+                                </p>
+                                <div class="mb-2">
+                                    <strong>Assunto:</strong>
+                                    <code class="d-block mt-1 p-2 bg-light rounded small">Lembrete: {{ '{' }}nome{{ '}' }} vence em {{ '{' }}dias{{ '}' }} dias</code>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Destinatários:</strong>
+                                    <div class="mt-1">
+                                        <span class="badge bg-secondary">Responsável</span>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Usado hoje:</strong>
+                                    <span class="text-success fw-bold">12 vezes</span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-light">
+                                <div class="btn-group w-100">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editTemplate('lembrete_vencendo')">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="previewTemplate('lembrete_vencendo')">
+                                        <i class="fas fa-eye"></i> Visualizar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="testTemplate('lembrete_vencendo')">
+                                        <i class="fas fa-paper-plane"></i> Testar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Template: Tarefa Vencida -->
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 template-card" data-category="system" data-status="active">
+                            <div class="card-header bg-info text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-tasks me-2"></i>Tarefa Vencida</span>
+                                    <div>
+                                        <span class="badge bg-light text-info me-1">Sistema</span>
+                                        <span class="badge bg-success">Ativo</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text text-muted small mb-3">
+                                    Enviado quando uma tarefa não é concluída no prazo
+                                </p>
+                                <div class="mb-2">
+                                    <strong>Assunto:</strong>
+                                    <code class="d-block mt-1 p-2 bg-light rounded small">Tarefa Vencida: {{ '{' }}descricao{{ '}' }}</code>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Destinatários:</strong>
+                                    <div class="mt-1">
+                                        <span class="badge bg-secondary">Responsável</span>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Usado hoje:</strong>
+                                    <span class="text-success fw-bold">5 vezes</span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-light">
+                                <div class="btn-group w-100">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editTemplate('tarefa_vencida')">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="previewTemplate('tarefa_vencida')">
+                                        <i class="fas fa-eye"></i> Visualizar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="testTemplate('tarefa_vencida')">
+                                        <i class="fas fa-paper-plane"></i> Testar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Push Notifications -->
+        <div class="tab-pane fade" id="push-templates" role="tabpanel">
+            <div class="config-card">
+                <div class="config-card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>
+                        Templates de Push Notifications
+                    </h3>
+                    <p class="text-muted mb-0 mt-1">Configure notificações push para dispositivos móveis</p>
+                </div>
+                <div class="config-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-success text-white">
+                                    <span><i class="fas fa-mobile-alt me-2"></i>Push - Chamado Urgente</span>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text text-muted small mb-3">
+                                        Notificação push para chamados de alta prioridade
+                                    </p>
+                                    <div class="mb-2">
+                                        <strong>Título:</strong> <code>Chamado Urgente #{{ '{' }}id{{ '}' }}</code>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Mensagem:</strong> <code>{{ '{' }}titulo{{ '}' }} - Prioridade Alta</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba SMS Templates -->
+        <div class="tab-pane fade" id="sms-templates" role="tabpanel">
+            <div class="config-card">
+                <div class="config-card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-sms me-2"></i>
+                        Templates SMS
+                    </h3>
+                    <p class="text-muted mb-0 mt-1">Configure mensagens de texto para notificações críticas</p>
+                </div>
+                <div class="config-card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Templates SMS serão implementados na próxima versão com integração Twilio/SNS.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Editor Visual -->
+        <div class="tab-pane fade" id="editor" role="tabpanel">
+            <div class="config-card">
+                <div class="config-card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        Editor Visual de Templates
+                    </h3>
+                    <p class="text-muted mb-0 mt-1">Crie e edite templates com interface drag-and-drop</p>
+                </div>
+                <div class="config-card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div id="templateEditor" class="border rounded p-3" style="min-height: 400px;">
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-palette fa-3x mb-3"></i>
+                                    <p>Editor visual será implementado na próxima versão</p>
+                                    <small>Suporte a drag-and-drop, preview em tempo real e validação automática</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Variáveis Disponíveis</h6>
+                                </div>
+                                <div class="card-body small">
+                                    <div class="mb-2"><code>{{ '{' }}nome{{ '}' }}</code> - Nome do usuário</div>
+                                    <div class="mb-2"><code>{{ '{' }}email{{ '}' }}</code> - Email do usuário</div>
+                                    <div class="mb-2"><code>{{ '{' }}id{{ '}' }}</code> - ID do item</div>
+                                    <div class="mb-2"><code>{{ '{' }}titulo{{ '}' }}</code> - Título do item</div>
+                                    <div class="mb-2"><code>{{ '{' }}data{{ '}' }}</code> - Data/hora</div>
+                                    <div class="mb-2"><code>{{ '{' }}dias{{ '}' }}</code> - Dias restantes</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funções de Templates
+function createTemplate() {
+    const modalContent = `
+        <form id="newTemplateForm">
+            <div class="mb-3">
+                <label class="form-label">Nome do Template</label>
+                <input type="text" class="form-control" id="templateName" placeholder="Ex: Relatório Semanal" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tipo</label>
+                <select class="form-select" id="templateType">
+                    <option value="email">Email</option>
+                    <option value="push">Push Notification</option>
+                    <option value="sms">SMS</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Categoria</label>
+                <select class="form-select" id="templateCategory">
+                    <option value="system">Sistema</option>
+                    <option value="custom">Personalizado</option>
+                    <option value="report">Relatório</option>
+                    <option value="alert">Alerta</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Descrição</label>
+                <textarea class="form-control" id="templateDescription" rows="2" placeholder="Descrição do template..."></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Baseado em Template Existente</label>
+                <select class="form-select" id="baseTemplate">
+                    <option value="">Criar do zero</option>
+                    <option value="chamado_aberto">Chamado Aberto</option>
+                    <option value="lembrete_vencendo">Lembrete Vencendo</option>
+                    <option value="tarefa_vencida">Tarefa Vencida</option>
+                </select>
+            </div>
+        </form>
+    `;
+    showModal('Novo Template', modalContent, 'Criar Template', () => {
+        const name = document.getElementById('templateName').value;
+        const type = document.getElementById('templateType').value;
+        if (name) {
+            alert(`Template "${name}" (${type}) criado com sucesso!`);
+        }
+    });
+}
+
+function duplicateTemplate() {
+    const selectedTemplates = document.querySelectorAll('.template-card input[type="checkbox"]:checked');
+    if (selectedTemplates.length === 0) {
+        Feedback.info('', 'Selecione pelo menos um template para duplicar.');
+        return;
+    }
+
+    const templateNames = Array.from(selectedTemplates).map(cb => {
+        return cb.closest('.template-card').querySelector('.card-header span').textContent.trim();
+    });
+
+    if (confirm(`Duplicar ${selectedTemplates.length} template(s): ${templateNames.join(', ')}?`)) {
+        Feedback.success('Sucesso', 'Templates duplicados com sucesso!');
+    }
+}
+
+function editTemplate(templateId) {
+    const templates = {
+        'chamado_aberto': {
+            name: 'Chamado Aberto',
+            subject: 'Chamado #{id} Aberto: {titulo}',
+            content: `Olá {nome},
+
+Um novo chamado foi aberto no sistema:
+
+Chamado: #{id}
+Título: {titulo}
+Prioridade: {prioridade}
+Solicitante: {solicitante}
+
+Para visualizar o chamado completo, acesse: {link}
+
+Atenciosamente,
+Sistema TI OSN`
+        },
+        'lembrete_vencendo': {
+            name: 'Lembrete Vencendo',
+            subject: 'Lembrete: {nome} vence em {dias} dias',
+            content: `Olá {nome},
+
+Este é um lembrete automático:
+
+Item: {nome}
+Descrição: {descricao}
+Vence em: {dias} dias
+Data de vencimento: {data_vencimento}
+
+Por favor, tome as ações necessárias.
+
+Atenciosamente,
+Sistema TI OSN`
+        }
+    };
+
+    const template = templates[templateId];
+    if (!template) {
+        Feedback.info('', 'Template não encontrado.');
+        return;
+    }
+
+    const modalContent = `
+        <form id="editTemplateForm">
+            <div class="mb-3">
+                <label class="form-label">Nome do Template</label>
+                <input type="text" class="form-control" value="${template.name}" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Assunto</label>
+                <input type="text" class="form-control" id="editSubject" value="${template.subject}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Conteúdo</label>
+                <textarea class="form-control" id="editContent" rows="10">${template.content}</textarea>
+            </div>
+            <div class="alert alert-info">
+                <strong>Variáveis disponíveis:</strong> {nome}, {email}, {id}, {titulo}, {dias}, {data}, {link}, {prioridade}, {solicitante}
+            </div>
+        </form>
+    `;
+    showModal(`Editar Template: ${template.name}`, modalContent, 'Salvar Alterações', () => {
+        const subject = document.getElementById('editSubject').value;
+        const content = document.getElementById('editContent').value;
+        if (subject && content) {
+            Feedback.success('Sucesso', 'Template atualizado com sucesso!');
+        }
+    });
+}
+
+function previewTemplate(templateId) {
+    const templates = {
+        'chamado_aberto': {
+            subject: 'Chamado #123 Aberto: Problema com impressora',
+            content: `Olá João Silva,
+
+Um novo chamado foi aberto no sistema:
+
+Chamado: #123
+Título: Problema com impressora
+Prioridade: Alta
+Solicitante: João Silva
+
+Para visualizar o chamado completo, acesse: http://tiosn.com/chamado/123
+
+Atenciosamente,
+Sistema TI OSN`
+        },
+        'lembrete_vencendo': {
+            subject: 'Lembrete: Certificação ISO vence em 7 dias',
+            content: `Olá Maria Santos,
+
+Este é um lembrete automático:
+
+Item: Certificação ISO 27001
+Descrição: Certificação de segurança da informação
+Vence em: 7 dias
+Data de vencimento: 2024-02-15
+
+Por favor, tome as ações necessárias.
+
+Atenciosamente,
+Sistema TI OSN`
+        }
+    };
+
+    const template = templates[templateId];
+    if (!template) {
+        Feedback.info('', 'Template não encontrado.');
+        return;
+    }
+
+    const previewWindow = window.open('', '_blank', 'width=800,height=600');
+    previewWindow.document.write(`
+        <html>
+        <head>
+            <title>Preview - ${templateId}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .preview { border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
+                .subject { font-weight: bold; margin-bottom: 15px; }
+                .content { white-space: pre-line; }
+            </style>
+        </head>
+        <body>
+            <h2>Preview do Template</h2>
+            <div class="preview">
+                <div class="subject">Assunto: ${template.subject}</div>
+                <div class="content">${template.content}</div>
+            </div>
+        </body>
+        </html>
+    `);
+}
+
+function testTemplate(templateId) {
+    const templates = {
+        'chamado_aberto': 'Chamado Aberto',
+        'chamado_atualizado': 'Chamado Atualizado',
+        'lembrete_vencendo': 'Lembrete Vencendo',
+        'tarefa_vencida': 'Tarefa Vencida'
+    };
+
+    const templateName = templates[templateId] || templateId;
+
+    if (confirm(`Enviar email de teste usando o template "${templateName}"?\n\nO email será enviado para: admin@tiosn.com`)) {
+        alert(`Email de teste enviado com sucesso!\n\nTemplate: ${templateName}\nDestinatário: admin@tiosn.com\nStatus: Enviado`);
+    }
+}
+
+// Função auxiliar para modal
+function showModal(title, content, confirmText = 'OK', confirmCallback = null) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">${title}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">${content}</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="modalConfirm">${confirmText}</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+
+    if (confirmCallback) {
+        document.getElementById('modalConfirm').onclick = () => {
+            confirmCallback();
+            bsModal.hide();
+        };
+    }
+
+    modal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(modal);
+    });
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtros funcionais
+    const templateSearch = document.getElementById('templateSearch');
+    const templateFilter = document.getElementById('templateFilter');
+
+    if (templateSearch) {
+        templateSearch.addEventListener('input', filterTemplates);
+    }
+    if (templateFilter) {
+        templateFilter.addEventListener('change', filterTemplates);
+    }
+
+    function filterTemplates() {
+        const searchTerm = templateSearch.value.toLowerCase();
+        const statusFilter = templateFilter.value;
+        const templates = document.querySelectorAll('.template-card');
+
+        templates.forEach(template => {
+            const text = template.textContent.toLowerCase();
+            const category = template.getAttribute('data-category');
+            const status = template.getAttribute('data-status');
+            const matchesSearch = text.includes(searchTerm);
+            const matchesFilter = statusFilter === 'all' ||
+                                (statusFilter === 'active' && status === 'active') ||
+                                (statusFilter === 'inactive' && status === 'inactive') ||
+                                (statusFilter === 'system' && category === 'system') ||
+                                (statusFilter === 'custom' && category === 'custom');
+
+            template.style.display = matchesSearch && matchesFilter ? '' : 'none';
+        });
+    }
+
+    // Adicionar checkboxes para seleção múltipla
+    const templateCards = document.querySelectorAll('.template-card');
+    templateCards.forEach(card => {
+        const header = card.querySelector('.card-header');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'form-check-input me-2';
+        checkbox.style.display = 'none'; // Escondido por padrão, mostrado ao selecionar
+
+        header.insertBefore(checkbox, header.firstChild);
+    });
+
+    // Modo de seleção múltipla
+    let multiSelectMode = false;
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'a') {
+            e.preventDefault();
+            multiSelectMode = !multiSelectMode;
+            const checkboxes = document.querySelectorAll('.template-card input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.style.display = multiSelectMode ? 'inline-block' : 'none';
+                if (!multiSelectMode) cb.checked = false;
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

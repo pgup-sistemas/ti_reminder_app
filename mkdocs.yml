@@ -1,53 +1,17 @@
 # Configuração do MKDocs para TI OSN System
-site_name: TI OSN System - Documentação
-site_description: Documentação completa do Sistema de Gerenciamento TI OSN
-site_author: Equipe TI OSN
+site_name: TI OSN System - Documentação Oficial
+site_description: Documentação completa do Sistema de Gerenciamento TI OSN - Versão 2.2.0
+site_author: Oézios Normando - Equipe TI OSN
 site_url: http://192.168.1.86:5000/docs/
 
-# Tema Material Design
+# Tema
 theme:
-  name: material
-  language: pt-BR
-  palette:
-    primary: blue
-    accent: blue
-  font:
-    text: Roboto
-    code: Roboto Mono
-  features:
-    - announce.dismiss
-    - content.action.edit
-    - content.action.view
-    - content.code.annotate
-    - content.code.copy
-    - content.code.select
-    - content.footnote.tooltips
-    - content.tabs.link
-    - content.tooltips
-    - header.autohide
-    - navigation.expand
-    - navigation.footer
-    - navigation.indexes
-    - navigation.instant
-    - navigation.instant.prefetch
-    - navigation.instant.progress
-    - navigation.prune
-    - navigation.sections
-    - navigation.tabs
-    - navigation.tabs.sticky
-    - navigation.top
-    - navigation.tracking
-    - search.highlight
-    - search.share
-    - search.suggest
-    - toc.follow
-    - toc.integrate
+  name: readthedocs
+  locale: pt_BR
 
 # Plugins
 plugins:
-  - awesome-pages
-  - search:
-      separator: '[\s\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - search
 
 # Navegação
 nav:
@@ -60,24 +24,26 @@ nav:
     - Tutoriais: user-guide/tutorials.md
     - Equipamentos: user-guide/equipment.md
     - Dashboard: user-guide/dashboard.md
+    - Sistema RFID: user-guide/rfid.md
+    - Avaliação de Satisfação: user-guide/satisfaction.md
+    - Certificações: user-guide/certifications.md
+    - Performance: user-guide/performance.md
+  - Guia do Administrador:
+    - Equipamentos: admin-guide/equipment-admin.md
+    - Performance: admin-guide/performance-admin.md
+    - RFID: admin-guide/rfid-admin.md
+    - Satisfação: admin-guide/satisfaction-admin.md
+    - Certificações: admin-guide/certifications-admin.md
 
 # Configurações de Markdown
 markdown_extensions:
-  - abbr
   - admonition
-  - attr_list
   - def_list
   - footnotes
-  - md_in_html
   - meta
   - tables
   - toc:
       permalink: true
-  - pymdownx.highlight:
-      anchor_linenums: true
-  - pymdownx.superfences
-  - pymdownx.tabbed:
-      alternate_style: true
 
 # CSS personalizado
 extra_css:
@@ -89,20 +55,8 @@ extra_javascript:
 
 # Configurações adicionais
 extra:
-  version:
-    provider: mike
-    default: latest
-
-  social:
-    - icon: fontawesome/brands/github
-      link: https://github.com
-    - icon: fontawesome/brands/python
-      link: https://python.org
-    - icon: fontawesome/solid/globe
-      link: http://192.168.1.86:5000
-
   generator: false
 
 # Configurações de build
 use_directory_urls: true
-strict: true
+strict: false

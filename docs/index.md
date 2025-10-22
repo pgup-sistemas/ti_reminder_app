@@ -13,59 +13,25 @@ O **TI OSN System** é uma solução completa e profissional para gerenciamento 
 
 ### ✨ Características Principais
 
-<div class="grid cards" markdown>
+- ⚡ **Performance Otimizada** - Sistema responsivo com carregamento rápido e interface fluida
 
--   :material-clock-fast:
-    **Performance Otimizada**
+- 📱 **Progressive Web App** - Funciona offline e pode ser instalado como aplicativo nativo
 
-    Sistema responsivo com carregamento rápido e interface fluida
+- 🔔 **Notificações Inteligentes** - Sistema anti-spam com regras personalizadas por tipo de alerta
 
--   :material-cellphone-cog:
-    **Progressive Web App**
+- 📊 **Relatórios Avançados** - Exportação profissional em Excel e PDF com gráficos interativos
 
-    Funciona offline e pode ser instalado como aplicativo nativo
+- 🔒 **Segurança Completa** - Controle de acesso baseado em roles e auditoria de ações
 
--   :material-bell-ring:
-    **Notificações Inteligentes**
+- 🗄️ **Banco PostgreSQL** - Banco de dados robusto e confiável para ambientes corporativos
 
-    Sistema anti-spam com regras personalizadas por tipo de alerta
+- 📡 **Sistema RFID** - Rastreamento automático de equipamentos com alertas de perda
 
--   :material-chart-line:
-    **Relatórios Avançados**
+- ⭐ **Satisfação do Cliente** - Pesquisas automáticas e métricas de qualidade de serviço
 
-    Exportação profissional em Excel e PDF com gráficos interativos
+- 🏆 **Gamificação** - Sistema de certificações e reconhecimento por contribuição
 
--   :material-shield-lock:
-    **Segurança Completa**
-
-    Controle de acesso baseado em roles e auditoria de ações
-
--   :material-database:
-    **Banco PostgreSQL**
-
-    Banco de dados robusto e confiável para ambientes corporativos
-
--   :material-rfid:
-    **Sistema RFID**
-
-    Rastreamento automático de equipamentos com alertas de perda
-
--   :material-star:
-    **Satisfação do Cliente**
-
-    Pesquisas automáticas e métricas de qualidade de serviço
-
--   :material-trophy:
-    **Gamificação**
-
-    Sistema de certificações e reconhecimento por contribuição
-
--   :material-speedometer:
-    **Monitoramento Avançado**
-
-    Dashboard de performance com otimização automática
-
-</div>
+- 📈 **Monitoramento Avançado** - Dashboard de performance com otimização automática
 
 ## 🚀 Início Rápido
 
@@ -85,81 +51,20 @@ O **TI OSN System** é uma solução completa e profissional para gerenciamento 
 
 ## 📚 Guias Disponíveis
 
-<div class="grid cards" markdown>
+### 👤 Guia do Usuário
+- **[Visão Geral](user-guide/overview.md)** - Documentação completa para usuários finais
+- **[Lembretes](user-guide/reminders.md)** - Criação e gerenciamento de lembretes recorrentes
+- **[Chamados](user-guide/chamados.md)** - Abrir, acompanhar e gerenciar chamados de suporte
+- **[Tarefas](user-guide/tasks.md)** - Gestão de tarefas pontuais com controle de prazos
+- **[Tutoriais](user-guide/tutorials.md)** - Base de conhecimento e tutoriais
+- **[Equipamentos](user-guide/equipment.md)** - Solicitação e gestão de equipamentos
+- **[Dashboard](user-guide/dashboard.md)** - Visão geral e métricas do sistema
 
--   :fontawesome-regular-user:
-    **[Guia do Usuário](user-guide/overview.md)**
-
-    ---
-
-    Documentação completa para usuários finais com guias detalhados de todos os módulos
-
-    :octicons-arrow-right-24: [Acessar Guia](user-guide/overview.md)
-
--   :fontawesome-solid-laptop:
-    **[Lembretes](user-guide/reminders.md)**
-
-    ---
-
-    Guia completo para criação e gerenciamento de lembretes recorrentes
-
-    :octicons-arrow-right-24: [Ver Lembretes](user-guide/reminders.md)
-
--   :fontawesome-solid-ticket-alt:
-    **[Chamados](user-guide/chamados.md)**
-
-    ---
-
-    Como abrir, acompanhar e gerenciar chamados de suporte técnico
-
-    :octicons-arrow-right-24: [Ver Chamados](user-guide/chamados.md)
-
--   :fontawesome-solid-tasks:
-    **[Tarefas](user-guide/tasks.md)**
-
-    ---
-
-    Gestão de tarefas pontuais com controle de prazos e responsáveis
-
-    :octicons-arrow-right-24: [Ver Tarefas](user-guide/tasks.md)
-
--   :material-rfid:
-    **[Sistema RFID](user-guide/rfid.md)**
-
-    ---
-
-    Rastreamento automático de equipamentos com tecnologia RFID
-
-    :octicons-arrow-right-24: [Ver RFID](user-guide/rfid.md)
-
--   :material-star:
-    **[Satisfação](user-guide/satisfaction.md)**
-
-    ---
-
-    Sistema de avaliação de serviços e métricas de qualidade
-
-    :octicons-arrow-right-24: [Ver Satisfação](user-guide/satisfaction.md)
-
--   :material-trophy:
-    **[Certificações](user-guide/certifications.md)**
-
-    ---
-
-    Gamificação e reconhecimento por contribuição na plataforma
-
-    :octicons-arrow-right-24: [Ver Certificações](user-guide/certifications.md)
-
--   :material-speedometer:
-    **[Performance](user-guide/performance.md)**
-
-    ---
-
-    Monitoramento e otimização de performance do sistema
-
-    :octicons-arrow-right-24: [Ver Performance](user-guide/performance.md)
-
-</div>
+### 🆕 Novas Funcionalidades
+- **[Sistema RFID](user-guide/rfid.md)** 📡 - Rastreamento automático de equipamentos
+- **[Avaliação de Satisfação](user-guide/satisfaction.md)** ⭐ - Pesquisas e métricas de qualidade
+- **[Certificações](user-guide/certifications.md)** 🏆 - Gamificação e reconhecimento
+- **[Performance](user-guide/performance.md)** 📈 - Monitoramento e otimização do sistema
 
 ## 🎨 Recursos Visuais
 
@@ -214,34 +119,45 @@ O sistema utiliza **Material Design** com:
 
 ### 📡 Sistema RFID
 
-- ✅ **Rastreamento Automático**: Localização em tempo real
-- ✅ **Alertas de Perda**: Notificações automáticas
-- ✅ **Dashboard Visual**: Mapa de localização
-- ✅ **Atribuição em Lote**: Configuração massiva
-- ✅ **Integração IoT**: Leitores conectados
+- ✅ **Rastreamento Automático**: Localização em tempo real de equipamentos
+- ✅ **Alertas de Perda**: Notificações automáticas quando equipamentos saem da área permitida
+- ✅ **Dashboard Visual**: Mapa interativo de localização de todos os ativos
+- ✅ **Atribuição em Lote**: Configuração massiva de tags RFID
+- ✅ **Integração IoT**: Leitores RFID conectados em rede
+- ✅ **Histórico de Movimentação**: Rastreamento completo do trajeto dos equipamentos
+- ✅ **Gestão de Leitores**: Monitoramento do status dos dispositivos RFID
 
 ### ⭐ Sistema de Satisfação
 
-- ✅ **Pesquisas Automáticas**: Envio pós-atendimento
-- ✅ **Avaliação por Estrelas**: Métricas objetivas
-- ✅ **Dashboard Executivo**: Análise de performance
-- ✅ **Tendências**: Evolução temporal
-- ✅ **Feedback Detalhado**: Comentários dos usuários
+- ✅ **Pesquisas Automáticas**: Envio automático 1 dia após fechamento do chamado
+- ✅ **Avaliação por Estrelas**: Sistema de 1 a 5 estrelas para métricas objetivas
+- ✅ **Dashboard Executivo**: Análise completa de performance do atendimento
+- ✅ **Tendências**: Evolução temporal da satisfação (30/90 dias)
+- ✅ **Feedback Detalhado**: Comentários e sugestões dos usuários
+- ✅ **Análises Segmentadas**: Por setor, prioridade e responsável
+- ✅ **Taxa de Resposta**: Monitoramento de participação nas pesquisas
+- ✅ **Privacidade**: Avaliações confidenciais e anônimas
 
 ### 🏆 Gamificação e Certificações
 
-- ✅ **Sistema de Pontos**: Recompensa por contribuição
-- ✅ **Certificações Automáticas**: Níveis por expertise
-- ✅ **Leaderboard**: Ranking de contribuidores
-- ✅ **Badges e Reconhecimento**: Motivação visual
-- ✅ **Validade Temporal**: Renovação automática
+- ✅ **Sistema de Pontos**: Recompensa automática por contribuição na plataforma
+- ✅ **Certificações Automáticas**: 5 níveis de expertise (Iniciante a Especialista)
+- ✅ **Leaderboard**: Ranking público de top contribuidores
+- ✅ **Badges e Reconhecimento**: Motivação visual e status na comunidade
+- ✅ **Validade Temporal**: Certificações válidas por 1 ano com renovação automática
+- ✅ **Pontuação Transparente**: Tutorial criado (10pts), Visualização (0.1pt), Comentário (2pts), Voto útil (5pts)
+- ✅ **Privilégios Progressivos**: Acesso antecipado e capacidade de moderação
+- ✅ **Estatísticas da Comunidade**: Métricas de participação e crescimento
 
 ### 📊 Dashboard e Relatórios
 
-- ✅ **Métricas em Tempo Real**: Contadores de atividades
-- ✅ **Gráficos Interativos**: Visualização por período
-- ✅ **Filtros Dinâmicos**: Por setor, usuário, data
-- ✅ **Exportação Profissional**: Excel e PDF formatados
+- ✅ **Métricas em Tempo Real**: Contadores de atividades e status
+- ✅ **Gráficos Interativos**: Visualização por período com Chart.js
+- ✅ **Filtros Dinâmicos**: Por setor, usuário, data e status
+- ✅ **Exportação Profissional**: Excel e PDF formatados com logos e estilos
+- ✅ **Dashboard de Performance**: Monitoramento de CPU, memória e disco
+- ✅ **Otimizações Automáticas**: Índices de banco e configurações de cache
+- ✅ **Alertas Inteligentes**: Notificações de recursos críticos
 
 ## 🌐 Progressive Web App (PWA)
 
@@ -263,25 +179,67 @@ O sistema utiliza **Material Design** com:
 
 ### Recursos de Ajuda
 
-- **📖 Documentação**: Guias completos e tutoriais
+- **📖 Documentação**: Guias completos e tutoriais detalhados
 - **❓ FAQ**: Perguntas frequentes respondidas
 - **🔧 Troubleshooting**: Solução de problemas comuns
-- **💬 Suporte**: Contato com equipe técnica
+- **💬 Suporte**: Contato com equipe técnica via chamados
+- **🎓 Tutoriais Interativos**: Base de conhecimento integrada
+- **📊 Dashboard de Ajuda**: Acesso rápido às funcionalidades
 
 ### Canais de Comunicação
 
 - **📧 E-mail**: suporte@ti-osn.com
-- **🎫 Chamados**: Sistema interno de chamados
-- **📚 Tutoriais**: Base de conhecimento integrada
+- **🎫 Chamados**: Sistema interno de chamados (recomendado)
+- **📚 Tutoriais**: Base de conhecimento com busca integrada
+- **🔔 Notificações**: Alertas automáticos de atualizações
+
+## 🆕 Novidades da Versão 2.2.0
+
+### Recursos Implementados Recentemente
+
+#### 📡 Sistema RFID Completo
+- Rastreamento automático de equipamentos com tecnologia RFID
+- Dashboard visual com mapa de localização em tempo real
+- Alertas automáticos de perda e movimentação suspeita
+- Histórico completo de trajeto dos ativos
+- Gestão de leitores RFID em rede
+
+#### ⭐ Avaliação de Satisfação
+- Pesquisas automáticas pós-atendimento
+- Sistema de avaliação por estrelas (1 a 5)
+- Dashboard executivo com métricas de qualidade
+- Análises segmentadas por setor, prioridade e responsável
+- Feedback detalhado e anônimo dos usuários
+
+#### 🏆 Sistema de Certificações e Gamificação
+- Pontuação automática por contribuição
+- 5 níveis de certificação (Iniciante a Especialista)
+- Leaderboard público de top contribuidores
+- Badges e reconhecimento visual
+- Privilégios progressivos conforme evolução
+
+#### 📊 Dashboard de Performance
+- Monitoramento em tempo real de CPU, memória e disco
+- Otimizações automáticas de banco de dados
+- Criação inteligente de índices
+- Alertas de recursos críticos
+- Relatórios PDF profissionais
+
+### Melhorias Gerais
+- **Performance**: Otimizações de consultas e cache
+- **Interface**: Design responsivo e moderno
+- **Segurança**: Controle de acesso aprimorado
+- **Notificações**: Sistema anti-spam inteligente
+- **Relatórios**: Exportação profissional em Excel e PDF
 
 ---
 
 <div class="info">
     **Última atualização**: Outubro 2025
     <br>
-    **Versão**: 2.1.0 - Recursos Avançados Implementados
+    **Versão**: 2.2.0 - Sistema Completo com Recursos Avançados
     <br>
-    **Novidades**: RFID, Satisfação, Certificações, Performance
+    **Novidades Recentes**: Sistema RFID, Avaliação de Satisfação, Gamificação com Certificações, Dashboard de Performance
     <br>
-    **Desenvolvido por**: Oézios Normando
+    **Desenvolvido por**: Oézios Normando - Equipe TI OSN
 </div>

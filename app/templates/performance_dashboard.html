@@ -1,273 +1,265 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard de Performance - Sistema TI OSN{% endblock %}
+{% block title %}Performance | TI OSN System{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-gradient-primary text-white">
-                    <h3 class="card-title mb-0">
-                        <i class="fas fa-tachometer-alt"></i> Dashboard de Performance do Sistema
-                    </h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-light btn-sm" onclick="runOptimizations()">
-                            <i class="fas fa-wrench"></i> Executar Otimizações
-                        </button>
-                        <a href="{{ url_for('main.performance_report') }}" class="btn btn-light btn-sm">
-                            <i class="fas fa-file-pdf"></i> Relatório PDF
-                        </a>
-                        <button type="button" class="btn btn-light btn-sm" onclick="refreshMetrics()">
-                            <i class="fas fa-sync-alt"></i> Atualizar
-                        </button>
+<div class="container-fluid py-3">
+    <!-- Header da Página -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="text-primary mb-1">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard de Performance
+            </h4>
+            <p class="text-muted mb-0 small">Monitoramento em tempo real dos recursos do sistema</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="runOptimizations()">
+                <i class="fas fa-wrench me-1"></i>Otimizar
+            </button>
+            <a href="{{ url_for('main.performance_report') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-file-pdf me-1"></i>Relatório
+            </a>
+            <button type="button" class="btn btn-outline-success btn-sm" onclick="refreshMetrics()">
+                <i class="fas fa-sync-alt me-1"></i>Atualizar
+            </button>
+        </div>
+    </div>
+
+    <!-- Alertas de Performance -->
+    {% if performance_report.recommendations %}
+    <div class="alert alert-warning border-0 mb-4" role="alert">
+        <div class="d-flex align-items-start">
+            <i class="fas fa-exclamation-triangle me-2 mt-1"></i>
+            <div class="flex-grow-1">
+                <h6 class="alert-heading mb-2">Recomendações de Performance</h6>
+                <ul class="mb-0 ps-3">
+                    {% for rec in performance_report.recommendations %}
+                    <li class="mb-1">{{ rec }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Métricas do Sistema -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h6 class="text-muted mb-1 fw-medium">CPU</h6>
+                            <p class="text-muted small mb-0">Processador</p>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-2 rounded">
+                            <i class="fas fa-microchip text-info"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-info mb-2 fw-bold" id="cpu-value">{{ "%.1f"|format(system_metrics.cpu_percent) }}%</h3>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-info" id="cpu-bar" style="width: {{ system_metrics.cpu_percent }}%"></div>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
                 <div class="card-body">
-
-                    <!-- Alertas de Performance -->
-                    {% if performance_report.recommendations %}
-                    <div class="alert alert-warning">
-                        <h6><i class="fas fa-exclamation-triangle"></i> Recomendações de Performance</h6>
-                        <ul class="mb-0">
-                            {% for rec in performance_report.recommendations %}
-                            <li>{{ rec }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-
-                    <!-- Métricas do Sistema -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-lg-3 col-md-6">
-                            <div class="card card-service h-100">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div>
-                                            <h6 class="card-title mb-1">CPU</h6>
-                                            <p class="text-dark small mb-0 font-weight-bold">Uso do processador</p>
-                                        </div>
-                                        <div class="bg-info bg-opacity-10 p-2 rounded">
-                                            <i class="fas fa-microchip text-info"></i>
-                                        </div>
-                                    </div>
-                                    <h3 class="text-info mb-3 metric-value">{{ "%.1f"|format(system_metrics.cpu_percent) }}%</h3>
-                                    <div class="progress" style="height: 6px;">
-                                        <div class="progress-bar bg-info" style="width: {{ system_metrics.cpu_percent }}%"></div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h6 class="text-muted mb-1 fw-medium">Memória</h6>
+                            <p class="text-muted small mb-0">RAM</p>
                         </div>
-                        <div class="col-lg-3 col-md-6">
-                            <div class="card card-service h-100">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div>
-                                            <h6 class="card-title mb-1">Memória</h6>
-                                            <p class="text-dark small mb-0 font-weight-bold">Uso da memória RAM</p>
-                                        </div>
-                                        <div class="bg-success bg-opacity-10 p-2 rounded">
-                                            <i class="fas fa-memory text-success"></i>
-                                        </div>
-                                    </div>
-                                    <h3 class="text-success mb-3 metric-value">{{ "%.1f"|format(system_metrics.memory_percent) }}%</h3>
-                                    <div class="progress" style="height: 6px;">
-                                        <div class="progress-bar bg-success" style="width: {{ system_metrics.memory_percent }}%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6">
-                            <div class="card card-service h-100">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div>
-                                            <h6 class="card-title mb-1">Disco</h6>
-                                            <p class="text-dark small mb-0 font-weight-bold">Uso do armazenamento</p>
-                                        </div>
-                                        <div class="bg-warning bg-opacity-10 p-2 rounded">
-                                            <i class="fas fa-hdd text-warning"></i>
-                                        </div>
-                                    </div>
-                                    <h3 class="text-warning mb-3 metric-value">{{ "%.1f"|format(system_metrics.disk_percent) }}%</h3>
-                                    <div class="progress" style="height: 6px;">
-                                        <div class="progress-bar bg-warning" style="width: {{ system_metrics.disk_percent }}%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6">
-                            <div class="card card-service h-100">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div>
-                                            <h6 class="card-title mb-1">Conexões DB</h6>
-                                            <p class="text-dark small mb-0 font-weight-bold">Banco de dados ativo</p>
-                                        </div>
-                                        <div class="bg-danger bg-opacity-10 p-2 rounded">
-                                            <i class="fas fa-database text-danger"></i>
-                                        </div>
-                                    </div>
-                                    <h3 class="text-danger mb-3 metric-value">{{ db_stats.active_connections }}</h3>
-                                </div>
-                            </div>
+                        <div class="bg-success bg-opacity-10 p-2 rounded">
+                            <i class="fas fa-memory text-success"></i>
                         </div>
                     </div>
-
-                    <!-- Métricas Detalhadas -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="card-title">Recursos do Sistema</h5>
-                                </div>
-                                <div class="card-body">
-                                    <table class="table table-sm">
-                                        <tr>
-                                            <td><strong>Memória Usada:</strong></td>
-                                            <td><span class="text-success font-weight-bold">{{ "%.2f"|format(system_metrics.memory_used_gb) }} GB</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Disco Usado:</strong></td>
-                                            <td><span class="text-warning font-weight-bold">{{ "%.2f"|format(system_metrics.disk_used_gb) }} GB</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Memória da App:</strong></td>
-                                            <td><span class="text-info font-weight-bold">{{ "%.2f"|format(system_metrics.app_memory_mb) }} MB</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>CPU da App:</strong></td>
-                                            <td><span class="text-primary font-weight-bold">{{ "%.1f"|format(system_metrics.app_cpu_percent) }}%</span></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
+                    <h3 class="text-success mb-2 fw-bold" id="memory-value">{{ "%.1f"|format(system_metrics.memory_percent) }}%</h3>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-success" id="memory-bar" style="width: {{ system_metrics.memory_percent }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h6 class="text-muted mb-1 fw-medium">Disco</h6>
+                            <p class="text-muted small mb-0">Armazenamento</p>
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="card-title">Banco de Dados</h5>
-                                </div>
-                                <div class="card-body">
-                                    <table class="table table-sm">
-                                        <tr>
-                                            <td><strong>Conexões Ativas:</strong></td>
-                                            <td><span class="text-danger font-weight-bold">{{ db_stats.active_connections }}</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Cache Hit Ratio:</strong></td>
-                                            <td>
-                                                <span class="badge badge-{{ 'success' if db_stats.get('cache_hit_ratio', 0) >= 95 else 'warning' }} font-weight-bold">
-                                                    {{ "%.1f"|format(db_stats.get('cache_hit_ratio', 0)) }}%
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Status:</strong></td>
-                                            <td>
-                                                <span class="badge badge-success">
-                                                    <i class="fas fa-check-circle"></i> Online
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
+                        <div class="bg-warning bg-opacity-10 p-2 rounded">
+                            <i class="fas fa-hdd text-warning"></i>
                         </div>
                     </div>
-
-                    <!-- Estatísticas das Tabelas -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-primary text-white">
-                                    <h5 class="card-title mb-0">
-                                        <i class="fas fa-database"></i> Estatísticas das Tabelas
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover table-striped">
-                                            <thead class="bg-dark text-white">
-                                                <tr>
-                                                    <th class="text-white"><i class="fas fa-table"></i> Tabela</th>
-                                                    <th class="text-center text-white"><i class="fas fa-check-circle"></i> Ativos</th>
-                                                    <th class="text-center text-white"><i class="fas fa-times-circle"></i> Mortos</th>
-                                                    <th class="text-center text-white"><i class="fas fa-plus"></i> Inserts</th>
-                                                    <th class="text-center text-white"><i class="fas fa-edit"></i> Updates</th>
-                                                    <th class="text-center text-white"><i class="fas fa-trash"></i> Deletes</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for table in db_stats.table_stats %}
-                                                <tr class="table-row-hover">
-                                                    <td><span class="badge bg-secondary text-white">{{ table.table }}</span></td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-success text-white font-weight-bold">{{ "{:,}".format(table.live_rows) }}</span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-danger text-white">{{ "{:,}".format(table.dead_rows) }}</span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-info text-white">{{ "{:,}".format(table.inserts) }}</span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-warning text-dark font-weight-bold">{{ "{:,}".format(table.updates) }}</span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-danger text-white">{{ "{:,}".format(table.deletes) }}</span>
-                                                    </td>
-                                                </tr>
-                                                {% endfor %}
-                                                {% if not db_stats.table_stats %}
-                                                <tr>
-                                                    <td colspan="6" class="text-center py-5">
-                                                        <div class="alert alert-info">
-                                                            <i class="fas fa-info-circle fa-3x mb-3 text-info"></i><br>
-                                                            <h5 class="text-info">Estatísticas do Banco Não Disponíveis</h5>
-                                                            <p class="mb-0">As estatísticas das tabelas serão exibidas quando houver dados no banco de dados.</p>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                {% endif %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+                    <h3 class="text-warning mb-2 fw-bold" id="disk-value">{{ "%.1f"|format(system_metrics.disk_percent) }}%</h3>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-warning" id="disk-bar" style="width: {{ system_metrics.disk_percent }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h6 class="text-muted mb-1 fw-medium">Conexões DB</h6>
+                            <p class="text-muted small mb-0">Banco de dados</p>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-2 rounded">
+                            <i class="fas fa-database text-primary"></i>
                         </div>
                     </div>
+                    <h3 class="text-primary mb-2 fw-bold" id="db-value">{{ db_stats.active_connections }}</h3>
+                    <p class="text-muted small mb-0">conexões ativas</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                    <!-- Gráfico de Performance -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <h5 class="card-title mb-0">
-                                        <i class="fas fa-chart-line"></i> Monitor de Recursos em Tempo Real
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="chart-container" style="position: relative; height: 400px;">
-                                        <canvas id="performanceChart"></canvas>
-                                    </div>
-                                    <div class="mt-3 text-center">
-                                        <small class="text-dark font-weight-bold">
-                                            <i class="fas fa-clock text-primary"></i> Atualizado automaticamente a cada 30 segundos
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Métricas Detalhadas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-light border-0">
+                    <h5 class="mb-0 fw-medium"><i class="fas fa-server me-2 text-primary"></i>Recursos do Sistema</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tr>
+                            <td class="text-muted">Memória Usada:</td>
+                            <td class="text-end"><span class="badge bg-success">{{ "%.2f"|format(system_metrics.memory_used_gb) }} GB</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Disco Usado:</td>
+                            <td class="text-end"><span class="badge bg-warning text-dark">{{ "%.2f"|format(system_metrics.disk_used_gb) }} GB</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Memória da App:</td>
+                            <td class="text-end"><span class="badge bg-info">{{ "%.2f"|format(system_metrics.app_memory_mb) }} MB</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">CPU da App:</td>
+                            <td class="text-end"><span class="badge bg-primary">{{ "%.1f"|format(system_metrics.app_cpu_percent) }}%</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-light border-0">
+                    <h5 class="mb-0 fw-medium"><i class="fas fa-database me-2 text-primary"></i>Banco de Dados</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tr>
+                            <td class="text-muted">Conexões Ativas:</td>
+                            <td class="text-end"><span class="badge bg-primary">{{ db_stats.active_connections }}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Cache Hit Ratio:</td>
+                            <td class="text-end">
+                                <span class="badge bg-{{ 'success' if db_stats.get('cache_hit_ratio', 0) >= 95 else 'warning' }}">
+                                    {{ "%.1f"|format(db_stats.get('cache_hit_ratio', 0)) }}%
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Status:</td>
+                            <td class="text-end">
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle"></i> Online
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico de Performance -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light border-0">
+                    <h5 class="mb-0 fw-medium">
+                        <i class="fas fa-chart-line me-2 text-primary"></i>Monitor de Recursos em Tempo Real
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 350px;">
+                        <canvas id="performanceChart"></canvas>
                     </div>
+                    <div class="mt-3 text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>Atualizado automaticamente a cada 30 segundos
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Estatísticas das Tabelas -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light border-0">
+                    <h5 class="mb-0 fw-medium">
+                        <i class="fas fa-table me-2 text-primary"></i>Estatísticas das Tabelas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="fas fa-table me-1"></i>Tabela</th>
+                                    <th class="text-center"><i class="fas fa-check-circle me-1"></i>Ativos</th>
+                                    <th class="text-center"><i class="fas fa-times-circle me-1"></i>Mortos</th>
+                                    <th class="text-center"><i class="fas fa-plus me-1"></i>Inserts</th>
+                                    <th class="text-center"><i class="fas fa-edit me-1"></i>Updates</th>
+                                    <th class="text-center"><i class="fas fa-trash me-1"></i>Deletes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for table in db_stats.table_stats %}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{ table.table }}</span></td>
+                                    <td class="text-center"><span class="badge bg-success">{{ "{:,}".format(table.live_rows) }}</span></td>
+                                    <td class="text-center"><span class="badge bg-danger">{{ "{:,}".format(table.dead_rows) }}</span></td>
+                                    <td class="text-center"><span class="badge bg-info">{{ "{:,}".format(table.inserts) }}</span></td>
+                                    <td class="text-center"><span class="badge bg-warning text-dark">{{ "{:,}".format(table.updates) }}</span></td>
+                                    <td class="text-center"><span class="badge bg-danger">{{ "{:,}".format(table.deletes) }}</span></td>
+                                </tr>
+                                {% endfor %}
+                                {% if not db_stats.table_stats %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                            <p class="mb-0">Estatísticas das tabelas não disponíveis</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 let performanceChart;
@@ -291,28 +283,44 @@ function initializeChart() {
             datasets: [{
                 label: 'CPU (%)',
                 data: [],
-                borderColor: '#007bff',
-                backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                tension: 0.4
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                tension: 0.4,
+                fill: true
             }, {
                 label: 'Memória (%)',
                 data: [],
-                borderColor: '#28a745',
-                backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                tension: 0.4
+                borderColor: '#198754',
+                backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                tension: 0.4,
+                fill: true
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true,
-                    max: 100
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
                 }
             },
             plugins: {
                 legend: {
-                    display: true
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
+                        }
+                    }
                 }
             }
         }
@@ -320,9 +328,8 @@ function initializeChart() {
 }
 
 function startRealTimeMonitoring() {
-    // Atualizar métricas a cada 30 segundos
     setInterval(updateMetrics, 30000);
-    updateMetrics(); // Atualização inicial
+    updateMetrics();
 }
 
 function updateMetrics() {
@@ -330,291 +337,86 @@ function updateMetrics() {
         .then(response => response.json())
         .then(data => {
             const timestamp = new Date(data.timestamp * 1000);
-            const timeLabel = timestamp.toLocaleTimeString();
+            const timeLabel = timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-            // Adicionar novos dados
             metricsHistory.labels.push(timeLabel);
             metricsHistory.cpu.push(data.system.cpu_percent);
             metricsHistory.memory.push(data.system.memory_percent);
 
-            // Manter apenas os últimos 20 pontos
             if (metricsHistory.labels.length > 20) {
                 metricsHistory.labels.shift();
                 metricsHistory.cpu.shift();
                 metricsHistory.memory.shift();
             }
 
-            // Atualizar gráfico
             performanceChart.data.labels = metricsHistory.labels;
             performanceChart.data.datasets[0].data = metricsHistory.cpu;
             performanceChart.data.datasets[1].data = metricsHistory.memory;
-            performanceChart.update();
+            performanceChart.update('none');
 
-            // Atualizar valores na tela
             updateDisplayValues(data);
         })
         .catch(error => console.error('Erro ao atualizar métricas:', error));
 }
 
 function updateDisplayValues(data) {
-    // Atualizar valores exibidos (se necessário)
-    const cpuElement = document.querySelector('.small-box.bg-info .inner h3');
-    const memoryElement = document.querySelector('.small-box.bg-success .inner h3');
+    const cpuValue = document.getElementById('cpu-value');
+    const memoryValue = document.getElementById('memory-value');
+    const diskValue = document.getElementById('disk-value');
+    const dbValue = document.getElementById('db-value');
+    const cpuBar = document.getElementById('cpu-bar');
+    const memoryBar = document.getElementById('memory-bar');
+    const diskBar = document.getElementById('disk-bar');
 
-    if (cpuElement) cpuElement.textContent = data.system.cpu_percent.toFixed(1) + '%';
-    if (memoryElement) memoryElement.textContent = data.system.memory_percent.toFixed(1) + '%';
+    if (cpuValue) cpuValue.textContent = data.system.cpu_percent.toFixed(1) + '%';
+    if (memoryValue) memoryValue.textContent = data.system.memory_percent.toFixed(1) + '%';
+    if (diskValue) diskValue.textContent = data.system.disk_percent.toFixed(1) + '%';
+    if (dbValue) dbValue.textContent = data.database.active_connections;
+    
+    if (cpuBar) cpuBar.style.width = data.system.cpu_percent + '%';
+    if (memoryBar) memoryBar.style.width = data.system.memory_percent + '%';
+    if (diskBar) diskBar.style.width = data.system.disk_percent + '%';
 }
 
 function runOptimizations() {
     if (confirm('Executar otimizações de performance? Esta operação pode demorar alguns minutos.')) {
-        // Desabilitar botão
-        const btn = event.target;
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Executando...';
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Executando...';
         btn.disabled = true;
 
-        // Executar otimizações
-        fetch('/performance/optimize', {
-            method: 'GET' // ou POST se necessário
-        })
-        .then(response => {
-            if (response.ok) {
-                location.reload();
-            } else {
-                alert('Erro ao executar otimizações');
-                btn.innerHTML = originalText;
+        fetch('/performance/optimize')
+            .then(response => {
+                if (response.ok) {
+                    btn.innerHTML = '<i class="fas fa-check me-1"></i>Concluído!';
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    throw new Error('Erro ao executar otimizações');
+                }
+            })
+            .catch(error => {
+                alert('Erro: ' + error.message);
+                btn.innerHTML = originalHTML;
                 btn.disabled = false;
-            }
-        })
-        .catch(error => {
-            alert('Erro: ' + error.message);
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        });
+            });
     }
 }
 
 function refreshMetrics() {
+    const btn = event.target.closest('button');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Atualizando...';
+    btn.disabled = true;
+    
     updateMetrics();
-    // Feedback visual
-    const btn = event.target;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-check"></i> Atualizado!';
+    
     setTimeout(() => {
-        btn.innerHTML = originalText;
-    }, 2000);
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>Atualizado!';
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        }, 1500);
+    }, 500);
 }
 </script>
-
-<style>
-.small-box {
-    margin-bottom: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.progress {
-    height: 6px;
-    border-radius: 3px;
-}
-
-.table td {
-    vertical-align: middle;
-    padding: 0.75rem;
-}
-
-.card-tools .btn {
-    margin-left: 5px;
-    border-radius: 6px;
-}
-
-.badge {
-    font-size: 0.8em;
-    font-weight: 500;
-}
-
-.card {
-    border-radius: 8px;
-    border: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.card-header {
-    border-radius: 8px 8px 0 0 !important;
-    border: none;
-    font-weight: 600;
-}
-
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-}
-
-.shadow-sm {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-}
-
-.table-hover tbody tr:hover {
-    background-color: rgba(0,123,255,0.05);
-}
-
-.font-weight-bold {
-    font-weight: 600 !important;
-}
-
-.chart-container {
-    position: relative;
-    margin: auto;
-    height: 400px;
-    width: 100%;
-}
-
-/* Melhorar contraste e visibilidade */
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(0, 0, 0, 0.02);
-}
-
-.table-row-hover:hover {
-    background-color: rgba(0, 123, 255, 0.1) !important;
-    transform: translateY(-1px);
-    transition: all 0.2s ease;
-}
-
-.text-muted {
-    color: #6c757d !important;
-    font-weight: 500;
-}
-
-.bg-light {
-    background-color: #f8f9fa !important;
-    color: #212529 !important;
-}
-
-.bg-dark {
-    background-color: #343a40 !important;
-    color: #ffffff !important;
-}
-
-/* Melhorar contraste dos ícones */
-.text-success {
-    color: #28a745 !important;
-    font-weight: 600;
-}
-
-.text-danger {
-    color: #dc3545 !important;
-    font-weight: 600;
-}
-
-.text-warning {
-    color: #ffc107 !important;
-    font-weight: 600;
-}
-
-.text-info {
-    color: #17a2b8 !important;
-    font-weight: 600;
-}
-
-/* Estilos para quando não há dados */
-.alert-info {
-    background-color: #d1ecf1;
-    border-color: #bee5eb;
-    color: #0c5460;
-    border-left: 4px solid #17a2b8;
-}
-
-.alert-info .text-info {
-    color: #0c5460 !important;
-    font-weight: 600;
-}
-
-/* Melhorar legibilidade das métricas */
-.metric-value {
-    font-size: 1.1em;
-    font-weight: 600;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
-
-/* Estilos para badges */
-.badge-success {
-    background-color: #28a745;
-    color: white;
-}
-
-.badge-danger {
-    background-color: #dc3545;
-    color: white;
-}
-
-.badge-warning {
-    background-color: #ffc107;
-    color: #212529;
-}
-
-.badge-info {
-    background-color: #17a2b8;
-    color: white;
-}
-
-/* Garantir contraste adequado em todos os elementos */
-.card-body {
-    background-color: #ffffff !important;
-    color: #212529 !important;
-}
-
-.table-responsive {
-    background-color: #ffffff !important;
-    border-radius: 8px;
-    padding: 1rem;
-}
-
-.table thead th {
-    background-color: #343a40 !important;
-    color: #ffffff !important;
-    border: none !important;
-    font-weight: 600;
-}
-
-.table tbody td {
-    background-color: #ffffff !important;
-    color: #212529 !important;
-    border-color: #dee2e6 !important;
-}
-
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: #f8f9fa !important;
-}
-
-.table-hover tbody tr:hover {
-    background-color: rgba(0, 123, 255, 0.1) !important;
-    color: #212529 !important;
-}
-
-/* Melhorar contraste dos textos descritivos */
-.card-title {
-    color: #212529 !important;
-    font-weight: 600;
-}
-
-.text-muted {
-    color: #495057 !important;
-    font-weight: 500;
-}
-
-/* Garantir que todos os ícones tenham contraste adequado */
-.fas, .far {
-    opacity: 1 !important;
-}
-
-/* Estilos específicos para elementos que podem ter problemas */
-.bg-light {
-    background-color: #e9ecef !important;
-    color: #212529 !important;
-}
-
-.bg-white {
-    background-color: #ffffff !important;
-    color: #212529 !important;
-}
-</style>
 {% endblock %}

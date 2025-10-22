@@ -1,10 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Dashboard | TI OSN System{% endblock %}
-
-{% block head %}
-<!-- Dashboard specific styles -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-{% endblock %}
+{% block title %}Análises e SLA | TI OSN System{% endblock %}
 
 {% block content %}
 <!-- Dashboard Chart Data -->
@@ -24,67 +19,74 @@ window.dashboardChartData = {
     }
 };
 </script>
-<div class="container-fluid py-3">
 
-  <!-- Alertas Críticos -->
-  {% if session.get('is_admin') and (sla_vencidos > 0 or sla_criticos > 0) %}
-  <div class="alert alert-danger border-0 mb-4" role="alert">
-    <div class="d-flex align-items-center">
-      <i class="fas fa-exclamation-triangle me-2"></i>
-      <div class="flex-grow-1">
-        <strong>Atenção: Problemas de SLA Detectados!</strong>
-        {% if sla_vencidos > 0 %}<strong>{{ sla_vencidos }}</strong> chamado(s) com SLA vencido{% endif %}
-        {% if sla_vencidos > 0 and sla_criticos > 0 %} • {% endif %}
-        {% if sla_criticos > 0 %}<strong>{{ sla_criticos }}</strong> chamado(s) em situação crítica{% endif %}
+<div class="container-fluid py-4">
+  <!-- Hero Section - Análises e SLA -->
+  <div class="dashboard-hero-section mb-5">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <div class="d-flex align-items-center mb-3">
+          <div class="hero-icon-dash me-3">
+            <i class="fas fa-chart-bar fa-3x text-primary"></i>
+          </div>
+          <div>
+            <h1 class="mb-1 fw-bold">Análises e SLA</h1>
+            <p class="text-muted mb-0">Relatórios avançados e monitoramento de acordos de nível de serviço</p>
+          </div>
+        </div>
       </div>
-      <a href="#sla-section" class="btn btn-sm btn-light">Ver Detalhes</a>
+      <div class="col-lg-4 text-lg-end">
+        <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+          <a href="{{ url_for('main.dashboard', task_status='expired') }}" class="btn btn-sm btn-outline-danger">
+            <i class="fas fa-exclamation-circle me-1"></i>Vencidas
+          </a>
+          <a href="{{ url_for('main.dashboard', reminder_status='pending') }}" class="btn btn-sm btn-outline-warning">
+            <i class="fas fa-bell me-1"></i>Pendentes
+          </a>
+          <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
+            <i class="fas fa-filter me-1"></i>Filtros
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alertas Críticos de SLA -->
+  {% if session.get('is_admin') and (sla_vencidos > 0 or sla_criticos > 0) %}
+  <div class="alert alert-danger border-0 shadow-sm mb-5" role="alert">
+    <div class="d-flex align-items-start">
+      <div class="flex-shrink-0 me-3">
+        <div class="alert-icon-dash bg-danger bg-opacity-10 rounded-circle" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+          <i class="fas fa-exclamation-triangle fa-lg text-danger"></i>
+        </div>
+      </div>
+      <div class="flex-grow-1">
+        <h6 class="alert-heading fw-bold mb-2">⚠️ Atenção: Problemas de SLA Detectados!</h6>
+        <p class="mb-3 small">
+          {% if sla_vencidos > 0 %}<strong>{{ sla_vencidos }}</strong> chamado(s) com SLA vencido que precisam de atenção imediata{% endif %}
+          {% if sla_vencidos > 0 and sla_criticos > 0 %}<br>{% endif %}
+          {% if sla_criticos > 0 %}<strong>{{ sla_criticos }}</strong> chamado(s) em situação crítica (próximo ao vencimento){% endif %}
+        </p>
+        <a href="#sla-section" class="btn btn-danger btn-sm">
+          <i class="fas fa-list me-1"></i> Ver Detalhes de SLA
+        </a>
+      </div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
   </div>
   {% endif %}
 
-
-  <!-- Header e Filtros -->
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-        <div>
-          <h1 class="h3 mb-1">Dashboard</h1>
-          <p class="text-muted mb-0">Visão geral do sistema</p>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-          <!-- Filtros Rápidos -->
-          <div class="d-flex flex-wrap gap-1">
-            <a href="{{ url_for('main.dashboard', task_status='expired') }}" class="btn btn-outline-danger btn-sm">
-              <i class="fas fa-exclamation-circle me-1"></i>Tarefas Vencidas
-            </a>
-            <a href="{{ url_for('main.dashboard', reminder_status='pending') }}" class="btn btn-outline-warning btn-sm">
-              <i class="fas fa-bell me-1"></i>Lembretes Pendentes
-            </a>
-            <a href="{{ url_for('main.dashboard', chamado_status='Aberto') }}" class="btn btn-outline-info btn-sm">
-              <i class="fas fa-ticket-alt me-1"></i>Chamados Abertos
-            </a>
-          </div>
-          
-          <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
-            <i class="fas fa-filter me-1"></i>Filtros Avançados
-          </button>
-          <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-refresh me-1"></i>Limpar
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Filtros Avançados -->
-  <div class="collapse mb-4" id="advancedFilters">
-    <div class="card">
-      <div class="card-body">
-        <h6 class="card-title mb-3">Filtros Avançados</h6>
-        <form class="row g-3" method="get" action="">
+  <div class="collapse mb-5" id="advancedFilters">
+    <div class="card border-0 shadow-hover">
+      <div class="card-header border-0 py-4">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-sliders-h me-2 text-primary"></i>Filtros Avançados</h5>
+      </div>
+      <div class="card-body p-4">
+        <form class="row g-4" method="get" action="">
           <!-- Status Filters -->
           <div class="col-12">
-            <h6 class="text-muted small mb-2"><i class="fas fa-filter me-1"></i>Status</h6>
+            <h6 class="fw-bold mb-3"><i class="fas fa-filter me-2 text-secondary"></i>Filtrar por Status</h6>
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
             <label for="task_status" class="form-label small fw-bold">Tarefas</label>
@@ -115,8 +117,8 @@ window.dashboardChartData = {
           </div>
 
           <!-- Date Filters -->
-          <div class="col-12 mt-3">
-            <h6 class="text-muted small mb-2"><i class="fas fa-calendar me-1"></i>Período</h6>
+          <div class="col-12 mt-4">
+            <h6 class="fw-bold mb-3"><i class="fas fa-calendar me-2 text-secondary"></i>Filtrar por Período</h6>
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
             <label for="start_date" class="form-label small fw-bold">Data Inicial</label>
@@ -128,8 +130,8 @@ window.dashboardChartData = {
           </div>
 
           <!-- Organization Filters -->
-          <div class="col-12 mt-3">
-            <h6 class="text-muted small mb-2"><i class="fas fa-building me-1"></i>Organização</h6>
+          <div class="col-12 mt-4">
+            <h6 class="fw-bold mb-3"><i class="fas fa-building me-2 text-secondary"></i>Filtrar por Organização</h6>
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
             <label for="sector_id" class="form-label small fw-bold">Setor</label>
@@ -151,13 +153,12 @@ window.dashboardChartData = {
             </select>
           </div>
           {% endif %}
-          <div class="col-12 mt-3">
-            <hr class="my-3">
-            <h6 class="mb-3">Exportar Relatórios</h6>
+          <div class="col-12 mt-4 pt-4 border-top">
+            <h6 class="fw-bold mb-3"><i class="fas fa-file-export me-2 text-secondary"></i>Exportar Relatórios</h6>
             <div class="row g-3">
-              <div class="col-md-4">
+              <div class="col-lg-4 col-md-6">
                 <label for="export_type" class="form-label small fw-bold">Tipo de Relatório</label>
-                <select id="export_type" name="export_type" class="form-select form-select-sm">
+                <select id="export_type" name="export_type" class="form-select">
                   <option value="all" {% if request.args.get('export_type', 'all') == 'all' %}selected{% endif %}>Todos os Dados</option>
                   <option value="tasks" {% if request.args.get('export_type') == 'tasks' %}selected{% endif %}>Apenas Tarefas</option>
                   <option value="reminders" {% if request.args.get('export_type') == 'reminders' %}selected{% endif %}>Apenas Lembretes</option>
@@ -166,26 +167,26 @@ window.dashboardChartData = {
                   <option value="tutoriais" {% if request.args.get('export_type') == 'tutoriais' %}selected{% endif %}>Apenas Tutoriais</option>
                 </select>
               </div>
-              <div class="col-md-8">
+              <div class="col-lg-8 col-md-6">
                 <label class="form-label small fw-bold">Formato de Exportação</label>
-                <div class="d-flex gap-2 flex-wrap align-items-end">
-                  <button type="submit" formaction="{{ url_for('main.export_excel') }}" class="btn btn-success btn-sm">
-                    <i class="fas fa-file-excel me-1"></i> Exportar Excel
+                <div class="d-flex gap-2 flex-wrap">
+                  <button type="submit" formaction="{{ url_for('main.export_excel') }}" class="btn btn-success">
+                    <i class="fas fa-file-excel me-2"></i> Excel
                   </button>
-                  <button type="submit" formaction="{{ url_for('main.export_pdf') }}" class="btn btn-danger btn-sm">
-                    <i class="fas fa-file-pdf me-1"></i> Exportar PDF
+                  <button type="submit" formaction="{{ url_for('main.export_pdf') }}" class="btn btn-danger">
+                    <i class="fas fa-file-pdf me-2"></i> PDF
                   </button>
                 </div>
               </div>
             </div>
           </div>
-          <div class="col-12 mt-3">
+          <div class="col-12 mt-4">
             <div class="d-flex gap-2">
-              <button type="submit" class="btn btn-primary btn-sm">
-                <i class="fas fa-search me-1"></i> Aplicar Filtros
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search me-2"></i> Aplicar Filtros
               </button>
-              <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-times me-1"></i> Limpar Filtros
+              <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-2"></i> Limpar Filtros
               </a>
             </div>
           </div>
@@ -195,184 +196,262 @@ window.dashboardChartData = {
   </div>
 
   <!-- Cards Principais de Serviços -->
-  <div class="row g-3 mb-4">
+  <div class="section-header mb-4">
+    <h5 class="fw-bold mb-1"><i class="fas fa-th-large me-2 text-primary"></i>Visão Geral dos Serviços</h5>
+    <p class="text-muted small mb-0">Estatísticas consolidadas de todas as funcionalidades do sistema</p>
+  </div>
+
+  <div class="row g-4 mb-5">
     <!-- Tarefas -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-      <div class="card card-service h-100">
-        <div class="card-body">
+      <div class="card service-card border-0 h-100 shadow-hover">
+        <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-start mb-3">
-            <div>
-              <h6 class="card-title mb-1">Tarefas</h6>
+            <div class="flex-grow-1">
+              <div class="service-icon bg-primary bg-opacity-10 mb-3">
+                <i class="fas fa-tasks text-primary fa-2x"></i>
+              </div>
+              <h6 class="fw-bold mb-1">Tarefas</h6>
               <p class="text-muted small mb-0">Gerenciamento de atividades</p>
             </div>
-            <div class="bg-primary bg-opacity-10 p-2 rounded">
-              <i class="fas fa-tasks text-primary"></i>
-            </div>
           </div>
-          <h3 class="text-primary mb-3">{{ tasks_total }}</h3>
+          <h2 class="text-primary mb-3 fw-bold">{{ tasks_total }}</h2>
           <div class="service-stats">
-            <div class="d-flex justify-content-between small mb-1">
-              <span>Concluídas</span>
-              <span class="text-success fw-bold">{{ tasks_done }}</span>
+            <div class="d-flex justify-content-between align-items-center mb-2 py-2 px-3 bg-success bg-opacity-10 rounded">
+              <span class="small fw-medium">Concluídas</span>
+              <span class="badge bg-success">{{ tasks_done }}</span>
             </div>
-            <div class="d-flex justify-content-between small mb-1">
-              <span>Pendentes</span>
-              <span class="text-warning fw-bold">{{ tasks_pending }}</span>
+            <div class="d-flex justify-content-between align-items-center mb-2 py-2 px-3 bg-warning bg-opacity-10 rounded">
+              <span class="small fw-medium">Pendentes</span>
+              <span class="badge bg-warning">{{ tasks_pending }}</span>
             </div>
-            <div class="d-flex justify-content-between small">
-              <span>Vencidas</span>
-              <span class="text-danger fw-bold">{{ tasks_expired }}</span>
+            <div class="d-flex justify-content-between align-items-center py-2 px-3 bg-danger bg-opacity-10 rounded">
+              <span class="small fw-medium">Vencidas</span>
+              <span class="badge bg-danger">{{ tasks_expired }}</span>
             </div>
           </div>
+        </div>
+        <div class="card-footer bg-light border-0 p-3">
+          <a href="{{ url_for('main.tasks') }}" class="btn btn-sm btn-outline-primary w-100">
+            <i class="fas fa-arrow-right me-2"></i>Ver Tarefas
+          </a>
         </div>
       </div>
     </div>
 
     <!-- Lembretes -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-      <div class="card card-service h-100">
-        <div class="card-body">
+      <div class="card service-card border-0 h-100 shadow-hover">
+        <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-start mb-3">
-            <div>
-              <h6 class="card-title mb-1">Lembretes</h6>
+            <div class="flex-grow-1">
+              <div class="service-icon bg-warning bg-opacity-10 mb-3">
+                <i class="fas fa-bell text-warning fa-2x"></i>
+              </div>
+              <h6 class="fw-bold mb-1">Lembretes</h6>
               <p class="text-muted small mb-0">Notificações e alertas</p>
             </div>
-            <div class="bg-warning bg-opacity-10 p-2 rounded">
-              <i class="fas fa-bell text-warning"></i>
-            </div>
           </div>
-          <h3 class="text-warning mb-3">{{ reminders_total }}</h3>
+          <h2 class="text-warning mb-3 fw-bold">{{ reminders_total }}</h2>
           <div class="service-stats">
-            <div class="d-flex justify-content-between small mb-1">
-              <span>Realizados</span>
-              <span class="text-success fw-bold">{{ reminders_done }}</span>
+            <div class="d-flex justify-content-between align-items-center mb-2 py-2 px-3 bg-success bg-opacity-10 rounded">
+              <span class="small fw-medium">Realizados</span>
+              <span class="badge bg-success">{{ reminders_done }}</span>
             </div>
-            <div class="d-flex justify-content-between small">
-              <span>Pendentes</span>
-              <span class="text-warning fw-bold">{{ reminders_pending }}</span>
+            <div class="d-flex justify-content-between align-items-center py-2 px-3 bg-warning bg-opacity-10 rounded">
+              <span class="small fw-medium">Pendentes</span>
+              <span class="badge bg-warning">{{ reminders_pending }}</span>
             </div>
           </div>
+        </div>
+        <div class="card-footer bg-light border-0 p-3">
+          <a href="{{ url_for('main.reminders') }}" class="btn btn-sm btn-outline-warning w-100">
+            <i class="fas fa-arrow-right me-2"></i>Ver Lembretes
+          </a>
         </div>
       </div>
     </div>
 
     <!-- Chamados -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-      <div class="card card-service h-100">
-        <div class="card-body">
+      <div class="card service-card border-0 h-100 shadow-hover">
+        <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-start mb-3">
-            <div>
-              <h6 class="card-title mb-1">Chamados</h6>
+            <div class="flex-grow-1">
+              <div class="service-icon bg-info bg-opacity-10 mb-3">
+                <i class="fas fa-ticket-alt text-info fa-2x"></i>
+              </div>
+              <h6 class="fw-bold mb-1">Chamados</h6>
               <p class="text-muted small mb-0">Suporte e atendimento</p>
             </div>
-            <div class="bg-info bg-opacity-10 p-2 rounded">
-              <i class="fas fa-ticket-alt text-info"></i>
-            </div>
           </div>
-          <h3 class="text-info mb-3">{{ chamados_total }}</h3>
+          <h2 class="text-info mb-3 fw-bold">{{ chamados_total }}</h2>
           <div class="service-stats">
-            <div class="d-flex justify-content-between small mb-1">
-              <span>Abertos</span>
-              <span class="text-info fw-bold">{{ chamados_aberto }}</span>
+            <div class="d-flex justify-content-between align-items-center mb-2 py-2 px-3 bg-info bg-opacity-10 rounded">
+              <span class="small fw-medium">Abertos</span>
+              <span class="badge bg-info">{{ chamados_aberto }}</span>
             </div>
-            <div class="d-flex justify-content-between small mb-1">
-              <span>Andamento</span>
-              <span class="text-warning fw-bold">{{ chamados_em_andamento }}</span>
+            <div class="d-flex justify-content-between align-items-center mb-2 py-2 px-3 bg-warning bg-opacity-10 rounded">
+              <span class="small fw-medium">Andamento</span>
+              <span class="badge bg-warning">{{ chamados_em_andamento }}</span>
             </div>
-            <div class="d-flex justify-content-between small">
-              <span>Fechados</span>
-              <span class="text-success fw-bold">{{ chamados_fechado }}</span>
+            <div class="d-flex justify-content-between align-items-center py-2 px-3 bg-success bg-opacity-10 rounded">
+              <span class="small fw-medium">Fechados</span>
+              <span class="badge bg-success">{{ chamados_fechado }}</span>
             </div>
           </div>
+        </div>
+        <div class="card-footer bg-light border-0 p-3">
+          <a href="{{ url_for('main.listar_chamados') }}" class="btn btn-sm btn-outline-info w-100">
+            <i class="fas fa-arrow-right me-2"></i>Ver Chamados
+          </a>
         </div>
       </div>
     </div>
 
     <!-- Equipamentos -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-      <div class="card card-service h-100">
-        <div class="card-body">
+      <div class="card service-card border-0 h-100 shadow-hover">
+        <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-start mb-3">
-            <div>
-              <h6 class="card-title mb-1">Equipamentos</h6>
-              <p class="text-muted small mb-0">Controle de ativos</p>
-            </div>
-            <div class="bg-purple bg-opacity-10 p-2 rounded">
-              <i class="fas fa-laptop text-purple"></i>
+            <div class="flex-grow-1">
+              <div class="service-icon bg-purple mb-3">
+                <i class="fas fa-desktop text-white fa-2x"></i>
+              </div>
+              <h6 class="fw-bold mb-1">Equipamentos</h6>
+              <p class="text-muted small mb-0">Solicitações de Equipamentos</p>
             </div>
           </div>
-          <h3 class="text-purple mb-3">{{ equipamentos_total }}</h3>
+          <h2 class="text-purple mb-3 fw-bold">{{ equipamentos_total }}</h2>
           <div class="service-stats">
-            <div class="d-flex justify-content-between small mb-1">
-              <span>Solicitados</span>
-              <span class="text-warning fw-bold">{{ equipamentos_solicitados }}</span>
+            <div class="d-flex justify-content-between align-items-center mb-2 py-2 px-3 bg-warning bg-opacity-10 rounded">
+              <span class="small fw-medium">Solicitados</span>
+              <span class="badge bg-warning">{{ equipamentos_solicitados }}</span>
             </div>
-            <div class="d-flex justify-content-between small mb-1">
-              <span>Entregues</span>
-              <span class="text-success fw-bold">{{ equipamentos_entregues }}</span>
+            <div class="d-flex justify-content-between align-items-center mb-2 py-2 px-3 bg-success bg-opacity-10 rounded">
+              <span class="small fw-medium">Entregues</span>
+              <span class="badge bg-success">{{ equipamentos_entregues }}</span>
             </div>
-            <div class="d-flex justify-content-between small">
-              <span>Negados</span>
-              <span class="text-danger fw-bold">{{ equipamentos_negados }}</span>
+            <div class="d-flex justify-content-between align-items-center py-2 px-3 bg-danger bg-opacity-10 rounded">
+              <span class="small fw-medium">Negados</span>
+              <span class="badge bg-danger">{{ equipamentos_negados }}</span>
             </div>
           </div>
+        </div>
+        <div class="card-footer bg-light border-0 p-3">
+          <a href="{{ url_for('equipment_v2.catalog') }}" class="btn btn-sm btn-outline-secondary w-100">
+            <i class="fas fa-arrow-right me-2"></i>Ver Equipamentos
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventário de Equipamentos -->
+    <div class="col-xl-3 col-lg-4 col-md-6">
+      <div class="card service-card border-0 h-100 shadow-hover">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="flex-grow-1">
+              <div class="service-icon bg-secondary bg-opacity-10 mb-3">
+                <i class="fas fa-boxes text-secondary fa-2x"></i>
+              </div>
+              <h6 class="fw-bold mb-1">Inventário</h6>
+              <p class="text-muted small mb-0">Equipamentos cadastrados</p>
+            </div>
+          </div>
+          <h2 class="text-secondary mb-3 fw-bold">{{ inventory_total }}</h2>
+          <div class="service-stats small">
+            <div class="d-flex justify-content-between mb-1">
+              <span>Disponíveis</span>
+              <span class="text-success fw-bold">{{ inventory_disponiveis }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span>Emprestados</span>
+              <span class="text-warning fw-bold">{{ inventory_emprestados }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span>Manutenção</span>
+              <span class="text-danger fw-bold">{{ inventory_manutencao }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span>Danificados</span>
+              <span class="text-danger fw-bold">{{ inventory_danificados }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span>Perdidos</span>
+              <span class="text-danger fw-bold">{{ inventory_perdidos }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer bg-light border-0 p-3">
+          <a href="{{ url_for('equipment_v2.catalog') }}" class="btn btn-sm btn-outline-secondary w-100">
+            <i class="fas fa-arrow-right me-2"></i>Ver Inventário
+          </a>
         </div>
       </div>
     </div>
 
     <!-- Tutoriais -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-      <div class="card card-service h-100">
-        <div class="card-body">
+      <div class="card service-card border-0 h-100 shadow-hover">
+        <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-start mb-3">
-            <div>
-              <h6 class="card-title mb-1">Tutoriais</h6>
+            <div class="flex-grow-1">
+              <div class="service-icon bg-success bg-opacity-10 mb-3">
+                <i class="fas fa-book text-success fa-2x"></i>
+              </div>
+              <h6 class="fw-bold mb-1">Tutoriais</h6>
               <p class="text-muted small mb-0">Base de conhecimento</p>
             </div>
-            <div class="bg-success bg-opacity-10 p-2 rounded">
-              <i class="fas fa-book text-success"></i>
-            </div>
           </div>
-          <h3 class="text-success mb-3">{{ total_tutoriais }}</h3>
+          <h2 class="text-success mb-3 fw-bold">{{ total_tutoriais }}</h2>
           <div class="service-stats">
-            <div class="d-flex justify-content-between small mb-1">
-              <span>Feedbacks Úteis</span>
-              <span class="text-success fw-bold">{{ feedbacks_util }}</span>
+            <div class="d-flex justify-content-between align-items-center mb-2 py-2 px-3 bg-success bg-opacity-10 rounded">
+              <span class="small fw-medium">Feedbacks Úteis</span>
+              <span class="badge bg-success">{{ feedbacks_util }}</span>
             </div>
-            <div class="d-flex justify-content-between small">
-              <span>Feedbacks Negativos</span>
-              <span class="text-danger fw-bold">{{ feedbacks_nao_util }}</span>
+            <div class="d-flex justify-content-between align-items-center py-2 px-3 bg-danger bg-opacity-10 rounded">
+              <span class="small fw-medium">Feedbacks Negativos</span>
+              <span class="badge bg-danger">{{ feedbacks_nao_util }}</span>
             </div>
           </div>
+        </div>
+        <div class="card-footer bg-light border-0 p-3">
+          <a href="{{ url_for('main.listar_tutoriais') }}" class="btn btn-sm btn-outline-success w-100">
+            <i class="fas fa-arrow-right me-2"></i>Ver Tutoriais
+          </a>
         </div>
       </div>
     </div>
 
     <!-- Performance Geral -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-      <div class="card card-service h-100">
-        <div class="card-body">
+      <div class="card service-card border-0 h-100 shadow-hover bg-gradient-primary text-white">
+        <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-start mb-3">
-            <div>
-              <h6 class="card-title mb-1">Performance</h6>
-              <p class="text-muted small mb-0">Indicadores gerais</p>
-            </div>
-            <div class="bg-dark bg-opacity-10 p-2 rounded">
-              <i class="fas fa-chart-line text-dark"></i>
+            <div class="flex-grow-1">
+              <div class="service-icon bg-white bg-opacity-25 mb-3">
+                <i class="fas fa-chart-line text-white fa-2x"></i>
+              </div>
+              <h6 class="fw-bold mb-1 text-white">Performance Geral</h6>
+              <p class="text-white-50 small mb-0">Indicadores consolidados</p>
             </div>
           </div>
-          <h3 class="text-dark mb-3 performance-indicator">
-            {{ overall_performance }}%
-          </h3>
+          <h1 class="text-white mb-3 fw-bold display-4">{{ overall_performance }}%</h1>
           <div class="service-stats">
-            <div class="d-flex justify-content-between small mb-1">
-              <span>Total Atividades</span>
-              <span class="text-primary fw-bold">{{ tasks_total + reminders_total + chamados_total }}</span>
+            <div class="d-flex justify-content-between mb-2 text-white-50">
+              <span class="small">Total Atividades</span>
+              <span class="fw-bold text-white">{{ tasks_total + reminders_total + chamados_total }}</span>
             </div>
-            <div class="d-flex justify-content-between small">
-              <span>Concluídas</span>
-              <span class="text-success fw-bold">{{ tasks_done + reminders_done + chamados_fechado }}</span>
+            <div class="d-flex justify-content-between text-white-50">
+              <span class="small">Concluídas</span>
+              <span class="fw-bold text-white">{{ tasks_done + reminders_done + chamados_fechado }}</span>
             </div>
+          </div>
+        </div>
+        <div class="card-footer bg-white bg-opacity-10 border-0 p-3">
+          <div class="text-white-50 small text-center">
+            <i class="fas fa-info-circle me-1"></i>Taxa de conclusão do sistema
           </div>
         </div>
       </div>
@@ -380,16 +459,14 @@ window.dashboardChartData = {
 
     <!-- Ações Rápidas -->
     <div class="col-xl-3 col-lg-4 col-md-6">
-      <div class="card card-service h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <div>
-              <h6 class="card-title mb-1">Ações Rápidas</h6>
-              <p class="text-muted small mb-0">Acesso direto</p>
+      <div class="card service-card border-0 h-100 shadow-hover">
+        <div class="card-body p-4">
+          <div class="mb-3">
+            <div class="service-icon bg-warning bg-opacity-10 mb-3">
+              <i class="fas fa-bolt text-warning fa-2x"></i>
             </div>
-            <div class="bg-secondary bg-opacity-10 p-2 rounded">
-              <i class="fas fa-bolt text-secondary"></i>
-            </div>
+            <h6 class="fw-bold mb-1">Ações Rápidas</h6>
+            <p class="text-muted small mb-0">Acesso direto às funcionalidades</p>
           </div>
           <div class="d-grid gap-2">
             <a href="{{ url_for('main.tasks') }}" class="btn btn-outline-primary btn-sm">
@@ -401,7 +478,7 @@ window.dashboardChartData = {
             <a href="{{ url_for('main.abrir_chamado') }}" class="btn btn-outline-info btn-sm">
               <i class="fas fa-ticket-alt me-2"></i>Abrir Chamado
             </a>
-            <a href="{{ url_for('main.new_equipment_request') }}" class="btn btn-outline-success btn-sm">
+            <a href="{{ url_for('equipment_v2.catalog') }}" class="btn btn-outline-success btn-sm">
               <i class="fas fa-laptop me-2"></i>Solicitar Equipamento
             </a>
           </div>
@@ -411,11 +488,26 @@ window.dashboardChartData = {
   </div>
 
   <!-- Gráficos -->
-  <div class="row g-3 mb-4">
+  <div class="section-header mb-4">
+    <h5 class="fw-bold mb-1"><i class="fas fa-chart-bar me-2 text-primary"></i>Análises e Tendências</h5>
+    <p class="text-muted small mb-0">Visualização gráfica de dados e evolução temporal</p>
+  </div>
+
+  <div class="row g-4 mb-5">
     <div class="col-lg-6">
-      <div class="card">
+      <div class="card border-0 shadow-hover h-100">
+        <div class="card-header bg-white border-0 py-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <h6 class="mb-0 fw-bold">Evolução Mensal</h6>
+              <small class="text-muted">Acompanhamento temporal das atividades</small>
+            </div>
+            <div class="chart-icon bg-primary bg-opacity-10 rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+              <i class="fas fa-chart-line text-primary"></i>
+            </div>
+          </div>
+        </div>
         <div class="card-body">
-          <h6 class="card-title mb-3">Evolução Mensal</h6>
           <div style="height: 300px;">
             <canvas id="chartEvolution"></canvas>
           </div>
@@ -423,9 +515,19 @@ window.dashboardChartData = {
       </div>
     </div>
     <div class="col-lg-6">
-      <div class="card">
+      <div class="card border-0 shadow-hover h-100">
+        <div class="card-header bg-white border-0 py-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <h6 class="mb-0 fw-bold">Distribuição por Setor</h6>
+              <small class="text-muted">Análise organizacional das demandas</small>
+            </div>
+            <div class="chart-icon bg-info bg-opacity-10 rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+              <i class="fas fa-chart-pie text-info"></i>
+            </div>
+          </div>
+        </div>
         <div class="card-body">
-          <h6 class="card-title mb-3">Distribuição por Setor</h6>
           <div style="height: 300px;">
             <canvas id="chartSector"></canvas>
           </div>
@@ -436,63 +538,108 @@ window.dashboardChartData = {
 
   <!-- Seção SLA (Admin) -->
   {% if session.get('is_admin') %}
-  <div class="row mb-4" id="sla-section">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header bg-light">
-          <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-0">
-              <i class="fas fa-clock me-2"></i>Relatório de SLA
-            </h6>
-            <form method="get" action="{{ url_for('main.export_excel') }}" class="d-inline">
-              <input type="hidden" name="export_type" value="chamados">
-              <button type="submit" class="btn btn-success btn-sm">
-                <i class="fas fa-file-excel me-1"></i>Exportar SLA
-              </button>
-            </form>
+  <div class="section-header mb-4">
+    <h5 class="fw-bold mb-1"><i class="fas fa-clock me-2 text-danger"></i>Relatório de SLA</h5>
+    <p class="text-muted small mb-0">Monitoramento de prazos e acordos de nível de serviço</p>
+  </div>
+
+  <!-- Acordeão de SLA -->
+  <div class="accordion" id="slaAccordion">
+    
+    <!-- SLA de Chamados -->
+    <div class="accordion-item border-0 shadow-sm mb-3">
+      <h2 class="accordion-header" id="headingChamados">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseChamados" aria-expanded="false" aria-controls="collapseChamados">
+          <div class="d-flex align-items-center w-100">
+            <div class="flex-grow-1">
+              <i class="fas fa-shield-alt me-2 text-danger"></i>
+              <strong>Análise de SLA de Chamados</strong>
+              <small class="text-muted ms-2">• Indicadores de cumprimento de prazos de atendimento</small>
+            </div>
+            <div class="badge-group me-3">
+              <span class="badge bg-danger me-1">{{ sla_vencidos or 0 }} Vencidos</span>
+              <span class="badge bg-warning text-dark me-1">{{ sla_criticos or 0 }} Críticos</span>
+              <span class="badge bg-success">{{ sla_ok or 0 }} OK</span>
+            </div>
           </div>
-        </div>
-        <div class="card-body">
-          <div class="row g-3 mb-4">
+        </button>
+      </h2>
+      <div id="collapseChamados" class="accordion-collapse collapse" aria-labelledby="headingChamados" data-bs-parent="#slaAccordion">
+        <div class="accordion-body p-4">
+          <!-- Botões de Exportação -->
+          <div class="d-flex justify-content-end mb-4">
+            <div class="btn-group">
+              <form method="get" action="{{ url_for('main.export_excel') }}" class="d-inline">
+                <input type="hidden" name="export_type" value="chamados">
+                <button type="submit" class="btn btn-success btn-sm">
+                  <i class="fas fa-file-excel me-2"></i>Excel
+                </button>
+              </form>
+              <form method="get" action="{{ url_for('main.export_pdf') }}" class="d-inline">
+                <input type="hidden" name="export_type" value="chamados">
+                <button type="submit" class="btn btn-danger btn-sm">
+                  <i class="fas fa-file-pdf me-2"></i>PDF
+                </button>
+              </form>
+            </div>
+          </div>
+          <div class="row g-4 mb-4">
             <div class="col-md-3">
-              <div class="text-center p-3 border border-danger rounded">
-                <div class="text-danger h4 mb-1">{{ sla_vencidos or 0 }}</div>
-                <small class="text-muted">SLA Vencidos</small>
+              <div class="sla-metric-card text-center p-4 bg-danger bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-danger bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-exclamation-circle text-danger fa-lg"></i>
+                </div>
+                <h2 class="text-danger fw-bold mb-2">{{ sla_vencidos or 0 }}</h2>
+                <p class="text-muted small mb-0 fw-medium">SLA Vencidos</p>
               </div>
             </div>
             <div class="col-md-3">
-              <div class="text-center p-3 border border-warning rounded">
-                <div class="text-warning h4 mb-1">{{ sla_criticos or 0 }}</div>
-                <small class="text-muted">SLA Críticos</small>
+              <div class="sla-metric-card text-center p-4 bg-warning bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-warning bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-clock text-warning fa-lg"></i>
+                </div>
+                <h2 class="text-warning fw-bold mb-2">{{ sla_criticos or 0 }}</h2>
+                <p class="text-muted small mb-0 fw-medium">SLA Críticos</p>
               </div>
             </div>
             <div class="col-md-3">
-              <div class="text-center p-3 border border-success rounded">
-                <div class="text-success h4 mb-1">{{ sla_ok or 0 }}</div>
-                <small class="text-muted">SLA OK</small>
+              <div class="sla-metric-card text-center p-4 bg-success bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-success bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-check-circle text-success fa-lg"></i>
+                </div>
+                <h2 class="text-success fw-bold mb-2">{{ sla_ok or 0 }}</h2>
+                <p class="text-muted small mb-0 fw-medium">SLA OK</p>
               </div>
             </div>
             <div class="col-md-3">
-              <div class="text-center p-3 border border-primary rounded">
-                <div class="text-primary h4 mb-1">{{ performance_sla or 0 }}%</div>
-                <small class="text-muted">Performance SLA</small>
+              <div class="sla-metric-card text-center p-4 bg-primary bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-primary bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-chart-line text-primary fa-lg"></i>
+                </div>
+                <h2 class="text-primary fw-bold mb-2">{{ performance_sla or 0 }}%</h2>
+                <p class="text-muted small mb-0 fw-medium">Performance SLA</p>
               </div>
             </div>
           </div>
 
-          <!-- Tabela SLA Simplificada -->
-          <div class="mt-4">
-            <h6 class="mb-3">Chamados por Status de SLA</h6>
+          <!-- Tabela SLA Detalhada -->
+          <div class="mt-5 pt-4 border-top">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+              <div>
+                <h6 class="mb-1 fw-bold">Chamados por Status de SLA</h6>
+                <small class="text-muted">Listagem detalhada de todos os chamados com monitoramento de prazo</small>
+              </div>
+            </div>
             <div class="table-responsive">
-              <table class="table table-sm table-striped">
-                <thead>
+              <table class="table table-hover align-middle">
+                <thead class="table-light">
                   <tr>
-                    <th>ID</th>
-                    <th>Título</th>
-                    <th>Prioridade</th>
-                    <th>Status</th>
-                    <th>Prazo SLA</th>
-                    <th>Status SLA</th>
+                    <th class="fw-bold">ID</th>
+                    <th class="fw-bold">Título</th>
+                    <th class="fw-bold">Prioridade</th>
+                    <th class="fw-bold">Status</th>
+                    <th class="fw-bold">Prazo SLA</th>
+                    <th class="fw-bold">Status SLA</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -540,11 +687,662 @@ window.dashboardChartData = {
                 </tbody>
               </table>
             </div>
+            
+            <!-- Paginação SLA -->
+            {% if sla_pagination and sla_pagination.pages > 1 %}
+            <div class="mt-3 d-flex justify-content-between align-items-center">
+              <div class="text-muted small">
+                Exibindo {{ (sla_pagination.page - 1) * sla_pagination.per_page + 1 }} 
+                a {{ [sla_pagination.page * sla_pagination.per_page, sla_pagination.total]|min }} 
+                de {{ sla_pagination.total }} chamados
+              </div>
+              <nav aria-label="Navegação da tabela SLA">
+                <ul class="pagination pagination-sm mb-0">
+                  <!-- Botão Primeira Página -->
+                  <li class="page-item {% if not sla_pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', sla_page=1, **request.args) }}">
+                      <i class="fas fa-angle-double-left"></i>
+                    </a>
+                  </li>
+                  
+                  <!-- Botão Anterior -->
+                  <li class="page-item {% if not sla_pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', sla_page=sla_pagination.prev_num, **request.args) if sla_pagination.has_prev else '#' }}">
+                      <i class="fas fa-angle-left"></i>
+                    </a>
+                  </li>
+                  
+                  <!-- Números de Páginas -->
+                  {% set start_page = [1, sla_pagination.page - 2]|max %}
+                  {% set end_page = [sla_pagination.pages, sla_pagination.page + 2]|min %}
+                  
+                  {% if start_page > 1 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                  {% endif %}
+                  
+                  {% for page_num in range(start_page, end_page + 1) %}
+                    <li class="page-item {% if page_num == sla_pagination.page %}active{% endif %}">
+                      <a class="page-link" href="{{ url_for('main.dashboard', sla_page=page_num, **request.args) }}">
+                        {{ page_num }}
+                      </a>
+                    </li>
+                  {% endfor %}
+                  
+                  {% if end_page < sla_pagination.pages %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                  {% endif %}
+                  
+                  <!-- Botão Próximo -->
+                  <li class="page-item {% if not sla_pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', sla_page=sla_pagination.next_num, **request.args) if sla_pagination.has_next else '#' }}">
+                      <i class="fas fa-angle-right"></i>
+                    </a>
+                  </li>
+                  
+                  <!-- Botão Última Página -->
+                  <li class="page-item {% if not sla_pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', sla_page=sla_pagination.pages, **request.args) }}">
+                      <i class="fas fa-angle-double-right"></i>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+              
+              <!-- Seletor de itens por página -->
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  <i class="fas fa-list me-1"></i>{{ sla_pagination.per_page }} / página
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  {% for per_page in [5, 10, 20, 50] %}
+                    <li>
+                      <a class="dropdown-item {% if sla_pagination.per_page == per_page %}active{% endif %}" 
+                         href="{{ url_for('main.dashboard', sla_per_page=per_page, sla_page=1, **request.args) }}">
+                        {{ per_page }} por página
+                      </a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+            {% endif %}
           </div>
         </div>
       </div>
     </div>
+    <!-- Fim SLA de Chamados -->
+
+    <!-- SLA de Equipamentos -->
+    <div class="accordion-item border-0 shadow-sm mb-3">
+      <h2 class="accordion-header" id="headingEquipamentos">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEquipamentos" aria-expanded="false" aria-controls="collapseEquipamentos">
+          <div class="d-flex align-items-center w-100">
+            <div class="flex-grow-1">
+              <i class="fas fa-desktop me-2 text-purple"></i>
+              <strong>SLA de Equipamentos</strong>
+              <small class="text-muted ms-2">• Monitoramento de aprovação e entrega</small>
+            </div>
+            <div class="badge-group me-3">
+              <span class="badge bg-warning me-1">{{ equipamentos_pendentes_aprovacao|default(0) }} Pendentes</span>
+              <span class="badge bg-danger">{{ equipamentos_atraso_entrega|default(0) }} Atrasados</span>
+            </div>
+          </div>
+        </button>
+      </h2>
+      <div id="collapseEquipamentos" class="accordion-collapse collapse" aria-labelledby="headingEquipamentos" data-bs-parent="#slaAccordion">
+        <div class="accordion-body p-4">
+          <!-- Botões de Exportação -->
+          <div class="d-flex justify-content-end mb-4">
+            <div class="btn-group">
+              <form method="get" action="{{ url_for('main.export_excel') }}" class="d-inline">
+                <input type="hidden" name="export_type" value="equipamentos">
+                <button type="submit" class="btn btn-success btn-sm">
+                  <i class="fas fa-file-excel me-2"></i>Excel
+                </button>
+              </form>
+              <form method="get" action="{{ url_for('main.export_pdf') }}" class="d-inline">
+                <input type="hidden" name="export_type" value="equipamentos">
+                <button type="submit" class="btn btn-danger btn-sm">
+                  <i class="fas fa-file-pdf me-2"></i>PDF
+                </button>
+              </form>
+            </div>
+          </div>
+          <!-- Cards de Métricas de Equipamentos -->
+          <div class="row g-4 mb-4">
+            <div class="col-md-3">
+              <div class="sla-metric-card text-center p-4 bg-warning bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-warning bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-clock text-warning fa-lg"></i>
+                </div>
+                <h2 class="text-warning fw-bold mb-2">{{ equipamento_sla_aprovacao_media|default('N/A') }}</h2>
+                <p class="text-muted small mb-0 fw-medium">Tempo Médio Aprovação</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="sla-metric-card text-center p-4 bg-success bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-success bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-shipping-fast text-success fa-lg"></i>
+                </div>
+                <h2 class="text-success fw-bold mb-2">{{ equipamento_sla_entrega_media|default('N/A') }}</h2>
+                <p class="text-muted small mb-0 fw-medium">Tempo Médio Entrega</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="sla-metric-card text-center p-4 bg-info bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-info bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-hourglass-half text-info fa-lg"></i>
+                </div>
+                <h2 class="text-info fw-bold mb-2">{{ equipamentos_pendentes_aprovacao|default(0) }}</h2>
+                <p class="text-muted small mb-0 fw-medium">Pendentes Aprovação</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="sla-metric-card text-center p-4 bg-danger bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-danger bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-exclamation-triangle text-danger fa-lg"></i>
+                </div>
+                <h2 class="text-danger fw-bold mb-2">{{ equipamentos_atraso_entrega|default(0) }}</h2>
+                <p class="text-muted small mb-0 fw-medium">Atrasados na Entrega</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Informação de Meta -->
+          <div class="alert alert-info border-0 mb-4">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Metas de SLA:</strong> Aprovação em 24h • Entrega em 48h após aprovação
+          </div>
+
+          <!-- Tabela Detalhada de Equipamentos -->
+          <div class="mt-5 pt-4 border-top">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+              <div>
+                <h6 class="mb-1 fw-bold">Equipamentos por Status de SLA</h6>
+                <small class="text-muted">Listagem detalhada de solicitações com monitoramento de prazo</small>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th class="fw-bold">ID</th>
+                    <th class="fw-bold">Descrição</th>
+                    <th class="fw-bold">Solicitante</th>
+                    <th class="fw-bold">Status</th>
+                    <th class="fw-bold">Data Solicitação</th>
+                    <th class="fw-bold">SLA Aprovação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if equipamentos_sla_list %}
+                    {% for eq in equipamentos_sla_list %}
+                    <tr>
+                      <td><strong>#{{ eq.id }}</strong></td>
+                      <td>
+                        <div class="text-truncate" style="max-width: 250px;" title="{{ eq.descricao }}">
+                          {{ eq.descricao }}
+                        </div>
+                      </td>
+                      <td>{{ eq.solicitante }}</td>
+                      <td>
+                        <span class="badge bg-{{ 'success' if eq.status == 'Entregue' else ('primary' if eq.status == 'Aprovado' else 'warning') }}">
+                          {{ eq.status }}
+                        </span>
+                      </td>
+                      <td>{{ eq.data_solicitacao.strftime('%d/%m/%Y %H:%M') }}</td>
+                      <td>
+                        {% if eq.status_sla == 'vencido' %}
+                          <span class="badge bg-danger">Vencido</span>
+                        {% elif eq.status_sla == 'critico' %}
+                          <span class="badge bg-warning text-dark">Crítico</span>
+                        {% elif eq.status_sla == 'ok' %}
+                          <span class="badge bg-success">OK</span>
+                        {% else %}
+                          <span class="badge bg-secondary">Concluído</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr>
+                      <td colspan="6" class="text-center text-muted py-5">
+                        <i class="fas fa-inbox fa-3x mb-3 d-block opacity-25"></i>
+                        <p class="mb-0">Nenhum equipamento solicitado no momento</p>
+                      </td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Paginação de Equipamentos -->
+            {% if equipamentos_sla_pagination and equipamentos_sla_pagination.pages > 1 %}
+            <div class="mt-3 d-flex justify-content-between align-items-center">
+              <div class="text-muted small">
+                Exibindo {{ (equipamentos_sla_pagination.page - 1) * equipamentos_sla_pagination.per_page + 1 }} 
+                a {{ [equipamentos_sla_pagination.page * equipamentos_sla_pagination.per_page, equipamentos_sla_pagination.total]|min }} 
+                de {{ equipamentos_sla_pagination.total }} equipamentos
+              </div>
+              <nav aria-label="Navegação da tabela">
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item {% if not equipamentos_sla_pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', equipamentos_page=1, **request.args) }}">
+                      <i class="fas fa-angle-double-left"></i>
+                    </a>
+                  </li>
+                  <li class="page-item {% if not equipamentos_sla_pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', equipamentos_page=equipamentos_sla_pagination.prev_num, **request.args) if equipamentos_sla_pagination.has_prev else '#' }}">
+                      <i class="fas fa-angle-left"></i>
+                    </a>
+                  </li>
+                  {% for page_num in range(1, equipamentos_sla_pagination.pages + 1) %}
+                    {% if page_num <= 3 or page_num > equipamentos_sla_pagination.pages - 3 or (page_num >= equipamentos_sla_pagination.page - 1 and page_num <= equipamentos_sla_pagination.page + 1) %}
+                      <li class="page-item {% if page_num == equipamentos_sla_pagination.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('main.dashboard', equipamentos_page=page_num, **request.args) }}">{{ page_num }}</a>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                  <li class="page-item {% if not equipamentos_sla_pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', equipamentos_page=equipamentos_sla_pagination.next_num, **request.args) if equipamentos_sla_pagination.has_next else '#' }}">
+                      <i class="fas fa-angle-right"></i>
+                    </a>
+                  </li>
+                  <li class="page-item {% if not equipamentos_sla_pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', equipamentos_page=equipamentos_sla_pagination.pages, **request.args) }}">
+                      <i class="fas fa-angle-double-right"></i>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Fim SLA de Equipamentos -->
+
+    <!-- SLA de Tarefas -->
+    <div class="accordion-item border-0 shadow-sm mb-3">
+      <h2 class="accordion-header" id="headingTarefas">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTarefas" aria-expanded="false" aria-controls="collapseTarefas">
+          <div class="d-flex align-items-center w-100">
+            <div class="flex-grow-1">
+              <i class="fas fa-tasks me-2 text-primary"></i>
+              <strong>SLA de Tarefas</strong>
+              <small class="text-muted ms-2">• Monitoramento de cumprimento de prazos</small>
+            </div>
+            <div class="badge-group me-3">
+              <span class="badge bg-success me-1">{{ tasks_done }} Concluídas</span>
+              <span class="badge bg-warning text-dark me-1">{{ tasks_pending }} Pendentes</span>
+              <span class="badge bg-danger">{{ tasks_expired }} Vencidas</span>
+            </div>
+          </div>
+        </button>
+      </h2>
+      <div id="collapseTarefas" class="accordion-collapse collapse" aria-labelledby="headingTarefas" data-bs-parent="#slaAccordion">
+        <div class="accordion-body p-4">
+          <!-- Botões de Exportação -->
+          <div class="d-flex justify-content-end mb-4">
+            <div class="btn-group">
+              <form method="get" action="{{ url_for('main.export_excel') }}" class="d-inline">
+                <input type="hidden" name="export_type" value="tasks">
+                <button type="submit" class="btn btn-success btn-sm">
+                  <i class="fas fa-file-excel me-2"></i>Excel
+                </button>
+              </form>
+              <form method="get" action="{{ url_for('main.export_pdf') }}" class="d-inline">
+                <input type="hidden" name="export_type" value="tasks">
+                <button type="submit" class="btn btn-danger btn-sm">
+                  <i class="fas fa-file-pdf me-2"></i>PDF
+                </button>
+              </form>
+            </div>
+          </div>
+          <!-- Cards de Métricas de Tarefas -->
+          <div class="row g-4 mb-4">
+            <div class="col-md-3">
+              <div class="sla-metric-card text-center p-4 bg-primary bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-primary bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-percentage text-primary fa-lg"></i>
+                </div>
+                <h2 class="text-primary fw-bold mb-2">{{ tarefas_sla_percent|default(0) }}%</h2>
+                <p class="text-muted small mb-0 fw-medium">Taxa Conclusão no Prazo</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="sla-metric-card text-center p-4 bg-success bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-success bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-check-circle text-success fa-lg"></i>
+                </div>
+                <h2 class="text-success fw-bold mb-2">{{ tasks_done }}</h2>
+                <p class="text-muted small mb-0 fw-medium">Concluídas no Prazo</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="sla-metric-card text-center p-4 bg-warning bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-warning bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-clock text-warning fa-lg"></i>
+                </div>
+                <h2 class="text-warning fw-bold mb-2">{{ tasks_pending }}</h2>
+                <p class="text-muted small mb-0 fw-medium">Pendentes</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="sla-metric-card text-center p-4 bg-danger bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-danger bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-exclamation-triangle text-danger fa-lg"></i>
+                </div>
+                <h2 class="text-danger fw-bold mb-2">{{ tasks_expired }}</h2>
+                <p class="text-muted small mb-0 fw-medium">Vencidas</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Informação de Meta -->
+          <div class="alert alert-info border-0 mb-4">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Meta de SLA:</strong> 85% de conclusão no prazo • Tempo médio: {{ tarefas_tempo_medio|default('N/A') }}
+          </div>
+
+          <!-- Tabela Detalhada de Tarefas -->
+          <div class="mt-5 pt-4 border-top">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+              <div>
+                <h6 class="mb-1 fw-bold">Tarefas por Status de SLA</h6>
+                <small class="text-muted">Listagem detalhada de tarefas com monitoramento de prazo</small>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th class="fw-bold">ID</th>
+                    <th class="fw-bold">Descrição</th>
+                    <th class="fw-bold">Responsável</th>
+                    <th class="fw-bold">Data</th>
+                    <th class="fw-bold">Setor</th>
+                    <th class="fw-bold">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if tarefas_sla_list %}
+                    {% for task in tarefas_sla_list %}
+                    <tr>
+                      <td><strong>#{{ task.id }}</strong></td>
+                      <td>
+                        <div class="text-truncate" style="max-width: 300px;" title="{{ task.descricao }}">
+                          {{ task.descricao }}
+                        </div>
+                      </td>
+                      <td>{{ task.responsavel }}</td>
+                      <td>{{ task.data.strftime('%d/%m/%Y') }}</td>
+                      <td>{{ task.setor }}</td>
+                      <td>
+                        {% if task.completed %}
+                          <span class="badge bg-success">Concluída</span>
+                        {% elif task.status == 'vencida' %}
+                          <span class="badge bg-danger">Vencida</span>
+                        {% elif task.status == 'critica' %}
+                          <span class="badge bg-warning text-dark">Crítica</span>
+                        {% else %}
+                          <span class="badge bg-primary">Pendente</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr>
+                      <td colspan="6" class="text-center text-muted py-5">
+                        <i class="fas fa-inbox fa-3x mb-3 d-block opacity-25"></i>
+                        <p class="mb-0">Nenhuma tarefa cadastrada no momento</p>
+                      </td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Paginação de Tarefas -->
+            {% if tarefas_sla_pagination and tarefas_sla_pagination.pages > 1 %}
+            <div class="mt-3 d-flex justify-content-between align-items-center">
+              <div class="text-muted small">
+                Exibindo {{ (tarefas_sla_pagination.page - 1) * tarefas_sla_pagination.per_page + 1 }} 
+                a {{ [tarefas_sla_pagination.page * tarefas_sla_pagination.per_page, tarefas_sla_pagination.total]|min }} 
+                de {{ tarefas_sla_pagination.total }} tarefas
+              </div>
+              <nav aria-label="Navegação da tabela">
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item {% if not tarefas_sla_pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', tarefas_page=1, **request.args) }}">
+                      <i class="fas fa-angle-double-left"></i>
+                    </a>
+                  </li>
+                  <li class="page-item {% if not tarefas_sla_pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', tarefas_page=tarefas_sla_pagination.prev_num, **request.args) if tarefas_sla_pagination.has_prev else '#' }}">
+                      <i class="fas fa-angle-left"></i>
+                    </a>
+                  </li>
+                  {% for page_num in range(1, tarefas_sla_pagination.pages + 1) %}
+                    {% if page_num <= 3 or page_num > tarefas_sla_pagination.pages - 3 or (page_num >= tarefas_sla_pagination.page - 1 and page_num <= tarefas_sla_pagination.page + 1) %}
+                      <li class="page-item {% if page_num == tarefas_sla_pagination.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('main.dashboard', tarefas_page=page_num, **request.args) }}">{{ page_num }}</a>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                  <li class="page-item {% if not tarefas_sla_pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', tarefas_page=tarefas_sla_pagination.next_num, **request.args) if tarefas_sla_pagination.has_next else '#' }}">
+                      <i class="fas fa-angle-right"></i>
+                    </a>
+                  </li>
+                  <li class="page-item {% if not tarefas_sla_pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', tarefas_page=tarefas_sla_pagination.pages, **request.args) }}">
+                      <i class="fas fa-angle-double-right"></i>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Fim SLA de Tarefas -->
+
+    <!-- SLA de Lembretes -->
+    <div class="accordion-item border-0 shadow-sm mb-3">
+      <h2 class="accordion-header" id="headingLembretes">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLembretes" aria-expanded="false" aria-controls="collapseLembretes">
+          <div class="d-flex align-items-center w-100">
+            <div class="flex-grow-1">
+              <i class="fas fa-bell me-2 text-warning"></i>
+              <strong>SLA de Lembretes</strong>
+              <small class="text-muted ms-2">• Monitoramento de realização no prazo</small>
+            </div>
+            <div class="badge-group me-3">
+              <span class="badge bg-success me-1">{{ reminders_done }} Realizados</span>
+              <span class="badge bg-info me-1">{{ reminders_pending }} Pendentes</span>
+              <span class="badge bg-danger">{{ lembretes_vencendo_hoje|default(0) }} Hoje</span>
+            </div>
+          </div>
+        </button>
+      </h2>
+      <div id="collapseLembretes" class="accordion-collapse collapse" aria-labelledby="headingLembretes" data-bs-parent="#slaAccordion">
+        <div class="accordion-body p-4">
+          <!-- Botões de Exportação -->
+          <div class="d-flex justify-content-end mb-4">
+            <div class="btn-group">
+              <form method="get" action="{{ url_for('main.export_excel') }}" class="d-inline">
+                <input type="hidden" name="export_type" value="reminders">
+                <button type="submit" class="btn btn-success btn-sm">
+                  <i class="fas fa-file-excel me-2"></i>Excel
+                </button>
+              </form>
+              <form method="get" action="{{ url_for('main.export_pdf') }}" class="d-inline">
+                <input type="hidden" name="export_type" value="reminders">
+                <button type="submit" class="btn btn-danger btn-sm">
+                  <i class="fas fa-file-pdf me-2"></i>PDF
+                </button>
+              </form>
+            </div>
+          </div>
+          <!-- Cards de Métricas de Lembretes -->
+          <div class="row g-4 mb-4">
+            <div class="col-md-3">
+              <div class="sla-metric-card text-center p-4 bg-warning bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-warning bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-percentage text-warning fa-lg"></i>
+                </div>
+                <h2 class="text-warning fw-bold mb-2">{{ lembretes_sla_percent|default(0) }}%</h2>
+                <p class="text-muted small mb-0 fw-medium">Taxa Realização no Prazo</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="sla-metric-card text-center p-4 bg-success bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-success bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-check-circle text-success fa-lg"></i>
+                </div>
+                <h2 class="text-success fw-bold mb-2">{{ reminders_done }}</h2>
+                <p class="text-muted small mb-0 fw-medium">Realizados</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="sla-metric-card text-center p-4 bg-info bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-info bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-clock text-info fa-lg"></i>
+                </div>
+                <h2 class="text-info fw-bold mb-2">{{ reminders_pending }}</h2>
+                <p class="text-muted small mb-0 fw-medium">Pendentes</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="sla-metric-card text-center p-4 bg-danger bg-opacity-10 border-0 rounded-3 shadow-sm">
+                <div class="sla-icon bg-danger bg-opacity-25 rounded-circle mx-auto mb-3" style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-exclamation-triangle text-danger fa-lg"></i>
+                </div>
+                <h2 class="text-danger fw-bold mb-2">{{ lembretes_vencendo_hoje|default(0) }}</h2>
+                <p class="text-muted small mb-0 fw-medium">Vencendo Hoje</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Informação de Meta -->
+          <div class="alert alert-info border-0 mb-4">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Meta de SLA:</strong> 90% de realização antes do vencimento
+          </div>
+
+          <!-- Tabela Detalhada de Lembretes -->
+          <div class="mt-5 pt-4 border-top">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+              <div>
+                <h6 class="mb-1 fw-bold">Lembretes por Status de SLA</h6>
+                <small class="text-muted">Listagem detalhada de lembretes com monitoramento de prazo</small>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th class="fw-bold">ID</th>
+                    <th class="fw-bold">Nome</th>
+                    <th class="fw-bold">Tipo</th>
+                    <th class="fw-bold">Responsável</th>
+                    <th class="fw-bold">Data Vencimento</th>
+                    <th class="fw-bold">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if lembretes_sla_list %}
+                    {% for lembrete in lembretes_sla_list %}
+                    <tr>
+                      <td><strong>#{{ lembrete.id }}</strong></td>
+                      <td>
+                        <div class="text-truncate" style="max-width: 250px;" title="{{ lembrete.nome }}">
+                          {{ lembrete.nome }}
+                        </div>
+                      </td>
+                      <td><span class="badge bg-info">{{ lembrete.tipo }}</span></td>
+                      <td>{{ lembrete.responsavel }}</td>
+                      <td>{{ lembrete.due_date.strftime('%d/%m/%Y') }}</td>
+                      <td>
+                        {% if lembrete.completed %}
+                          <span class="badge bg-success">Realizado</span>
+                        {% elif lembrete.status == 'vencido' %}
+                          <span class="badge bg-danger">Vencido</span>
+                        {% elif lembrete.status == 'hoje' %}
+                          <span class="badge bg-warning text-dark">Vence Hoje</span>
+                        {% elif lembrete.status == 'proximo' %}
+                          <span class="badge bg-warning">Próximo</span>
+                        {% else %}
+                          <span class="badge bg-primary">Pendente</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr>
+                      <td colspan="6" class="text-center text-muted py-5">
+                        <i class="fas fa-inbox fa-3x mb-3 d-block opacity-25"></i>
+                        <p class="mb-0">Nenhum lembrete cadastrado no momento</p>
+                      </td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Paginação de Lembretes -->
+            {% if lembretes_sla_pagination and lembretes_sla_pagination.pages > 1 %}
+            <div class="mt-3 d-flex justify-content-between align-items-center">
+              <div class="text-muted small">
+                Exibindo {{ (lembretes_sla_pagination.page - 1) * lembretes_sla_pagination.per_page + 1 }} 
+                a {{ [lembretes_sla_pagination.page * lembretes_sla_pagination.per_page, lembretes_sla_pagination.total]|min }} 
+                de {{ lembretes_sla_pagination.total }} lembretes
+              </div>
+              <nav aria-label="Navegação da tabela">
+                <ul class="pagination pagination-sm mb-0">
+                  <li class="page-item {% if not lembretes_sla_pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', lembretes_page=1, **request.args) }}">
+                      <i class="fas fa-angle-double-left"></i>
+                    </a>
+                  </li>
+                  <li class="page-item {% if not lembretes_sla_pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', lembretes_page=lembretes_sla_pagination.prev_num, **request.args) if lembretes_sla_pagination.has_prev else '#' }}">
+                      <i class="fas fa-angle-left"></i>
+                    </a>
+                  </li>
+                  {% for page_num in range(1, lembretes_sla_pagination.pages + 1) %}
+                    {% if page_num <= 3 or page_num > lembretes_sla_pagination.pages - 3 or (page_num >= lembretes_sla_pagination.page - 1 and page_num <= lembretes_sla_pagination.page + 1) %}
+                      <li class="page-item {% if page_num == lembretes_sla_pagination.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('main.dashboard', lembretes_page=page_num, **request.args) }}">{{ page_num }}</a>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                  <li class="page-item {% if not lembretes_sla_pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', lembretes_page=lembretes_sla_pagination.next_num, **request.args) if lembretes_sla_pagination.has_next else '#' }}">
+                      <i class="fas fa-angle-right"></i>
+                    </a>
+                  </li>
+                  <li class="page-item {% if not lembretes_sla_pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('main.dashboard', lembretes_page=lembretes_sla_pagination.pages, **request.args) }}">
+                      <i class="fas fa-angle-double-right"></i>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Fim SLA de Lembretes -->
+
   </div>
+  <!-- Fim do Acordeão de SLA -->
   {% endif %}
 
 </div>
@@ -556,4 +1354,552 @@ window.dashboardChartData = {
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- Dashboard charts -->
 <script src="{{ url_for('static', filename='js/dashboard-charts.js') }}"></script>
+
+<style>
+/* ============================================
+   MODERN PROFESSIONAL DASHBOARD STYLES
+   ============================================ */
+
+/* Hero Section */
+.dashboard-hero-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.hero-icon-dash {
+    animation: fadeInDash 0.5s ease-in;
+}
+
+@keyframes fadeInDash {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Section Headers */
+.section-header h5 {
+    position: relative;
+    display: inline-block;
+}
+
+.section-header h5::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, #0d6efd 0%, rgba(13, 110, 253, 0.3) 100%);
+    border-radius: 10px;
+}
+
+/* Alert Icon Dashboard */
+.alert-icon-dash {
+    animation: pulseAlert 2s ease-in-out infinite;
+}
+
+@keyframes pulseAlert {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Service Cards */
+.service-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--bs-primary) 0%, var(--bs-info) 100%);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+}
+
+.service-card:hover::before {
+    transform: scaleX(1);
+}
+
+.service-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.service-card:hover .service-icon {
+    transform: scale(1.1) rotate(-5deg);
+}
+
+/* Shadow Hover Effect */
+.shadow-hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shadow-hover:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Purple Color */
+.text-purple {
+    color: #6f42c1 !important;
+}
+
+.bg-purple {
+    background-color: #6f42c1 !important;
+}
+
+/* Gradient Primary */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+}
+
+/* SLA Metric Cards */
+.sla-metric-card {
+    transition: all 0.3s ease;
+}
+
+.sla-metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12) !important;
+}
+
+.sla-icon {
+    transition: all 0.3s ease;
+}
+
+.sla-metric-card:hover .sla-icon {
+    transform: scale(1.1) rotate(10deg);
+}
+
+/* ============================================
+   ESTILOS CUSTOMIZADOS PARA ACORDEÃO DE SLA
+   ============================================ */
+
+/* Acordeão Container */
+#slaAccordion {
+    margin-bottom: 2rem;
+}
+
+/* Accordion Item */
+.accordion-item {
+    background: #ffffff;
+    border: none !important;
+    margin-bottom: 1rem;
+    border-radius: 12px !important;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Accordion Header */
+.accordion-header {
+    background: transparent;
+}
+
+/* Accordion Button */
+.accordion-button {
+    background-color: #f8f9fa;
+    border: none;
+    padding: 1.25rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #212529;
+    transition: all 0.3s ease;
+    box-shadow: none !important;
+}
+
+.accordion-button:not(.collapsed) {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #0d6efd;
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.125);
+}
+
+.accordion-button:hover {
+    background-color: #e9ecef;
+}
+
+.accordion-button::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%230d6efd'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    transition: transform 0.3s ease;
+    width: 1.5rem;
+    height: 1.5rem;
+    background-size: 1.5rem;
+}
+
+.accordion-button:not(.collapsed)::after {
+    transform: rotate(-180deg);
+}
+
+/* Badge Group no Header */
+.accordion-button .badge-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.accordion-button .badge {
+    font-size: 0.7rem;
+    padding: 0.35rem 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+}
+
+.accordion-button:hover .badge {
+    transform: scale(1.05);
+}
+
+/* Accordion Body */
+.accordion-collapse {
+    transition: all 0.3s ease-in-out;
+}
+
+.accordion-body {
+    background-color: #ffffff;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Animação de Entrada do Conteúdo */
+.accordion-collapse.show .accordion-body {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ícones no Header do Acordeão */
+.accordion-button i.fas {
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.accordion-button:not(.collapsed) i.fas {
+    transform: scale(1.1);
+}
+
+/* Responsividade do Acordeão */
+@media (max-width: 768px) {
+    .accordion-button {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .accordion-button .badge-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .accordion-button small {
+        display: block;
+        margin-top: 0.25rem;
+    }
+}
+
+/* Efeito de Foco no Acordeão */
+.accordion-button:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+}
+
+/* Chart Cards */
+.chart-icon {
+    transition: all 0.3s ease;
+}
+
+.card:hover .chart-icon {
+    transform: scale(1.1);
+}
+
+/* Table Improvements */
+.table-hover tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+    transform: scale(1.01);
+}
+
+/* Badge Enhancements */
+.badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+/* Button Enhancements */
+.btn {
+    border-radius: 8px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
+}
+
+/* Card Enhancements */
+.card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.card-footer {
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+/* Form Controls */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+/* Pagination */
+.pagination .page-link {
+    border-radius: 6px;
+    margin: 0 2px;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.pagination .page-link:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-color: #0d6efd;
+    transform: translateY(-2px);
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    border-color: #0d6efd;
+}
+
+/* Dropdown Enhancements */
+.dropdown-menu {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    padding: 0.5rem;
+}
+
+.dropdown-item {
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+    transform: translateX(5px);
+}
+
+.dropdown-item.active {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .dashboard-hero-section {
+        padding: 1.5rem;
+    }
+    
+    .service-card {
+        margin-bottom: 1rem;
+    }
+    
+    .section-header h5 {
+        font-size: 1.1rem;
+    }
+    
+    .sla-metric-card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Smooth Transitions */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* Alert Enhancements */
+.alert {
+    border-radius: 12px;
+}
+
+.alert .btn-close {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.alert .btn-close:hover {
+    opacity: 1;
+}
+</style>
+
+<script>
+// ============================================
+// FUNCIONALIDADES DO ACORDEÃO DE SLA
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Selecionar todos os botões do acordeão
+    const accordionButtons = document.querySelectorAll('#slaAccordion .accordion-button');
+    
+    // Adicionar listener para cada botão
+    accordionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Adicionar pequeno delay para animação suave
+            setTimeout(() => {
+                // Se o botão não está colapsado (foi expandido)
+                if (!this.classList.contains('collapsed')) {
+                    // Scroll suave até o item expandido
+                    const accordionItem = this.closest('.accordion-item');
+                    const offset = 100; // Offset do topo
+                    const elementPosition = accordionItem.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+                    
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 100);
+        });
+    });
+    
+    // Adicionar animação de entrada aos cards quando o acordeão é expandido
+    const accordionCollapses = document.querySelectorAll('#slaAccordion .accordion-collapse');
+    
+    accordionCollapses.forEach(collapse => {
+        collapse.addEventListener('shown.bs.collapse', function() {
+            // Animar os cards dentro do acordeão
+            const cards = this.querySelectorAll('.sla-metric-card, .table-responsive');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(10px)';
+                    
+                    requestAnimationFrame(() => {
+                        card.style.transition = 'all 0.3s ease';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    });
+                }, index * 50);
+            });
+        });
+    });
+    
+    // Adicionar contadores animados nos badges do header
+    function animateCounter(element, target) {
+        let current = 0;
+        const increment = target / 20;
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                element.textContent = target;
+                clearInterval(timer);
+            } else {
+                element.textContent = Math.floor(current);
+            }
+        }, 30);
+    }
+    
+    // Observar quando os acordeões entram no viewport
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '0';
+                entry.target.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    entry.target.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }, 100);
+                
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    // Observar todos os itens do acordeão
+    const accordionItems = document.querySelectorAll('#slaAccordion .accordion-item');
+    accordionItems.forEach(item => {
+        observer.observe(item);
+    });
+});
+</script>
 {% endblock %}

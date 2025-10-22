@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt_BR" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Oézios Normando - Equipe TI OSN" /><link rel="canonical" href="http://192.168.1.86:5000/docs/admin-guide/equipment-admin/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Equipamentos - TI OSN System - Documentação Oficial</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Equipamentos";
+        var mkdocs_page_input_path = "admin-guide\\equipment-admin.md";
+        var mkdocs_page_url = "/docs/admin-guide/equipment-admin/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> TI OSN System - Documentação Oficial
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Início</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Usuário</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/overview/">Visão Geral</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/reminders/">Lembretes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/chamados/">Chamados</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/tasks/">Tarefas</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/tutorials/">Tutoriais</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/equipment/">Equipamentos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/dashboard/">Dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/rfid/">Sistema RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/satisfaction/">Avaliação de Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/certifications/">Certificações</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/performance/">Performance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Administrador</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Equipamentos</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#visao-geral-administrativa">🎯 Visão Geral Administrativa</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#gestao-do-inventario">🏗️ Gestão do Inventário</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#cadastrando-equipamentos">Cadastrando Equipamentos</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#importacao-em-massa">Importação em Massa</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#dashboard-executivo">📊 Dashboard Executivo</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#metricas-principais">Métricas Principais</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#alertas-criticos">Alertas Críticos</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#gestao-de-usuarios-e-permissoes">👥 Gestão de Usuários e Permissões</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#perfis-de-acesso">Perfis de Acesso</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#regras-de-aprovacao">Regras de Aprovação</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#manutencao-e-controle">🔧 Manutenção e Controle</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#agendamento-de-manutencao">Agendamento de Manutenção</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#controle-de-qualidade">Controle de Qualidade</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#relatorios-avancados">📈 Relatórios Avançados</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#relatorios-disponiveis">Relatórios Disponíveis</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#exportacao-e-integracao">Exportação e Integração</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#configuracoes-do-sistema">⚙️ Configurações do Sistema</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#parametros-gerais">Parâmetros Gerais</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#automacao">Automação</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#monitoramento-e-alertas">🚨 Monitoramento e Alertas</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#alertas-em-tempo-real">Alertas em Tempo Real</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#logs-e-auditoria">Logs e Auditoria</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#integracoes">🔗 Integrações</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#sistemas-corporativos">Sistemas Corporativos</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#apis-e-webhooks">APIs e Webhooks</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#seguranca-e-conformidade">🛡️ Segurança e Conformidade</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#controle-de-acesso">Controle de Acesso</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#conformidade">Conformidade</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#manuais-e-suporte">📚 Manuais e Suporte</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#documentacao-tecnica">Documentação Técnica</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#suporte-e-treinamento">Suporte e Treinamento</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../performance-admin/">Performance</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../rfid-admin/">RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../satisfaction-admin/">Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../certifications-admin/">Certificações</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">TI OSN System - Documentação Oficial</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Guia do Administrador</li>
+      <li class="breadcrumb-item active">Equipamentos</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="administracao-de-equipamentos">Administração de Equipamentos<a class="headerlink" href="#administracao-de-equipamentos" title="Permanent link">&para;</a></h1>
+<p>Guia completo para administradores do sistema profissional de gestão de equipamentos de TI.</p>
+<h2 id="visao-geral-administrativa">🎯 Visão Geral Administrativa<a class="headerlink" href="#visao-geral-administrativa" title="Permanent link">&para;</a></h2>
+<p>Como administrador, você tem controle total sobre o parque de equipamentos da empresa, desde o cadastro até o descarte, com ferramentas avançadas de gestão e analytics.</p>
+<h2 id="gestao-do-inventario">🏗️ Gestão do Inventário<a class="headerlink" href="#gestao-do-inventario" title="Permanent link">&para;</a></h2>
+<h3 id="cadastrando-equipamentos">Cadastrando Equipamentos<a class="headerlink" href="#cadastrando-equipamentos" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Acesse o painel administrativo</strong>:</li>
+<li>URL: <code>http://192.168.1.86:5000/equipment/admin/dashboard</code></li>
+<li>
+<p>Menu: <strong>Equipamentos</strong> → <strong>Admin Dashboard</strong></p>
+</li>
+<li>
+<p><strong>Adicione novo equipamento</strong>:</p>
+</li>
+<li>Clique em <strong>"Cadastrar Equipamento"</strong></li>
+<li>
+<p>Preencha dados completos</p>
+</li>
+<li>
+<p><strong>Campos obrigatórios</strong>:</p>
+</li>
+<li>Nome e descrição</li>
+<li>Categoria (Notebook, Monitor, etc.)</li>
+<li>Localização física</li>
+<li>Valor de aquisição</li>
+<li>Dias máximos de empréstimo</li>
+</ol>
+<h3 id="importacao-em-massa">Importação em Massa<a class="headerlink" href="#importacao-em-massa" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>📄 CSV/Excel</strong>: Para cadastrar múltiplos equipamentos</li>
+<li><strong>🔄 API</strong>: Integração com sistemas externos</li>
+<li><strong>📊 Validação automática</strong>: Verificação de dados</li>
+</ul>
+<h2 id="dashboard-executivo">📊 Dashboard Executivo<a class="headerlink" href="#dashboard-executivo" title="Permanent link">&para;</a></h2>
+<h3 id="metricas-principais">Métricas Principais<a class="headerlink" href="#metricas-principais" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>📈 Utilização geral</strong>: Percentual de equipamentos em uso</li>
+<li><strong>⏱️ SLA compliance</strong>: Taxa de cumprimento de prazos</li>
+<li><strong>💰 Custos</strong>: Valores de aquisição e manutenção</li>
+<li><strong>🔄 Rotatividade</strong>: Frequência de empréstimos</li>
+</ul>
+<h3 id="alertas-criticos">Alertas Críticos<a class="headerlink" href="#alertas-criticos" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>🚨 Equipamentos atrasados</strong>: Lista com SLA vermelho</li>
+<li><strong>🔧 Manutenção pendente</strong>: Equipamentos próximos do vencimento</li>
+<li><strong>📍 Localização desconhecida</strong>: Itens sem rastreamento</li>
+</ul>
+<h2 id="gestao-de-usuarios-e-permissoes">👥 Gestão de Usuários e Permissões<a class="headerlink" href="#gestao-de-usuarios-e-permissoes" title="Permanent link">&para;</a></h2>
+<h3 id="perfis-de-acesso">Perfis de Acesso<a class="headerlink" href="#perfis-de-acesso" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Usuários Comuns</strong>: Apenas reserva e visualização</li>
+<li><strong>TI Básico</strong>: Reserva + devolução + relatórios</li>
+<li><strong>TI Avançado</strong>: Controle total + manutenção</li>
+<li><strong>Administradores</strong>: Acesso irrestrito</li>
+</ul>
+<h3 id="regras-de-aprovacao">Regras de Aprovação<a class="headerlink" href="#regras-de-aprovacao" title="Permanent link">&para;</a></h3>
+<p>Configure regras automáticas baseadas em:</p>
+<ul>
+<li><strong>👤 Perfil do usuário</strong> (Admin/TI sempre aprovado)</li>
+<li><strong>📅 Duração do empréstimo</strong> (até 7 dias = auto-aprovado)</li>
+<li><strong>💰 Valor do equipamento</strong> (baixo risco = auto-aprovado)</li>
+<li><strong>🏢 Setor restrito</strong> (equipamentos específicos por setor)</li>
+</ul>
+<h2 id="manutencao-e-controle">🔧 Manutenção e Controle<a class="headerlink" href="#manutencao-e-controle" title="Permanent link">&para;</a></h2>
+<h3 id="agendamento-de-manutencao">Agendamento de Manutenção<a class="headerlink" href="#agendamento-de-manutencao" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Defina cronograma</strong> por equipamento</li>
+<li><strong>Alertas automáticos</strong> antes do vencimento</li>
+<li><strong>Registro completo</strong> de intervenções</li>
+<li><strong>Custos associados</strong> ao equipamento</li>
+</ol>
+<h3 id="controle-de-qualidade">Controle de Qualidade<a class="headerlink" href="#controle-de-qualidade" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>📋 Checklists</strong> obrigatórios na entrega/devolução</li>
+<li><strong>📸 Registro fotográfico</strong> do estado</li>
+<li><strong>📝 Avaliação de condição</strong> (Excelente/Bom/Regular/Ruim)</li>
+<li><strong>🔍 Inspeção técnica</strong> periódica</li>
+</ul>
+<h2 id="relatorios-avancados">📈 Relatórios Avançados<a class="headerlink" href="#relatorios-avancados" title="Permanent link">&para;</a></h2>
+<h3 id="relatorios-disponiveis">Relatórios Disponíveis<a class="headerlink" href="#relatorios-disponiveis" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>📊 Utilização por período</strong>: Gráficos de demanda</li>
+<li><strong>💰 ROI por equipamento</strong>: Custo vs benefício</li>
+<li><strong>⏰ SLA compliance</strong>: Performance de prazos</li>
+<li><strong>🔄 Histórico completo</strong>: Rastreabilidade total</li>
+</ul>
+<h3 id="exportacao-e-integracao">Exportação e Integração<a class="headerlink" href="#exportacao-e-integracao" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>📄 Excel/CSV</strong>: Para análise externa</li>
+<li><strong>📊 Power BI</strong>: Conectores diretos</li>
+<li><strong>🔄 API</strong>: Dados em tempo real</li>
+<li><strong>📧 Agendamento</strong>: Relatórios automáticos</li>
+</ul>
+<h2 id="configuracoes-do-sistema">⚙️ Configurações do Sistema<a class="headerlink" href="#configuracoes-do-sistema" title="Permanent link">&para;</a></h2>
+<h3 id="parametros-gerais">Parâmetros Gerais<a class="headerlink" href="#parametros-gerais" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>⏰ SLA padrão</strong>: Tempos de resposta por categoria</li>
+<li><strong>📧 Notificações</strong>: Templates e frequências</li>
+<li><strong>🔒 Regras de segurança</strong>: Restrições de acesso</li>
+<li><strong>💰 Políticas de custo</strong>: Limites e aprovações</li>
+</ul>
+<h3 id="automacao">Automação<a class="headerlink" href="#automacao" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>🤖 Aprovações automáticas</strong>: Regras configuráveis</li>
+<li><strong>⏰ Lembretes</strong>: Frequências e conteúdos</li>
+<li><strong>🔧 Manutenção</strong>: Alertas e escalas</li>
+<li><strong>📊 Relatórios</strong>: Geração automática</li>
+</ul>
+<h2 id="monitoramento-e-alertas">🚨 Monitoramento e Alertas<a class="headerlink" href="#monitoramento-e-alertas" title="Permanent link">&para;</a></h2>
+<h3 id="alertas-em-tempo-real">Alertas em Tempo Real<a class="headerlink" href="#alertas-em-tempo-real" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>📱 Dashboard</strong>: Visão geral de alertas</li>
+<li><strong>📧 Email</strong>: Notificações automáticas</li>
+<li><strong>🔴 Críticos</strong>: SLA vermelho, equipamentos perdidos</li>
+<li><strong>🟡 Atenção</strong>: Manutenção próxima, atrasos</li>
+</ul>
+<h3 id="logs-e-auditoria">Logs e Auditoria<a class="headerlink" href="#logs-e-auditoria" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>📋 Histórico completo</strong>: Todas as ações</li>
+<li><strong>👤 Rastreamento</strong>: Quem fez o quê e quando</li>
+<li><strong>🔍 Pesquisa avançada</strong>: Filtros por data, usuário, ação</li>
+<li><strong>📄 Exportação</strong>: Para auditoria externa</li>
+</ul>
+<h2 id="integracoes">🔗 Integrações<a class="headerlink" href="#integracoes" title="Permanent link">&para;</a></h2>
+<h3 id="sistemas-corporativos">Sistemas Corporativos<a class="headerlink" href="#sistemas-corporativos" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>🏢 ERP</strong>: Sincronização de ativos</li>
+<li><strong>💰 Financeiro</strong>: Custos e depreciação</li>
+<li><strong>👥 RH</strong>: Controle de usuários</li>
+<li><strong>📊 BI</strong>: Analytics avançada</li>
+</ul>
+<h3 id="apis-e-webhooks">APIs e Webhooks<a class="headerlink" href="#apis-e-webhooks" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>📡 Eventos em tempo real</strong>: Para sistemas externos</li>
+<li><strong>🔄 Sincronização bidirecional</strong>: Dados atualizados</li>
+<li><strong>🔐 Autenticação JWT</strong>: Segurança enterprise</li>
+<li><strong>📊 Rate limiting</strong>: Controle de uso</li>
+</ul>
+<h2 id="seguranca-e-conformidade">🛡️ Segurança e Conformidade<a class="headerlink" href="#seguranca-e-conformidade" title="Permanent link">&para;</a></h2>
+<h3 id="controle-de-acesso">Controle de Acesso<a class="headerlink" href="#controle-de-acesso" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>🔐 Autenticação forte</strong>: MFA opcional</li>
+<li><strong>👥 RBAC</strong>: Controle granular de permissões</li>
+<li><strong>📊 Auditoria</strong>: Logs completos de acesso</li>
+<li><strong>🚨 Alertas</strong>: Tentativas suspeitas</li>
+</ul>
+<h3 id="conformidade">Conformidade<a class="headerlink" href="#conformidade" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>📋 LGPD</strong>: Proteção de dados pessoais</li>
+<li><strong>🏛️ SOX</strong>: Controles financeiros</li>
+<li><strong>🔒 ISO 27001</strong>: Segurança da informação</li>
+<li><strong>📊 ISO 55000</strong>: Gestão de ativos</li>
+</ul>
+<h2 id="manuais-e-suporte">📚 Manuais e Suporte<a class="headerlink" href="#manuais-e-suporte" title="Permanent link">&para;</a></h2>
+<h3 id="documentacao-tecnica">Documentação Técnica<a class="headerlink" href="#documentacao-tecnica" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>🔧 APIs completas</strong>: Documentação OpenAPI</li>
+<li><strong>📊 Webhooks</strong>: Eventos e payloads</li>
+<li><strong>🔄 Migração</strong>: Guias de importação</li>
+<li><strong>⚙️ Configuração</strong>: Parâmetros avançados</li>
+</ul>
+<h3 id="suporte-e-treinamento">Suporte e Treinamento<a class="headerlink" href="#suporte-e-treinamento" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>👨‍💼 Consultoria</strong>: Implementação personalizada</li>
+<li><strong>📚 Treinamentos</strong>: Para usuários e admins</li>
+<li><strong>💬 Help Desk</strong>: Suporte técnico dedicado</li>
+<li><strong>📈 Melhorias</strong>: Roadmap e feedback</li>
+</ul>
+<hr />
+<div class="success">
+    **🎉 Sistema Empresarial Completo!** Você agora tem controle total sobre o parque de equipamentos com ferramentas profissionais de gestão, analytics e automação.
+</div>
+
+<div class="warning">
+    **⚠️ Importante**: Configure as regras de aprovação e mantenha o inventário atualizado para garantir a eficiência do sistema.
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../user-guide/performance/" class="btn btn-neutral float-left" title="Performance"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../performance-admin/" class="btn btn-neutral float-right" title="Performance">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../user-guide/performance/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../performance-admin/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../javascripts/extra.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

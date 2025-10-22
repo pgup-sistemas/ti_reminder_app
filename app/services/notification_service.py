@@ -29,7 +29,7 @@ class NotificationService:
             mail.send(msg)
             return True
         except Exception as e:
-            current_app.logger.error(f"Erro ao enviar email: {str(e)}")
+            current_app.logger.error("Erro ao enviar email")
             return False
 
     @staticmethod
@@ -165,18 +165,18 @@ class NotificationService:
     def _notify_task_due(task):
         """Notifica sobre tarefa próxima do vencimento"""
         # Notificar responsável da tarefa
-        if task.user and task.user.email:
+        if task.usuario and task.usuario.email:
             settings = NotificationService.get_user_notification_settings(
-                task.user.id, 'task_reminder'
+                task.usuario.id, 'task_reminder'
             )
 
             if settings['email_enabled']:
                 NotificationService.send_email_notification(
-                    task.user.email,
+                    task.usuario.email,
                     f"Tarefa próxima do vencimento: {task.description[:50]}",
                     "emails/task_due.html",
                     task=task,
-                    user=task.user
+                    user=task.usuario
                 )
 
         # Notificar administradores
@@ -201,8 +201,8 @@ class NotificationService:
         # Notificar responsável e administradores
         recipients = []
 
-        if task.user:
-            recipients.append(task.user)
+        if task.usuario:
+            recipients.append(task.usuario)
 
         admins = User.query.filter_by(is_admin=True, ativo=True).all()
         recipients.extend(admins)
@@ -313,14 +313,103 @@ class NotificationService:
             )
 
     @staticmethod
+    def check_upcoming_reminders():
+        """
+        Verifica lembretes que estão próximos do vencimento
+        Envia notificações preventivas em intervalos configuráveis
+        """
+        from datetime import date, timedelta
+        
+        current_time = get_current_time_for_db()
+        today = current_time.date()
+        notifications_sent = 0
+        
+        # Definir intervalos de notificação (em dias antes do vencimento)
+        notification_intervals = [90, 60, 30, 15, 7, 3, 1]
+        
+        for days_before in notification_intervals:
+            target_date = today + timedelta(days=days_before)
+            
+            # Buscar lembretes ativos que vencem na data alvo e ainda não foram notificados
+            upcoming_reminders = Reminder.query.filter(
+                Reminder.status == 'ativo',
+                Reminder.completed == False,
+                Reminder.due_date == target_date,
+                # Evitar notificar lembretes que já foram escalados recentemente
+                db.or_(
+                    Reminder.last_escalation.is_(None),
+                    Reminder.last_escalation < current_time - timedelta(hours=24)
+                )
+            ).all()
+            
+            for reminder in upcoming_reminders:
+                try:
+                    # Determinar urgência baseado no tempo restante
+                    if days_before <= 3:
+                        urgency = "CRÍTICO"
+                        priority_label = "danger"
+                    elif days_before <= 7:
+                        urgency = "URGENTE"
+                        priority_label = "warning"
+                    elif days_before <= 15:
+                        urgency = "IMPORTANTE"
+                        priority_label = "info"
+                    else:
+                        urgency = "Atenção"
+                        priority_label = "primary"
+                    
+                    # Notificar responsável
+                    if reminder.usuario and reminder.usuario.email:
+                        NotificationService.send_email_notification(
+                            reminder.usuario.email,
+                            f"[{urgency}] Lembrete vence em {days_before} dias: {reminder.name}",
+                            "emails/reminder_upcoming.html",
+                            reminder=reminder,
+                            user=reminder.usuario,
+                            days_remaining=days_before,
+                            urgency=urgency,
+                            priority_label=priority_label
+                        )
+                        notifications_sent += 1
+                    
+                    # Para lembretes críticos (alta prioridade), notificar também os admins
+                    if reminder.priority in ['alta', 'critica'] and days_before <= 15:
+                        admins = User.query.filter_by(is_admin=True, ativo=True).all()
+                        for admin in admins:
+                            settings = NotificationService.get_user_notification_settings(
+                                admin.id, 'reminder_upcoming'
+                            )
+                            
+                            if settings.get('email_enabled', True):
+                                NotificationService.send_email_notification(
+                                    admin.email,
+                                    f"[ADMIN - {urgency}] Lembrete crítico em {days_before} dias: {reminder.name}",
+                                    "emails/reminder_upcoming_admin.html",
+                                    reminder=reminder,
+                                    admin=admin,
+                                    days_remaining=days_before,
+                                    urgency=urgency,
+                                    priority_label=priority_label
+                                )
+                    
+                    # Notificação enviada para lembrete
+                    
+                except Exception as e:
+                    current_app.logger.error(f"Erro ao notificar lembrete {reminder.id}")
+                    continue
+        
+        return notifications_sent
+
+    @staticmethod
     def run_notification_checks():
         """Executa todas as verificações de notificação"""
         results = {
             'task_notifications': NotificationService.check_task_notifications(),
             'equipment_alerts': NotificationService.check_equipment_return_alerts(),
             'reminder_escalations': NotificationService.check_reminder_escalations(),
+            'reminder_upcoming': NotificationService.check_upcoming_reminders(),
             'timestamp': get_current_time_for_db()
         }
 
-        current_app.logger.info(f"Notificações processadas: {results}")
+        # Notificações processadas
         return results

@@ -1,0 +1,960 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Centro de Alertas{% endblock %}
+
+{% block config_content %}
+<!-- Abas de Navegação -->
+<div class="config-tabs mb-4">
+    <ul class="nav nav-tabs" id="alertsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="active-alerts-tab" data-bs-toggle="tab" data-bs-target="#active-alerts" type="button" role="tab">
+                <i class="fas fa-exclamation-triangle me-1"></i> Alertas Ativos
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="alert-rules-tab" data-bs-toggle="tab" data-bs-target="#alert-rules" type="button" role="tab">
+                <i class="fas fa-cogs me-1"></i> Regras
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="alert-history-tab" data-bs-toggle="tab" data-bs-target="#alert-history" type="button" role="tab">
+                <i class="fas fa-history me-1"></i> Histórico
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="alert-analytics-tab" data-bs-toggle="tab" data-bs-target="#alert-analytics" type="button" role="tab">
+                <i class="fas fa-chart-bar me-1"></i> Analytics
+            </button>
+        </li>
+    </ul>
+</div>
+
+<div class="tab-content" id="alertsTabsContent">
+    <!-- Aba Alertas Ativos -->
+    <div class="tab-pane fade show active" id="active-alerts" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Centro de Controle de Alertas
+                        </h3>
+                        <p class="text-muted mb-0 mt-1">Monitoramento e gestão de alertas do sistema em tempo real</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-info" onclick="testAlerts()">
+                            <i class="fas fa-vial me-1"></i> Testar Sistema
+                        </button>
+                        <button type="button" class="btn btn-outline-success" onclick="enableAllAlerts()">
+                            <i class="fas fa-toggle-on me-1"></i> Habilitar Todos
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" onclick="acknowledgeAll()">
+                            <i class="fas fa-check-double me-1"></i> Reconhecer Todos
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-card-body">
+                <!-- Dashboard de Alertas em Tempo Real -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-tachometer-alt me-2"></i>
+                                    Status do Sistema de Alertas
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                            <h4 class="mb-0 text-success">Online</h4>
+                                            <small class="text-muted">Sistema Ativo</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                                            <h4 class="mb-0 text-warning" id="activeAlertsCount">3</h4>
+                                            <small class="text-muted">Alertas Ativos</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                                            <h4 class="mb-0 text-info" id="alertsTodayCount">12</h4>
+                                            <small class="text-muted">Hoje</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-times-circle fa-2x text-danger mb-2"></i>
+                                            <h4 class="mb-0 text-danger" id="criticalAlertsCount">1</h4>
+                                            <small class="text-muted">Críticos</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-center">
+                                            <small class="text-muted">
+                                                <i class="fas fa-circle text-success me-1"></i>Monitoramento ativo
+                                                <span class="mx-2">•</span>
+                                                <i class="fas fa-envelope me-1"></i>Email: configurado
+                                                <span class="mx-2">•</span>
+                                                <i class="fas fa-bell me-1"></i>Notificações: ativas
+                                                <span class="mx-2">•</span>
+                                                <i class="fas fa-shield-alt me-1"></i>Proteção: habilitada
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alertas Ativos Prioritários -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="mb-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Alertas Ativos (Requerem Atenção)
+                        </h5>
+                        <div class="alerts-container">
+                            <!-- Alerta Crítico -->
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-times-circle fa-2x me-3"></i>
+                                    <div class="flex-grow-1">
+                                        <h6 class="alert-heading mb-1">CPU Crítica - 95% de Utilização</h6>
+                                        <p class="mb-1">O processador está operando acima do limite seguro há 15 minutos.</p>
+                                        <small class="text-muted">há 8 min • Prioridade: Crítica • Sistema afetado</small>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-outline-danger" onclick="acknowledgeAlert(this)">
+                                            <i class="fas fa-check me-1"></i>Reconhecer
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="resolveAlert(this)">
+                                            <i class="fas fa-wrench me-1"></i>Resolver
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Alerta de Aviso -->
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                                    <div class="flex-grow-1">
+                                        <h6 class="alert-heading mb-1">Espaço em Disco Baixo</h6>
+                                        <p class="mb-1">Disco principal com apenas 15% de espaço livre (12GB restantes).</p>
+                                        <small class="text-muted">há 2h • Prioridade: Alta • Backup afetado</small>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="acknowledgeAlert(this)">
+                                            <i class="fas fa-check me-1"></i>Reconhecer
+                                        </button>
+                                        <button class="btn btn-sm btn-warning" onclick="viewDetails(this)">
+                                            <i class="fas fa-info-circle me-1"></i>Detalhes
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Alerta Informativo -->
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-info-circle fa-2x me-3"></i>
+                                    <div class="flex-grow-1">
+                                        <h6 class="alert-heading mb-1">Backup Automático Pendente</h6>
+                                        <p class="mb-1">Próximo backup agendado para hoje às 02:00 (em 4 horas).</p>
+                                        <small class="text-muted">há 30 min • Prioridade: Baixa • Monitoramento</small>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-outline-info" onclick="acknowledgeAlert(this)">
+                                            <i class="fas fa-check me-1"></i>OK
+                                        </button>
+                                        <button class="btn btn-sm btn-info" onclick="runBackupNow()">
+                                            <i class="fas fa-play me-1"></i>Fazer Backup
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+        </div>
+    </div>
+
+    <!-- Aba Regras de Alertas -->
+    <div class="tab-pane fade" id="alert-rules" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    Regras de Alertas
+                </h3>
+                <p class="text-muted mb-0 mt-1">Configure condições e thresholds para disparo de alertas</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-success mb-3" onclick="addAlertRule()">
+                            <i class="fas fa-plus me-1"></i> Nova Regra
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="accordion" id="alertRulesAccordion">
+                            <!-- Regra de CPU -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#cpuRule">
+                                        <i class="fas fa-microchip me-2 text-primary"></i>
+                                        CPU Alta - Alerta quando uso > 80%
+                                    </button>
+                                </h2>
+                                <div id="cpuRule" class="accordion-collapse collapse show" data-bs-parent="#alertRulesAccordion">
+                                    <div class="accordion-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>Condições</h6>
+                                                <ul class="list-unstyled">
+                                                    <li><strong>Métrica:</strong> CPU Usage</li>
+                                                    <li><strong>Operador:</strong> Maior que</li>
+                                                    <li><strong>Threshold:</strong> 80%</li>
+                                                    <li><strong>Duração:</strong> 5 minutos</li>
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Ações</h6>
+                                                <ul class="list-unstyled">
+                                                    <li><i class="fas fa-envelope text-info me-2"></i>Email imediato</li>
+                                                    <li><i class="fas fa-bell text-warning me-2"></i>Notificação push</li>
+                                                    <li><i class="fas fa-slack text-primary me-2"></i>Slack (canal #alerts)</li>
+                                                </ul>
+                                                <div class="mt-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" checked>
+                                                        <label class="form-check-label">Regra ativa</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <button class="btn btn-sm btn-outline-primary me-2" onclick="editRule('cpu')">
+                                                <i class="fas fa-edit me-1"></i>Editar
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="deleteRule('cpu')">
+                                                <i class="fas fa-trash me-1"></i>Excluir
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Regra de Disco -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#diskRule">
+                                        <i class="fas fa-hdd me-2 text-warning"></i>
+                                        Disco Cheio - Alerta quando espaço < 20%
+                                    </button>
+                                </h2>
+                                <div id="diskRule" class="accordion-collapse collapse" data-bs-parent="#alertRulesAccordion">
+                                    <div class="accordion-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>Condições</h6>
+                                                <ul class="list-unstyled">
+                                                    <li><strong>Métrica:</strong> Disk Space</li>
+                                                    <li><strong>Operador:</strong> Menor que</li>
+                                                    <li><strong>Threshold:</strong> 20%</li>
+                                                    <li><strong>Duração:</strong> Imediato</li>
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Ações</h6>
+                                                <ul class="list-unstyled">
+                                                    <li><i class="fas fa-envelope text-info me-2"></i>Email imediato</li>
+                                                    <li><i class="fas fa-bell text-warning me-2"></i>Notificação push</li>
+                                                    <li><i class="fas fa-file-alt text-success me-2"></i>Relatório automático</li>
+                                                </ul>
+                                                <div class="mt-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" checked>
+                                                        <label class="form-check-label">Regra ativa</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <button class="btn btn-sm btn-outline-primary me-2" onclick="editRule('disk')">
+                                                <i class="fas fa-edit me-1"></i>Editar
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="deleteRule('disk')">
+                                                <i class="fas fa-trash me-1"></i>Excluir
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Regra de Segurança -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#securityRule">
+                                        <i class="fas fa-shield-alt me-2 text-danger"></i>
+                                        Tentativas de Login - Alerta quando > 5 falhas
+                                    </button>
+                                </h2>
+                                <div id="securityRule" class="accordion-collapse collapse" data-bs-parent="#alertRulesAccordion">
+                                    <div class="accordion-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>Condições</h6>
+                                                <ul class="list-unstyled">
+                                                    <li><strong>Métrica:</strong> Failed Logins</li>
+                                                    <li><strong>Operador:</strong> Maior que</li>
+                                                    <li><strong>Threshold:</strong> 5 tentativas</li>
+                                                    <li><strong>Janela:</strong> 15 minutos</li>
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Ações</h6>
+                                                <ul class="list-unstyled">
+                                                    <li><i class="fas fa-envelope text-info me-2"></i>Email imediato</li>
+                                                    <li><i class="fas fa-lock text-danger me-2"></i>Bloqueio temporário</li>
+                                                    <li><i class="fas fa-user-secret text-dark me-2"></i>Log de segurança</li>
+                                                </ul>
+                                                <div class="mt-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" checked>
+                                                        <label class="form-check-label">Regra ativa</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <button class="btn btn-sm btn-outline-primary me-2" onclick="editRule('security')">
+                                                <i class="fas fa-edit me-1"></i>Editar
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="deleteRule('security')">
+                                                <i class="fas fa-trash me-1"></i>Excluir
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba Histórico de Alertas -->
+    <div class="tab-pane fade" id="alert-history" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-history me-2"></i>
+                    Histórico de Alertas
+                </h3>
+                <p class="text-muted mb-0 mt-1">Registro completo de todos os alertas disparados</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" placeholder="Buscar alertas..." id="alertSearch">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="alertTypeFilter">
+                            <option value="">Todos os tipos</option>
+                            <option value="performance">Performance</option>
+                            <option value="security">Segurança</option>
+                            <option value="disk">Disco</option>
+                            <option value="database">Banco</option>
+                            <option value="network">Rede</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="alertStatusFilter">
+                            <option value="">Todos os status</option>
+                            <option value="resolved">Resolvidos</option>
+                            <option value="acknowledged">Reconhecidos</option>
+                            <option value="ongoing">Em andamento</option>
+                            <option value="pending">Pendentes</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-outline-secondary w-100" onclick="exportAlerts()">
+                            <i class="fas fa-download me-1"></i>Exportar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Severidade</th>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Status</th>
+                                <th>Duração</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alertHistoryTable">
+                            <tr>
+                                <td>2024-01-20 14:30:25</td>
+                                <td><span class="badge bg-danger">Crítica</span></td>
+                                <td>Performance</td>
+                                <td class="text-truncate" style="max-width: 250px;" title="CPU utilization exceeded 95% for 15 minutes">CPU utilization exceeded 95% for 15 minutes</td>
+                                <td><span class="badge bg-success">Resolvido</span></td>
+                                <td>23 min</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewAlertDetails(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" onclick="reopenAlert(this)">
+                                            <i class="fas fa-undo"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-20 12:15:10</td>
+                                <td><span class="badge bg-warning">Alta</span></td>
+                                <td>Disco</td>
+                                <td class="text-truncate" style="max-width: 250px;" title="Disk space below 20% threshold (15GB remaining)">Disk space below 20% threshold (15GB remaining)</td>
+                                <td><span class="badge bg-warning">Reconhecido</span></td>
+                                <td>Ongoing</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewAlertDetails(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success" onclick="resolveAlertFromHistory(this)">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-20 09:45:33</td>
+                                <td><span class="badge bg-info">Média</span></td>
+                                <td>Segurança</td>
+                                <td class="text-truncate" style="max-width: 250px;" title="Multiple failed login attempts from IP 192.168.1.50">Multiple failed login attempts from IP 192.168.1.50</td>
+                                <td><span class="badge bg-success">Resolvido</span></td>
+                                <td>5 min</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewAlertDetails(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="blockIP(this)">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-19 23:30:15</td>
+                                <td><span class="badge bg-danger">Crítica</span></td>
+                                <td>Banco</td>
+                                <td class="text-truncate" style="max-width: 250px;" title="Database connection pool exhausted">Database connection pool exhausted</td>
+                                <td><span class="badge bg-success">Resolvido</span></td>
+                                <td>12 min</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewAlertDetails(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" onclick="viewDatabaseLogs(this)">
+                                            <i class="fas fa-database"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav aria-label="Paginação de alertas">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Próximo</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba Analytics de Alertas -->
+    <div class="tab-pane fade" id="alert-analytics" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Analytics de Alertas
+                </h3>
+                <p class="text-muted mb-0 mt-1">Estatísticas e tendências dos alertas do sistema</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Alertas por Tipo (30 dias)</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="alertsByTypeChart" width="100%" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Alertas por Severidade</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="alertsBySeverityChart" width="100%" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Timeline de Alertas (7 dias)</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="alertsTimelineChart" width="100%" height="150"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Métricas de Performance</h5>
+                        <div class="list-group">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                Tempo Médio de Resolução
+                                <span class="badge bg-primary rounded-pill">23 min</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                Taxa de Reconhecimento
+                                <span class="badge bg-success rounded-pill">94%</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                Falsos Positivos
+                                <span class="badge bg-warning rounded-pill">3%</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                Alertas por Dia
+                                <span class="badge bg-info rounded-pill">12.5</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Top Causas de Alertas</h5>
+                        <div class="list-group">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                CPU Alta
+                                <span class="badge bg-danger rounded-pill">45%</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                Espaço em Disco
+                                <span class="badge bg-warning rounded-pill">28%</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                Tentativas de Login
+                                <span class="badge bg-info rounded-pill">15%</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                Outros
+                                <span class="badge bg-secondary rounded-pill">12%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<script>
+// Funções de Controle de Alertas
+function testAlerts() {
+    if (confirm('Deseja enviar um alerta de teste para todos os canais configurados?\n\n• Email\n• Notificações push\n• Slack/Teams (se configurado)')) {
+        showGlobalProgress('Enviando alerta de teste...', 3000);
+        setTimeout(() => {
+            hideGlobalProgress();
+            Feedback.success('Sucesso', '✅ Alerta de teste enviado com sucesso!\n\nVerifique:\n• Caixa de email\n• Notificações do navegador\n• Canais do Slack/Teams');
+        }, 3000);
+    }
+}
+
+function enableAllAlerts() {
+    if (confirm('Habilitar todos os tipos de alertas?\n\nIsso ativará todas as regras de monitoramento.')) {
+        // Simular habilitação
+        const switches = document.querySelectorAll('.form-check-input[type="checkbox"]');
+        switches.forEach(sw => sw.checked = true);
+
+        Feedback.info('', '✅ Todos os alertas foram habilitados!\n\nSistema de monitoramento totalmente ativo.');
+    }
+}
+
+function acknowledgeAlert(button) {
+    const alertElement = button.closest('.alert');
+    alertElement.classList.remove('alert-danger', 'alert-warning', 'alert-info');
+    alertElement.classList.add('alert-secondary');
+
+    const actions = alertElement.querySelector('.d-flex.gap-2:last-child');
+    actions.innerHTML = '<small class="text-muted"><i class="fas fa-check me-1"></i>Reconhecido</small>';
+
+    // Atualizar contador
+    const activeCount = document.getElementById('activeAlertsCount');
+    activeCount.textContent = Math.max(0, parseInt(activeCount.textContent) - 1);
+
+    showToast('Alerta reconhecido', 'success');
+}
+
+function resolveAlert(button) {
+    const alertElement = button.closest('.alert');
+    alertElement.style.opacity = '0.5';
+
+    setTimeout(() => {
+        alertElement.remove();
+        const activeCount = document.getElementById('activeAlertsCount');
+        activeCount.textContent = Math.max(0, parseInt(activeCount.textContent) - 1);
+    }, 500);
+
+    showToast('Alerta resolvido e removido', 'success');
+}
+
+function acknowledgeAll() {
+    if (confirm('Reconhecer todos os alertas ativos?\n\nEles permanecerão visíveis mas marcados como reconhecidos.')) {
+        const alerts = document.querySelectorAll('.alerts-container .alert');
+        alerts.forEach(alert => {
+            const actions = alert.querySelector('.d-flex.gap-2:last-child');
+            if (actions && !actions.innerHTML.includes('Reconhecido')) {
+                actions.innerHTML = '<small class="text-muted"><i class="fas fa-check me-1"></i>Reconhecido</small>';
+                alert.classList.remove('alert-danger', 'alert-warning', 'alert-info');
+                alert.classList.add('alert-secondary');
+            }
+        });
+
+        document.getElementById('activeAlertsCount').textContent = '0';
+        showToast('Todos os alertas foram reconhecidos', 'info');
+    }
+}
+
+function runBackupNow() {
+    showGlobalProgress('Executando backup...', 5000);
+    setTimeout(() => {
+        hideGlobalProgress();
+        Feedback.success('Sucesso', '✅ Backup concluído com sucesso!\n\n• Arquivos: 1,247\n• Tamanho: 2.4GB\n• Duração: 4min 32s\n• Status: Verificado');
+    }, 5000);
+}
+
+function viewDetails(button) {
+    Feedback.info('', 'Detalhes do Alerta: Espaço em Disco\n\n📊 Métricas Atuais:\n• Total: 100GB\n• Usado: 87GB (87%)\n• Livre: 13GB\n\n📈 Tendência:\n• Crescimento diário: ~500MB\n• Previsão de esgotamento: 26 dias\n\n🔧 Recomendações:\n• Limpar logs antigos\n• Arquivar dados históricos\n• Expandir capacidade de storage');
+}
+
+// Funções de Regras
+function addAlertRule() {
+    const modalContent = `
+        <form id="newAlertRuleForm">
+            <div class="mb-3">
+                <label class="form-label">Nome da Regra</label>
+                <input type="text" class="form-control" id="ruleName" required>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Métrica</label>
+                        <select class="form-select" id="ruleMetric" required>
+                            <option value="">Selecione...</option>
+                            <option value="cpu">CPU Usage</option>
+                            <option value="memory">Memory Usage</option>
+                            <option value="disk">Disk Space</option>
+                            <option value="network">Network I/O</option>
+                            <option value="connections">DB Connections</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Operador</label>
+                        <select class="form-select" id="ruleOperator" required>
+                            <option value="gt">Maior que</option>
+                            <option value="lt">Menor que</option>
+                            <option value="eq">Igual a</option>
+                            <option value="ne">Diferente de</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Threshold</label>
+                        <input type="number" class="form-control" id="ruleThreshold" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Duração (minutos)</label>
+                        <input type="number" class="form-control" id="ruleDuration" value="5" min="1" required>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Ações</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="actionEmail" checked>
+                    <label class="form-check-label">Enviar Email</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="actionPush" checked>
+                    <label class="form-check-label">Notificação Push</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="actionSlack">
+                    <label class="form-check-label">Slack</label>
+                </div>
+            </div>
+        </form>
+    `;
+
+    showModal('Nova Regra de Alerta', modalContent, 'Criar Regra', () => {
+        const name = document.getElementById('ruleName').value;
+        const metric = document.getElementById('ruleMetric').value;
+        if (name && metric) {
+            alert(`✅ Regra "${name}" criada com sucesso!\n\nMonitorando: ${metric}\nStatus: Ativa`);
+            location.reload();
+        }
+    });
+}
+
+function editRule(ruleId) {
+    alert(`Editar regra: ${ruleId}\n\nFuncionalidade em desenvolvimento.`);
+}
+
+function deleteRule(ruleId) {
+    if (confirm(`Excluir regra "${ruleId}"?\n\nEsta ação não pode ser desfeita.`)) {
+        alert(`Regra "${ruleId}" excluída com sucesso!`);
+        // Simular remoção
+        location.reload();
+    }
+}
+
+// Funções de Histórico
+function viewAlertDetails(button) {
+    const row = button.closest('tr');
+    const cells = row.querySelectorAll('td');
+
+    const details = `
+DETALHES DO ALERTA
+
+Data/Hora: ${cells[0].textContent}
+Severidade: ${cells[1].textContent}
+Tipo: ${cells[2].textContent}
+Descrição: ${cells[3].title || cells[3].textContent}
+Status: ${cells[4].textContent}
+Duração: ${cells[5].textContent}
+
+INFORMAÇÕES TÉCNICAS:
+- ID do Alerta: ALT-${Date.now()}
+- Regra Disparada: RULE-${Math.random().toString(36).substr(2, 9)}
+- Métrica: ${cells[2].textContent.toLowerCase()}_usage
+- Threshold: Configurado dinamicamente
+
+AÇÕES EXECUTADAS:
+${cells[4].textContent.includes('Resolvido') ? '✅ Alerta reconhecido\n✅ Notificações enviadas\n✅ Logs registrados\n✅ Métricas coletadas' : '⏳ Aguardando reconhecimento\n📧 Notificações pendentes'}
+
+HISTÓRICO:
+- Disparado: ${cells[0].textContent}
+- Reconhecido: ${cells[4].textContent.includes('Reconhecido') ? 'Sim' : 'Não'}
+- Resolvido: ${cells[4].textContent.includes('Resolvido') ? 'Sim' : 'Não'}
+    `;
+
+    showModal('Detalhes do Alerta', `<pre class="bg-light p-3 small">${details}</pre>`);
+}
+
+function resolveAlertFromHistory(button) {
+    const row = button.closest('tr');
+    row.querySelector('td:nth-child(5)').innerHTML = '<span class="badge bg-success">Resolvido</span>';
+    showToast('Alerta marcado como resolvido', 'success');
+}
+
+function reopenAlert(button) {
+    const row = button.closest('tr');
+    row.querySelector('td:nth-child(5)').innerHTML = '<span class="badge bg-warning">Em Andamento</span>';
+    showToast('Alerta reaberto', 'warning');
+}
+
+function blockIP(button) {
+    if (confirm('Bloquear IP responsável pelo alerta?\n\nEsta ação adicionará o IP à lista negra.')) {
+        Feedback.success('Sucesso', 'IP bloqueado com sucesso!\n\n• IP adicionado à blacklist\n• Tentativas futuras serão rejeitadas\n• Log de segurança atualizado');
+        showToast('IP bloqueado permanentemente', 'danger');
+    }
+}
+
+function viewDatabaseLogs(button) {
+    Feedback.info('', 'Abrindo logs do banco de dados...\n\n📋 Conexões ativas: 12/50\n📊 Queries lentas: 3 identificadas\n⚠️ Pool exhaustion resolvido\n\nJanela será aberta em nova aba.');
+}
+
+function exportAlerts() {
+    const format = prompt('Formato de exportação:', 'CSV');
+    if (format) {
+        alert(`📤 Exportação iniciada!\n\nFormato: ${format.toUpperCase()}\nPeríodo: Últimos 30 dias\nRegistros: 247 alertas\n\nDownload começará automaticamente.`);
+    }
+}
+
+// Funções de Analytics (seriam implementadas com Chart.js)
+function initializeCharts() {
+    // Simulação - em produção usaria Chart.js
+    console.log('Charts initialized');
+}
+
+// Funções auxiliares
+function showGlobalProgress(message, duration) {
+    const progressContainer = document.createElement('div');
+    progressContainer.id = 'globalProgress';
+    progressContainer.className = 'position-fixed top-50 start-50 translate-middle bg-white border rounded shadow p-4 z-index-9999';
+    progressContainer.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Executando...</span>
+            </div>
+            <h5>${message}</h5>
+            <div class="progress mt-3" style="height: 6px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" id="globalProgressBar" style="width: 0%"></div>
+            </div>
+            <small class="text-muted mt-2" id="progressText">Iniciando...</small>
+        </div>
+    `;
+
+    document.body.appendChild(progressContainer);
+
+    // Animação da barra de progresso
+    const progressBar = document.getElementById('globalProgressBar');
+    const progressText = document.getElementById('progressText');
+    let progress = 0;
+
+    const interval = setInterval(() => {
+        progress += 2;
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            progressText.textContent = 'Finalizando...';
+        }
+        progressBar.style.width = progress + '%';
+        progressText.textContent = `Progresso: ${progress}%`;
+    }, duration / 50);
+}
+
+function hideGlobalProgress() {
+    const progressContainer = document.getElementById('globalProgress');
+    if (progressContainer) {
+        progressContainer.remove();
+    }
+}
+
+function showToast(message, type = 'info') {
+    // Simulação de toast - em produção usaria uma lib como Toastify
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} position-fixed top-0 end-0 m-3`;
+    toast.style.zIndex = '9999';
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : type === 'danger' ? 'times' : 'info'}-circle me-2"></i>
+        ${message}
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+function showModal(title, content, confirmText = 'OK', confirmCallback = null) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">${title}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">${content}</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    ${confirmText !== 'OK' ? `<button type="button" class="btn btn-primary" id="modalConfirm">${confirmText}</button>` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+
+    if (confirmCallback) {
+        document.getElementById('modalConfirm').onclick = () => {
+            confirmCallback();
+            bsModal.hide();
+        };
+    }
+
+    modal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(modal);
+    });
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+
+    // Simular atualização de contadores em tempo real
+    setInterval(() => {
+        const activeCount = document.getElementById('activeAlertsCount');
+        const todayCount = document.getElementById('alertsTodayCount');
+        const criticalCount = document.getElementById('criticalAlertsCount');
+
+        // Pequenas variações para simular atividade
+        if (Math.random() < 0.1) { // 10% de chance
+            const current = parseInt(activeCount.textContent);
+            activeCount.textContent = Math.max(0, current + (Math.random() > 0.5 ? 1 : -1));
+        }
+
+        if (Math.random() < 0.05) { // 5% de chance
+            const current = parseInt(todayCount.textContent);
+            todayCount.textContent = current + 1;
+        }
+    }, 30000); // A cada 30 segundos
+});
+</script>
+{% endblock %}

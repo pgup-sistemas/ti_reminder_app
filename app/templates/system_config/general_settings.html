@@ -1,0 +1,779 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Configurações Gerais{% endblock %}
+
+{% block config_content %}
+<!-- Header com Preview -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">
+            <i class="fas fa-sliders-h me-3 text-primary"></i>
+            Configurações Gerais do Sistema
+        </h2>
+        <p class="text-muted mb-0">Configure parâmetros globais e personalize o comportamento do sistema</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-info" onclick="showPreview()" title="Visualizar mudanças">
+            <i class="fas fa-eye me-1"></i>
+            <span class="d-none d-lg-inline">Preview</span>
+        </button>
+        <button type="button" class="btn btn-outline-secondary" onclick="resetToDefaults()" title="Restaurar padrões">
+            <i class="fas fa-undo me-1"></i>
+            <span class="d-none d-lg-inline">Padrões</span>
+        </button>
+    </div>
+</div>
+
+<!-- Abas de Configuração -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom-0">
+        <ul class="nav nav-tabs card-header-tabs" id="settingsTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="system-tab" data-bs-toggle="tab" data-bs-target="#system" type="button" role="tab">
+                    <i class="fas fa-info-circle me-2"></i>Sistema
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="regional-tab" data-bs-toggle="tab" data-bs-target="#regional" type="button" role="tab">
+                    <i class="fas fa-globe me-2"></i>Regional
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="operation-tab" data-bs-toggle="tab" data-bs-target="#operation" type="button" role="tab">
+                    <i class="fas fa-cogs me-2"></i>Operação
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="server-tab" data-bs-toggle="tab" data-bs-target="#server" type="button" role="tab">
+                    <i class="fas fa-server me-2"></i>Servidor
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card-body">
+        <form method="POST" id="generalSettingsForm">
+            <div class="tab-content" id="settingsTabContent">
+                <!-- Aba Sistema -->
+                <div class="tab-pane fade show active" id="system" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-info-circle fa-2x text-primary me-3"></i>
+                                <div>
+                                    <h5 class="mb-0">Informações do Sistema</h5>
+                                    <small class="text-muted">Configure a identidade e informações básicas do sistema</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control form-control-lg" id="system_name" name="system_name"
+                                       value="{{ settings.system_name }}" placeholder="Nome do Sistema" required>
+                                <label for="system_name">
+                                    <i class="fas fa-tag me-1"></i>Nome do Sistema
+                                </label>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Nome exibido no cabeçalho e títulos do sistema
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control form-control-lg" id="system_version" name="system_version"
+                                       value="{{ settings.system_version }}" placeholder="Versão" readonly>
+                                <label for="system_version">
+                                    <i class="fas fa-code-branch me-1"></i>Versão do Sistema
+                                </label>
+                                <div class="form-text">
+                                    <i class="fas fa-lock me-1"></i>
+                                    Controlado automaticamente pelo sistema
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="alert alert-info border-0">
+                                <div class="d-flex">
+                                    <i class="fas fa-lightbulb fa-2x me-3 text-info"></i>
+                                    <div>
+                                        <h6 class="alert-heading mb-1">Dica de Personalização</h6>
+                                        <p class="mb-0">O nome do sistema será exibido em todos os cabeçalhos, emails e relatórios gerados pelo sistema.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba Regional -->
+                <div class="tab-pane fade" id="regional" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-globe fa-2x text-success me-3"></i>
+                                <div>
+                                    <h5 class="mb-0">Configurações Regionais</h5>
+                                    <small class="text-muted">Adapte o sistema ao seu fuso horário e idioma</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-floating">
+                                <select class="form-select form-select-lg" id="timezone" name="timezone" required>
+                                    {% for tz_key, tz_info in timezones.items() %}
+                                    <option value="{{ tz_key }}" {% if settings.timezone == tz_key %}selected{% endif %}>
+                                        {{ tz_info.name }} ({{ tz_info.offset }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <label for="timezone">
+                                    <i class="fas fa-clock me-1"></i>Fuso Horário
+                                </label>
+                            </div>
+                            <div class="form-text mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Afeta todas as datas e horários exibidos no sistema
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-floating">
+                                <select class="form-select form-select-lg" id="language" name="language" required>
+                                    {% for lang_code, lang_name in languages %}
+                                    <option value="{{ lang_code }}" {% if settings.language == lang_code %}selected{% endif %}>
+                                        {{ lang_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <label for="language">
+                                    <i class="fas fa-language me-1"></i>Idioma
+                                </label>
+                            </div>
+                            <div class="form-text mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Define o idioma da interface do usuário
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="card border-info">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            <i class="fas fa-calendar-alt fa-2x text-info"></i>
+                                        </div>
+                                        <div class="col">
+                                            <h6 class="mb-1">Horário Atual do Sistema</h6>
+                                            <p class="mb-0 text-muted" id="currentTime">Carregando...</p>
+                                        </div>
+                                        <div class="col-auto">
+                                            <button type="button" class="btn btn-outline-info btn-sm" onclick="updateCurrentTime()">
+                                                <i class="fas fa-sync-alt me-1"></i>Atualizar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba Operação -->
+                <div class="tab-pane fade" id="operation" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-cogs fa-2x text-warning me-3"></i>
+                                <div>
+                                    <h5 class="mb-0">Modo de Operação</h5>
+                                    <small class="text-muted">Configure o comportamento operacional do sistema</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="card border-warning border-2 h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-tools fa-2x text-warning me-3"></i>
+                                        <div>
+                                            <h6 class="mb-0">Modo de Manutenção</h6>
+                                            <small class="text-muted">Restringe acesso ao sistema</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input form-check-input-lg" type="checkbox"
+                                               id="maintenance_mode" name="maintenance_mode"
+                                               {% if settings.maintenance_mode %}checked{% endif %}>
+                                        <label class="form-check-label fw-bold" for="maintenance_mode">
+                                            Ativar Modo de Manutenção
+                                        </label>
+                                    </div>
+
+                                    <div class="alert alert-warning border-0" id="maintenanceAlert" style="{% if not settings.maintenance_mode %}display: none;{% endif %}">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Atenção:</strong> Quando ativado, apenas administradores poderão acessar o sistema.
+                                        Todos os outros usuários serão redirecionados para uma página de manutenção.
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            Status atual: <span class="fw-bold" id="maintenanceStatus">
+                                                {% if settings.maintenance_mode %}ATIVADO{% else %}DESATIVADO{% endif %}
+                                            </span>
+                                        </small>
+                                        <span class="badge fs-6 {% if settings.maintenance_mode %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                                            {% if settings.maintenance_mode %}
+                                                <i class="fas fa-exclamation-triangle me-1"></i>Manutenção
+                                            {% else %}
+                                                <i class="fas fa-check-circle me-1"></i>Normal
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="card border-info border-2 h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-bug fa-2x text-info me-3"></i>
+                                        <div>
+                                            <h6 class="mb-0">Modo Debug</h6>
+                                            <small class="text-muted">Informações técnicas detalhadas</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input form-check-input-lg" type="checkbox"
+                                               id="debug_mode" name="debug_mode"
+                                               {% if settings.debug_mode %}checked{% endif %} disabled>
+                                        <label class="form-check-label fw-bold" for="debug_mode">
+                                            Ativar Modo Debug
+                                        </label>
+                                    </div>
+
+                                    <div class="alert alert-info border-0">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Esta configuração é controlada pela variável de ambiente <code>FLASK_DEBUG</code>
+                                        e só pode ser alterada no servidor.
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            Status atual: <span class="fw-bold" id="debugStatus">
+                                                {% if settings.debug_mode %}ATIVADO{% else %}DESATIVADO{% endif %}
+                                            </span>
+                                        </small>
+                                        <span class="badge fs-6 {% if settings.debug_mode %}bg-info{% else %}bg-secondary{% endif %}">
+                                            {% if settings.debug_mode %}
+                                                <i class="fas fa-bug me-1"></i>Debug
+                                            {% else %}
+                                                <i class="fas fa-shield-alt me-1"></i>Produção
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="alert alert-light border">
+                                <div class="d-flex">
+                                    <i class="fas fa-shield-alt fa-2x me-3 text-primary"></i>
+                                    <div>
+                                        <h6 class="alert-heading mb-1">Impacto das Configurações</h6>
+                                        <ul class="mb-0 small">
+                                            <li><strong>Modo de Manutenção:</strong> Afeta imediatamente o acesso de todos os usuários</li>
+                                            <li><strong>Modo Debug:</strong> Pode expor informações sensíveis - use apenas em desenvolvimento</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba Servidor -->
+                <div class="tab-pane fade" id="server" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-server fa-2x text-secondary me-3"></i>
+                                <div>
+                                    <h5 class="mb-0">Informações do Servidor</h5>
+                                    <small class="text-muted">Status e métricas do ambiente de execução</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Cards -->
+                        <div class="col-xl-3 col-lg-6">
+                            <div class="card border-0 shadow-sm h-100 status-card" data-status="database">
+                                <div class="card-body text-center">
+                                    <div class="status-icon mb-3">
+                                        <i class="fas fa-database fa-3x text-primary"></i>
+                                    </div>
+                                    <h6 class="card-title mb-2">Banco de Dados</h6>
+                                    <div class="status-indicator">
+                                        <span class="badge bg-success fs-6 px-3 py-2">
+                                            <i class="fas fa-check-circle me-1"></i>PostgreSQL
+                                        </span>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">Conectado</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6">
+                            <div class="card border-0 shadow-sm h-100 status-card" data-status="system">
+                                <div class="card-body text-center">
+                                    <div class="status-icon mb-3">
+                                        <i class="fas fa-check-circle fa-3x text-success"></i>
+                                    </div>
+                                    <h6 class="card-title mb-2">Sistema</h6>
+                                    <div class="status-indicator">
+                                        <span class="badge bg-success fs-6 px-3 py-2">
+                                            <i class="fas fa-play-circle me-1"></i>Operacional
+                                        </span>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">Funcionando normalmente</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6">
+                            <div class="card border-0 shadow-sm h-100 status-card" data-status="uptime">
+                                <div class="card-body text-center">
+                                    <div class="status-icon mb-3">
+                                        <i class="fas fa-clock fa-3x text-info"></i>
+                                    </div>
+                                    <h6 class="card-title mb-2">Uptime</h6>
+                                    <div class="status-indicator">
+                                        <span class="badge bg-info fs-6 px-3 py-2">
+                                            <i class="fas fa-clock me-1"></i>{{ settings.get('uptime', 'N/A') }}
+                                        </span>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">Tempo de atividade</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-lg-6">
+                            <div class="card border-0 shadow-sm h-100 status-card" data-status="version">
+                                <div class="card-body text-center">
+                                    <div class="status-icon mb-3">
+                                        <i class="fas fa-code-branch fa-3x text-warning"></i>
+                                    </div>
+                                    <h6 class="card-title mb-2">Versão</h6>
+                                    <div class="status-indicator">
+                                        <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                                            <i class="fas fa-tag me-1"></i>{{ settings.system_version }}
+                                        </span>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">Versão atual</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Métricas Detalhadas -->
+                        <div class="col-12">
+                            <div class="card border-0 bg-light">
+                                <div class="card-header bg-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        Métricas do Sistema
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-md-3">
+                                            <div class="metric">
+                                                <div class="metric-value text-primary fw-bold fs-4">2.1 GB</div>
+                                                <div class="metric-label small text-muted">Memória Usada</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="metric">
+                                                <div class="metric-value text-success fw-bold fs-4">45%</div>
+                                                <div class="metric-label small text-muted">CPU</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="metric">
+                                                <div class="metric-value text-info fw-bold fs-4">127</div>
+                                                <div class="metric-label small text-muted">Conexões Ativas</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="metric">
+                                                <div class="metric-value text-warning fw-bold fs-4">2.4 MB</div>
+                                                <div class="metric-label small text-muted">Disco Usado</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barra de Ações -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-save text-primary me-2"></i>
+                            <small class="text-muted">
+                                Suas alterações serão aplicadas imediatamente após salvar
+                            </small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary" onclick="validateSettings()">
+                                <i class="fas fa-check-circle me-1"></i>Validar
+                            </button>
+                            <button type="submit" class="btn btn-success btn-lg" id="saveSettingsBtn">
+                                <i class="fas fa-save me-2"></i>Salvar Configurações
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ========================================
+// CONFIGURAÇÕES GERAIS - JAVASCRIPT APRIMORADO
+// ========================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeGeneralSettings();
+});
+
+// Inicialização
+function initializeGeneralSettings() {
+    setupFormValidation();
+    setupRealTimePreview();
+    setupMaintenanceModeToggle();
+    updateCurrentTime();
+    initializeTooltips();
+}
+
+// Validação de Formulário
+function setupFormValidation() {
+    const form = document.getElementById('generalSettingsForm');
+
+    form.addEventListener('submit', function(e) {
+        if (!validateSettings()) {
+            e.preventDefault();
+            return false;
+        }
+
+        // Mostrar loading
+        const submitBtn = document.getElementById('saveSettingsBtn');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Salvando...';
+        submitBtn.disabled = true;
+    });
+}
+
+function validateSettings() {
+    let isValid = true;
+    const errors = [];
+
+    // Validar nome do sistema
+    const systemName = document.getElementById('system_name').value.trim();
+    if (systemName.length < 3) {
+        errors.push('Nome do sistema deve ter pelo menos 3 caracteres');
+        isValid = false;
+    }
+
+    // Validar fuso horário
+    const timezone = document.getElementById('timezone').value;
+    if (!timezone) {
+        errors.push('Fuso horário é obrigatório');
+        isValid = false;
+    }
+
+    // Validar idioma
+    const language = document.getElementById('language').value;
+    if (!language) {
+        errors.push('Idioma é obrigatório');
+        isValid = false;
+    }
+
+    // Mostrar erros se houver
+    if (!isValid) {
+        showValidationErrors(errors);
+    } else {
+        hideValidationErrors();
+    }
+
+    return isValid;
+}
+
+function showValidationErrors(errors) {
+    hideValidationErrors();
+
+    const errorHtml = `
+        <div class="alert alert-danger alert-dismissible fade show" id="validationErrors">
+            <h6><i class="fas fa-exclamation-triangle me-2"></i>Erros de Validação</h6>
+            <ul class="mb-0">
+                ${errors.map(error => `<li>${error}</li>`).join('')}
+            </ul>
+            <button type="button" class="btn-close" onclick="hideValidationErrors()"></button>
+        </div>
+    `;
+
+    const form = document.getElementById('generalSettingsForm');
+    form.insertBefore(
+        new DOMParser().parseFromString(errorHtml, 'text/html').body.firstChild,
+        form.firstChild
+    );
+}
+
+function hideValidationErrors() {
+    const errorsDiv = document.getElementById('validationErrors');
+    if (errorsDiv) {
+        errorsDiv.remove();
+    }
+}
+
+// Preview em Tempo Real
+function setupRealTimePreview() {
+    const inputs = ['system_name', 'timezone', 'language'];
+
+    inputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.addEventListener('input', debounce(updatePreview, 500));
+            input.addEventListener('change', updatePreview);
+        }
+    });
+}
+
+function updatePreview() {
+    // Implementar preview das mudanças
+    console.log('Preview updated');
+}
+
+function showPreview() {
+    // Implementar modal de preview
+    Feedback.info('', 'Funcionalidade de preview será implementada');
+}
+
+// Toggle do Modo de Manutenção
+function setupMaintenanceModeToggle() {
+    const maintenanceToggle = document.getElementById('maintenance_mode');
+    const maintenanceAlert = document.getElementById('maintenanceAlert');
+    const maintenanceStatus = document.getElementById('maintenanceStatus');
+
+    if (maintenanceToggle) {
+        maintenanceToggle.addEventListener('change', function() {
+            const isEnabled = this.checked;
+
+            if (maintenanceAlert) {
+                maintenanceAlert.style.display = isEnabled ? 'block' : 'none';
+            }
+
+            if (maintenanceStatus) {
+                maintenanceStatus.textContent = isEnabled ? 'ATIVADO' : 'DESATIVADO';
+            }
+
+            // Atualizar badge visual
+            updateMaintenanceBadge(isEnabled);
+        });
+    }
+}
+
+function updateMaintenanceBadge(isEnabled) {
+    const badge = document.querySelector('[data-bs-toggle="tab"][data-bs-target="#operation"] .badge');
+    if (badge) {
+        badge.className = `badge fs-6 ${isEnabled ? 'bg-warning text-dark' : 'bg-success'}`;
+        badge.innerHTML = isEnabled
+            ? '<i class="fas fa-exclamation-triangle me-1"></i>Manutenção'
+            : '<i class="fas fa-check-circle me-1"></i>Normal';
+    }
+}
+
+// Atualização do Horário Atual
+function updateCurrentTime() {
+    const currentTimeElement = document.getElementById('currentTime');
+    if (currentTimeElement) {
+        const now = new Date();
+        currentTimeElement.textContent = now.toLocaleString('pt-BR', {
+            timeZone: document.getElementById('timezone')?.value || 'America/Manaus',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    }
+}
+
+// Restaurar Padrões
+function resetToDefaults() {
+    if (confirm('Tem certeza de que deseja restaurar todas as configurações para os valores padrão?')) {
+        // Reset form
+        document.getElementById('system_name').value = 'TI OSN System';
+        document.getElementById('timezone').value = 'America/Manaus';
+        document.getElementById('language').value = 'pt-BR';
+        document.getElementById('maintenance_mode').checked = false;
+
+        // Trigger events
+        document.getElementById('maintenance_mode').dispatchEvent(new Event('change'));
+        updatePreview();
+
+        showToast('Configurações restauradas para os valores padrão', 'info');
+    }
+}
+
+// Sistema de Tooltips
+function initializeTooltips() {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+}
+
+// Utilitários
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function showToast(message, type = 'info') {
+    // Implementar sistema de toast notifications
+    console.log(`${type}: ${message}`);
+}
+
+// Atualizar horário a cada minuto
+setInterval(updateCurrentTime, 60000);
+</script>
+
+<style>
+/* Cards de Status */
+.status-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+.status-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+.status-icon {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.status-card:hover .status-icon {
+    opacity: 1;
+}
+
+/* Métricas */
+.metric {
+    padding: 1rem;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.5);
+    transition: all 0.3s ease;
+}
+
+.metric:hover {
+    background: rgba(255,255,255,0.8);
+    transform: scale(1.02);
+}
+
+.metric-value {
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Abas */
+.nav-tabs .nav-link {
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--bs-gray-600);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    border-bottom-color: var(--bs-primary);
+    color: var(--bs-primary);
+}
+
+.nav-tabs .nav-link.active {
+    border-bottom-color: var(--bs-primary);
+    color: var(--bs-primary);
+    background: none;
+}
+
+/* Formulários */
+.form-floating > .form-control {
+    border-radius: 8px;
+}
+
+.form-floating > label {
+    padding: 1rem;
+}
+
+/* Switches Grandes */
+.form-check-input-lg {
+    width: 3rem !important;
+    height: 1.5rem !important;
+}
+
+.form-check-input-lg:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .status-card {
+        margin-bottom: 1rem;
+    }
+
+    .metric {
+        margin-bottom: 1rem;
+    }
+
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch !important;
+    }
+
+    .d-flex.justify-content-between .d-flex.gap-2 {
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}

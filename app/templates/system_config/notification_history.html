@@ -1,0 +1,746 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Histórico de Notificações{% endblock %}
+
+{% block config_content %}
+<!-- Abas de Navegação -->
+<div class="config-tabs mb-4">
+    <ul class="nav nav-tabs" id="historyTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-history-tab" data-bs-toggle="tab" data-bs-target="#all-history" type="button" role="tab">
+                <i class="fas fa-list me-1"></i> Todas
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="email-history-tab" data-bs-toggle="tab" data-bs-target="#email-history" type="button" role="tab">
+                <i class="fas fa-envelope me-1"></i> Email
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="push-history-tab" data-bs-toggle="tab" data-bs-target="#push-history" type="button" role="tab">
+                <i class="fas fa-bell me-1"></i> Push
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">
+                <i class="fas fa-chart-bar me-1"></i> Analytics
+            </button>
+        </li>
+    </ul>
+</div>
+
+<div class="tab-content" id="historyTabsContent">
+    <!-- Aba Todas as Notificações -->
+    <div class="tab-pane fade show active" id="all-history" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">
+                            <i class="fas fa-history me-2"></i>
+                            Histórico Completo de Notificações
+                        </h3>
+                        <p class="text-muted mb-0 mt-1">Visualize todas as notificações enviadas pelo sistema</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-info" onclick="refreshHistory()">
+                            <i class="fas fa-sync me-1"></i> Atualizar
+                        </button>
+                        <button type="button" class="btn btn-outline-success" onclick="exportHistory()">
+                            <i class="fas fa-download me-1"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-card-body">
+                <!-- Dashboard de Estatísticas -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Estatísticas de Notificações - Últimos 30 Dias
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-paper-plane fa-2x text-success mb-2"></i>
+                                            <h4 class="mb-0 text-success">8,547</h4>
+                                            <small class="text-muted">Enviadas</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-check-circle fa-2x text-primary mb-2"></i>
+                                            <h4 class="mb-0 text-primary">98.7%</h4>
+                                            <small class="text-muted">Taxa de Sucesso</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
+                                            <h4 class="mb-0 text-danger">127</h4>
+                                            <small class="text-muted">Falhas</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                                            <h4 class="mb-0 text-warning">23</h4>
+                                            <small class="text-muted">Pendentes</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros Avançados -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-filter me-2"></i>
+                                    Filtros Avançados
+                                    <button class="btn btn-sm btn-outline-secondary float-end" onclick="toggleFilters()">
+                                        <i class="fas fa-chevron-up" id="filterToggleIcon"></i>
+                                    </button>
+                                </h6>
+                            </div>
+                            <div class="card-body" id="filtersContent">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <label for="filter_type" class="form-label">Tipo</label>
+                                        <select class="form-select form-select-sm" id="filter_type">
+                                            <option value="">Todos</option>
+                                            <option value="chamado">Chamados</option>
+                                            <option value="lembrete">Lembretes</option>
+                                            <option value="tarefa">Tarefas</option>
+                                            <option value="sistema">Sistema</option>
+                                            <option value="alerta">Alertas</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="filter_status" class="form-label">Status</label>
+                                        <select class="form-select form-select-sm" id="filter_status">
+                                            <option value="">Todos</option>
+                                            <option value="sent">Enviado</option>
+                                            <option value="failed">Falhou</option>
+                                            <option value="pending">Pendente</option>
+                                            <option value="bounced">Rejeitado</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="filter_channel" class="form-label">Canal</label>
+                                        <select class="form-select form-select-sm" id="filter_channel">
+                                            <option value="">Todos</option>
+                                            <option value="email">Email</option>
+                                            <option value="push">Push</option>
+                                            <option value="sms">SMS</option>
+                                            <option value="slack">Slack</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="filter_date_start" class="form-label">Data Inicial</label>
+                                        <input type="date" class="form-control form-control-sm" id="filter_date_start">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="filter_date_end" class="form-label">Data Final</label>
+                                        <input type="date" class="form-control form-control-sm" id="filter_date_end">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="filter_recipient" class="form-label">Destinatário</label>
+                                        <input type="text" class="form-control form-control-sm" id="filter_recipient" placeholder="Buscar por email...">
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-primary" onclick="applyFilters()">
+                                                <i class="fas fa-search me-1"></i> Aplicar Filtros
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearFilters()">
+                                                <i class="fas fa-times me-1"></i> Limpar
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-info" onclick="saveFilterPreset()">
+                                                <i class="fas fa-save me-1"></i> Salvar Preset
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline Visual -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-stream me-2"></i>
+                                    Timeline de Notificações - Hoje
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="timeline">
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-success"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Novo chamado #123</h6>
+                                            <p class="mb-1 small text-muted">Enviado para joao.silva@empresa.com</p>
+                                            <small class="text-success">14:30 - Sucesso</small>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-success"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Lembrete: Manutenção Servidor</h6>
+                                            <p class="mb-1 small text-muted">Enviado para equipe.ti@empresa.com</p>
+                                            <small class="text-success">12:15 - Sucesso</small>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-danger"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Alerta SLA Crítico</h6>
+                                            <p class="mb-1 small text-muted">Falhou para gerente@empresa.com</p>
+                                            <small class="text-danger">11:45 - Falha: Email inválido</small>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-warning"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Tarefa Vencida</h6>
+                                            <p class="mb-1 small text-muted">Pendente para maria.santos@empresa.com</p>
+                                            <small class="text-warning">10:20 - Aguardando reenvio</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela Interativa de Histórico -->
+                <div class="table-responsive">
+                    <table class="table table-hover" id="notificationsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>
+                                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                                </th>
+                                <th>Data/Hora <i class="fas fa-sort sort-icon" onclick="sortTable(1)"></i></th>
+                                <th>Tipo <i class="fas fa-sort sort-icon" onclick="sortTable(2)"></i></th>
+                                <th>Canal</th>
+                                <th>Destinatário</th>
+                                <th>Assunto</th>
+                                <th>Status</th>
+                                <th>Tentativas</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-status="sent" data-type="chamado" data-channel="email">
+                                <td><input type="checkbox" class="notification-checkbox"></td>
+                                <td>2024-01-20 14:30:25</td>
+                                <td><span class="badge bg-primary">Chamado</span></td>
+                                <td><i class="fas fa-envelope text-primary" title="Email"></i></td>
+                                <td>joao.silva@empresa.com</td>
+                                <td class="text-truncate" style="max-width: 250px;" title="Chamado #123 Aberto: Problema com impressora">Chamado #123 Aberto: Problema com impressora</td>
+                                <td><span class="badge bg-success"><i class="fas fa-check me-1"></i>Enviado</span></td>
+                                <td>1/1</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-info" onclick="viewNotificationDetails(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="showNotificationLog(this)">
+                                            <i class="fas fa-history"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-status="sent" data-type="lembrete" data-channel="email">
+                                <td><input type="checkbox" class="notification-checkbox"></td>
+                                <td>2024-01-20 12:15:10</td>
+                                <td><span class="badge bg-warning">Lembrete</span></td>
+                                <td><i class="fas fa-envelope text-primary" title="Email"></i></td>
+                                <td>equipe.ti@empresa.com</td>
+                                <td class="text-truncate" style="max-width: 250px;" title="Lembrete: Manutenção Servidor - Vence em 2 dias">Lembrete: Manutenção Servidor - Vence em 2 dias</td>
+                                <td><span class="badge bg-success"><i class="fas fa-check me-1"></i>Enviado</span></td>
+                                <td>1/1</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-info" onclick="viewNotificationDetails(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="showNotificationLog(this)">
+                                            <i class="fas fa-history"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-status="failed" data-type="alerta" data-channel="email">
+                                <td><input type="checkbox" class="notification-checkbox"></td>
+                                <td>2024-01-20 11:45:33</td>
+                                <td><span class="badge bg-danger">Alerta</span></td>
+                                <td><i class="fas fa-envelope text-primary" title="Email"></i></td>
+                                <td>gerente@empresa.com</td>
+                                <td class="text-truncate" style="max-width: 250px;" title="ALERTA: SLA Crítico - Chamado #456">ALERTA: SLA Crítico - Chamado #456</td>
+                                <td><span class="badge bg-danger"><i class="fas fa-times me-1"></i>Falhou</span></td>
+                                <td>3/3</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-info" onclick="viewNotificationDetails(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-warning" onclick="retryNotification(this)">
+                                            <i class="fas fa-redo"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="showNotificationLog(this)">
+                                            <i class="fas fa-history"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-status="pending" data-type="tarefa" data-channel="push">
+                                <td><input type="checkbox" class="notification-checkbox"></td>
+                                <td>2024-01-20 10:20:15</td>
+                                <td><span class="badge bg-info">Tarefa</span></td>
+                                <td><i class="fas fa-bell text-info" title="Push Notification"></i></td>
+                                <td>maria.santos@empresa.com</td>
+                                <td class="text-truncate" style="max-width: 250px;" title="Tarefa Vencida: Atualização Sistema">Tarefa Vencida: Atualização Sistema</td>
+                                <td><span class="badge bg-warning"><i class="fas fa-clock me-1"></i>Pendente</span></td>
+                                <td>0/3</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-info" onclick="viewNotificationDetails(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-success" onclick="sendNow(this)">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="cancelNotification(this)">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-status="sent" data-type="sistema" data-channel="slack">
+                                <td><input type="checkbox" class="notification-checkbox"></td>
+                                <td>2024-01-20 09:15:42</td>
+                                <td><span class="badge bg-secondary">Sistema</span></td>
+                                <td><i class="fab fa-slack text-warning" title="Slack"></i></td>
+                                <td>#alertas-ti</td>
+                                <td class="text-truncate" style="max-width: 250px;" title="Backup concluído com sucesso">Backup concluído com sucesso</td>
+                                <td><span class="badge bg-success"><i class="fas fa-check me-1"></i>Enviado</span></td>
+                                <td>1/1</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-info" onclick="viewNotificationDetails(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="showNotificationLog(this)">
+                                            <i class="fas fa-history"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Barra de Ações em Massa -->
+                <div class="bulk-actions mt-3" id="bulkActions" style="display: none;">
+                    <div class="card border-primary">
+                        <div class="card-body py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><strong id="selectedCount">0</strong> notificações selecionadas</span>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="bulkRetry()">
+                                        <i class="fas fa-redo me-1"></i> Reenviar Selecionadas
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="bulkExport()">
+                                        <i class="fas fa-download me-1"></i> Exportar Selecionadas
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="bulkDelete()">
+                                        <i class="fas fa-trash me-1"></i> Excluir Selecionadas
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearSelection()">
+                                        <i class="fas fa-times me-1"></i> Limpar Seleção
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Aba Histórico de Email -->
+        <div class="tab-pane fade" id="email-history" role="tabpanel">
+            <div class="config-card">
+                <div class="config-card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-envelope me-2"></i>
+                        Histórico de Emails
+                    </h3>
+                    <p class="text-muted mb-0 mt-1">Notificações enviadas por email</p>
+                </div>
+                <div class="config-card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Esta aba mostra apenas notificações por email. Use a aba "Todas" para visualizar todos os tipos.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Histórico de Push -->
+        <div class="tab-pane fade" id="push-history" role="tabpanel">
+            <div class="config-card">
+                <div class="config-card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>
+                        Histórico de Push Notifications
+                    </h3>
+                    <p class="text-muted mb-0 mt-1">Notificações push enviadas</p>
+                </div>
+                <div class="config-card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Push notifications serão implementadas na próxima versão com integração Firebase/OneSignal.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Analytics -->
+        <div class="tab-pane fade" id="analytics" role="tabpanel">
+            <div class="config-card">
+                <div class="config-card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Analytics de Notificações
+                    </h3>
+                    <p class="text-muted mb-0 mt-1">Estatísticas e métricas detalhadas</p>
+                </div>
+                <div class="config-card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Taxa de Abertura por Tipo</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="openRateChart" width="100%" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Tempo Médio de Resposta</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="responseTimeChart" width="100%" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Notificações por Hora do Dia</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="hourlyChart" width="100%" height="150"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funções de Histórico
+function refreshHistory() {
+    const btn = event.target.closest('button');
+    const originalHTML = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Atualizando...';
+
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        Feedback.success('Sucesso', 'Histórico atualizado com sucesso!\n\nDados mais recentes carregados.');
+    }, 2000);
+}
+
+function toggleFilters() {
+    const content = document.getElementById('filtersContent');
+    const icon = document.getElementById('filterToggleIcon');
+
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';
+    } else {
+        content.style.display = 'none';
+        icon.className = 'fas fa-chevron-down';
+    }
+}
+
+function applyFilters() {
+    Feedback.info('', 'Filtros aplicados!\n\nBuscando notificações com os critérios selecionados...');
+    // Simular aplicação de filtros
+}
+
+function clearFilters() {
+    document.getElementById('filter_type').value = '';
+    document.getElementById('filter_status').value = '';
+    document.getElementById('filter_channel').value = '';
+    document.getElementById('filter_date_start').value = '';
+    document.getElementById('filter_date_end').value = '';
+    document.getElementById('filter_recipient').value = '';
+    Feedback.info('', 'Filtros limpos!');
+}
+
+function saveFilterPreset() {
+    const presetName = prompt('Nome do preset de filtros:');
+    if (presetName) {
+        alert(`Preset "${presetName}" salvo com sucesso!\n\nPoderá ser reutilizado posteriormente.`);
+    }
+}
+
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.notification-checkbox');
+    const bulkActions = document.getElementById('bulkActions');
+    const selectedCount = document.getElementById('selectedCount');
+
+    checkboxes.forEach(cb => {
+        cb.checked = selectAll.checked;
+    });
+
+    updateBulkActions();
+}
+
+function updateBulkActions() {
+    const checkboxes = document.querySelectorAll('.notification-checkbox:checked');
+    const bulkActions = document.getElementById('bulkActions');
+    const selectedCount = document.getElementById('selectedCount');
+
+    if (checkboxes.length > 0) {
+        bulkActions.style.display = 'block';
+        selectedCount.textContent = checkboxes.length;
+    } else {
+        bulkActions.style.display = 'none';
+    }
+}
+
+// Adicionar event listeners para checkboxes
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.notification-checkbox');
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateBulkActions);
+    });
+});
+
+function sortTable(column) {
+    alert(`Ordenando por coluna ${column} - Funcionalidade em desenvolvimento`);
+}
+
+function viewNotificationDetails(button) {
+    const row = button.closest('tr');
+    const cells = row.querySelectorAll('td');
+    const datetime = cells[1].textContent;
+    const type = cells[2].textContent;
+    const recipient = cells[4].textContent;
+    const subject = cells[5].textContent;
+    const status = cells[6].textContent;
+
+    const details = `
+DETALHES DA NOTIFICAÇÃO
+
+Data/Hora: ${datetime}
+Tipo: ${type}
+Destinatário: ${recipient}
+Assunto: ${subject}
+Status: ${status}
+
+Template Utilizado: Chamado Aberto
+Regra Disparada: Novo Chamado Criado
+Canal: Email
+
+Tentativas: 1/3
+Última Tentativa: ${datetime}
+Código de Resposta: 200 OK
+Tempo de Resposta: 245ms
+
+Cabeçalhos:
+- From: sistema@tiosn.com
+- To: ${recipient}
+- Subject: ${subject}
+
+Corpo da Mensagem:
+[Conteúdo completo da notificação...]
+    `;
+
+    showModal('Detalhes da Notificação', `<pre class="bg-light p-3">${details}</pre>`);
+}
+
+function showNotificationLog(button) {
+    const logDetails = `
+LOG DE ENVIO
+
+2024-01-20 14:30:25 - Iniciando envio
+2024-01-20 14:30:25 - Conectando ao servidor SMTP
+2024-01-20 14:30:25 - Autenticação realizada
+2024-01-20 14:30:25 - Enviando mensagem
+2024-01-20 14:30:25 - Mensagem enviada com sucesso
+2024-01-20 14:30:25 - Código de resposta: 200 OK
+2024-01-20 14:30:25 - Tempo total: 245ms
+    `;
+
+    showModal('Log de Envio', `<pre class="bg-light p-3 small">${logDetails}</pre>`);
+}
+
+function retryNotification(button) {
+    if (confirm('Reenviar esta notificação?\n\nSerá feita uma nova tentativa de envio.')) {
+        const row = button.closest('tr');
+        const statusCell = row.querySelector('td:nth-child(7)');
+        statusCell.innerHTML = '<span class="badge bg-warning"><i class="fas fa-clock me-1"></i>Reenviando...</span>';
+
+        setTimeout(() => {
+            statusCell.innerHTML = '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Enviado</span>';
+            Feedback.success('Sucesso', 'Notificação reenviada com sucesso!');
+        }, 2000);
+    }
+}
+
+function sendNow(button) {
+    if (confirm('Enviar esta notificação agora?\n\nA notificação será processada imediatamente.')) {
+        const row = button.closest('tr');
+        const statusCell = row.querySelector('td:nth-child(7)');
+        statusCell.innerHTML = '<span class="badge bg-info"><i class="fas fa-paper-plane me-1"></i>Enviando...</span>';
+
+        setTimeout(() => {
+            statusCell.innerHTML = '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Enviado</span>';
+            Feedback.success('Sucesso', 'Notificação enviada com sucesso!');
+        }, 1500);
+    }
+}
+
+function cancelNotification(button) {
+    if (confirm('Cancelar esta notificação?\n\nA notificação será removida da fila de envio.')) {
+        const row = button.closest('tr');
+        row.remove();
+        Feedback.info('', 'Notificação cancelada!');
+        updateBulkActions();
+    }
+}
+
+function bulkRetry() {
+    const selected = document.querySelectorAll('.notification-checkbox:checked');
+    if (selected.length === 0) {
+        Feedback.info('', 'Nenhuma notificação selecionada.');
+        return;
+    }
+
+    if (confirm(`Reenviar ${selected.length} notificações?\n\nSerá feita uma nova tentativa para cada uma.`)) {
+        alert(`${selected.length} notificações estão sendo reenviadas...`);
+    }
+}
+
+function bulkExport() {
+    const selected = document.querySelectorAll('.notification-checkbox:checked');
+    if (selected.length === 0) {
+        Feedback.info('', 'Nenhuma notificação selecionada.');
+        return;
+    }
+
+    alert(`Exportando ${selected.length} notificações...\n\nFormato: CSV\nInclui: Data, Tipo, Destinatário, Status, Detalhes`);
+}
+
+function bulkDelete() {
+    const selected = document.querySelectorAll('.notification-checkbox:checked');
+    if (selected.length === 0) {
+        Feedback.info('', 'Nenhuma notificação selecionada.');
+        return;
+    }
+
+    if (confirm(`Excluir ${selected.length} notificações?\n\nEsta ação não pode ser desfeita.`)) {
+        selected.forEach(cb => {
+            cb.closest('tr').remove();
+        });
+        alert(`${selected.length} notificações excluídas!`);
+        updateBulkActions();
+    }
+}
+
+function clearSelection() {
+    const checkboxes = document.querySelectorAll('.notification-checkbox');
+    const selectAll = document.getElementById('selectAll');
+
+    checkboxes.forEach(cb => cb.checked = false);
+    selectAll.checked = false;
+    updateBulkActions();
+}
+
+function exportHistory() {
+    const format = prompt('Formato de exportação:', 'CSV');
+    if (format) {
+        alert(`Exportando histórico...\n\nFormato: ${format.toUpperCase()}\nPeríodo: Últimos 30 dias\nRegistros: ~8.500\n\nO arquivo será baixado automaticamente.`);
+    }
+}
+
+// Função auxiliar para modal
+function showModal(title, content, confirmText = 'OK', confirmCallback = null) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">${title}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">${content}</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    ${confirmText !== 'OK' ? `<button type="button" class="btn btn-primary" id="modalConfirm">${confirmText}</button>` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+
+    if (confirmCallback) {
+        document.getElementById('modalConfirm').onclick = () => {
+            confirmCallback();
+            bsModal.hide();
+        };
+    }
+
+    modal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(modal);
+    });
+}
+</script>
+{% endblock %}

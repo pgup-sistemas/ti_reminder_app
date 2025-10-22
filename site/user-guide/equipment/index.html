@@ -1,1227 +1,593 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt_BR" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Oézios Normando - Equipe TI OSN" /><link rel="canonical" href="http://192.168.1.86:5000/docs/user-guide/equipment/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Equipamentos - TI OSN System - Documentação Oficial</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Equipamentos";
+        var mkdocs_page_input_path = "user-guide\\equipment.md";
+        var mkdocs_page_url = "/docs/user-guide/equipment/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
 
-<!doctype html>
-<html lang="pt" class="no-js">
-  <head>
-    
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1">
-      
-        <meta name="description" content="Documentação completa do Sistema de Gerenciamento TI OSN">
-      
-      
-        <meta name="author" content="Equipe TI OSN">
-      
-      
-        <link rel="canonical" href="http://192.168.1.86:5000/docs/user-guide/equipment/">
-      
-      
-        <link rel="prev" href="../tutorials/">
-      
-      
-        <link rel="next" href="../dashboard/">
-      
-      
-      <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.8">
-    
-    
-      
-        <title>Equipamentos - TI OSN System - Documentação</title>
-      
-    
-    
-      <link rel="stylesheet" href="../../assets/stylesheets/main.4b4a2bd9.min.css">
-      
-        
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
-      
-      
+<body class="wy-body-for-nav" role="document">
 
-
-    
-    
-      
-    
-    
-      
-        
-        
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-      
-    
-    
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
-    
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
-    
-      
-
-    
-    
-    
-  </head>
-  
-  
-    
-    
-    
-    
-    
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue">
-  
-    
-    
-    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
-    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
-    <div data-md-component="skip">
-      
-        
-        <a href="#gestao-de-equipamentos" class="md-skip">
-          Pular para conteúdo
-        </a>
-      
-    </div>
-    <div data-md-component="announce">
-      
-    </div>
-    
-      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
-        
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> TI OSN System - Documentação Oficial
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
       </div>
-    
-    
-      
 
-  
-
-<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Cabeçalho">
-    <a href="../.." title="TI OSN System - Documentação" class="md-header__button md-logo" aria-label="TI OSN System - Documentação" data-md-component="logo">
-      
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
-
-    </a>
-    <label class="md-header__button md-icon" for="__drawer">
-      
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
-    </label>
-    <div class="md-header__title" data-md-component="header-title">
-      <div class="md-header__ellipsis">
-        <div class="md-header__topic">
-          <span class="md-ellipsis">
-            TI OSN System - Documentação
-          </span>
-        </div>
-        <div class="md-header__topic" data-md-component="header-topic">
-          <span class="md-ellipsis">
-            
-              Equipamentos
-            
-          </span>
-        </div>
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Início</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Usuário</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Visão Geral</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../reminders/">Lembretes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../chamados/">Chamados</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tasks/">Tarefas</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tutorials/">Tutoriais</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Equipamentos</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#visao-geral">🎯 Visão Geral</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#catalogo-de-equipamentos">🛒 Catálogo de Equipamentos</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#navegando-pelo-inventario">Navegando pelo Inventário</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sistema-de-reservas">📅 Sistema de Reservas</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#fazendo-uma-reserva">Fazendo uma Reserva</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#regras-de-aprovacao">Regras de Aprovação</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#beneficios-do-sistema">Benefícios do Sistema</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#novo-fluxo-de-emprestimo">🔄 Novo Fluxo de Empréstimo</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#status-atualizado">Status Atualizado</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#processo-otimizado">Processo Otimizado</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#acompanhamento-moderno">📊 Acompanhamento Moderno</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#paineis-de-controle">Painéis de Controle</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#notificacoes-inteligentes">Notificações Inteligentes</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#inventario-central">🏗️ Inventário Central</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#dados-tecnicos-completos">Dados Técnicos Completos</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#controle-de-qualidade-avancado">Controle de Qualidade Avançado</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#devolucao-inteligente">♻️ Devolução Inteligente</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#gatilhos-automaticos">Gatilhos Automáticos</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#processo-simplificado">Processo Simplificado</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#beneficios-da-automacao">Benefícios da Automação</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#tipos-de-equipamento">📋 Tipos de Equipamento</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#categorias-comuns">Categorias Comuns</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#analytics-e-business-intelligence">📈 Analytics e Business Intelligence</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#metricas-avancadas">Métricas Avançadas</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#dashboards-executivos">Dashboards Executivos</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#relatorios-customizaveis">Relatórios Customizáveis</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#novos-recursos-e-beneficios">🚀 Novos Recursos e Benefícios</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#para-usuarios">Para Usuários</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#para-tiadmin">Para TI/Admin</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#para-a-empresa">Para a Empresa</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#suporte-e-troubleshooting">🔧 Suporte e Troubleshooting</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#problemas-comuns-nova-era">Problemas Comuns - Nova Era</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#suporte-avancado">Suporte Avançado</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#integracoes-e-apis">🔗 Integrações e APIs</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#sistema-conectado">Sistema Conectado</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#api-rest-completa">API REST Completa</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#webhooks-e-automacao">Webhooks e Automação</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../dashboard/">Dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../rfid/">Sistema RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../satisfaction/">Avaliação de Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../certifications/">Certificações</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../performance/">Performance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Administrador</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/equipment-admin/">Equipamentos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/performance-admin/">Performance</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/rfid-admin/">RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/satisfaction-admin/">Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/certifications-admin/">Certificações</a>
+                  </li>
+              </ul>
       </div>
     </div>
-    
-      
-    
-    
-    
-      <label class="md-header__button md-icon" for="__search">
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">TI OSN System - Documentação Oficial</a>
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
-      </label>
-      <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Pesquisar">
-        
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Compartilhar" aria-label="Compartilhar" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
-            
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
-          </a>
-        
-        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
-        </button>
       </nav>
-      
-        <div class="md-search__suggest" data-md-component="search-suggest"></div>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Inicializando busca
-          </div>
-          <ol class="md-search-result__list" role="presentation"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-    
-    
-  </nav>
-  
-    
-      
-<nav class="md-tabs" aria-label="Abas" data-md-component="tabs">
-  <div class="md-grid">
-    <ul class="md-tabs__list">
-      
-        
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
-        
-  
-    
-  
-  Início
-
-      </a>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Guia do Usuário</li>
+      <li class="breadcrumb-item active">Equipamentos</li>
+    <li class="wy-breadcrumbs-aside">
     </li>
-  
-
-      
-        
-  
-  
-    
-  
-  
-    
-    
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../overview/" class="md-tabs__link">
-          
-  
-    
-  
-  Guia do Usuário
-
-        </a>
-      </li>
-    
-  
-
-      
-    </ul>
-  </div>
-</nav>
-    
-  
-</header>
-    
-    <div class="md-container" data-md-component="container">
-      
-      
-        
-      
-      <main class="md-main" data-md-component="main">
-        <div class="md-main__inner md-grid">
-          
-            
-              
-              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-
-  
-
-
-  
-
-<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navegação" data-md-level="0">
-  <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="TI OSN System - Documentação" class="md-nav__button md-logo" aria-label="TI OSN System - Documentação" data-md-component="logo">
-      
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
-
-    </a>
-    TI OSN System - Documentação
-  </label>
-  
-  <ul class="md-nav__list" data-md-scrollfix>
-    
-      
-      
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Início
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-    
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-    
-      
-      
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
-            
-  
-  <span class="md-ellipsis">
-    Guia do Usuário
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_2">
-            <span class="md-nav__icon md-icon"></span>
-            Guia do Usuário
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../overview/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Visão Geral
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reminders/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Lembretes
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../chamados/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Chamados
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../tasks/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Tarefas
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../tutorials/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Tutoriais
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Equipamentos
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  <span class="md-ellipsis">
-    Equipamentos
-  </span>
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Índice">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Índice
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#visao-geral" class="md-nav__link">
-    🎯 Visão Geral
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#solicitando-equipamentos" class="md-nav__link">
-    📝 Solicitando Equipamentos
-  </a>
-  
-    <nav class="md-nav" aria-label="📝 Solicitando Equipamentos">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#passo-a-passo" class="md-nav__link">
-    Passo a Passo
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#fluxo-de-aprovacao" class="md-nav__link">
-    🔄 Fluxo de Aprovação
-  </a>
-  
-    <nav class="md-nav" aria-label="🔄 Fluxo de Aprovação">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#status-das-solicitacoes" class="md-nav__link">
-    Status das Solicitações
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#processo-de-aprovacao" class="md-nav__link">
-    Processo de Aprovação
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#acompanhamento" class="md-nav__link">
-    📊 Acompanhamento
-  </a>
-  
-    <nav class="md-nav" aria-label="📊 Acompanhamento">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#visualizando-solicitacoes" class="md-nav__link">
-    Visualizando Solicitações
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#notificacoes" class="md-nav__link">
-    Notificações
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dados-tecnicos" class="md-nav__link">
-    🖥️ Dados Técnicos
-  </a>
-  
-    <nav class="md-nav" aria-label="🖥️ Dados Técnicos">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#informacoes-cadastradas" class="md-nav__link">
-    Informações Cadastradas
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#controle-de-qualidade" class="md-nav__link">
-    Controle de Qualidade
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#processo-de-devolucao" class="md-nav__link">
-    ♻️ Processo de Devolução
-  </a>
-  
-    <nav class="md-nav" aria-label="♻️ Processo de Devolução">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#quando-devolver" class="md-nav__link">
-    Quando Devolver
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#como-devolver" class="md-nav__link">
-    Como Devolver
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#tipos-de-equipamento" class="md-nav__link">
-    📋 Tipos de Equipamento
-  </a>
-  
-    <nav class="md-nav" aria-label="📋 Tipos de Equipamento">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#categorias-comuns" class="md-nav__link">
-    Categorias Comuns
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#relatorios-e-metricas" class="md-nav__link">
-    📈 Relatórios e Métricas
-  </a>
-  
-    <nav class="md-nav" aria-label="📈 Relatórios e Métricas">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#dados-disponiveis" class="md-nav__link">
-    Dados Disponíveis
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#exportacao" class="md-nav__link">
-    Exportação
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#boas-praticas" class="md-nav__link">
-    💡 Boas Práticas
-  </a>
-  
-    <nav class="md-nav" aria-label="💡 Boas Práticas">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ao-solicitar" class="md-nav__link">
-    Ao Solicitar
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#durante-uso" class="md-nav__link">
-    Durante Uso
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#na-devolucao" class="md-nav__link">
-    Na Devolução
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#solucao-de-problemas" class="md-nav__link">
-    🚨 Solução de Problemas
-  </a>
-  
-    <nav class="md-nav" aria-label="🚨 Solução de Problemas">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#problemas-comuns" class="md-nav__link">
-    Problemas Comuns
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#recursos-adicionais" class="md-nav__link">
-    📚 Recursos Adicionais
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../dashboard/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Dashboard
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
   </ul>
-</nav>
-                  </div>
-                </div>
-              </div>
-            
-            
-          
-          
-            <div class="md-content" data-md-component="content">
-              <article class="md-content__inner md-typeset">
-                
-                  
-
-
-<h1 id="gestao-de-equipamentos">Gestão de Equipamentos<a class="headerlink" href="#gestao-de-equipamentos" title="Permanent link">&para;</a></h1>
-<p>Solicite equipamentos de TI, acompanhe aprovações e gerencie devoluções de forma organizada e rastreável.</p>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="gestao-de-equipamentos">Gestão de Equipamentos<a class="headerlink" href="#gestao-de-equipamentos" title="Permanent link">&para;</a></h1>
+<p>Sistema profissional de gestão de ativos de TI com inventário central, reservas automáticas e controle completo do ciclo de vida.</p>
 <h2 id="visao-geral">🎯 Visão Geral<a class="headerlink" href="#visao-geral" title="Permanent link">&para;</a></h2>
-<p>O módulo de equipamentos oferece controle completo do ciclo de vida dos equipamentos de TI:
-- ✅ <strong>Solicitação</strong> de novos equipamentos
-- ✅ <strong>Aprovação</strong> por equipe de TI
-- ✅ <strong>Entrega</strong> e controle de recebimento
-- ✅ <strong>Devolução</strong> e baixa do equipamento
-- ✅ <strong>Rastreamento</strong> completo de movimentações</p>
-<h2 id="solicitando-equipamentos">📝 Solicitando Equipamentos<a class="headerlink" href="#solicitando-equipamentos" title="Permanent link">&para;</a></h2>
-<h3 id="passo-a-passo">Passo a Passo<a class="headerlink" href="#passo-a-passo" title="Permanent link">&para;</a></h3>
+<p>O novo sistema de equipamentos oferece controle profissional do parque de TI:
+- ✅ <strong>Inventário Central</strong> com catálogo completo
+- ✅ <strong>Sistema de Reservas</strong> com calendário de disponibilidade
+- ✅ <strong>Aprovação Automática</strong> baseada em regras de negócio
+- ✅ <strong>Controle de SLA</strong> para empréstimos
+- ✅ <strong>Alertas Inteligentes</strong> de manutenção e devolução
+- ✅ <strong>API REST</strong> para integrações</p>
+<h2 id="catalogo-de-equipamentos">🛒 Catálogo de Equipamentos<a class="headerlink" href="#catalogo-de-equipamentos" title="Permanent link">&para;</a></h2>
+<h3 id="navegando-pelo-inventario">Navegando pelo Inventário<a class="headerlink" href="#navegando-pelo-inventario" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Acesse o módulo</strong>:</li>
-<li>Menu principal → <strong>"Equipamentos"</strong></li>
-<li>Clique em <strong>"Nova Solicitação"</strong></li>
+<li><strong>Acesse o catálogo</strong>:</li>
+<li>Menu principal → <strong>"Equipamentos"</strong> → <strong>"Catálogo"</strong></li>
 <li>
-<p>URL: <code>http://192.168.1.86:5000/equipment/new</code></p>
+<p>URL: <code>http://192.168.1.86:5000/equipment/catalog</code></p>
 </li>
 <li>
-<p><strong>Preencha o formulário</strong>:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Dados do Equipamento</label><label for="__tabbed_1_2">Dados de Entrega</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<table>
-<thead>
-<tr>
-<th>Campo</th>
-<th>Obrigatório</th>
-<th>Descrição</th>
-<th>Exemplo</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Descrição</strong></td>
-<td>✅</td>
-<td>O que está solicitando</td>
-<td>"Notebook Dell Latitude para desenvolvimento"</td>
-</tr>
-<tr>
-<td><strong>Tipo</strong></td>
-<td>❌</td>
-<td>Categoria do equipamento</td>
-<td>"Notebook", "Monitor", "Impressora"</td>
-</tr>
-<tr>
-<td><strong>Patrimônio</strong></td>
-<td>❌</td>
-<td>Número do patrimônio (se conhecido)</td>
-<td>"TI-2024-001"</td>
-</tr>
-<tr>
-<td><strong>Motivo</strong></td>
-<td>✅</td>
-<td>Justificativa da solicitação</td>
-<td>"Substituição de equipamento com defeito"</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="tabbed-block">
-<table>
-<thead>
-<tr>
-<th>Campo</th>
-<th>Obrigatório</th>
-<th>Descrição</th>
-<th>Exemplo</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Setor/Destino</strong></td>
-<td>✅</td>
-<td>Onde o equipamento será usado</td>
-<td>"Setor de Desenvolvimento"</td>
-</tr>
-<tr>
-<td><strong>Data de entrega</strong></td>
-<td>❌</td>
-<td>Quando precisa receber</td>
-<td>Selecione no calendário</td>
-</tr>
-<tr>
-<td><strong>Observações</strong></td>
-<td>❌</td>
-<td>Informações adicionais</td>
-<td>"Urgente para projeto X"</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
+<p><strong>Explore equipamentos disponíveis</strong>:</p>
+</li>
+<li><strong>Filtros inteligentes</strong>: Por categoria, marca, localização</li>
+<li><strong>Busca avançada</strong>: Nome, patrimônio, especificações</li>
+<li>
+<p><strong>Visualização</strong>: Fotos, especificações técnicas, status</p>
 </li>
 <li>
-<p><strong>Envio da solicitação</strong>:</p>
+<p><strong>Verifique disponibilidade</strong>:</p>
 </li>
-<li>Sistema registra automaticamente</li>
-<li>Equipe de TI é notificada</li>
-<li>Você recebe confirmação</li>
+<li><strong>Calendário visual</strong> de reservas existentes</li>
+<li><strong>Verificação automática</strong> de conflitos</li>
+<li><strong>Datas sugeridas</strong> de disponibilidade</li>
 </ol>
-<h2 id="fluxo-de-aprovacao">🔄 Fluxo de Aprovação<a class="headerlink" href="#fluxo-de-aprovacao" title="Permanent link">&para;</a></h2>
-<h3 id="status-das-solicitacoes">Status das Solicitações<a class="headerlink" href="#status-das-solicitacoes" title="Permanent link">&para;</a></h3>
-<div class="grid cards">
-<ul>
-<li>
-<p>:material-clock-outline:
-    <strong>Solicitado</strong></p>
-<hr />
-<p>Aguardando análise e aprovação da equipe de TI</p>
-</li>
-<li>
-<p>:material-check-circle-outline:
-    <strong>Aprovado</strong></p>
-<hr />
-<p>Solicitação aprovada, aguardando entrega</p>
-</li>
-<li>
-<p>:material-package-variant-closed:
-    <strong>Entregue</strong></p>
-<hr />
-<p>Equipamento entregue ao solicitante</p>
-</li>
-<li>
-<p>:material-package-variant:
-    <strong>Devolvido</strong></p>
-<hr />
-<p>Equipamento devolvido ao setor de TI</p>
-</li>
-<li>
-<p>:material-close-circle-outline:
-    <strong>Negado</strong></p>
-<hr />
-<p>Solicitação não aprovada</p>
-</li>
-</ul>
-</div>
-<h3 id="processo-de-aprovacao">Processo de Aprovação<a class="headerlink" href="#processo-de-aprovacao" title="Permanent link">&para;</a></h3>
+<h2 id="sistema-de-reservas">📅 Sistema de Reservas<a class="headerlink" href="#sistema-de-reservas" title="Permanent link">&para;</a></h2>
+<h3 id="fazendo-uma-reserva">Fazendo uma Reserva<a class="headerlink" href="#fazendo-uma-reserva" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>📝 Análise inicial</strong> pela equipe de TI</li>
-<li><strong>✅ Aprovação</strong> ou <strong>❌ Negação</strong> da solicitação</li>
-<li><strong>📋 Preenchimento de dados técnicos</strong> (patrimônio, especificações)</li>
-<li><strong>📦 Entrega física</strong> do equipamento</li>
-<li><strong>✅ Confirmação de recebimento</strong> pelo solicitante</li>
+<li><strong>Selecione equipamento</strong> no catálogo</li>
+<li><strong>Escolha período</strong> de empréstimo</li>
+<li><strong>Sistema verifica</strong> disponibilidade automaticamente</li>
+<li><strong>Confirmação instantânea</strong> (alguns equipamentos)</li>
 </ol>
-<h2 id="acompanhamento">📊 Acompanhamento<a class="headerlink" href="#acompanhamento" title="Permanent link">&para;</a></h2>
-<h3 id="visualizando-solicitacoes">Visualizando Solicitações<a class="headerlink" href="#visualizando-solicitacoes" title="Permanent link">&para;</a></h3>
+<h3 id="regras-de-aprovacao">Regras de Aprovação<a class="headerlink" href="#regras-de-aprovacao" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>🟢 Auto-aprovado</strong>: Equipamentos de baixo risco, empréstimos curtos</li>
+<li><strong>🟡 Pendente</strong>: Equipamentos de alto valor, períodos longos</li>
+<li><strong>🔴 Rejeitado</strong>: Violação de políticas ou restrições</li>
+</ul>
+<h3 id="beneficios-do-sistema">Benefícios do Sistema<a class="headerlink" href="#beneficios-do-sistema" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>⏰ Reserva 24/7</strong> sem depender de aprovação manual</li>
+<li><strong>📊 Transparência</strong> total na disponibilidade</li>
+<li><strong>⚡ Processamento rápido</strong> de solicitações simples</li>
+<li><strong>🔄 Auto-renovação</strong> quando disponível</li>
+</ul>
+<h2 id="novo-fluxo-de-emprestimo">🔄 Novo Fluxo de Empréstimo<a class="headerlink" href="#novo-fluxo-de-emprestimo" title="Permanent link">&para;</a></h2>
+<h3 id="status-atualizado">Status Atualizado<a class="headerlink" href="#status-atualizado" title="Permanent link">&para;</a></h3>
+<div class="grid cards" markdown>
+
+-   :material-calendar-check:
+    **Reservado**
+
+    ---
+
+    Equipamento reservado no sistema, aguardando aprovação automática
+
+-   :material-clock-outline:
+    **Pendente**
+
+    ---
+
+    Aguardando aprovação manual da equipe de TI
+
+-   :material-check-circle-outline:
+    **Confirmado**
+
+    ---
+
+    Reserva confirmada, aguardando retirada
+
+-   :material-package-variant-closed:
+    **Emprestado**
+
+    ---
+
+    Equipamento retirado e em uso
+
+-   :material-package-variant:
+    **Devolvido**
+
+    ---
+
+    Equipamento devolvido ao inventário
+
+-   :material-close-circle-outline:
+    **Cancelado**
+
+    ---
+
+    Reserva ou empréstimo cancelado
+
+</div>
+
+<h3 id="processo-otimizado">Processo Otimizado<a class="headerlink" href="#processo-otimizado" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Lista de equipamentos</strong>:</li>
-<li>Veja todas as suas solicitações</li>
-<li>Filtros por status</li>
+<li><strong>📅 Reserva automática</strong> via catálogo</li>
+<li><strong>🤖 Aprovação inteligente</strong> baseada em regras</li>
+<li><strong>📦 Retirada programada</strong> com agendamento</li>
+<li><strong>⏰ Lembretes automáticos</strong> de devolução</li>
+<li><strong>🔄 Renovação automática</strong> quando possível</li>
+</ol>
+<h2 id="acompanhamento-moderno">📊 Acompanhamento Moderno<a class="headerlink" href="#acompanhamento-moderno" title="Permanent link">&para;</a></h2>
+<h3 id="paineis-de-controle">Painéis de Controle<a class="headerlink" href="#paineis-de-controle" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Minhas Reservas</strong> (<code>/equipment/my-reservations</code>):</li>
+<li>Todas as suas reservas ativas</li>
+<li>Status em tempo real</li>
 <li>
-<p>Ordenação por data</p>
+<p>Histórico completo</p>
 </li>
 <li>
-<p><strong>Detalhes da solicitação</strong>:</p>
+<p><strong>Meus Empréstimos</strong> (<code>/equipment/my-loans</code>):</p>
 </li>
-<li>Informações completas</li>
-<li>Histórico de movimentações</li>
-<li>Dados técnicos do equipamento</li>
+<li>Equipamentos atualmente emprestados</li>
+<li>Datas de devolução</li>
+<li>
+<p>SLA e alertas</p>
+</li>
+<li>
+<p><strong>Catálogo Interativo</strong>:</p>
+</li>
+<li>Busca em tempo real</li>
+<li>Filtros avançados</li>
+<li>Calendário de disponibilidade</li>
 </ol>
-<h3 id="notificacoes">Notificações<a class="headerlink" href="#notificacoes" title="Permanent link">&para;</a></h3>
+<h3 id="notificacoes-inteligentes">Notificações Inteligentes<a class="headerlink" href="#notificacoes-inteligentes" title="Permanent link">&para;</a></h3>
 <ul>
-<li>📧 <strong>E-mail de aprovação</strong> quando solicitação é aprovada</li>
-<li>📧 <strong>E-mail de entrega</strong> quando equipamento é entregue</li>
-<li>📧 <strong>Lembretes</strong> para devolução (quando aplicável)</li>
+<li>📧 <strong>Confirmação instantânea</strong> de reservas</li>
+<li>📱 <strong>Push notifications</strong> no navegador</li>
+<li>⏰ <strong>Lembretes automáticos</strong> 24h antes da devolução</li>
+<li>🚨 <strong>Alertas de SLA</strong> quando empréstimo está crítico</li>
+<li>🔄 <strong>Sugestões de renovação</strong> quando disponível</li>
 </ul>
-<h2 id="dados-tecnicos">🖥️ Dados Técnicos<a class="headerlink" href="#dados-tecnicos" title="Permanent link">&para;</a></h2>
-<h3 id="informacoes-cadastradas">Informações Cadastradas<a class="headerlink" href="#informacoes-cadastradas" title="Permanent link">&para;</a></h3>
-<p>Após aprovação, equipe de TI preenche:</p>
+<h2 id="inventario-central">🏗️ Inventário Central<a class="headerlink" href="#inventario-central" title="Permanent link">&para;</a></h2>
+<h3 id="dados-tecnicos-completos">Dados Técnicos Completos<a class="headerlink" href="#dados-tecnicos-completos" title="Permanent link">&para;</a></h3>
+<p>Cada equipamento no inventário possui:</p>
 <ul>
-<li>🔢 <strong>Número do patrimônio</strong></li>
-<li>💻 <strong>Modelo e especificações</strong></li>
-<li>📅 <strong>Data de entrega</strong></li>
-<li>👤 <strong>Quem recebeu</strong></li>
-<li>📋 <strong>Status de conferência</strong></li>
-<li>📝 <strong>Observações técnicas</strong></li>
+<li>🔢 <strong>Patrimônio único</strong> e rastreável</li>
+<li>📋 <strong>Especificações técnicas</strong> detalhadas</li>
+<li>💰 <strong>Valor de aquisição</strong> e depreciação</li>
+<li>📅 <strong>Datas importantes</strong> (compra, garantia, manutenção)</li>
+<li>📍 <strong>Localização física</strong> atual</li>
+<li>🔧 <strong>Histórico de manutenção</strong> completo</li>
+<li>📊 <strong>Métricas de uso</strong> e performance</li>
 </ul>
-<h3 id="controle-de-qualidade">Controle de Qualidade<a class="headerlink" href="#controle-de-qualidade" title="Permanent link">&para;</a></h3>
+<h3 id="controle-de-qualidade-avancado">Controle de Qualidade Avançado<a class="headerlink" href="#controle-de-qualidade-avancado" title="Permanent link">&para;</a></h3>
 <ul>
-<li>✅ <strong>Conferência física</strong> antes da entrega</li>
-<li>✅ <strong>Testes funcionais</strong> quando necessário</li>
-<li>✅ <strong>Registro fotográfico</strong> (em desenvolvimento)</li>
-<li>✅ <strong>Documentação</strong> de entrega</li>
+<li>✅ <strong>Conferência automatizada</strong> via RFID</li>
+<li>✅ <strong>Testes funcionais</strong> obrigatórios</li>
+<li>✅ <strong>Registro fotográfico</strong> digital</li>
+<li>✅ <strong>Documentação completa</strong> de entrega/devolução</li>
+<li>✅ <strong>Avaliação de condição</strong> na devolução</li>
 </ul>
-<h2 id="processo-de-devolucao">♻️ Processo de Devolução<a class="headerlink" href="#processo-de-devolucao" title="Permanent link">&para;</a></h2>
-<h3 id="quando-devolver">Quando Devolver<a class="headerlink" href="#quando-devolver" title="Permanent link">&para;</a></h3>
+<h2 id="devolucao-inteligente">♻️ Devolução Inteligente<a class="headerlink" href="#devolucao-inteligente" title="Permanent link">&para;</a></h2>
+<h3 id="gatilhos-automaticos">Gatilhos Automáticos<a class="headerlink" href="#gatilhos-automaticos" title="Permanent link">&para;</a></h3>
 <ul>
-<li>🔄 <strong>Equipamento com defeito</strong> para manutenção</li>
-<li>📦 <strong>Substituição</strong> por modelo mais novo</li>
-<li>👥 <strong>Transferência</strong> para outro setor</li>
-<li>🚪 <strong>Término de contrato</strong> ou demissão</li>
-<li>🔄 <strong>Fim de projeto</strong> ou necessidade</li>
+<li>⏰ <strong>Lembretes automáticos</strong> 24h antes do vencimento</li>
+<li>🚨 <strong>Alertas de SLA</strong> quando empréstimo está crítico</li>
+<li>🔄 <strong>Renovação sugerida</strong> quando equipamento disponível</li>
+<li>📊 <strong>Avaliação obrigatória</strong> da condição na devolução</li>
 </ul>
-<h3 id="como-devolver">Como Devolver<a class="headerlink" href="#como-devolver" title="Permanent link">&para;</a></h3>
+<h3 id="processo-simplificado">Processo Simplificado<a class="headerlink" href="#processo-simplificado" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Abra um chamado</strong> explicando motivo da devolução</li>
-<li><strong>Aguarde instruções</strong> da equipe de TI</li>
-<li><strong>Entregue fisicamente</strong> o equipamento</li>
-<li><strong>Assine termo de devolução</strong> (quando aplicável)</li>
-<li><strong>Sistema registra</strong> devolução automaticamente</li>
+<li><strong>Receba lembrete</strong> automático do sistema</li>
+<li><strong>Avalie condição</strong> do equipamento (Excelente/Bom/Regular/Ruim)</li>
+<li><strong>Adicione observações</strong> sobre uso e estado</li>
+<li><strong>Confirme devolução</strong> via sistema</li>
+<li><strong>Entregue fisicamente</strong> na data agendada</li>
+<li><strong>Sistema registra</strong> automaticamente e atualiza inventário</li>
 </ol>
+<h3 id="beneficios-da-automacao">Benefícios da Automação<a class="headerlink" href="#beneficios-da-automacao" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>⏰ Nunca esqueça</strong> prazos de devolução</li>
+<li><strong>📈 Melhore pontualidade</strong> com lembretes inteligentes</li>
+<li><strong>🔍 Rastreamento completo</strong> do estado dos equipamentos</li>
+<li><strong>📊 Dados para melhoria</strong> contínua do parque</li>
+</ul>
 <h2 id="tipos-de-equipamento">📋 Tipos de Equipamento<a class="headerlink" href="#tipos-de-equipamento" title="Permanent link">&para;</a></h2>
 <h3 id="categorias-comuns">Categorias Comuns<a class="headerlink" href="#categorias-comuns" title="Permanent link">&para;</a></h3>
-<div class="grid cards">
-<ul>
-<li>
-<p>:material-laptop:
-    <strong>Notebooks</strong></p>
-<hr />
-<p>Computadores portáteis para trabalho remoto e mobilidade</p>
-</li>
-<li>
-<p>:material-monitor:
-    <strong>Monitores</strong></p>
-<hr />
-<p>Telas para estações de trabalho e apresentações</p>
-</li>
-<li>
-<p>:material-keyboard:
-    <strong>Periféricos</strong></p>
-<hr />
-<p>Teclados, mouses, webcams e outros acessórios</p>
-</li>
-<li>
-<p>:material-printer:
-    <strong>Impressoras</strong></p>
-<hr />
-<p>Equipamentos para impressão e digitalização</p>
-</li>
-<li>
-<p>:material-cellphone-cog:
-    <strong>Dispositivos Móveis</strong></p>
-<hr />
-<p>Tablets e smartphones corporativos</p>
-</li>
-<li>
-<p>:material-router-wireless:
-    <strong>Equipamentos de Rede</strong></p>
-<hr />
-<p>Roteadores, switches e acessórios de conectividade</p>
-</li>
-</ul>
+<div class="grid cards" markdown>
+
+-   :material-laptop:
+    **Notebooks**
+
+    ---
+
+    Computadores portáteis para trabalho remoto e mobilidade
+
+-   :material-monitor:
+    **Monitores**
+
+    ---
+
+    Telas para estações de trabalho e apresentações
+
+-   :material-keyboard:
+    **Periféricos**
+
+    ---
+
+    Teclados, mouses, webcams e outros acessórios
+
+-   :material-printer:
+    **Impressoras**
+
+    ---
+
+    Equipamentos para impressão e digitalização
+
+-   :material-cellphone-cog:
+    **Dispositivos Móveis**
+
+    ---
+
+    Tablets e smartphones corporativos
+
+-   :material-router-wireless:
+    **Equipamentos de Rede**
+
+    ---
+
+    Roteadores, switches e acessórios de conectividade
+
 </div>
-<h2 id="relatorios-e-metricas">📈 Relatórios e Métricas<a class="headerlink" href="#relatorios-e-metricas" title="Permanent link">&para;</a></h2>
-<h3 id="dados-disponiveis">Dados Disponíveis<a class="headerlink" href="#dados-disponiveis" title="Permanent link">&para;</a></h3>
+
+<h2 id="analytics-e-business-intelligence">📈 Analytics e Business Intelligence<a class="headerlink" href="#analytics-e-business-intelligence" title="Permanent link">&para;</a></h2>
+<h3 id="metricas-avancadas">Métricas Avançadas<a class="headerlink" href="#metricas-avancadas" title="Permanent link">&para;</a></h3>
 <ul>
-<li>📊 <strong>Equipamentos por setor</strong></li>
-<li>📈 <strong>Tempo médio de aprovação</strong></li>
-<li>🔄 <strong>Taxa de devolução</strong></li>
-<li>💻 <strong>Tipos mais solicitados</strong></li>
-<li>📅 <strong>Sazonalidade</strong> de solicitações</li>
+<li>📊 <strong>Utilização por equipamento</strong> (horas/dias de uso)</li>
+<li>💰 <strong>ROI dos equipamentos</strong> (custo vs benefício)</li>
+<li>⏱️ <strong>Tempo médio de empréstimo</strong> por categoria</li>
+<li>🎯 <strong>Taxa de pontualidade</strong> nas devoluções</li>
+<li>🔄 <strong>Frequência de manutenção</strong> e custos</li>
+<li>📈 <strong>Tendências de demanda</strong> por período</li>
 </ul>
-<h3 id="exportacao">Exportação<a class="headerlink" href="#exportacao" title="Permanent link">&para;</a></h3>
+<h3 id="dashboards-executivos">Dashboards Executivos<a class="headerlink" href="#dashboards-executivos" title="Permanent link">&para;</a></h3>
 <ul>
-<li>📄 <strong>Excel</strong>: Para análise detalhada</li>
-<li>📋 <strong>PDF</strong>: Para relatórios gerenciais</li>
-<li>🔍 <strong>Filtros aplicados</strong>: Exporte dados filtrados</li>
+<li><strong>📊 Visão Geral</strong>: Status completo do parque</li>
+<li><strong>📈 Performance</strong>: SLA, utilização, custos</li>
+<li><strong>🔍 Detalhamento</strong>: Por categoria, setor, período</li>
+<li><strong>🎯 Insights</strong>: Recomendações automáticas</li>
 </ul>
-<h2 id="boas-praticas">💡 Boas Práticas<a class="headerlink" href="#boas-praticas" title="Permanent link">&para;</a></h2>
-<h3 id="ao-solicitar">Ao Solicitar<a class="headerlink" href="#ao-solicitar" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>📝 Seja específico</strong> sobre necessidades técnicas</li>
-<li><strong>⏰ Defina prazos realistas</strong> para entrega</li>
-<li><strong>🔗 Justifique adequadamente</strong> a solicitação</li>
-<li><strong>📞 Mantenha contato</strong> para acompanhamento</li>
-</ol>
-<h3 id="durante-uso">Durante Uso<a class="headerlink" href="#durante-uso" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>💻 Cuide do equipamento</strong> adequadamente</li>
-<li><strong>🔒 Mantenha segurança</strong> (antivírus, backups)</li>
-<li><strong>📞 Reporte problemas</strong> imediatamente</li>
-<li><strong>📋 Mantenha documentação</strong> atualizada</li>
-</ol>
-<h3 id="na-devolucao">Na Devolução<a class="headerlink" href="#na-devolucao" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>💾 Faça backup</strong> de dados pessoais</li>
-<li><strong>🧹 Limpe dados</strong> corporativos</li>
-<li><strong>🔧 Restaure configurações</strong> originais</li>
-<li><strong>📦 Embale adequadamente</strong> para transporte</li>
-</ol>
-<h2 id="solucao-de-problemas">🚨 Solução de Problemas<a class="headerlink" href="#solucao-de-problemas" title="Permanent link">&para;</a></h2>
-<h3 id="problemas-comuns">Problemas Comuns<a class="headerlink" href="#problemas-comuns" title="Permanent link">&para;</a></h3>
-<p><strong>❓ Solicitação não aparece</strong>
-- ✅ Verifique se foi enviada corretamente
-- ✅ Aguarde processamento (até 5 minutos)
-- ✅ Entre em contato com TI se não aparecer</p>
-<p><strong>❓ Status não atualiza</strong>
-- ✅ Aguarde processamento da equipe de TI
-- ✅ Verifique se há comentários na solicitação
-- ✅ Entre em contato se demora muito</p>
-<p><strong>❓ Não consigo editar</strong>
-- ✅ Apenas solicitações "Solicitadas" podem ser editadas
-- ✅ Entre em contato com TI para alterações
-- ✅ Abra novo chamado se necessário</p>
-<p><strong>❓ Perdi equipamento</strong>
-- ✅ Abra chamado imediatamente explicando situação
-- ✅ Forneça detalhes sobre quando foi perdido
-- ✅ Siga procedimentos de segurança da empresa</p>
-<h2 id="recursos-adicionais">📚 Recursos Adicionais<a class="headerlink" href="#recursos-adicionais" title="Permanent link">&para;</a></h2>
+<h3 id="relatorios-customizaveis">Relatórios Customizáveis<a class="headerlink" href="#relatorios-customizaveis" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>🎫 Sistema de Chamados</strong>: Para problemas com equipamentos</li>
-<li><strong>📚 Tutoriais</strong>: Guias sobre uso de equipamentos</li>
-<li><strong>❓ FAQ</strong>: Perguntas sobre processos de solicitação</li>
-<li><strong>📖 Políticas Corporativas</strong>: Regulamentos sobre uso de equipamentos</li>
+<li>📄 <strong>Excel/CSV</strong>: Para análise avançada</li>
+<li>📊 <strong>Power BI/Tableau</strong>: Integração com ferramentas externas</li>
+<li>🔄 <strong>Agendamento</strong>: Relatórios automáticos por email</li>
+<li>📱 <strong>Mobile</strong>: Dashboards responsivos</li>
+</ul>
+<h2 id="novos-recursos-e-beneficios">🚀 Novos Recursos e Benefícios<a class="headerlink" href="#novos-recursos-e-beneficios" title="Permanent link">&para;</a></h2>
+<h3 id="para-usuarios">Para Usuários<a class="headerlink" href="#para-usuarios" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>⚡ Reserva instantânea</strong> sem burocracia</li>
+<li><strong>📱 Interface moderna</strong> e intuitiva</li>
+<li><strong>⏰ Lembretes inteligentes</strong> nunca esqueça prazos</li>
+<li><strong>🔍 Transparência total</strong> no status dos empréstimos</li>
+<li><strong>📊 Histórico completo</strong> de uso pessoal</li>
+</ul>
+<h3 id="para-tiadmin">Para TI/Admin<a class="headerlink" href="#para-tiadmin" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>🤖 Automação inteligente</strong> de aprovações</li>
+<li><strong>📈 Controle total</strong> do parque de equipamentos</li>
+<li><strong>🔧 Manutenção preventiva</strong> automatizada</li>
+<li><strong>📊 Analytics avançados</strong> para decisões estratégicas</li>
+<li><strong>🔗 API completa</strong> para integrações</li>
+</ul>
+<h3 id="para-a-empresa">Para a Empresa<a class="headerlink" href="#para-a-empresa" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>💰 Redução de custos</strong> com melhor utilização</li>
+<li><strong>⏱️ Aumento produtividade</strong> com equipamentos sempre disponíveis</li>
+<li><strong>🔒 Maior segurança</strong> e rastreabilidade</li>
+<li><strong>📈 Dados estratégicos</strong> para planejamento de investimentos</li>
+</ul>
+<h2 id="suporte-e-troubleshooting">🔧 Suporte e Troubleshooting<a class="headerlink" href="#suporte-e-troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="problemas-comuns-nova-era">Problemas Comuns - Nova Era<a class="headerlink" href="#problemas-comuns-nova-era" title="Permanent link">&para;</a></h3>
+<p><strong>❓ Reserva não foi confirmada</strong>
+- ✅ Verifique regras de aprovação automática
+- ✅ Aguarde processamento (até 30 segundos)
+- ✅ Contate TI se for equipamento restrito</p>
+<p><strong>❓ Equipamento mostra indisponível</strong>
+- ✅ Verifique calendário de reservas existentes
+- ✅ Tente datas alternativas
+- ✅ Contate TI para conflitos específicos</p>
+<p><strong>❓ Não recebi lembretes</strong>
+- ✅ Verifique configurações de notificação
+- ✅ Confirme se empréstimo está ativo
+- ✅ Sistema envia lembretes 24h antes</p>
+<p><strong>❓ Problemas com devolução</strong>
+- ✅ Use botão "Devolver" no painel de empréstimos
+- ✅ Avalie condição do equipamento
+- ✅ Sistema registra automaticamente</p>
+<h3 id="suporte-avancado">Suporte Avançado<a class="headerlink" href="#suporte-avancado" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>📞 Help Desk Integrado</strong>: Abra chamados diretamente do sistema</li>
+<li><strong>📚 Tutoriais Contextuais</strong>: Ajuda específica por equipamento</li>
+<li><strong>🤖 Chatbot</strong>: Assistente virtual para dúvidas comuns</li>
+<li><strong>📱 Mobile App</strong>: Empréstimos e devoluções via celular</li>
+</ul>
+<h2 id="integracoes-e-apis">🔗 Integrações e APIs<a class="headerlink" href="#integracoes-e-apis" title="Permanent link">&para;</a></h2>
+<h3 id="sistema-conectado">Sistema Conectado<a class="headerlink" href="#sistema-conectado" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>🔄 Chamados Integrados</strong>: Abra chamados diretamente do sistema</li>
+<li><strong>📱 Tutoriais Contextuais</strong>: Ajuda específica por equipamento</li>
+<li><strong>🤖 RFID</strong>: Rastreamento automático (futuro)</li>
+<li><strong>📊 ERP</strong>: Integração com sistemas corporativos</li>
+<li><strong>📧 Email</strong>: Notificações automáticas inteligentes</li>
+</ul>
+<h3 id="api-rest-completa">API REST Completa<a class="headerlink" href="#api-rest-completa" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash"># Exemplos de uso da API
+GET  /api/v1/equipment          # Lista equipamentos
+POST /api/v1/reservations       # Criar reserva
+POST /api/v1/loans/{id}/return  # Devolver equipamento
+GET  /api/v1/stats              # Estatísticas
+</code></pre>
+<h3 id="webhooks-e-automacao">Webhooks e Automação<a class="headerlink" href="#webhooks-e-automacao" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>📡 Eventos em tempo real</strong> para sistemas externos</li>
+<li><strong>🔄 Sincronização automática</strong> com outros módulos</li>
+<li><strong>📈 Analytics integrada</strong> com ferramentas de BI</li>
+<li><strong>🔧 Manutenção preventiva</strong> automatizada</li>
 </ul>
 <hr />
+<div class="success">
+    **🎉 Novo Sistema Ativo!** O sistema profissional de gestão de equipamentos está totalmente operacional. Acesse `/equipment/catalog` para explorar o catálogo ou `/equipment/admin/dashboard` para gerenciar o inventário.
+</div>
+
 <div class="info">
-    **Dica**: Mantenha seus equipamentos sempre atualizados e seguros. Em caso de dúvidas sobre uso ou manutenção, consulte os tutoriais disponíveis ou abra um chamado para suporte técnico.
+    **💡 Dica**: O novo sistema reduz em até 80% o tempo de processamento de solicitações e oferece controle total do ciclo de vida dos equipamentos. Explore todas as funcionalidades!
 </div>
-
-
-
-
-
-                
-              </article>
-            </div>
-          
-          
-  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
-
-        </div>
-        
-          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
-  Voltar para o topo
-</button>
-        
-      </main>
-      
-        <footer class="md-footer">
-  
-    
-      
-      <nav class="md-footer__inner md-grid" aria-label="Rodapé" >
-        
-          
-          <a href="../tutorials/" class="md-footer__link md-footer__link--prev" aria-label="Anterior: Tutoriais">
-            <div class="md-footer__button md-icon">
               
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
             </div>
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Anterior
-              </span>
-              <div class="md-ellipsis">
-                Tutoriais
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="../dashboard/" class="md-footer__link md-footer__link--next" aria-label="Próximo: Dashboard">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Próximo
-              </span>
-              <div class="md-ellipsis">
-                Dashboard
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
-    
-  
-  <div class="md-footer-meta md-typeset">
-    <div class="md-footer-meta__inner md-grid">
-      <div class="md-copyright">
-  
-  
-</div>
-      
-        <div class="md-social">
-  
-    
-    
-    
-    
-      
-      
-    
-    <a href="https://github.com" target="_blank" rel="noopener" title="github.com" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
-    </a>
-  
-    
-    
-    
-    
-      
-      
-    
-    <a href="https://python.org" target="_blank" rel="noopener" title="python.org" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6zM286.2 404c11.1 0 20.1 9.1 20.1 20.3 0 11.3-9 20.4-20.1 20.4-11 0-20.1-9.2-20.1-20.4.1-11.3 9.1-20.3 20.1-20.3zM167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4zm-6.7-142.6c-11.1 0-20.1-9.1-20.1-20.3.1-11.3 9-20.4 20.1-20.4 11 0 20.1 9.2 20.1 20.4s-9 20.3-20.1 20.3z"/></svg>
-    </a>
-  
-    
-    
-    
-    
-      
-      
-    
-    <a href="http://192.168.1.86:5000" target="_blank" rel="noopener" title="192.168.1.86:5000" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M352 256c0 22.2-1.2 43.6-3.3 64H163.3c-2.2-20.4-3.3-41.8-3.3-64s1.2-43.6 3.3-64h185.4c2.2 20.4 3.3 41.8 3.3 64zm28.8-64h123.1c5.3 20.5 8.1 41.9 8.1 64s-2.8 43.5-8.1 64H380.8c2.1-20.6 3.2-42 3.2-64s-1.1-43.4-3.2-64zm112.6-32H376.7c-10-63.9-29.8-117.4-55.3-151.6 78.3 20.7 142 77.5 171.9 151.6zm-149.1 0H167.7c6.1-36.4 15.5-68.6 27-94.7 10.5-23.6 22.2-40.7 33.5-51.5C239.4 3.2 248.7 0 256 0s16.6 3.2 27.8 13.8c11.3 10.8 23 27.9 33.5 51.5 11.6 26 20.9 58.2 27 94.7zm-209 0H18.6c30-74.1 93.6-130.9 172-151.6-25.5 34.2-45.3 87.7-55.3 151.6zM8.1 192h123.1c-2.1 20.6-3.2 42-3.2 64s1.1 43.4 3.2 64H8.1C2.8 299.5 0 278.1 0 256s2.8-43.5 8.1-64zm186.6 254.6c-11.6-26-20.9-58.2-27-94.6h176.6c-6.1 36.4-15.5 68.6-27 94.6-10.5 23.6-22.2 40.7-33.5 51.5-11.2 10.7-20.5 13.9-27.8 13.9s-16.6-3.2-27.8-13.8c-11.3-10.8-23-27.9-33.5-51.5zM135.3 352c10 63.9 29.8 117.4 55.3 151.6-78.4-20.7-142-77.5-172-151.6h116.7zm358.1 0c-30 74.1-93.6 130.9-171.9 151.6 25.5-34.2 45.2-87.7 55.3-151.6h116.6z"/></svg>
-    </a>
-  
-</div>
-      
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../tutorials/" class="btn btn-neutral float-left" title="Tutoriais"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../dashboard/" class="btn btn-neutral float-right" title="Dashboard">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
   </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
 </footer>
-      
-    </div>
-    <div class="md-dialog" data-md-component="dialog">
-      <div class="md-dialog__inner md-typeset"></div>
-    </div>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
     
-      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+      <span><a href="../tutorials/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.code.select", "content.footnote.tooltips", "content.tabs.link", "content.tooltips", "header.autohide", "navigation.expand", "navigation.footer", "navigation.indexes", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.prune", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow", "toc.integrate"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <span><a href="../dashboard/" style="color: #fcfcfc">Next &raquo;</a></span>
     
-    
-      <script src="../../assets/javascripts/bundle.81fa17fe.min.js"></script>
-      
-        <script src="../../javascripts/extra.js"></script>
-      
-    
-  </body>
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../javascripts/extra.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
 </html>

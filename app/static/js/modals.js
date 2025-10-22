@@ -1,56 +1,109 @@
 /**
  * Sistema de Modais Modernas - TI OSN System
  * Substituição elegante para alerts básicos
+ * Versão 2.0 - Otimizado e profissional
+ * 
+ * @class ModernModal
+ * @description Sistema completo de modais com suporte a confirmações, alertas, prompts e loading
  */
 
 class ModernModal {
     constructor() {
         this.activeModal = null;
         this.modalCount = 0;
+        this.modalStack = [];
         this.init();
     }
 
+    /**
+     * Inicializa o sistema de modais
+     * @private
+     */
     init() {
         // Criar container de modais se não existir
         if (!document.getElementById('modal-container')) {
             const container = document.createElement('div');
             container.id = 'modal-container';
             container.className = 'modal-container';
+            container.setAttribute('role', 'dialog');
+            container.setAttribute('aria-modal', 'true');
             document.body.appendChild(container);
         }
 
-        // Event listeners
+        // Event listeners globais
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.activeModal) {
                 this.close();
             }
+        });
+
+        // Prevenir scroll quando modal está aberto
+        this.preventBodyScroll();
+    }
+
+    /**
+     * Previne scroll do body quando modal está aberto
+     * @private
+     */
+    preventBodyScroll() {
+        const observer = new MutationObserver(() => {
+            const hasModal = document.querySelector('.modal-overlay.show');
+            document.body.style.overflow = hasModal ? 'hidden' : '';
+        });
+
+        observer.observe(document.getElementById('modal-container'), {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class']
         });
     }
 
     /**
      * Criar e exibir modal
      * @param {Object} options - Configurações do modal
+     * @param {string} options.title - Título do modal
+     * @param {string} options.message - Mensagem/conteúdo do modal
+     * @param {string} options.type - Tipo: info, success, warning, error, confirm
+     * @param {string} options.size - Tamanho: small, medium, large, xl
+     * @param {Array} options.buttons - Array de botões customizados
+     * @param {boolean} options.closable - Se pode fechar com X
+     * @param {boolean} options.backdrop - Se fecha ao clicar fora
+     * @param {boolean} options.animation - Se usa animação
+     * @param {Function} options.onShow - Callback ao mostrar
+     * @param {Function} options.onHide - Callback ao esconder
+     * @param {Function} options.onConfirm - Callback ao confirmar
+     * @param {Function} options.onCancel - Callback ao cancelar
+     * @param {string} options.customClass - Classes CSS adicionais
+     * @returns {Promise} Promise que resolve com a ação do usuário
      */
     show(options = {}) {
         const config = {
             title: options.title || 'Confirmação',
             message: options.message || '',
-            type: options.type || 'info', // info, success, warning, error, confirm
-            size: options.size || 'medium', // small, medium, large
+            type: options.type || 'info',
+            size: options.size || 'medium',
             buttons: options.buttons || this.getDefaultButtons(options.type),
             closable: options.closable !== false,
             backdrop: options.backdrop !== false,
             animation: options.animation !== false,
             onShow: options.onShow || null,
             onHide: options.onHide || null,
-            customClass: options.customClass || ''
+            onConfirm: options.onConfirm || null,
+            onCancel: options.onCancel || null,
+            customClass: options.customClass || '',
+            html: options.html || false // Permite HTML customizado no message
         };
 
         return new Promise((resolve, reject) => {
             const modalId = `modal-${++this.modalCount}`;
             const modal = this.createModal(modalId, config, resolve, reject);
             
-            document.getElementById('modal-container').appendChild(modal);
+            const container = document.getElementById('modal-container');
+            container.appendChild(modal);
+            
+            // Adicionar à pilha de modais
+            this.modalStack.push(modal);
             
             // Animação de entrada
             if (config.animation) {
@@ -65,15 +118,70 @@ class ModernModal {
             
             // Callback onShow
             if (config.onShow) {
-                config.onShow();
+                setTimeout(() => config.onShow(), 100);
             }
 
-            // Auto-focus no primeiro botão
-            const firstButton = modal.querySelector('.modal-button');
-            if (firstButton) {
-                setTimeout(() => firstButton.focus(), 100);
-            }
+            // Gestão de foco para acessibilidade
+            this.manageFocus(modal);
         });
+    }
+
+    /**
+     * Gerencia foco para acessibilidade
+     * @private
+     */
+    manageFocus(modal) {
+        // Salvar elemento focado antes
+        const previousFocus = document.activeElement;
+        
+        // Focar no primeiro botão primário ou primeiro botão
+        const primaryButton = modal.querySelector('.modal-button.btn-primary');
+        const firstButton = modal.querySelector('.modal-button');
+        const focusTarget = primaryButton || firstButton;
+        
+        if (focusTarget) {
+            setTimeout(() => focusTarget.focus(), 150);
+        }
+        
+        // Restaurar foco ao fechar
+        modal.addEventListener('modal-closed', () => {
+            if (previousFocus && previousFocus !== document.body) {
+                previousFocus.focus();
+            }
+        }, { once: true });
+        
+        // Trap focus dentro do modal
+        this.trapFocus(modal);
+    }
+
+    /**
+     * Mantém o foco dentro do modal (trap focus)
+     * @private
+     */
+    trapFocus(modal) {
+        const focusableElements = modal.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        const handleTabKey = (e) => {
+            if (e.key !== 'Tab') return;
+
+            if (e.shiftKey) {
+                if (document.activeElement === firstElement) {
+                    e.preventDefault();
+                    lastElement.focus();
+                }
+            } else {
+                if (document.activeElement === lastElement) {
+                    e.preventDefault();
+                    firstElement.focus();
+                }
+            }
+        };
+
+        modal.addEventListener('keydown', handleTabKey);
     }
 
     /**
@@ -138,22 +246,35 @@ class ModernModal {
 
     /**
      * Anexar event listeners
+     * @private
      */
     attachEventListeners(modal, config, resolve, reject) {
         // Botão de fechar
         const closeBtn = modal.querySelector('.modal-close');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
-                this.close();
+                if (config.onCancel) {
+                    config.onCancel();
+                }
+                if (config.onHide) {
+                    config.onHide();
+                }
+                this.close({ action: 'close', value: null });
                 resolve({ action: 'close', value: null });
             });
         }
 
-        // Backdrop
+        // Backdrop click
         if (config.backdrop) {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
-                    this.close();
+                    if (config.onCancel) {
+                        config.onCancel();
+                    }
+                    if (config.onHide) {
+                        config.onHide();
+                    }
+                    this.close({ action: 'backdrop', value: null });
                     resolve({ action: 'backdrop', value: null });
                 }
             });
@@ -164,32 +285,64 @@ class ModernModal {
         buttons.forEach(button => {
             button.addEventListener('click', () => {
                 const action = button.dataset.action;
-                this.close();
                 
-                if (action === 'confirm') {
-                    resolve({ action: 'confirm', value: true });
-                } else if (action === 'cancel') {
-                    resolve({ action: 'cancel', value: false });
-                } else {
-                    resolve({ action: action, value: action });
+                // Executar callbacks apropriados
+                if (action === 'confirm' && config.onConfirm) {
+                    const shouldClose = config.onConfirm();
+                    if (shouldClose === false) return; // Permite prevenir fechamento
+                } else if (action === 'cancel' && config.onCancel) {
+                    config.onCancel();
                 }
+                
+                if (config.onHide) {
+                    config.onHide();
+                }
+                
+                const result = {
+                    action: action,
+                    value: action === 'confirm' ? true : action === 'cancel' ? false : action
+                };
+                
+                this.close(result);
+                resolve(result);
             });
         });
     }
 
     /**
      * Fechar modal ativo
+     * @param {Object} result - Resultado a ser passado no resolve
      */
-    close() {
+    close(result = null) {
         if (!this.activeModal) return;
 
+        // Disparar evento customizado
+        const event = new CustomEvent('modal-closed', { detail: result });
+        this.activeModal.dispatchEvent(event);
+
+        // Remover da pilha
+        const index = this.modalStack.indexOf(this.activeModal);
+        if (index > -1) {
+            this.modalStack.splice(index, 1);
+        }
+
+        // Animação de saída
+        this.activeModal.classList.remove('show');
         this.activeModal.classList.add('hide');
         
+        const modalToRemove = this.activeModal;
+        
         setTimeout(() => {
-            if (this.activeModal && this.activeModal.parentNode) {
-                this.activeModal.parentNode.removeChild(this.activeModal);
+            if (modalToRemove && modalToRemove.parentNode) {
+                modalToRemove.parentNode.removeChild(modalToRemove);
             }
-            this.activeModal = null;
+            
+            // Se há modais na pilha, ativar o anterior
+            if (this.modalStack.length > 0) {
+                this.activeModal = this.modalStack[this.modalStack.length - 1];
+            } else {
+                this.activeModal = null;
+            }
         }, 300);
     }
 

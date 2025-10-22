@@ -1,0 +1,1125 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Gerenciar Usuários{% endblock %}
+
+{% block config_content %}
+<!-- Header com Ações Rápidas -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">
+            <i class="fas fa-users me-3 text-primary"></i>
+            Gerenciamento de Usuários
+        </h2>
+        <p class="text-muted mb-0">Administre usuários, permissões e configurações de acesso do sistema</p>
+    </div>
+    <div class="d-flex gap-3">
+        <a href="{{ url_for('system_config.bulk_user_actions') }}" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-tasks me-2"></i>
+            <span class="d-none d-lg-inline">Ações em Lote</span>
+        </a>
+        <a href="{{ url_for('system_config.create_user') }}" class="btn btn-success btn-lg">
+            <i class="fas fa-user-plus me-2"></i>
+            <span class="d-none d-lg-inline">Novo Usuário</span>
+        </a>
+    </div>
+</div>
+
+<!-- Cards de Estatísticas Interativos -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+        <div class="stats-card border-start border-primary border-4 shadow-sm h-100" onclick="filterByStatus('')">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-users fa-2x text-primary me-3"></i>
+                        <div>
+                            <h3 class="mb-0 text-primary fw-bold">{{ stats.total_users }}</h3>
+                            <small class="text-muted">Total de Usuários</small>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-primary" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+        <div class="stats-card border-start border-success border-4 shadow-sm h-100" onclick="filterByStatus('active')">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-user-check fa-2x text-success me-3"></i>
+                        <div>
+                            <h3 class="mb-0 text-success fw-bold">{{ stats.active_users }}</h3>
+                            <small class="text-muted">Usuários Ativos</small>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-success" style="width: {{ (stats.active_users / stats.total_users * 100) if stats.total_users > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+        <div class="stats-card border-start border-warning border-4 shadow-sm h-100" onclick="filterByRole('admin')">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-crown fa-2x text-warning me-3"></i>
+                        <div>
+                            <h3 class="mb-0 text-warning fw-bold">{{ stats.admin_users }}</h3>
+                            <small class="text-muted">Administradores</small>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-warning" style="width: {{ (stats.admin_users / stats.total_users * 100) if stats.total_users > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+        <div class="stats-card border-start border-info border-4 shadow-sm h-100" onclick="filterByRole('ti')">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-user-shield fa-2x text-info me-3"></i>
+                        <div>
+                            <h3 class="mb-0 text-info fw-bold">{{ stats.ti_users }}</h3>
+                            <small class="text-muted">Equipe TI</small>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar bg-info" style="width: {{ (stats.ti_users / stats.total_users * 100) if stats.total_users > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Barra de Filtros Avançados -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-4 col-md-6">
+                <label for="userSearch" class="form-label fw-semibold">
+                    <i class="fas fa-search me-1"></i>Buscar Usuários
+                </label>
+                <div class="input-group">
+                    <input type="text" class="form-control form-control-lg" id="userSearch"
+                           placeholder="Nome, email ou setor..." autocomplete="off">
+                    <button class="btn btn-outline-secondary" type="button" id="clearSearch">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-3">
+                <label for="statusFilter" class="form-label fw-semibold">
+                    <i class="fas fa-circle me-1"></i>Status
+                </label>
+                <select class="form-select form-select-lg" id="statusFilter">
+                    <option value="">Todos</option>
+                    <option value="active">✓ Ativos</option>
+                    <option value="inactive">✗ Inativos</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-3">
+                <label for="roleFilter" class="form-label fw-semibold">
+                    <i class="fas fa-user-tag me-1"></i>Função
+                </label>
+                <select class="form-select form-select-lg" id="roleFilter">
+                    <option value="">Todas</option>
+                    <option value="admin">👑 Admin</option>
+                    <option value="ti">🛡️ TI</option>
+                    <option value="user">👤 Usuário</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <label for="sectorFilter" class="form-label fw-semibold">
+                    <i class="fas fa-building me-1"></i>Setor
+                </label>
+                <select class="form-select form-select-lg" id="sectorFilter">
+                    <option value="">Todos os setores</option>
+                    <!-- Opções serão populadas dinamicamente -->
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-primary flex-fill" onclick="applyFilters()">
+                        <i class="fas fa-filter me-1"></i>
+                        <span class="d-none d-sm-inline">Filtrar</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                        <i class="fas fa-eraser me-1"></i>
+                        <span class="d-none d-sm-inline">Limpar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela de Usuários Aprimorada -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom-0 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-table me-2 text-primary"></i>
+                    Lista de Usuários
+                </h5>
+                <small class="text-muted">Gerencie todos os usuários do sistema</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="selectAll" title="Selecionar todos">
+                    <label class="form-check-label small text-muted" for="selectAll">
+                        Selecionar todos
+                    </label>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-cog me-1"></i>Opções
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="exportUsers()">
+                            <i class="fas fa-download me-2"></i>Exportar Selecionados
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="bulkActivate()">
+                            <i class="fas fa-user-check me-2"></i>Ativar Selecionados
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="bulkDeactivate()">
+                            <i class="fas fa-user-slash me-2"></i>Desativar Selecionados
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" onclick="bulkDelete()">
+                            <i class="fas fa-trash me-2"></i>Excluir Selecionados
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="usersTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="border-0" style="width: 40px;">
+                            <input type="checkbox" class="form-check-input" id="selectAll">
+                        </th>
+                        <th class="border-0 fw-semibold">
+                            <i class="fas fa-hashtag me-1 text-muted"></i>ID
+                        </th>
+                        <th class="border-0 fw-semibold">
+                            <i class="fas fa-user me-1 text-muted"></i>Usuário
+                        </th>
+                        <th class="border-0 fw-semibold">
+                            <i class="fas fa-envelope me-1 text-muted"></i>Email
+                        </th>
+                        <th class="border-0 fw-semibold">
+                            <i class="fas fa-user-tag me-1 text-muted"></i>Função
+                        </th>
+                        <th class="border-0 fw-semibold">
+                            <i class="fas fa-circle me-1 text-muted"></i>Status
+                        </th>
+                        <th class="border-0 fw-semibold">
+                            <i class="fas fa-clock me-1 text-muted"></i>Último Acesso
+                        </th>
+                        <th class="border-0 fw-semibold text-center">
+                            <i class="fas fa-cogs me-1 text-muted"></i>Ações
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="user-row" data-user-id="{{ user.id }}" data-user-status="{{ 'active' if user.ativo else 'inactive' }}" data-user-role="{{ 'admin' if user.is_admin else 'ti' if user.is_ti else 'user' }}">
+                        <td class="align-middle">
+                            <input type="checkbox" class="form-check-input user-checkbox" value="{{ user.id }}">
+                        </td>
+                        <td class="align-middle fw-mono small text-muted">{{ user.id }}</td>
+                        <td class="align-middle">
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar me-3 position-relative">
+                                    {% if user.is_admin %}
+                                        <div class="avatar-badge bg-warning">
+                                            <i class="fas fa-crown fa-xs"></i>
+                                        </div>
+                                    {% elif user.is_ti %}
+                                        <div class="avatar-badge bg-info">
+                                            <i class="fas fa-shield-alt fa-xs"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="avatar-circle {{ 'border-success' if user.ativo else 'border-danger' }}">
+                                        <i class="fas fa-user text-muted"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold text-dark mb-1">{{ user.username }}</div>
+                                    {% if user.sector %}
+                                    <small class="text-muted">
+                                        <i class="fas fa-building me-1"></i>{{ user.sector.name }}
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="align-middle">
+                            <a href="mailto:{{ user.email }}" class="text-decoration-none">
+                                {{ user.email }}
+                            </a>
+                        </td>
+                        <td class="align-middle">
+                            {% if user.is_admin %}
+                                <span class="badge bg-warning text-dark px-2 py-1">
+                                    <i class="fas fa-crown me-1"></i>Administrador
+                                </span>
+                            {% elif user.is_ti %}
+                                <span class="badge bg-info text-white px-2 py-1">
+                                    <i class="fas fa-user-shield me-1"></i>Equipe TI
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary text-white px-2 py-1">
+                                    <i class="fas fa-user me-1"></i>Usuário
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="align-middle">
+                            {% if user.ativo %}
+                                <span class="badge bg-success px-2 py-1">
+                                    <i class="fas fa-circle me-1"></i>Ativo
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger px-2 py-1">
+                                    <i class="fas fa-circle me-1"></i>Inativo
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="align-middle">
+                            {% if user.last_login %}
+                                <div class="d-flex flex-column">
+                                    <span class="small fw-semibold">{{ user.last_login.strftime('%d/%m/%Y') }}</span>
+                                    <small class="text-muted">{{ user.last_login.strftime('%H:%M') }}</small>
+                                </div>
+                            {% else %}
+                                <span class="text-muted small">
+                                    <i class="fas fa-minus me-1"></i>Nunca acessou
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="align-middle">
+                            <div class="d-flex justify-content-center gap-1">
+                                <a href="{{ url_for('system_config.edit_user', user_id=user.id) }}"
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Editar usuário"
+                                   data-bs-toggle="tooltip">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-warning"
+                                        onclick="resetPassword({{ user.id }}, '{{ user.username }}')"
+                                        title="Redefinir senha"
+                                        data-bs-toggle="tooltip">
+                                    <i class="fas fa-key"></i>
+                                </button>
+                                <button type="button"
+                                        class="btn btn-sm {{ 'btn-outline-danger' if user.ativo else 'btn-outline-success' }}"
+                                        onclick="toggleUserStatus({{ user.id }}, {{ user.ativo|lower }})"
+                                        title="{{ 'Desativar usuário' if user.ativo else 'Ativar usuário' }}"
+                                        data-bs-toggle="tooltip">
+                                    <i class="fas fa-{{ 'user-slash' if user.ativo else 'user-check' }}"></i>
+                                </button>
+                                {% if user.id != session.get('user_id') %}
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="deleteUser({{ user.id }}, '{{ user.username }}')"
+                                        title="Excluir usuário"
+                                        data-bs-toggle="tooltip">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Estado Vazio -->
+        {% if not users %}
+        <div class="text-center py-5">
+            <div class="mb-3">
+                <i class="fas fa-users fa-4x text-muted"></i>
+            </div>
+            <h5 class="text-muted">Nenhum usuário encontrado</h5>
+            <p class="text-muted mb-3">Não há usuários que correspondam aos filtros aplicados.</p>
+            <button type="button" class="btn btn-outline-primary" onclick="clearFilters()">
+                <i class="fas fa-eraser me-1"></i>Limpar Filtros
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Paginação Aprimorada -->
+{% if pagination and pagination.pages > 1 %}
+<div class="card border-0 shadow-sm mt-3">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                    <small class="text-muted me-3">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Mostrando <strong>{{ (pagination.page - 1) * pagination.per_page + 1 }}</strong> a
+                        <strong>{{ min(pagination.page * pagination.per_page, pagination.total) }}</strong> de
+                        <strong>{{ pagination.total }}</strong> usuários
+                    </small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <nav aria-label="Paginação de usuários">
+                    <ul class="pagination pagination-sm justify-content-end mb-0">
+                        {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('system_config.list_users', page=pagination.prev_num, search=request.args.get('search', ''), status=request.args.get('status', ''), role=request.args.get('role', '')) }}"
+                               aria-label="Página anterior">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-label="Página anterior desabilitada">
+                                <i class="fas fa-chevron-left"></i>
+                            </span>
+                        </li>
+                        {% endif %}
+
+                        {% for page_num in pagination.iter_pages() %}
+                        {% if page_num %}
+                        <li class="page-item {{ 'active' if page_num == pagination.page else '' }}">
+                            <a class="page-link" href="{{ url_for('system_config.list_users', page=page_num, search=request.args.get('search', ''), status=request.args.get('status', ''), role=request.args.get('role', '')) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('system_config.list_users', page=pagination.next_num, search=request.args.get('search', ''), status=request.args.get('status', ''), role=request.args.get('role', '')) }}"
+                               aria-label="Próxima página">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-label="Próxima página desabilitada">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Barra de Ações Rápidas -->
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <div class="d-flex align-items-center gap-2">
+        <small class="text-muted">
+            <i class="fas fa-lightbulb me-1"></i>
+            <strong>Dica:</strong> Clique nos cards de estatísticas para filtrar automaticamente
+        </small>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-success btn-sm" onclick="exportUsers()" title="Exportar usuários para CSV">
+            <i class="fas fa-download me-1"></i>
+            <span class="d-none d-sm-inline">Exportar</span>
+        </button>
+        <button type="button" class="btn btn-outline-info btn-sm" onclick="importUsers()" title="Importar usuários via CSV">
+            <i class="fas fa-upload me-1"></i>
+            <span class="d-none d-sm-inline">Importar</span>
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="refreshUsers()" title="Atualizar lista">
+            <i class="fas fa-sync-alt me-1"></i>
+            <span class="d-none d-sm-inline">Atualizar</span>
+        </button>
+    </div>
+</div>
+
+<!-- Modal de Confirmação para Reset de Senha -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetPasswordModalLabel">
+                    <i class="fas fa-key me-2"></i>Redefinir Senha
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza de que deseja redefinir a senha do usuário <strong id="resetUserName"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Uma nova senha temporária será gerada e exibida na tela.
+                    Recomenda-se copiar e enviar ao usuário por um canal seguro.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning" id="confirmResetPassword">
+                    <i class="fas fa-key me-1"></i>Redefinir Senha
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação para Exclusão -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteUserModalLabel">
+                    <i class="fas fa-trash me-2"></i>Excluir Usuário
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza de que deseja excluir o usuário <strong id="deleteUserName"></strong>?</p>
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Esta ação não pode ser desfeita. Todos os dados do usuário serão permanentemente removidos.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteUser">
+                    <i class="fas fa-trash me-1"></i>Excluir Usuário
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================
+     SISTEMA DE GERENCIAMENTO DE USUÁRIOS - JAVASCRIPT APRIMORADO
+     ======================================== -->
+
+<script>
+// Variáveis globais
+let userToReset = null;
+let userToDelete = null;
+let currentFilters = {
+    search: '',
+    status: '',
+    role: '',
+    sector: ''
+};
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    initializeUserManagement();
+    initializeTooltips();
+    initializeKeyboardShortcuts();
+});
+
+// Sistema de Inicialização
+function initializeUserManagement() {
+    setupEventListeners();
+    setupBulkActions();
+    loadSectorOptions();
+    initializeStatsCards();
+}
+
+// Configuração de Event Listeners
+function setupEventListeners() {
+    // Filtros
+    const searchInput = document.getElementById('userSearch');
+    const statusFilter = document.getElementById('statusFilter');
+    const roleFilter = document.getElementById('roleFilter');
+    const sectorFilter = document.getElementById('sectorFilter');
+    const clearSearchBtn = document.getElementById('clearSearch');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(applyFilters, 300));
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyFilters();
+            }
+        });
+    }
+
+    if (statusFilter) statusFilter.addEventListener('change', applyFilters);
+    if (roleFilter) roleFilter.addEventListener('change', applyFilters);
+    if (sectorFilter) sectorFilter.addEventListener('change', applyFilters);
+    if (clearSearchBtn) clearSearchBtn.addEventListener('click', clearSearch);
+
+    // Seleção
+    const selectAllCheckbox = document.getElementById('selectAll');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', toggleSelectAll);
+    }
+
+    // Modais
+    setupModalListeners();
+
+    // Atualização automática
+    setInterval(updateLastActivity, 30000); // A cada 30 segundos
+}
+
+// Sistema de Filtros Aprimorado
+function applyFilters() {
+    const searchTerm = document.getElementById('userSearch')?.value?.toLowerCase() || '';
+    const statusFilter = document.getElementById('statusFilter')?.value || '';
+    const roleFilter = document.getElementById('roleFilter')?.value || '';
+    const sectorFilter = document.getElementById('sectorFilter')?.value || '';
+
+    currentFilters = { search: searchTerm, status: statusFilter, role: roleFilter, sector: sectorFilter };
+
+    const rows = document.querySelectorAll('.user-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        const isVisible = shouldShowRow(row, currentFilters);
+        row.style.display = isVisible ? '' : 'none';
+        if (isVisible) visibleCount++;
+    });
+
+    updateVisibleCount(visibleCount);
+    updateBulkActionsState();
+}
+
+function shouldShowRow(row, filters) {
+    const username = row.querySelector('.fw-semibold')?.textContent?.toLowerCase() || '';
+    const email = row.querySelector('td:nth-child(4) a')?.textContent?.toLowerCase() || '';
+    const role = row.dataset.userRole || '';
+    const status = row.dataset.userStatus || '';
+    const sector = row.querySelector('small')?.textContent?.toLowerCase() || '';
+
+    const matchesSearch = !filters.search ||
+        username.includes(filters.search) ||
+        email.includes(filters.search) ||
+        sector.includes(filters.search);
+
+    const matchesStatus = !filters.status || status === filters.status;
+    const matchesRole = !filters.role || role === filters.role;
+    const matchesSector = !filters.sector || sector.includes(filters.sector.toLowerCase());
+
+    return matchesSearch && matchesStatus && matchesRole && matchesSector;
+}
+
+function clearFilters() {
+    document.getElementById('userSearch').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('roleFilter').value = '';
+    document.getElementById('sectorFilter').value = '';
+    currentFilters = { search: '', status: '', role: '', sector: '' };
+    applyFilters();
+}
+
+function clearSearch() {
+    document.getElementById('userSearch').value = '';
+    applyFilters();
+}
+
+// Sistema de Seleção
+function toggleSelectAll() {
+    const isChecked = this.checked;
+    const checkboxes = document.querySelectorAll('.user-checkbox');
+    checkboxes.forEach(cb => {
+        cb.checked = isChecked;
+    });
+    updateBulkActionsState();
+}
+
+function updateBulkActionsState() {
+    const selectedCount = document.querySelectorAll('.user-checkbox:checked').length;
+    const bulkActionsBtn = document.querySelector('[data-bs-toggle="dropdown"]');
+
+    if (bulkActionsBtn) {
+        bulkActionsBtn.innerHTML = selectedCount > 0
+            ? `<i class="fas fa-tasks me-1"></i>${selectedCount} Selecionado(s)`
+            : `<i class="fas fa-cog me-1"></i>Opções`;
+    }
+}
+
+// Ações Individuais
+function resetPassword(userId, username) {
+    userToReset = userId;
+    const modal = document.getElementById('resetPasswordModal');
+    if (modal) {
+        document.getElementById('resetUserName').textContent = username;
+        new bootstrap.Modal(modal).show();
+    }
+}
+
+function toggleUserStatus(userId, isActive) {
+    const action = isActive ? 'desativar' : 'ativar';
+    const actionText = isActive ? 'Desativar' : 'Ativar';
+
+    showConfirmDialog({
+        title: `${actionText} Usuário`,
+        message: `Tem certeza de que deseja ${action} este usuário?`,
+        confirmText: actionText,
+        confirmClass: isActive ? 'btn-warning' : 'btn-success',
+        onConfirm: () => performStatusToggle(userId, isActive)
+    });
+}
+
+function deleteUser(userId, username) {
+    userToDelete = userId;
+    const modal = document.getElementById('deleteUserModal');
+    if (modal) {
+        document.getElementById('deleteUserName').textContent = username;
+        new bootstrap.Modal(modal).show();
+    }
+}
+
+// Ações em Lote
+function setupBulkActions() {
+    // Os métodos são chamados pelos botões no dropdown
+}
+
+function bulkActivate() {
+    performBulkAction('activate', 'Ativar usuários selecionados?');
+}
+
+function bulkDeactivate() {
+    performBulkAction('deactivate', 'Desativar usuários selecionados?');
+}
+
+function bulkDelete() {
+    performBulkAction('delete', 'EXCLUIR usuários selecionados? Esta ação não pode ser desfeita!');
+}
+
+function performBulkAction(action, confirmMessage) {
+    const selectedUsers = Array.from(document.querySelectorAll('.user-checkbox:checked')).map(cb => cb.value);
+
+    if (selectedUsers.length === 0) {
+        showToast('Nenhum usuário selecionado', 'warning');
+        return;
+    }
+
+    showConfirmDialog({
+        title: 'Ação em Lote',
+        message: confirmMessage,
+        confirmText: 'Confirmar',
+        confirmClass: action === 'delete' ? 'btn-danger' : 'btn-primary',
+        onConfirm: () => executeBulkAction(action, selectedUsers)
+    });
+}
+
+// API Calls
+function performStatusToggle(userId, isActive) {
+    showLoading('Alterando status do usuário...');
+
+    fetch(`/configuracoes/usuarios/${userId}/toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showToast('Status alterado com sucesso!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast('Erro: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        console.error('Erro:', error);
+        showToast('Erro ao alterar status do usuário', 'error');
+    });
+}
+
+function executeBulkAction(action, userIds) {
+    showLoading(`Executando ação em lote...`);
+
+    fetch('/configuracoes/usuarios/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            action: action,
+            'user_ids[]': userIds
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showToast(`Ação executada com sucesso em ${userIds.length} usuários!`, 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast('Erro na execução da ação', 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        console.error('Erro:', error);
+        showToast('Erro na execução da ação em lote', 'error');
+    });
+}
+
+// Modais
+function setupModalListeners() {
+    // Reset Password
+    const confirmResetBtn = document.getElementById('confirmResetPassword');
+    if (confirmResetBtn) {
+        confirmResetBtn.addEventListener('click', function() {
+            if (userToReset) {
+                fetch(`/configuracoes/usuarios/${userToReset}/reset-senha`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Senha redefinida com sucesso!', 'success');
+                        document.getElementById('newPasswordDisplay').textContent = data.new_password;
+                        document.getElementById('newPasswordDisplay').style.display = 'block';
+                        setTimeout(() => {
+                            bootstrap.Modal.getInstance(document.getElementById('resetPasswordModal')).hide();
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        showToast('Erro: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    showToast('Erro ao redefinir senha', 'error');
+                });
+            }
+        });
+    }
+
+    // Delete User
+    const confirmDeleteBtn = document.getElementById('confirmDeleteUser');
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', function() {
+            if (userToDelete) {
+                fetch(`/configuracoes/usuarios/${userToDelete}/deletar`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Usuário excluído com sucesso!', 'success');
+                        bootstrap.Modal.getInstance(document.getElementById('deleteUserModal')).hide();
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showToast('Erro: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    showToast('Erro ao excluir usuário', 'error');
+                });
+            }
+        });
+    }
+}
+
+// Utilitários
+function filterByStatus(status) {
+    document.getElementById('statusFilter').value = status;
+    applyFilters();
+}
+
+function filterByRole(role) {
+    document.getElementById('roleFilter').value = role;
+    applyFilters();
+}
+
+function exportUsers() {
+    const selectedUsers = Array.from(document.querySelectorAll('.user-checkbox:checked')).map(cb => cb.value);
+    let url = '/configuracoes/usuarios/export';
+
+    if (selectedUsers.length > 0) {
+        url += '?users=' + selectedUsers.join(',');
+    }
+
+    window.open(url, '_blank');
+}
+
+function importUsers() {
+    showToast('Funcionalidade de importação será implementada em breve', 'info');
+}
+
+function refreshUsers() {
+    showLoading('Atualizando lista de usuários...');
+    setTimeout(() => {
+        location.reload();
+    }, 500);
+}
+
+function loadSectorOptions() {
+    // Carregar opções de setor dinamicamente se necessário
+    const sectorFilter = document.getElementById('sectorFilter');
+    if (sectorFilter) {
+        // Implementar carregamento dinâmico de setores
+    }
+}
+
+function initializeStatsCards() {
+    const statsCards = document.querySelectorAll('.stats-card');
+    statsCards.forEach(card => {
+        card.addEventListener('click', function() {
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+}
+
+function updateVisibleCount(count) {
+    // Atualizar contador de usuários visíveis se necessário
+}
+
+function updateLastActivity() {
+    // Atualizar indicadores de atividade em tempo real
+}
+
+// Sistema de Tooltips
+function initializeTooltips() {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+}
+
+// Atalhos de Teclado
+function initializeKeyboardShortcuts() {
+    document.addEventListener('keydown', function(e) {
+        // Ctrl+F para focar na busca
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            document.getElementById('userSearch')?.focus();
+        }
+
+        // Escape para limpar filtros
+        if (e.key === 'Escape') {
+            if (document.activeElement.id === 'userSearch') {
+                clearSearch();
+            }
+        }
+    });
+}
+
+// Sistema de Feedback Visual
+function showLoading(message = 'Carregando...') {
+    // Implementar loading overlay
+    console.log(message);
+}
+
+function hideLoading() {
+    // Remover loading overlay
+}
+
+function showToast(message, type = 'info') {
+    // Implementar sistema de toast notifications
+    console.log(`${type}: ${message}`);
+}
+
+function showConfirmDialog(options) {
+    // Criar modal de confirmação personalizado
+    const modalHtml = `
+        <div class="modal fade" id="confirmDialog" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${options.title}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>${options.message}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn ${options.confirmClass}" id="confirmAction">${options.confirmText}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modal = new bootstrap.Modal(document.getElementById('confirmDialog'));
+
+    document.getElementById('confirmAction').addEventListener('click', function() {
+        modal.hide();
+        options.onConfirm();
+        document.getElementById('confirmDialog').remove();
+    });
+
+    modal.show();
+}
+
+// Utilitários
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+</script>
+
+<!-- CSS Adicional -->
+<style>
+/* Cards de Estatísticas */
+.stats-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none !important;
+    background: white;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.stats-card .progress {
+    background-color: rgba(0,0,0,0.1);
+}
+
+/* Avatares */
+.user-avatar {
+    position: relative;
+}
+
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bs-light);
+    border: 2px solid var(--bs-border-color);
+}
+
+.avatar-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: white;
+    border: 2px solid white;
+}
+
+/* Tabela */
+.table th {
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table td {
+    vertical-align: middle;
+    border-color: var(--bs-border-color-light);
+}
+
+/* Estados Vazios */
+.text-center.py-5 {
+    padding: 3rem 1rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .stats-card .d-flex {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .stats-card .me-3 {
+        margin-right: 0 !important;
+        margin-bottom: 0.5rem;
+    }
+
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-group .btn {
+        border-radius: 0 !important;
+        margin-bottom: 1px;
+    }
+
+    .btn-group .btn:first-child {
+        border-top-left-radius: 0.375rem !important;
+        border-top-right-radius: 0.375rem !important;
+    }
+
+    .btn-group .btn:last-child {
+        border-bottom-left-radius: 0.375rem !important;
+        border-bottom-right-radius: 0.375rem !important;
+        margin-bottom: 0;
+    }
+}
+
+/* Animações */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user-row {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+/* Estados de Foco */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Tooltips Aprimorados */
+.tooltip-inner {
+    max-width: 200px;
+    text-align: center;
+}
+</style>
+{% endblock %}

@@ -15,38 +15,26 @@ class NotificationManager {
 
     async init() {
         if (!this.isSupported) {
-            console.warn('Notificações não são suportadas neste navegador');
-            this.showUnsupportedMessage();
+            // Notificações nativas não suportadas - não mostrar mensagem
+            // O sistema de toasts in-app funciona independentemente
             return;
         }
 
         // Verificar permissão atual
         this.permission = Notification.permission;
-        console.log(`Status inicial da permissão: ${this.permission}`);
         
-        // Verificar se o usuário dispensou recentemente
-        if (!this.shouldShowMessage()) {
-            console.log('Usuário dispensou notificações recentemente, não mostrando mensagem');
-            return;
-        }
-        
+        // IMPORTANTE: Não solicitar permissão automaticamente
+        // Apenas iniciar se já tiver permissão concedida
         if (this.permission === 'granted') {
             // Registrar o Service Worker e iniciar polling
             await this.registerServiceWorker();
             this.startPolling();
             this.hidePermissionMessage();
-        } else if (this.permission === 'denied') {
-            // Permissão foi negada permanentemente
-            this.showPermissionDeniedMessage();
-        } else {
-            // Permissão ainda não foi solicitada (default)
-            // Aguardar um pouco antes de mostrar a mensagem para evitar aparecer na tela de login
-            setTimeout(() => {
-                if (this.shouldShowMessage()) {
-                    this.showPermissionRequestMessage();
-                }
-            }, 2000);
         }
+        
+        // NÃO MOSTRAR mensagens automáticas de permissão
+        // O usuário pode habilitar manualmente se desejar
+        // Os toasts in-app funcionam sem necessidade de permissão
     }
     
     async registerServiceWorker() {
@@ -65,35 +53,35 @@ class NotificationManager {
                     reg.scope.includes(window.location.origin));
                 
                 if (swRegistration) {
-                    console.log('Service Worker já registrado:', swRegistration);
+                    // Service Worker já registrado
                     this.serviceWorkerRegistration = swRegistration;
                     return true;
                 }
             }
             
             // Se não houver service worker registrado, registrar novamente
-            console.log('Registrando Service Worker...');
+            // Registrando Service Worker...
             const registration = await navigator.serviceWorker.register('/static/sw.js');
-            console.log('Service Worker registrado com sucesso:', registration);
+            // Service Worker registrado com sucesso
             this.serviceWorkerRegistration = registration;
             
             // Verificar se o SW está ativo
             if (registration.active) {
-                console.log('Service Worker está ativo');
+                // Service Worker está ativo
             } else {
                 console.log('Service Worker está instalando/esperando');
                 // Esperar até que o SW esteja ativo
                 registration.addEventListener('updatefound', () => {
                     const newWorker = registration.installing;
                     newWorker.addEventListener('statechange', () => {
-                        console.log('Service Worker mudou de estado para:', newWorker.state);
+                        // Service Worker mudou de estado
                     });
                 });
             }
             
             return true;
         } catch (error) {
-            console.error('Erro ao registrar Service Worker:', error);
+            console.error('Erro ao registrar Service Worker');
             return false;
         }
     }
@@ -321,34 +309,34 @@ class NotificationManager {
             this.permission = Notification.permission;
             
             if (this.permission === 'granted') {
-                console.log('Permissão para notificações já concedida');
+                // Permissão já concedida
                 return 'granted';
             }
             
             if (this.permission === 'denied') {
-                console.log('Permissão para notificações foi negada pelo usuário');
+                // Permissão negada
                 return 'denied';
             }
 
             // Solicitar permissão apenas se ainda não foi solicitada (default)
-            console.log('Solicitando permissão para notificações...');
+            // Solicitando permissão
             const permission = await Notification.requestPermission();
-            console.log(`Resultado da solicitação de permissão: ${permission}`);
+            // Resultado da solicitação de permissão
             
             this.permission = permission;
             return permission;
         } catch (error) {
-            console.error('Erro ao solicitar permissão para notificações:', error);
+            console.error('Erro ao solicitar permissão para notificações');
             return 'denied';
         }
     }
 
     async showNotification(title, options = {}) {
         if (this.permission !== 'granted') {
-            console.log('Tentando solicitar permissão para notificações novamente...');
+            // Tentando solicitar permissão novamente
             this.permission = await this.requestPermission();
             if (this.permission !== 'granted') {
-                console.warn('Permissão para notificações não concedida');
+                // Permissão não concedida
                 return null;
             }
         }
@@ -373,11 +361,11 @@ class NotificationManager {
                         ...options
                     });
                     
-                    console.log('Notificação exibida via Service Worker registrado:', title);
+                    // Notificação exibida
                     return true;
                 } else {
                     // Tentar obter o Service Worker pronto
-                    console.log('Service Worker não registrado, tentando obter o pronto...');
+                    // Obtendo Service Worker
                     const registration = await navigator.serviceWorker.ready;
                     this.serviceWorkerRegistration = registration;
                     
@@ -396,7 +384,7 @@ class NotificationManager {
                         ...options
                     });
                     
-                    console.log('Notificação exibida via Service Worker:', title);
+                    // Notificação exibida
                     return true;
                 }
             } else {
@@ -412,18 +400,18 @@ class NotificationManager {
                     notification.close();
                 }, 10000);
 
-                console.log('Notificação exibida via API padrão:', title);
+                // Notificação exibida via API padrão
                 return notification;
             }
         } catch (error) {
-            console.error('Erro ao exibir notificação:', error);
+            console.error('Erro ao exibir notificação');
             // Tentar registrar o Service Worker novamente
             try {
                 await this.registerServiceWorker();
-                console.log('Service Worker registrado novamente após erro');
+                // Service Worker registrado novamente
                 return null;
             } catch (swError) {
-                console.error('Erro ao registrar Service Worker após falha na notificação:', swError);
+                console.error('Erro ao registrar Service Worker após falha na notificação');
                 return null;
             }
         }
@@ -438,10 +426,10 @@ class NotificationManager {
         });
         
         if (result) {
-            console.log('Teste de notificação enviado com sucesso');
+            // Teste de notificação bem-sucedido
             return true;
         } else {
-            console.warn('Falha no teste de notificação');
+            // Falha no teste de notificação
             return false;
         }
     }
@@ -450,17 +438,17 @@ class NotificationManager {
         try {
             // Verificar se o usuário está online
             if (!navigator.onLine) {
-                console.log('Usuário está offline, pulando verificação de notificações');
+                // Usuário offline, pulando verificação
                 return;
             }
             
             // Verificar se temos permissão para notificações
             if (this.permission !== 'granted') {
-                console.log('Permissão para notificações não concedida, tentando solicitar novamente...');
+                // Solicitando permissão novamente
                 this.permission = await this.requestPermission();
                 
                 if (this.permission !== 'granted') {
-                    console.log('Permissão para notificações ainda não concedida, pulando verificação');
+                    // Permissão não concedida, pulando verificação
                     return;
                 }
             }
@@ -485,7 +473,7 @@ class NotificationManager {
             if (!response.ok) {
                 // Se o erro for 401 ou 403, o usuário não está autenticado
                 if (response.status === 401 || response.status === 403) {
-                    console.log('Usuário não autenticado, redirecionando para login...');
+                    // Usuário não autenticado
                     // Opcional: redirecionar para a página de login
                     // window.location.href = '/login';
                     return;
@@ -498,7 +486,7 @@ class NotificationManager {
                 const responseText = await response.text();
                 data = JSON.parse(responseText);
             } catch (parseError) {
-                console.error('Erro ao analisar JSON:', parseError);
+                console.error('Erro ao analisar JSON');
                 return;
             }
             
@@ -515,13 +503,13 @@ class NotificationManager {
                 (data.tasks_overdue && data.tasks_overdue.length > 0);
                 
             if (!hasNotifications) {
-                console.log('Nenhuma notificação para exibir');
+                // Nenhuma notificação para exibir
                 return;
             }
 
             // Lembretes vencendo (máximo 1 por dia por lembrete)
             if (data.reminders_expiring && data.reminders_expiring.length > 0) {
-                console.log(`${data.reminders_expiring.length} lembretes vencendo em breve`);
+                // Processando lembretes vencendo em breve
                 for (const reminder of data.reminders_expiring) {
                     const notificationKey = `reminder-${reminder.id}`;
                     if (this.shouldShowNotification(notificationKey, 24 * 60 * 60 * 1000)) { // 24 horas
@@ -541,7 +529,7 @@ class NotificationManager {
 
             // Chamados atualizados (máximo 1 por hora por chamado)
             if (data.chamados_updated && data.chamados_updated.length > 0) {
-                console.log(`${data.chamados_updated.length} chamados atualizados recentemente`);
+                // Processando chamados atualizados
                 for (const chamado of data.chamados_updated) {
                     const notificationKey = `chamado-${chamado.id}`;
                     if (this.shouldShowNotification(notificationKey, 60 * 60 * 1000)) { // 1 hora
@@ -561,7 +549,7 @@ class NotificationManager {
 
             // Tarefas vencidas (máximo 1 por 4 horas)
             if (data.tasks_overdue && data.tasks_overdue.length > 0) {
-                console.log(`${data.tasks_overdue.length} tarefas em atraso`);
+                // Processando tarefas em atraso
                 const notificationKey = 'tasks-overdue';
                 if (this.shouldShowNotification(notificationKey, 4 * 60 * 60 * 1000)) { // 4 horas
                     await this.showNotification('⚠️ Tarefas Vencidas!', {
@@ -576,14 +564,14 @@ class NotificationManager {
                 }
             }
 
-            console.log('Verificação de notificações concluída com sucesso');
+            // Verificação de notificações concluída
 
         } catch (error) {
-            console.error('Erro ao verificar notificações:', error);
+            console.error('Erro ao verificar notificações');
             
             // Se houver erro de conexão, tentar novamente mais tarde
             if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                console.log('Erro de conexão, tentando novamente em 2 minutos...');
+                // Erro de conexão, tentando novamente em 2 minutos
                 setTimeout(() => this.checkForUpdates(), 120000); // 2 minutos
             }
         }
@@ -606,14 +594,14 @@ class NotificationManager {
         // Adicionar listeners para eventos de conectividade (apenas uma vez)
         if (!this.listenersAdded) {
             window.addEventListener('online', () => {
-                console.log('Conexão restaurada, verificando notificações...');
+                // Conexão restaurada, verificando notificações
                 this.checkForUpdates();
             });
             
             // Registrar para eventos de visibilidade da página
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
-                    console.log('Página visível, verificando notificações...');
+                    // Página visível, verificando notificações
                     this.checkForUpdates();
                 }
             });

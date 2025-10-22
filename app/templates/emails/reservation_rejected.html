@@ -1,0 +1,72 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-bottom: 1px solid #e9ecef;">
+        <h1 style="color: #dc3545; margin: 0;">Reserva Não Aprovada</h1>
+        <p style="margin: 10px 0 0; color: #6c757d;">Sua solicitação de reserva foi analisada</p>
+    </div>
+
+    <div style="padding: 30px 20px;">
+        <p>Olá {{ reservation.user.name }},</p>
+        
+        <p>Lamentamos informar que sua solicitação de reserva para o equipamento <strong>{{ reservation.equipment.name }}</strong> não foi aprovada.</p>
+        
+        <div style="background-color: #f8f9fa; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #dc3545;">Detalhes da Reserva</h3>
+            <p style="margin: 5px 0;">
+                <strong>Equipamento:</strong> {{ reservation.equipment.name }}
+                {% if reservation.equipment.patrimony %}
+                    (Patrimônio: {{ reservation.equipment.patrimony }})
+                {% endif %}
+            </p>
+            <p style="margin: 5px 0;">
+                <strong>Período Solicitado:</strong> 
+                {{ reservation.start_date.strftime('%d/%m/%Y') }} a {{ reservation.end_date.strftime('%d/%m/%Y') }}
+            </p>
+            {% if reservation.purpose %}
+            <p style="margin: 5px 0;">
+                <strong>Finalidade Informada:</strong> {{ reservation.purpose }}
+            </p>
+            {% endif %}
+        </div>
+
+        <div style="background-color: #f8e9e9; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #dc3545;">Motivo da Rejeição</h3>
+            <p style="margin: 5px 0;">{{ reason }}</p>
+            
+            <p style="margin: 5px 0;">
+                <strong>Responsável pela Análise:</strong> {{ rejected_by.name }}
+                {% if rejected_by.phone %}
+                    <br><strong>Telefone:</strong> {{ rejected_by.phone }}
+                {% endif %}
+            </p>
+            
+            <p style="margin: 10px 0 0; font-size: 0.9em; color: #6c757d;">
+                Data da Análise: {{ reservation.approval_date.strftime('%d/%m/%Y %H:%M') }}
+            </p>
+        </div>
+
+        <p>Se você acredita que houve um engano ou deseja mais informações, entre em contato com o responsável ou com o setor de TI.</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{ url_for('equipment_v2.catalog', _external=True) }}" 
+               style="display: inline-block; padding: 10px 20px; background-color: #dc3545; 
+                      color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">
+                Ver Outros Equipamentos
+            </a>
+        </div>
+        
+        <p>Agradecemos sua compreensão.</p>
+    </div>
+    
+    <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; border-top: 1px solid #e9ecef;">
+        <p style="margin: 5px 0;">Esta é uma mensagem automática, por favor não responda este e-mail.</p>
+        <p style="margin: 5px 0;">
+            Em caso de dúvidas, entre em contato com o setor de TI através do 
+            <a href="mailto:ti@empresa.com" style="color: #007bff; text-decoration: none;">ti@empresa.com</a>
+            ou pelo telefone (XX) XXXX-XXXX.
+        </p>
+    </div>
+</div>
+{% endblock %}

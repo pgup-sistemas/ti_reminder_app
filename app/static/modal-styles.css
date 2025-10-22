@@ -71,6 +71,35 @@
   max-width: 700px;
 }
 
+/* Bootstrap modal sizes - Sobrescrever para modais Bootstrap */
+.modal-dialog.modal-sm {
+  max-width: 300px !important;
+  width: 100% !important;
+}
+
+.modal-dialog.modal-lg {
+  max-width: 800px !important;
+  width: 100% !important;
+}
+
+.modal-dialog.modal-xl {
+  max-width: 1140px !important;
+  width: 100% !important;
+  margin: 1.75rem auto !important;
+}
+
+/* Garantir que o conteúdo do modal não seja cortado */
+.modal-dialog.modal-xl .modal-content {
+  max-height: calc(100vh - 3.5rem) !important;
+  overflow: visible !important;
+}
+
+.modal-dialog.modal-xl .modal-body {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: calc(100vh - 250px) !important;
+}
+
 /* Conteúdo do modal */
 .modal-content {
   display: flex;

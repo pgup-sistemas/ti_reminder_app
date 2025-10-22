@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Alerta de SLA - Equipamento</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #dc3545;">🚨 ALERTA DE SLA - Equipamento</h2>
+
+        <p>Olá, {{ ti_user.username }}!</p>
+
+        <p>Um empréstimo de equipamento está com <strong>SLA {{ loan.get_sla_display().upper() }}</strong>.</p>
+
+        <div style="background-color: {% if loan.sla_status == 'atencao' %}#fff3cd{% elif loan.sla_status == 'vencido' %}#f8d7da{% else %}#f8f9fa{% endif %}; padding: 15px; border-left: 4px solid {% if loan.sla_status == 'atencao' %}#ffc107{% elif loan.sla_status == 'vencido' %}#dc3545{% else %}#007bff{% endif %}; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: {% if loan.sla_status == 'atencao' %}#856404{% elif loan.sla_status == 'vencido' %}#721c24{% else %}#007bff{% endif %};">Detalhes do Empréstimo:</h3>
+            <p><strong>Equipamento:</strong> {{ loan.equipment.name }}</p>
+            <p><strong>Patrimônio:</strong> {{ loan.equipment.patrimony or 'N/A' }}</p>
+            <p><strong>Usuário:</strong> {{ loan.user.username }} ({{ loan.user.email }})</p>
+            <p><strong>Data de Empréstimo:</strong> {{ loan.loan_date.strftime('%d/%m/%Y %H:%M') }}</p>
+            <p><strong>Data de Devolução:</strong> {{ loan.expected_return_date.strftime('%d/%m/%Y') }}</p>
+            <p><strong>SLA Configurado:</strong> {{ loan.sla_hours }} horas</p>
+            <p><strong>Prazo SLA:</strong> {{ loan.sla_deadline.strftime('%d/%m/%Y %H:%M') if loan.sla_deadline else 'N/A' }}</p>
+            <p><strong>Status Atual:</strong>
+                <span style="color: {% if loan.sla_status == 'cumprido' %}#28a745{% elif loan.sla_status == 'atencao' %}#ffc107{% elif loan.sla_status == 'vencido' %}#dc3545{% else %}#6c757d{% endif %}; font-weight: bold;">
+                    {{ loan.get_sla_display() }}
+                </span>
+            </p>
+        </div>
+
+        {% if loan.sla_status == 'atencao' %}
+        <p><strong>AÇÃO NECESSÁRIA:</strong> O SLA está próximo do vencimento. Entre em contato com o usuário para agilizar a devolução.</p>
+        {% elif loan.sla_status == 'vencido' %}
+        <p><strong>AÇÃO IMEDIATA NECESSÁRIA:</strong> O SLA foi vencido. Contate o usuário urgentemente e considere aplicar medidas administrativas.</p>
+        {% endif %}
+
+        <p>Para mais detalhes, acesse o sistema: <a href="{{ url_for('equipment_v2.admin_equipment', _external=True) }}">Gerenciar Equipamentos</a></p>
+
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+        <p style="color: #6c757d; font-size: 12px;">
+            Este é um email automático do sistema de monitoramento SLA.<br>
+            Sistema de Gestão de Equipamentos - TI OSN System
+        </p>
+    </div>
+</body>
+</html>

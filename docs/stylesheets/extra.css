@@ -1,5 +1,104 @@
 /* CSS personalizado para documentação TI OSN System */
 
+/* ========================================
+   LARGURA E LAYOUT PRINCIPAL
+   ======================================== */
+
+/* Aumentar largura máxima do conteúdo */
+.wy-nav-content {
+    max-width: 1400px !important;
+    margin: 0 auto;
+}
+
+/* Ajustar largura do container principal */
+.wy-nav-content-wrap {
+    margin-left: 300px;
+}
+
+/* Sidebar com largura fixa */
+.wy-nav-side {
+    width: 300px;
+}
+
+/* Conteúdo ocupa toda largura disponível */
+.rst-content {
+    max-width: 100% !important;
+}
+
+/* Ajustes para tela cheia */
+@media screen and (min-width: 1400px) {
+    .wy-nav-content {
+        max-width: 1600px !important;
+    }
+}
+
+/* ========================================
+   FORMATAÇÃO DE TEXTO E EMOJIS
+   ======================================== */
+
+/* Melhorar renderização de emojis */
+.rst-content h1,
+.rst-content h2,
+.rst-content h3,
+.rst-content h4 {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
+    line-height: 1.4;
+}
+
+/* Espaçamento melhorado para títulos com emojis */
+.rst-content h1 {
+    font-size: 2.2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.rst-content h2 {
+    font-size: 1.8rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+    border-bottom: 2px solid #e1e4e8;
+    padding-bottom: 0.3rem;
+}
+
+.rst-content h3 {
+    font-size: 1.4rem;
+    margin-top: 1.2rem;
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+}
+
+.rst-content h4 {
+    font-size: 1.2rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+/* Melhorar espaçamento de parágrafos */
+.rst-content p {
+    margin-bottom: 1rem;
+    line-height: 1.7;
+}
+
+/* Listas com melhor formatação */
+.rst-content ul,
+.rst-content ol {
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+}
+
+.rst-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+/* Checkmarks (✅) e ícones */
+.rst-content li::marker {
+    font-size: 1.1em;
+}
+
 /* Hero section styling */
 .hero {
     background: linear-gradient(135deg, #a5e3ff 0%, #005aa3 100%);

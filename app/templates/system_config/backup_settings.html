@@ -1,0 +1,252 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Configurações de Backup{% endblock %}
+
+{% block config_content %}
+<div class="config-card">
+    <div class="config-card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-0">
+                    <i class="fas fa-save me-2"></i>
+                    Configurações de Backup
+                </h3>
+                <p class="text-muted mb-0 mt-1">Configure backups automáticos e restauração de dados</p>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST">
+        <div class="config-card-body">
+            <!-- Status do Backup -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Status do Backup
+                    </h5>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <div class="h4 mb-0 text-success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <small class="text-muted">Último Backup</small>
+                            <div class="fw-bold">Hoje, 03:00</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <div class="h4 mb-0 text-primary">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <small class="text-muted">Tamanho Total</small>
+                            <div class="fw-bold">2.4 GB</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <div class="h4 mb-0 text-info">
+                                <i class="fas fa-copy"></i>
+                            </div>
+                            <small class="text-muted">Backups Armazenados</small>
+                            <div class="fw-bold">7</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <div class="h4 mb-0 text-warning">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <small class="text-muted">Próximo Backup</small>
+                            <div class="fw-bold">Amanhã, 03:00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configurações de Backup Automático -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3">
+                        <i class="fas fa-cog me-2"></i>
+                        Backup Automático
+                    </h5>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="enable_auto_backup" 
+                                   name="enable_auto_backup" checked>
+                            <label class="form-check-label" for="enable_auto_backup">
+                                <strong>Habilitar Backup Automático</strong>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="backup_frequency" class="form-label">Frequência</label>
+                        <select class="form-select" id="backup_frequency" name="backup_frequency">
+                            <option value="daily" selected>Diário</option>
+                            <option value="weekly">Semanal</option>
+                            <option value="monthly">Mensal</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="backup_time" class="form-label">Horário</label>
+                        <input type="time" class="form-control" id="backup_time" 
+                               name="backup_time" value="03:00">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="retention_days" class="form-label">Retenção (dias)</label>
+                        <input type="number" class="form-control" id="retention_days" 
+                               name="retention_days" value="30" min="1" max="365">
+                        <small class="form-text text-muted">Backups mais antigos serão excluídos automaticamente</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="backup_location" class="form-label">Local de Armazenamento</label>
+                        <select class="form-select" id="backup_location" name="backup_location">
+                            <option value="local" selected>Servidor Local</option>
+                            <option value="cloud">Nuvem (em desenvolvimento)</option>
+                            <option value="both">Ambos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações Manuais -->
+            <div class="row">
+                <div class="col-12">
+                    <h5 class="mb-3">
+                        <i class="fas fa-hand-pointer me-2"></i>
+                        Ações Manuais
+                    </h5>
+                </div>
+                <div class="col-12">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-primary w-100" onclick="createBackup()">
+                                        <i class="fas fa-save me-2"></i>
+                                        Criar Backup Agora
+                                    </button>
+                                    <small class="form-text text-muted d-block mt-2">
+                                        Cria um backup completo imediatamente
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-info w-100" onclick="downloadBackup()">
+                                        <i class="fas fa-download me-2"></i>
+                                        Baixar Último Backup
+                                    </button>
+                                    <small class="form-text text-muted d-block mt-2">
+                                        Download do backup mais recente
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-warning w-100" onclick="restoreBackup()">
+                                        <i class="fas fa-undo me-2"></i>
+                                        Restaurar Backup
+                                    </button>
+                                    <small class="form-text text-muted d-block mt-2">
+                                        Restaurar dados de um backup anterior
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Backups Recentes -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h5 class="mb-3">
+                        <i class="fas fa-history me-2"></i>
+                        Backups Recentes
+                    </h5>
+                </div>
+                <div class="col-12">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Tipo</th>
+                                    <th>Tamanho</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>17/10/2025 03:00</td>
+                                    <td><span class="badge bg-primary">Automático</span></td>
+                                    <td>2.4 GB</td>
+                                    <td><span class="badge bg-success">Completo</span></td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-info" title="Baixar">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-warning" title="Restaurar">
+                                            <i class="fas fa-undo"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>16/10/2025 03:00</td>
+                                    <td><span class="badge bg-primary">Automático</span></td>
+                                    <td>2.3 GB</td>
+                                    <td><span class="badge bg-success">Completo</span></td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-info" title="Baixar">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-warning" title="Restaurar">
+                                            <i class="fas fa-undo"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="config-actions">
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save me-1"></i> Salvar Configurações
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+function createBackup() {
+    if (confirm('Deseja criar um backup completo agora? Isso pode levar alguns minutos.')) {
+        Feedback.info('', 'Funcionalidade em desenvolvimento. O backup será criado em breve.');
+    }
+}
+
+function downloadBackup() {
+    Feedback.info('', 'Funcionalidade em desenvolvimento. O download será iniciado em breve.');
+}
+
+function restoreBackup() {
+    if (confirm('ATENÇÃO: Restaurar um backup substituirá todos os dados atuais. Deseja continuar?')) {
+        Feedback.info('', 'Funcionalidade em desenvolvimento. A restauração será processada em breve.');
+    }
+}
+</script>
+{% endblock %}

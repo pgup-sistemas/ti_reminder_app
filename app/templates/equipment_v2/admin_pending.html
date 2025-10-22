@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block title %}Aprovar Solicitações | TI OSN System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-tasks me-2 text-warning"></i>Solicitações Pendentes</h2>
+                    <p class="text-muted mb-0">Aprove ou rejeite solicitações de empréstimo</p>
+                </div>
+                <a href="{{ url_for('equipment_v2.index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if pending %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>{{ pending|length }}</strong> solicitação(ões) aguardando sua aprovação.
+    </div>
+
+    <div class="row g-3">
+        {% for req in pending %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm border-0 border-start border-warning border-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-warning bg-opacity-10 rounded p-2 me-3">
+                            <i class="fas fa-laptop fa-lg text-warning"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold">{{ req.equipment.name }}</h5>
+                            {% if req.equipment.patrimony %}
+                            <small class="text-muted">Pat: {{ req.equipment.patrimony }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <hr class="my-3">
+                    <div class="mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-user text-primary me-2 mt-1"></i>
+                            <div>
+                                <small class="text-muted d-block">Solicitante</small>
+                                <strong>{{ req.user.username }}</strong>
+                                {% if req.user.sector %}
+                                <small class="text-muted d-block">({{ req.user.sector.name }})</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-calendar text-info me-2 mt-1"></i>
+                            <div class="flex-grow-1">
+                                <small class="text-muted d-block">Período</small>
+                                <strong class="d-block">{{ req.start_date.strftime('%d/%m/%Y') }}</strong>
+                                {% if req.start_time %}
+                                <small class="text-muted">às {{ req.start_time.strftime('%H:%M') }}</small>
+                                {% endif %}
+                                <div class="mt-1">
+                                    <small class="text-muted">até {{ req.end_date.strftime('%d/%m/%Y') }}</small>
+                                    {% if req.end_time %}
+                                    <small class="text-muted">às {{ req.end_time.strftime('%H:%M') }}</small>
+                                    {% endif %}
+                                </div>
+                                <span class="badge bg-info bg-opacity-10 text-info mt-1">{{ (req.end_date - req.start_date).days + 1 }} dia(s)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if req.purpose %}
+                    <div class="mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-comment text-success me-2 mt-1"></i>
+                            <div>
+                                <small class="text-muted d-block">Finalidade</small>
+                                <small class="d-block">{{ req.purpose }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-clock text-secondary me-2 mt-1"></i>
+                            <div>
+                                <small class="text-muted d-block">Solicitado em</small>
+                                <small>{{ req.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium small">
+                            <i class="fas fa-pencil-alt me-1"></i>Observações (opcional)
+                        </label>
+                        <textarea class="form-control form-control-sm" id="notes-{{ req.id }}" rows="2" 
+                                  placeholder="Adicione observações sobre a aprovação/rejeição..."></textarea>
+                    </div>
+                    
+                    <div class="d-flex gap-2 pt-2">
+                        <button class="btn btn-success flex-fill" onclick="approveRequest({{ req.id }})">
+                            <i class="fas fa-check me-1"></i>Aprovar
+                        </button>
+                        <button class="btn btn-danger flex-fill" onclick="rejectRequest({{ req.id }})">
+                            <i class="fas fa-times me-1"></i>Rejeitar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle me-2"></i>
+        Não há solicitações pendentes no momento!
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// ============================================
+// FUNÇÕES DO SISTEMA DE MODAIS MODERNOS
+// ============================================
+
+/**
+ * Aprovar solicitação de equipamento
+ */
+async function approveRequest(id) {
+    const notes = document.getElementById('notes-' + id).value;
+    
+    const confirmed = await window.Modal.show({
+        type: 'success',
+        title: 'Aprovar Solicitação',
+        message: `
+            <p>Confirma a <strong class="text-success">APROVAÇÃO</strong> desta solicitação?</p>
+            ${notes ? `<div class="alert alert-info border-info mb-0">
+                <small><strong>Observações:</strong><br>${notes}</small>
+            </div>` : ''}
+        `,
+        html: true,
+        buttons: [
+            { text: 'Cancelar', action: 'cancel', class: 'btn-outline-secondary' },
+            { text: 'Aprovar', action: 'confirm', class: 'btn-success', icon: 'fas fa-check-circle' }
+        ]
+    });
+    
+    if (confirmed.action === 'confirm') {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/equipment/admin/approve/' + id;
+        
+        const notesInput = document.createElement('input');
+        notesInput.type = 'hidden';
+        notesInput.name = 'notes';
+        notesInput.value = notes;
+        form.appendChild(notesInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+/**
+ * Rejeitar solicitação de equipamento
+ */
+async function rejectRequest(id) {
+    const notes = document.getElementById('notes-' + id).value;
+    
+    if (!notes.trim()) {
+        await showWarning(
+            'Por favor, adicione uma <strong>observação explicando o motivo</strong> da rejeição.',
+            'Observação Obrigatória'
+        );
+        document.getElementById('notes-' + id).focus();
+        return;
+    }
+    
+    const confirmed = await window.Modal.show({
+        type: 'error',
+        title: 'Rejeitar Solicitação',
+        message: `
+            <p>Confirma a <strong class="text-danger">REJEIÇÃO</strong> desta solicitação?</p>
+            <div class="alert alert-warning border-warning mb-0">
+                <small><strong>Motivo da Rejeição:</strong><br>${notes}</small>
+            </div>
+        `,
+        html: true,
+        buttons: [
+            { text: 'Cancelar', action: 'cancel', class: 'btn-outline-secondary' },
+            { text: 'Rejeitar', action: 'confirm', class: 'btn-danger', icon: 'fas fa-times-circle' }
+        ]
+    });
+    
+    if (confirmed.action === 'confirm') {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/equipment/admin/reject/' + id;
+        
+        const notesInput = document.createElement('input');
+        notesInput.type = 'hidden';
+        notesInput.name = 'notes';
+        notesInput.value = notes;
+        form.appendChild(notesInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

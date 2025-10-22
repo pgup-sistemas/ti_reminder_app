@@ -85,10 +85,12 @@ class FeedbackManager {
             });
         }
 
-        // Progress bar
+        // Progress bar animation
         if (config.duration > 0) {
-            const progressBar = toast.querySelector('.toast-progress');
-            progressBar.style.animationDuration = `${config.duration}ms`;
+            const progressBar = toast.querySelector('.toast-progress-bar');
+            if (progressBar) {
+                progressBar.style.animation = `progressBar ${config.duration}ms linear forwards`;
+            }
         }
 
         return toast;
@@ -407,6 +409,31 @@ window.Feedback = new FeedbackManager();
 window.showToast = (type, title, message, options) => window.Feedback.toast(type, title, message, options);
 window.showLoading = (target, options) => window.Feedback.showLoading(target, options);
 window.hideLoading = (id) => window.Feedback.hideLoading(id);
+
+// Alias global simplificado para uso rápido
+window.notify = (type, title, message, options) => window.Feedback.toast(type, title, message, options);
+
+// Helper para converter resposta de servidor em toast
+window.showServerResponse = (response, defaultTitle = '') => {
+    if (!response) return;
+    
+    // Se response tem tipo e mensagem
+    if (response.type && response.message) {
+        const typeMap = {
+            'success': 'success',
+            'error': 'error',
+            'danger': 'error',
+            'warning': 'warning',
+            'info': 'info'
+        };
+        const type = typeMap[response.type] || 'info';
+        window.Feedback.toast(type, response.title || defaultTitle, response.message);
+    }
+    // Se response é apenas uma string
+    else if (typeof response === 'string') {
+        window.Feedback.info(defaultTitle, response);
+    }
+};
 
 // Exportar para uso em módulos
 if (typeof module !== 'undefined' && module.exports) {

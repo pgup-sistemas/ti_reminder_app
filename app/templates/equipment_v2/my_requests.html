@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Minhas Solicitações | TI OSN System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-list me-2 text-primary"></i>Minhas Solicitações</h2>
+                    <p class="text-muted mb-0">Acompanhe o status das suas solicitações de empréstimo</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('equipment_v2.catalog') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Nova Solicitação
+                    </a>
+                    <a href="{{ url_for('equipment_v2.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if requests %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Equipamento</th>
+                    <th>Período</th>
+                    <th>Finalidade</th>
+                    <th>Status</th>
+                    <th>Solicitado em</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr>
+                    <td>
+                        <strong>{{ req.equipment.name }}</strong><br>
+                        <small class="text-muted">
+                            {% if req.equipment.patrimony %}Pat: {{ req.equipment.patrimony }}{% endif %}
+                        </small>
+                    </td>
+                    <td>
+                        <i class="fas fa-calendar me-1"></i>{{ req.start_date.strftime('%d/%m/%Y') }}
+                        {% if req.start_time %}
+                        <small class="text-muted">às {{ req.start_time.strftime('%H:%M') }}</small>
+                        {% endif %}
+                        <br>
+                        <small class="text-muted">
+                            até {{ req.end_date.strftime('%d/%m/%Y') }}
+                            {% if req.end_time %}
+                            às {{ req.end_time.strftime('%H:%M') }}
+                            {% endif %}
+                        </small>
+                    </td>
+                    <td>
+                        {% if req.purpose %}
+                        {{ req.purpose[:50] }}{% if req.purpose|length > 50 %}...{% endif %}
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if req.status == 'pendente' %}
+                        <span class="badge bg-warning">
+                            <i class="fas fa-clock me-1"></i>Pendente
+                        </span>
+                        {% elif req.status == 'confirmada' %}
+                        <span class="badge bg-success">
+                            <i class="fas fa-check me-1"></i>Aprovada
+                        </span>
+                        {% elif req.status == 'rejeitada' %}
+                        <span class="badge bg-danger">
+                            <i class="fas fa-times me-1"></i>Rejeitada
+                        </span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ req.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <small>{{ req.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                    </td>
+                    <td>
+                        {% if req.status == 'confirmada' %}
+                        <a href="{{ url_for('equipment_v2.my_loans') }}" class="btn btn-sm btn-info">
+                            <i class="fas fa-eye me-1"></i>Ver Empréstimo
+                        </a>
+                        {% elif req.status == 'rejeitada' and req.approval_notes %}
+                        <button class="btn btn-sm btn-outline-secondary" 
+                                data-bs-toggle="tooltip" 
+                                title="{{ req.approval_notes }}">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        Você ainda não fez nenhuma solicitação de empréstimo.
+        <a href="{{ url_for('equipment_v2.catalog') }}" class="alert-link">Clique aqui para ver os equipamentos disponíveis.</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Ativar tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+</script>
+{% endblock %}

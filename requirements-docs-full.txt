@@ -1,0 +1,21 @@
+# === DOCUMENTAÇÃO COMPLETA (OPCIONAL) ===
+# Este arquivo contém dependências opcionais para documentação avançada
+# Para instalar: pip install -r requirements-docs-full.txt
+
+# Tema Material Design para MKDocs (visual moderno e profissional)
+mkdocs-material==9.4.8
+
+# Extensões avançadas de Markdown
+pymdown-extensions==10.3
+
+# Plugin de páginas awesome
+mkdocs-awesome-pages-plugin==2.9.2
+
+# Plugin de minificação
+mkdocs-minify-plugin==0.7.1
+
+# Plugin de git revision date
+mkdocs-git-revision-date-localized-plugin==1.2.1
+
+# NOTA: Após instalar estas dependências, você pode atualizar o mkdocs.yml
+# para usar o tema 'material' ao invés de 'readthedocs'

@@ -57,6 +57,21 @@ class ThemeManager {
         
         // Aplica o tema ao HTML
         html.setAttribute('data-theme', this.currentTheme);
+        // Ajusta color-scheme para controles nativos
+        html.style.colorScheme = this.currentTheme === 'dark' ? 'dark' : 'light';
+
+        // Atualiza meta theme-color (PWA/mobile)
+        try {
+            const metaTheme = document.querySelector('meta[name="theme-color"]') || (function(){
+                const m = document.createElement('meta');
+                m.setAttribute('name', 'theme-color');
+                document.head.appendChild(m);
+                return m;
+            })();
+            const styles = getComputedStyle(html);
+            const bgBody = styles.getPropertyValue('--bg-body').trim() || styles.getPropertyValue('--bg-primary').trim() || '#ffffff';
+            metaTheme.setAttribute('content', bgBody);
+        } catch (e) { /* no-op */ }
         
         // Atualiza os ícones de tema
         this.updateIcons();

@@ -3,6 +3,8 @@
   /* Cores base */
   --white: #ffffff;
   --black: #000000;
+  /* Define esquema de cores padrão para controles nativos */
+  color-scheme: light;
   
   /* Cores primárias - Sistema TI OSN */
   --primary-100: #e6f4fb;
@@ -88,6 +90,8 @@
   --text-primary: var(--gray-100);
   --text-secondary: var(--gray-300);
   --text-muted: var(--gray-500);
+  /* Define esquema de cores dark para controles nativos */
+  color-scheme: dark;
   
   /* Cores de fundo */
   --bg-body: var(--gray-900);
@@ -96,7 +100,7 @@
   --bg-surface-tertiary: var(--gray-600);
   
   /* Bordas */
-  --border-color: var(--gray-700);
+  --border-color: var(--gray-600); /* Ajustado para WCAG AA (contraste 3.2:1) */
   
   /* Sombras */
   --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.4);

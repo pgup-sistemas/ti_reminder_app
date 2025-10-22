@@ -12,47 +12,16 @@ class ComponentManager {
     }
 
     registerComponents() {
-        // Toast Notifications
+        // Toast Notifications - Redirecionar para FeedbackManager
         this.components.set('toast', {
             create: (type, title, message, duration = 5000) => {
-                const toastId = `toast-${Date.now()}`;
-                const toastHTML = `
-                    <div id="${toastId}" class="toast-modern toast-${type} fade-in">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                ${this.getIcon(type)}
-                            </div>
-                            <div class="flex-grow-1">
-                                <div class="fw-bold">${title}</div>
-                                <div class="small text-muted">${message}</div>
-                            </div>
-                            <button type="button" class="btn-close ms-2" onclick="this.closest('.toast-modern').remove()"></button>
-                        </div>
-                        <div class="toast-progress">
-                            <div class="toast-progress-bar" style="animation: progress ${duration}ms linear;"></div>
-                        </div>
-                    </div>
-                `;
-
-                let container = document.querySelector('.toast-container');
-                if (!container) {
-                    container = document.createElement('div');
-                    container.className = 'toast-container';
-                    document.body.appendChild(container);
+                // Usar o FeedbackManager unificado
+                if (window.Feedback) {
+                    return window.Feedback.toast(type, title, message, { duration });
                 }
-
-                container.insertAdjacentHTML('beforeend', toastHTML);
-
-                // Auto remove
-                setTimeout(() => {
-                    const toast = document.getElementById(toastId);
-                    if (toast) {
-                        toast.style.animation = 'slideOutRight 0.3s ease-in';
-                        setTimeout(() => toast.remove(), 300);
-                    }
-                }, duration);
-
-                return toastId;
+                // Fallback se Feedback ainda não carregou
+                console.warn('FeedbackManager não disponível, usando fallback');
+                return null;
             }
         });
 
@@ -118,7 +87,7 @@ class ComponentManager {
             show: (title, message, onConfirm, onCancel = null) => {
                 const content = `
                     <div class="text-center">
-                        <i class="fas fa-question-circle text-warning fs-1 mb-3"></i>
+                        <i class="fas fa-question-circle text-warning" style="font-size: 3rem; margin-bottom: 1rem;"></i>
                         <p class="mb-0">${message}</p>
                     </div>
                 `;
@@ -144,15 +113,7 @@ class ComponentManager {
         });
     }
 
-    getIcon(type) {
-        const icons = {
-            success: '<i class="fas fa-check-circle text-success"></i>',
-            error: '<i class="fas fa-times-circle text-danger"></i>',
-            warning: '<i class="fas fa-exclamation-triangle text-warning"></i>',
-            info: '<i class="fas fa-info-circle text-info"></i>'
-        };
-        return icons[type] || icons.info;
-    }
+    // Removido: getIcon() agora está no FeedbackManager
 
     initializeComponents() {
         // Auto-initialize existing elements

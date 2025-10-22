@@ -24,11 +24,18 @@ class DashboardService:
         Returns:
             Dict com todos os dados necessários para o dashboard
         """
-        # Aplicar filtros baseados em permissões
-        task_query = DashboardService._apply_base_filters(Task.query, permissions)
-        reminder_query = DashboardService._apply_base_filters(Reminder.query, permissions)
-        chamado_query = DashboardService._apply_base_filters_chamados(Chamado.query, permissions)
-        equipment_query = DashboardService._apply_base_filters_equipment(EquipmentRequest.query, permissions)
+        # Aplicar filtros baseados em permissões, a menos que seja solicitado escopo global
+        is_global = filters.get('global', False)
+        if is_global:
+            task_query = Task.query
+            reminder_query = Reminder.query
+            chamado_query = Chamado.query
+            equipment_query = EquipmentRequest.query
+        else:
+            task_query = DashboardService._apply_base_filters(Task.query, permissions)
+            reminder_query = DashboardService._apply_base_filters(Reminder.query, permissions)
+            chamado_query = DashboardService._apply_base_filters_chamados(Chamado.query, permissions)
+            equipment_query = DashboardService._apply_base_filters_equipment(EquipmentRequest.query, permissions)
 
         # Aplicar filtros específicos
         task_query = DashboardService._apply_task_filters(task_query, filters)
@@ -68,10 +75,12 @@ class DashboardService:
             task_query, reminder_query, chamado_query, equipment_query, filters
         )
 
-        # Obter dados SLA se for admin
+        # Obter dados SLA se for admin (com paginação)
         sla_data = {}
         if permissions.get('is_admin'):
-            sla_data = DashboardService._calculate_sla_data()
+            page = filters.get('sla_page', 1)
+            per_page = filters.get('sla_per_page', 10)
+            sla_data = DashboardService._calculate_sla_data(page=page, per_page=per_page)
 
         # Calculate overall performance
         performance = DashboardService._calculate_overall_performance(stats)
@@ -193,39 +202,39 @@ class DashboardService:
     @staticmethod
     def _calculate_optimized_stats(task_query, reminder_query, chamado_query, equipment_query) -> Dict[str, Any]:
         """Calcula estatísticas usando agregações SQL otimizadas"""
-        # Estatísticas de tarefas
-        task_stats = db.session.query(
+        # Estatísticas de tarefas - agregar diretamente na query original
+        task_stats = task_query.with_entities(
             func.count(Task.id).label('total'),
             func.count(case((Task.completed == True, 1))).label('done'),
             func.count(case((and_(Task.completed == False, Task.date >= date.today()), 1))).label('pending'),
             func.count(case((and_(Task.completed == False, Task.date < date.today()), 1))).label('expired')
-        ).select_from(task_query.subquery()).first()
+        ).first()
 
-        # Estatísticas de lembretes
-        reminder_stats = db.session.query(
+        # Estatísticas de lembretes - agregar diretamente na query original
+        reminder_stats = reminder_query.with_entities(
             func.count(Reminder.id).label('total'),
             func.count(case((Reminder.completed == True, 1))).label('done'),
             func.count(case((Reminder.completed == False, 1))).label('pending')
-        ).select_from(reminder_query.subquery()).first()
+        ).first()
 
-        # Estatísticas de chamados - removendo campos de satisfação que não existem na migração atual
-        chamado_stats = db.session.query(
+        # Estatísticas de chamados - agregar diretamente na query original
+        chamado_stats = chamado_query.with_entities(
             func.count(Chamado.id).label('total'),
             func.count(case((Chamado.status == 'Aberto', 1))).label('aberto'),
             func.count(case((Chamado.status == 'Em Andamento', 1))).label('em_andamento'),
             func.count(case((Chamado.status == 'Resolvido', 1))).label('resolvido'),
             func.count(case((Chamado.status == 'Fechado', 1))).label('fechado')
-        ).select_from(chamado_query.subquery()).first()
+        ).first()
 
-        # Estatísticas de equipamentos
-        equipment_stats = db.session.query(
+        # Estatísticas de equipamentos - agregar diretamente na query original
+        equipment_stats = equipment_query.with_entities(
             func.count(EquipmentRequest.id).label('total'),
             func.count(case((EquipmentRequest.status == 'Solicitado', 1))).label('solicitados'),
             func.count(case((EquipmentRequest.status == 'Aprovado', 1))).label('aprovados'),
             func.count(case((EquipmentRequest.status == 'Entregue', 1))).label('entregues'),
             func.count(case((EquipmentRequest.status == 'Negado', 1))).label('negados'),
             func.count(case((EquipmentRequest.status == 'Devolvido', 1))).label('devolvidos')
-        ).select_from(equipment_query.subquery()).first()
+        ).first()
 
         return {
             'tasks': {
@@ -402,21 +411,32 @@ class DashboardService:
         }
 
     @staticmethod
-    def _calculate_sla_data():
-        """Calcula dados SLA para administradores"""
+    def _calculate_sla_data(page: int = 1, per_page: int = 10):
+        """
+        Calcula dados SLA para administradores com paginação
+        
+        Args:
+            page: Número da página (começa em 1)
+            per_page: Quantidade de itens por página
+            
+        Returns:
+            Dict com dados SLA incluindo paginação
+        """
         from ..utils.timezone_utils import get_current_time_for_db
 
-        # Buscar chamados abertos
-        chamados_abertos = Chamado.query.filter(Chamado.status != "Fechado").all()
+        # Buscar todos os chamados abertos para contagem
+        chamados_abertos_query = Chamado.query.filter(Chamado.status != "Fechado")
+        
+        # Calcular SLA para chamados que não têm prazo
+        chamados_sem_sla = chamados_abertos_query.filter(Chamado.prazo_sla.is_(None)).all()
+        for chamado in chamados_sem_sla:
+            chamado.calcular_sla()
+        
+        if chamados_sem_sla:
+            db.session.commit()
 
-        # Calcular SLA se necessário
-        for chamado in chamados_abertos:
-            if not chamado.prazo_sla:
-                chamado.calcular_sla()
-
-        db.session.commit()
-
-        # Contar status SLA
+        # Contar status SLA (todos os chamados, sem paginação)
+        chamados_abertos = chamados_abertos_query.all()
         sla_vencidos = 0
         sla_criticos = 0
         sla_ok = 0
@@ -451,12 +471,33 @@ class DashboardService:
             sla_cumpridos = len([c for c in chamados_fechados_30_dias if c.sla_cumprido])
             performance_sla = round((sla_cumpridos / len(chamados_fechados_30_dias)) * 100)
 
+        # Aplicar paginação nos chamados para a tabela
+        pagination = chamados_abertos_query.order_by(
+            # Ordenar: vencidos primeiro, depois críticos, depois normais
+            case(
+                (Chamado.prazo_sla < get_current_time_for_db(), 0),  # Vencidos
+                (Chamado.prazo_sla < get_current_time_for_db() + timedelta(hours=24), 1),  # Críticos
+                else_=2  # Normais
+            ),
+            Chamado.data_abertura.desc()
+        ).paginate(page=page, per_page=per_page, error_out=False)
+
         return {
             'vencidos': sla_vencidos,
             'criticos': sla_criticos,
             'ok': sla_ok,
             'performance': performance_sla,
-            'chamados_sla': chamados_abertos
+            'chamados_sla': pagination.items,
+            'pagination': {
+                'page': pagination.page,
+                'per_page': pagination.per_page,
+                'total': pagination.total,
+                'pages': pagination.pages,
+                'has_prev': pagination.has_prev,
+                'has_next': pagination.has_next,
+                'prev_num': pagination.prev_num,
+                'next_num': pagination.next_num
+            }
         }
 
     @staticmethod

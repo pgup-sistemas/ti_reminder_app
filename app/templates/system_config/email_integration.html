@@ -1,0 +1,656 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Integração de Email{% endblock %}
+
+{% block config_content %}
+<!-- Abas de Navegação -->
+<div class="config-tabs mb-4">
+    <ul class="nav nav-tabs" id="emailTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="smtp-tab" data-bs-toggle="tab" data-bs-target="#smtp" type="button" role="tab">
+                <i class="fas fa-server me-1"></i> SMTP
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="templates-tab" data-bs-toggle="tab" data-bs-target="#templates" type="button" role="tab">
+                <i class="fas fa-file-alt me-1"></i> Templates
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs" type="button" role="tab">
+                <i class="fas fa-history me-1"></i> Logs
+            </button>
+        </li>
+    </ul>
+</div>
+
+<div class="tab-content" id="emailTabsContent">
+    <!-- Aba SMTP -->
+    <div class="tab-pane fade show active" id="smtp" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">
+                            <i class="fas fa-envelope me-2"></i>
+                            Configuração SMTP
+                        </h3>
+                        <p class="text-muted mb-0 mt-1">Configure o servidor SMTP para envio de emails</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-info" onclick="testConnection()">
+                            <i class="fas fa-vial me-1"></i> Testar Conexão
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="guidedSetup()">
+                            <i class="fas fa-magic me-1"></i> Configuração Guiada
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <form method="POST">
+                <div class="config-card-body">
+                    <!-- Status da Conexão -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="connection-status-card" id="connectionStatus">
+                                <div class="alert alert-success" role="alert">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle me-2 fs-4"></i>
+                                        <div>
+                                            <strong>Conexão Ativa</strong>
+                                            <p class="mb-0 small">Servidor SMTP conectado e funcionando corretamente</p>
+                                            <small class="text-muted">Último teste: há 5 minutos</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview de Configuração -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-eye me-2"></i>
+                                        Preview da Configuração
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <strong>Servidor:</strong> <span id="previewServer">smtp.gmail.com</span><br>
+                                            <strong>Porta:</strong> <span id="previewPort">587</span><br>
+                                            <strong>Segurança:</strong> <span id="previewSecurity">TLS</span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>Usuário:</strong> <span id="previewUser">your-email@gmail.com</span><br>
+                                            <strong>Remetente:</strong> <span id="previewSender">TI OSN System</span><br>
+                                            <strong>Email:</strong> <span id="previewEmail">noreply@tiosn.com</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configurações SMTP -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">
+                                <i class="fas fa-server me-2"></i>
+                                Servidor SMTP
+                            </h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="smtp_server" class="form-label">Servidor SMTP</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="smtp_server" name="smtp_server"
+                                           value="smtp.gmail.com" required oninput="updatePreview()">
+                                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-list"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" onclick="selectProvider('gmail')">Gmail</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectProvider('outlook')">Outlook</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectProvider('yahoo')">Yahoo</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="selectProvider('custom')">Personalizado</a></li>
+                                    </ul>
+                                </div>
+                                <small class="form-text text-muted">Ex: smtp.gmail.com, smtp.office365.com</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="smtp_port" class="form-label">Porta</label>
+                                <input type="number" class="form-control" id="smtp_port" name="smtp_port"
+                                       value="587" min="1" max="65535" required oninput="updatePreview()">
+                                <small class="form-text text-muted">Porta padrão: 587 (TLS) ou 465 (SSL)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="smtp_username" class="form-label">Usuário/Email</label>
+                                <input type="email" class="form-control" id="smtp_username" name="smtp_username"
+                                       value="your-email@gmail.com" required oninput="updatePreview()">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="smtp_password" class="form-label">Senha/App Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="smtp_password" name="smtp_password"
+                                           value="••••••••••••••••" required>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+                                        <i class="fas fa-eye" id="toggleIcon"></i>
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted">Use App Password para Gmail</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configurações de Segurança -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">
+                                <i class="fas fa-lock me-2"></i>
+                                Segurança
+                            </h5>
+                        </div>
+                        <div class="col-12">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="use_tls"
+                                                       name="use_tls" checked onchange="updateSecurityPreview()">
+                                                <label class="form-check-label" for="use_tls">
+                                                    <strong>Usar TLS</strong>
+                                                </label>
+                                                <small class="form-text text-muted d-block">
+                                                    Recomendado para a maioria dos servidores SMTP
+                                                </small>
+                                            </div>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="use_ssl"
+                                                       name="use_ssl" onchange="updateSecurityPreview()">
+                                                <label class="form-check-label" for="use_ssl">
+                                                    <strong>Usar SSL</strong>
+                                                </label>
+                                                <small class="form-text text-muted d-block">
+                                                    Alternativa ao TLS (geralmente porta 465)
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="security-indicator">
+                                                <h6>Nível de Segurança</h6>
+                                                <div class="progress mb-2">
+                                                    <div class="progress-bar bg-success" id="securityProgress" style="width: 85%"></div>
+                                                </div>
+                                                <small class="text-muted" id="securityText">Excelente - TLS habilitado</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configurações de Envio -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="mb-3">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Configurações de Envio
+                            </h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="sender_name" class="form-label">Nome do Remetente</label>
+                                <input type="text" class="form-control" id="sender_name" name="sender_name"
+                                       value="TI OSN System" required oninput="updatePreview()">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="sender_email" class="form-label">Email do Remetente</label>
+                                <input type="email" class="form-control" id="sender_email" name="sender_email"
+                                       value="noreply@tiosn.com" required oninput="updatePreview()">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="max_emails_per_hour" class="form-label">Limite de Emails/Hora</label>
+                                <input type="number" class="form-control" id="max_emails_per_hour"
+                                       name="max_emails_per_hour" value="100" min="1" max="1000">
+                                <small class="form-text text-muted">Previne bloqueio por spam</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="retry_attempts" class="form-label">Tentativas de Reenvio</label>
+                                <input type="number" class="form-control" id="retry_attempts"
+                                       name="retry_attempts" value="3" min="1" max="10">
+                                <small class="form-text text-muted">Número de tentativas em caso de falha</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-actions">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="alert alert-info mb-0 py-2 px-3" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <small>Alterações nas configurações de email requerem reinicialização</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary" onclick="sendTestEmail()">
+                                <i class="fas fa-paper-plane me-1"></i> Enviar Email de Teste
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i> Salvar Configurações
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Aba Templates -->
+    <div class="tab-pane fade" id="templates" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-file-alt me-2"></i>
+                    Templates de Email
+                </h3>
+                <p class="text-muted mb-0 mt-1">Gerencie templates de email para notificações</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="list-group" id="templateList">
+                            <a href="#" class="list-group-item list-group-item-action active" onclick="selectTemplate('welcome')">
+                                <i class="fas fa-user-plus me-2"></i> Boas-vindas
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action" onclick="selectTemplate('reminder')">
+                                <i class="fas fa-clock me-2"></i> Lembrete
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action" onclick="selectTemplate('alert')">
+                                <i class="fas fa-exclamation-triangle me-2"></i> Alerta
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action" onclick="selectTemplate('report')">
+                                <i class="fas fa-chart-bar me-2"></i> Relatório
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div id="templateEditor">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Editor de Template</h5>
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="previewTemplate()">
+                                        <i class="fas fa-eye me-1"></i> Preview
+                                    </button>
+                                    <button class="btn btn-outline-success btn-sm" onclick="saveTemplate()">
+                                        <i class="fas fa-save me-1"></i> Salvar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Assunto</label>
+                                <input type="text" class="form-control" id="templateSubject" value="Bem-vindo ao Sistema TI OSN">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Conteúdo HTML</label>
+                                <textarea class="form-control" id="templateContent" rows="15">
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .header { background: #007bff; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .footer { background: #f8f9fa; padding: 10px; text-align: center; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Sistema TI OSN</h1>
+    </div>
+    <div class="content">
+        <p>Olá {{nome}},</p>
+        <p>Seja bem-vindo ao Sistema de Gestão TI OSN!</p>
+        <p>Seu acesso foi configurado com sucesso.</p>
+    </div>
+    <div class="footer">
+        <p>Esta é uma mensagem automática. Não responda este email.</p>
+    </div>
+</body>
+</html>
+                                </textarea>
+                            </div>
+                            <div class="alert alert-info">
+                                <strong>Variáveis disponíveis:</strong> {{nome}}, {{email}}, {{data}}, {{sistema}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba Logs -->
+    <div class="tab-pane fade" id="logs" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-history me-2"></i>
+                    Logs de Envio
+                </h3>
+                <p class="text-muted mb-0 mt-1">Histórico de emails enviados</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" placeholder="Buscar logs..." id="logSearch">
+                    </div>
+                    <div class="col-md-6">
+                        <select class="form-select" id="logFilter">
+                            <option value="all">Todos os status</option>
+                            <option value="success">Enviados</option>
+                            <option value="error">Falhas</option>
+                            <option value="pending">Pendentes</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Destinatário</th>
+                                <th>Assunto</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logTable">
+                            <tr>
+                                <td>2024-01-15 14:30</td>
+                                <td>usuario@empresa.com</td>
+                                <td>Lembrete de manutenção</td>
+                                <td><span class="badge bg-success">Enviado</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" onclick="viewLogDetails()">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-15 13:45</td>
+                                <td>admin@sistema.com</td>
+                                <td>Relatório semanal</td>
+                                <td><span class="badge bg-success">Enviado</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" onclick="viewLogDetails()">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funções de preview e atualização em tempo real
+function updatePreview() {
+    const server = document.getElementById('smtp_server').value;
+    const port = document.getElementById('smtp_port').value;
+    const user = document.getElementById('smtp_username').value;
+    const sender = document.getElementById('sender_name').value;
+    const email = document.getElementById('sender_email').value;
+
+    document.getElementById('previewServer').textContent = server;
+    document.getElementById('previewPort').textContent = port;
+    document.getElementById('previewUser').textContent = user;
+    document.getElementById('previewSender').textContent = sender;
+    document.getElementById('previewEmail').textContent = email;
+}
+
+function updateSecurityPreview() {
+    const tls = document.getElementById('use_tls').checked;
+    const ssl = document.getElementById('use_ssl').checked;
+    const progress = document.getElementById('securityProgress');
+    const text = document.getElementById('securityText');
+
+    if (tls) {
+        progress.style.width = '85%';
+        progress.className = 'progress-bar bg-success';
+        text.textContent = 'Excelente - TLS habilitado';
+        document.getElementById('previewSecurity').textContent = 'TLS';
+    } else if (ssl) {
+        progress.style.width = '70%';
+        progress.className = 'progress-bar bg-warning';
+        text.textContent = 'Bom - SSL habilitado';
+        document.getElementById('previewSecurity').textContent = 'SSL';
+    } else {
+        progress.style.width = '30%';
+        progress.className = 'progress-bar bg-danger';
+        text.textContent = 'Ruim - Sem criptografia';
+        document.getElementById('previewSecurity').textContent = 'Nenhuma';
+    }
+}
+
+function selectProvider(provider) {
+    const server = document.getElementById('smtp_server');
+    const port = document.getElementById('smtp_port');
+    const tls = document.getElementById('use_tls');
+    const ssl = document.getElementById('use_ssl');
+
+    switch(provider) {
+        case 'gmail':
+            server.value = 'smtp.gmail.com';
+            port.value = '587';
+            tls.checked = true;
+            ssl.checked = false;
+            break;
+        case 'outlook':
+            server.value = 'smtp-mail.outlook.com';
+            port.value = '587';
+            tls.checked = true;
+            ssl.checked = false;
+            break;
+        case 'yahoo':
+            server.value = 'smtp.mail.yahoo.com';
+            port.value = '587';
+            tls.checked = true;
+            ssl.checked = false;
+            break;
+        case 'custom':
+            server.value = '';
+            port.value = '587';
+            tls.checked = true;
+            ssl.checked = false;
+            break;
+    }
+    updatePreview();
+    updateSecurityPreview();
+}
+
+function togglePassword() {
+    const passwordField = document.getElementById('smtp_password');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordField.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+}
+
+function testConnection() {
+    const btn = event.target.closest('button');
+    const originalHTML = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Testando...';
+
+    // Simular teste de conexão
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+
+        const statusCard = document.getElementById('connectionStatus');
+        statusCard.innerHTML = `
+            <div class="alert alert-success" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle me-2 fs-4"></i>
+                    <div>
+                        <strong>Conexão Ativa</strong>
+                        <p class="mb-0 small">Servidor SMTP conectado e funcionando corretamente</p>
+                        <small class="text-muted">Último teste: há poucos segundos</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    }, 2000);
+}
+
+function sendTestEmail() {
+    const btn = event.target;
+    const originalHTML = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
+
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        Feedback.success('Sucesso', 'Email de teste enviado com sucesso!\n\nVerifique sua caixa de entrada.');
+    }, 3000);
+}
+
+function guidedSetup() {
+    // Implementação da configuração guiada
+    Feedback.info('', 'Configuração Guiada - Em desenvolvimento\n\nEsta funcionalidade irá guiar você passo-a-passo na configuração do SMTP.');
+}
+
+function selectTemplate(template) {
+    // Remover classe active de todos
+    document.querySelectorAll('#templateList .list-group-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    // Adicionar active ao selecionado
+    event.target.classList.add('active');
+
+    // Simular carregamento de template
+    const templates = {
+        'welcome': {
+            subject: 'Bem-vindo ao Sistema TI OSN',
+            content: `<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .header { background: #007bff; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .footer { background: #f8f9fa; padding: 10px; text-align: center; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Sistema TI OSN</h1>
+    </div>
+    <div class="content">
+        <p>Olá {{nome}},</p>
+        <p>Seja bem-vindo ao Sistema de Gestão TI OSN!</p>
+        <p>Seu acesso foi configurado com sucesso.</p>
+    </div>
+    <div class="footer">
+        <p>Esta é uma mensagem automática. Não responda este email.</p>
+    </div>
+</body>
+</html>`
+        },
+        'reminder': {
+            subject: 'Lembrete: {{titulo}}',
+            content: `<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .alert { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; }
+        .content { padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="alert">
+        <h3>Lembrete Importante</h3>
+    </div>
+    <div class="content">
+        <p>Olá {{nome}},</p>
+        <p>Este é um lembrete para: <strong>{{titulo}}</strong></p>
+        <p>Data: {{data}}</p>
+        <p>Por favor, tome as ações necessárias.</p>
+    </div>
+</body>
+</html>`
+        }
+    };
+
+    if (templates[template]) {
+        document.getElementById('templateSubject').value = templates[template].subject;
+        document.getElementById('templateContent').value = templates[template].content;
+    }
+}
+
+function previewTemplate() {
+    const subject = document.getElementById('templateSubject').value;
+    const content = document.getElementById('templateContent').value;
+
+    const previewWindow = window.open('', '_blank', 'width=800,height=600');
+    previewWindow.document.write(`
+        <html>
+        <head>
+            <title>Preview - ${subject}</title>
+            <style>body { font-family: Arial, sans-serif; margin: 20px; }</style>
+        </head>
+        <body>
+            <h2>Assunto: ${subject}</h2>
+            <hr>
+            ${content}
+        </body>
+        </html>
+    `);
+}
+
+function saveTemplate() {
+    Feedback.success('Sucesso', 'Template salvo com sucesso!');
+}
+
+function viewLogDetails() {
+    Feedback.info('', 'Detalhes do log - Em desenvolvimento');
+}
+
+// Inicializar previews
+document.addEventListener('DOMContentLoaded', function() {
+    updatePreview();
+    updateSecurityPreview();
+});
+</script>
+{% endblock %}

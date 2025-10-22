@@ -1,0 +1,726 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Integrações API{% endblock %}
+
+{% block config_content %}
+<!-- Abas de Navegação -->
+<div class="config-tabs mb-4">
+    <ul class="nav nav-tabs" id="apiTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="integrations-tab" data-bs-toggle="tab" data-bs-target="#integrations" type="button" role="tab">
+                <i class="fas fa-plug me-1"></i> Integrações
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="api-keys-tab" data-bs-toggle="tab" data-bs-target="#api-keys" type="button" role="tab">
+                <i class="fas fa-key me-1"></i> Chaves API
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="webhooks-tab" data-bs-toggle="tab" data-bs-target="#webhooks" type="button" role="tab">
+                <i class="fas fa-link me-1"></i> Webhooks
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs" type="button" role="tab">
+                <i class="fas fa-history me-1"></i> Logs
+            </button>
+        </li>
+    </ul>
+</div>
+
+<div class="tab-content" id="apiTabsContent">
+    <!-- Aba Integrações -->
+    <div class="tab-pane fade show active" id="integrations" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0">
+                            <i class="fas fa-code me-2"></i>
+                            Integrações com APIs Externas
+                        </h3>
+                        <p class="text-muted mb-0 mt-1">Gerencie conexões com serviços externos</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-info" onclick="testAllConnections()">
+                            <i class="fas fa-vial me-1"></i> Testar Todas
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="addIntegration()">
+                            <i class="fas fa-plus me-1"></i> Nova Integração
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-card-body">
+                <!-- Dashboard de Status -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-tachometer-alt me-2"></i>
+                                    Status das Integrações
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-plug fa-2x text-success mb-2"></i>
+                                            <h4 class="mb-0">4</h4>
+                                            <small class="text-muted">Ativas</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                                            <h4 class="mb-0">2</h4>
+                                            <small class="text-muted">Pendentes</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
+                                            <h4 class="mb-0">1</h4>
+                                            <small class="text-muted">Com Erro</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="status-indicator">
+                                            <i class="fas fa-tools fa-2x text-info mb-2"></i>
+                                            <h4 class="mb-0">3</h4>
+                                            <small class="text-muted">Em Desenvolvimento</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integrações Disponíveis -->
+                <div class="row g-3 mb-4">
+                    <!-- Slack Integration -->
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 integration-card" data-status="configured">
+                            <div class="card-header bg-primary text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><i class="fab fa-slack me-2"></i>Slack</span>
+                                    <span class="badge bg-light text-primary">Disponível</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text text-muted small mb-3">
+                                    Envie notificações de chamados e tarefas para canais do Slack
+                                </p>
+                                <div class="mb-2">
+                                    <strong>Status:</strong>
+                                    <span class="badge bg-success ms-2">
+                                        <i class="fas fa-check-circle me-1"></i>Configurado
+                                    </span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Último teste:</strong>
+                                    <small class="text-muted">há 2 horas</small>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Recursos:</strong>
+                                    <ul class="small mb-0">
+                                        <li>Notificações em tempo real</li>
+                                        <li>Comandos via bot</li>
+                                        <li>Integração com workflows</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-light">
+                                <div class="btn-group w-100">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="configureIntegration('slack')">
+                                        <i class="fas fa-cog me-1"></i> Configurar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="testIntegration('slack')">
+                                        <i class="fas fa-vial me-1"></i> Testar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Microsoft Teams Integration -->
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 integration-card" data-status="error">
+                            <div class="card-header bg-info text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><i class="fab fa-microsoft me-2"></i>Microsoft Teams</span>
+                                    <span class="badge bg-light text-info">Disponível</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text text-muted small mb-3">
+                                    Integre com Microsoft Teams para notificações e colaboração
+                                </p>
+                                <div class="mb-2">
+                                    <strong>Status:</strong>
+                                    <span class="badge bg-danger ms-2">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Erro de Conexão
+                                    </span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Último teste:</strong>
+                                    <small class="text-muted">há 1 dia</small>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Recursos:</strong>
+                                    <ul class="small mb-0">
+                                        <li>Webhooks para canais</li>
+                                        <li>Cards adaptáveis</li>
+                                        <li>Botões de ação rápida</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-light">
+                                <div class="btn-group w-100">
+                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="configureIntegration('teams')">
+                                        <i class="fas fa-cog me-1"></i> Configurar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="testIntegration('teams')">
+                                        <i class="fas fa-vial me-1"></i> Testar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+            <!-- WhatsApp Business API -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="fab fa-whatsapp me-2"></i>WhatsApp Business</span>
+                            <span class="badge bg-light text-success">Em Breve</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text text-muted small mb-3">
+                            Envie notificações via WhatsApp Business API
+                        </p>
+                        <div class="mb-2">
+                            <strong>Status:</strong>
+                            <span class="badge bg-warning text-dark ms-2">Em Desenvolvimento</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Recursos:</strong>
+                            <ul class="small mb-0">
+                                <li>Mensagens de texto</li>
+                                <li>Templates aprovados</li>
+                                <li>Confirmação de leitura</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <button type="button" class="btn btn-sm btn-secondary w-100" disabled>
+                            <i class="fas fa-clock me-1"></i> Em Breve
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Webhook Genérico -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-dark text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-link me-2"></i>Webhook Genérico</span>
+                            <span class="badge bg-light text-dark">Disponível</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text text-muted small mb-3">
+                            Configure webhooks personalizados para qualquer serviço
+                        </p>
+                        <div class="mb-2">
+                            <strong>Status:</strong>
+                            <span class="badge bg-secondary ms-2">Não Configurado</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Recursos:</strong>
+                            <ul class="small mb-0">
+                                <li>POST/GET requests</li>
+                                <li>Headers customizados</li>
+                                <li>Payload JSON</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <button type="button" class="btn btn-sm btn-dark w-100" onclick="configureIntegration('webhook')">
+                            <i class="fas fa-cog me-1"></i> Configurar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+    </div>
+
+    <!-- Aba Chaves API -->
+    <div class="tab-pane fade" id="api-keys" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-key me-2"></i>
+                    Gerenciamento de Chaves API
+                </h3>
+                <p class="text-muted mb-0 mt-1">Controle de acesso externo ao sistema</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" placeholder="Buscar chaves..." id="apiKeySearch">
+                    </div>
+                    <div class="col-md-6">
+                        <select class="form-select" id="apiKeyFilter">
+                            <option value="all">Todas as chaves</option>
+                            <option value="active">Ativas</option>
+                            <option value="inactive">Inativas</option>
+                            <option value="expired">Expiradas</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Chave (Preview)</th>
+                                <th>Status</th>
+                                <th>Criada em</th>
+                                <th>Último Uso</th>
+                                <th>Expira em</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="apiKeysTable">
+                            <tr>
+                                <td>API Externa - Mobile App</td>
+                                <td><code>sk-****-****-****-a1b2c3d4</code></td>
+                                <td><span class="badge bg-success">Ativa</span></td>
+                                <td>2024-01-15</td>
+                                <td>2024-01-20 14:30</td>
+                                <td>2025-01-15</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewApiKeyDetails()">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" onclick="regenerateApiKey()">
+                                            <i class="fas fa-sync"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="revokeApiKey()">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Integração - ERP</td>
+                                <td><code>sk-****-****-****-e5f6g7h8</code></td>
+                                <td><span class="badge bg-warning">Expirando</span></td>
+                                <td>2023-12-01</td>
+                                <td>2024-01-19 09:15</td>
+                                <td>2024-02-01</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewApiKeyDetails()">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" onclick="regenerateApiKey()">
+                                            <i class="fas fa-sync"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="revokeApiKey()">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="alert alert-info mb-0 py-2 px-3" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>Chaves de API têm validade de 1 ano e podem ser revogadas a qualquer momento</small>
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="generateApiKey()">
+                        <i class="fas fa-plus me-1"></i> Gerar Nova Chave
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba Webhooks -->
+    <div class="tab-pane fade" id="webhooks" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-link me-2"></i>
+                    Configuração de Webhooks
+                </h3>
+                <p class="text-muted mb-0 mt-1">Configure webhooks para notificações em tempo real</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-success mb-3" onclick="addWebhook()">
+                            <i class="fas fa-plus me-1"></i> Novo Webhook
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>URL</th>
+                                <th>Eventos</th>
+                                <th>Status</th>
+                                <th>Último Envio</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="webhooksTable">
+                            <tr>
+                                <td>Webhook - Slack</td>
+                                <td><code>https://hooks.slack.com/...</code></td>
+                                <td><span class="badge bg-primary">Novo Chamado</span></td>
+                                <td><span class="badge bg-success">Ativo</span></td>
+                                <td>2024-01-20 15:30</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-info" onclick="testWebhook()">
+                                            <i class="fas fa-vial"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" onclick="editWebhook()">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteWebhook()">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba Logs -->
+    <div class="tab-pane fade" id="logs" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-history me-2"></i>
+                    Logs de Integrações
+                </h3>
+                <p class="text-muted mb-0 mt-1">Histórico de chamadas e respostas das APIs</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" placeholder="Buscar logs..." id="integrationLogSearch">
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="integrationFilter">
+                            <option value="all">Todas as integrações</option>
+                            <option value="slack">Slack</option>
+                            <option value="teams">Teams</option>
+                            <option value="webhook">Webhooks</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="statusFilter">
+                            <option value="all">Todos os status</option>
+                            <option value="success">Sucesso</option>
+                            <option value="error">Erro</option>
+                            <option value="pending">Pendente</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Integração</th>
+                                <th>Evento</th>
+                                <th>Status</th>
+                                <th>Código HTTP</th>
+                                <th>Duração</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="integrationLogsTable">
+                            <tr>
+                                <td>2024-01-20 15:30:25</td>
+                                <td>Slack</td>
+                                <td>Novo chamado #123</td>
+                                <td><span class="badge bg-success">Sucesso</span></td>
+                                <td>200</td>
+                                <td>245ms</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" onclick="viewLogDetails()">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-20 14:15:10</td>
+                                <td>Teams</td>
+                                <td>Atualização tarefa</td>
+                                <td><span class="badge bg-danger">Erro</span></td>
+                                <td>500</td>
+                                <td>3.2s</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" onclick="viewLogDetails()">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funções de integração
+function testAllConnections() {
+    const btn = event.target.closest('button');
+    const originalHTML = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Testando...';
+
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        Feedback.error('Erro', 'Teste concluído!\n\nSlack: OK\nTeams: Erro de conexão\nWhatsApp: Em desenvolvimento\nWebhook: OK');
+    }, 3000);
+}
+
+function addIntegration() {
+    Feedback.info('', 'Nova Integração - Em desenvolvimento\n\nEsta funcionalidade permitirá adicionar integrações personalizadas.');
+}
+
+function configureIntegration(type) {
+    const modalContent = {
+        slack: {
+            title: 'Configurar Slack',
+            content: `
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Webhook URL</label>
+                        <input type="url" class="form-control" placeholder="https://hooks.slack.com/...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Canal Padrão</label>
+                        <input type="text" class="form-control" placeholder="#geral">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nome do Bot</label>
+                        <input type="text" class="form-control" placeholder="TI OSN Bot">
+                    </div>
+                </form>
+            `
+        },
+        teams: {
+            title: 'Configurar Microsoft Teams',
+            content: `
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Webhook URL</label>
+                        <input type="url" class="form-control" placeholder="https://outlook.office.com/...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Título das Mensagens</label>
+                        <input type="text" class="form-control" placeholder="Sistema TI OSN">
+                    </div>
+                </form>
+            `
+        }
+    };
+
+    if (modalContent[type]) {
+        showModal(modalContent[type].title, modalContent[type].content);
+    } else {
+        alert(`Configurar integração: ${type}\nFuncionalidade em desenvolvimento.`);
+    }
+}
+
+function testIntegration(type) {
+    const btn = event.target.closest('button');
+    const originalHTML = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Testando...';
+
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+
+        if (type === 'slack') {
+            Feedback.success('Sucesso', 'Teste do Slack: Sucesso!\nMensagem enviada para o canal configurado.');
+        } else if (type === 'teams') {
+            Feedback.error('Erro', 'Teste do Teams: Falhou!\nErro: Webhook URL inválida ou expirada.');
+        } else {
+            alert(`Teste da integração ${type}: Em desenvolvimento`);
+        }
+    }, 2000);
+}
+
+function generateApiKey() {
+    if (confirm('Gerar uma nova chave de API?\n\nA chave terá validade de 1 ano e poderá ser revogada a qualquer momento.')) {
+        const keyName = prompt('Nome da chave API:');
+        if (keyName) {
+            alert(`Chave API gerada com sucesso!\n\nNome: ${keyName}\nChave: sk-${Math.random().toString(36).substr(2, 16)}\n\nGuarde esta chave em local seguro!`);
+            // Simular adição na tabela
+            location.reload();
+        }
+    }
+}
+
+// Funções de API Keys
+function viewApiKeyDetails() {
+    Feedback.info('', 'Detalhes da Chave API\n\nNome: API Externa - Mobile App\nCriada em: 2024-01-15\nÚltimo uso: 2024-01-20 14:30\nExpira em: 2025-01-15\n\nUsos hoje: 45\nUsos este mês: 1,234');
+}
+
+function regenerateApiKey() {
+    if (confirm('Regenerar esta chave API?\n\nA chave antiga será invalidada imediatamente.')) {
+        alert('Chave regenerada com sucesso!\nNova chave: sk-' + Math.random().toString(36).substr(2, 16));
+    }
+}
+
+function revokeApiKey() {
+    if (confirm('Revogar esta chave API?\n\nEsta ação não pode ser desfeita.')) {
+        Feedback.success('Sucesso', 'Chave revogada com sucesso!');
+        // Simular remoção da tabela
+        event.target.closest('tr').remove();
+    }
+}
+
+// Funções de Webhooks
+function addWebhook() {
+    const modalContent = `
+        <form id="webhookForm">
+            <div class="mb-3">
+                <label class="form-label">Nome do Webhook</label>
+                <input type="text" class="form-control" id="webhookName" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">URL do Webhook</label>
+                <input type="url" class="form-control" id="webhookUrl" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Eventos</label>
+                <select class="form-select" id="webhookEvents" multiple>
+                    <option value="new_ticket">Novo Chamado</option>
+                    <option value="update_ticket">Atualização de Chamado</option>
+                    <option value="new_task">Nova Tarefa</option>
+                    <option value="system_alert">Alerta do Sistema</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Método HTTP</label>
+                <select class="form-select" id="webhookMethod">
+                    <option value="POST">POST</option>
+                    <option value="GET">GET</option>
+                </select>
+            </div>
+        </form>
+    `;
+    showModal('Novo Webhook', modalContent, 'Criar', () => {
+        const name = document.getElementById('webhookName').value;
+        const url = document.getElementById('webhookUrl').value;
+        if (name && url) {
+            alert(`Webhook "${name}" criado com sucesso!`);
+        }
+    });
+}
+
+function testWebhook() {
+    Feedback.success('Sucesso', 'Teste do Webhook: Sucesso!\n\nHTTP 200 - OK\nResposta recebida em 150ms');
+}
+
+function editWebhook() {
+    Feedback.info('', 'Editar Webhook - Em desenvolvimento');
+}
+
+function deleteWebhook() {
+    if (confirm('Excluir este webhook?\n\nEsta ação não pode ser desfeita.')) {
+        Feedback.success('Sucesso', 'Webhook excluído com sucesso!');
+        event.target.closest('tr').remove();
+    }
+}
+
+// Funções de Logs
+function viewLogDetails() {
+    Feedback.info('', 'Detalhes do Log\n\nData/Hora: 2024-01-20 15:30:25\nIntegração: Slack\nEvento: Novo chamado #123\n\nRequest:\nPOST https://hooks.slack.com/services/...\n\nResponse:\nStatus: 200 OK\nTempo: 245ms\n\nPayload: {...}');
+}
+
+// Função auxiliar para modal
+function showModal(title, content, confirmText = 'OK', confirmCallback = null) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">${title}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">${content}</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="modalConfirm">${confirmText}</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+
+    if (confirmCallback) {
+        document.getElementById('modalConfirm').onclick = () => {
+            confirmCallback();
+            bsModal.hide();
+        };
+    }
+
+    modal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(modal);
+    });
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    // Adicionar filtros funcionais
+    const searchInputs = ['apiKeySearch', 'integrationLogSearch'];
+    searchInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', function() {
+                // Implementar busca em tempo real
+                console.log('Buscando:', this.value);
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

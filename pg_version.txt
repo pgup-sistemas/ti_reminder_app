@@ -1,1 +1,0 @@
-PostgreSQL 15.13, compiled by Visual C++ build 194

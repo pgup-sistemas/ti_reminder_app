@@ -1,0 +1,1015 @@
+{% extends 'base.html' %}
+{% block title %}Configurações do Sistema | TI OSN System{% endblock %}
+
+{% block styles %}
+<style>
+/* ========================================
+   CONFIGURAÇÕES DO SISTEMA - DESIGN SYSTEM
+   ======================================== */
+
+/* Layout Principal */
+.config-container {
+    min-height: calc(100vh - 76px);
+}
+
+.config-sidebar {
+    background: linear-gradient(180deg, var(--bs-gray-50) 0%, var(--bs-gray-100) 100%);
+    border-right: 2px solid var(--bs-primary);
+    min-height: calc(100vh - 76px);
+    position: sticky;
+    top: 76px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] .config-sidebar {
+    background: linear-gradient(180deg, var(--bs-gray-800) 0%, var(--bs-gray-900) 100%);
+    border-right: 2px solid var(--bs-primary);
+    box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+}
+
+/* Header da Sidebar */
+.config-header {
+    padding: 2rem 1.5rem;
+    border-bottom: 2px solid var(--bs-primary);
+    background: linear-gradient(135deg, var(--bs-primary), var(--bs-primary-dark));
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.config-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+}
+
+.config-header h4 {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Navegação */
+.config-nav {
+    padding: 1.5rem 0;
+}
+
+.nav-section {
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 0 1rem 1rem 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] .nav-section {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.nav-section-header {
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    border: none;
+    background: white;
+    width: 100%;
+    text-align: left;
+    color: var(--bs-gray-700);
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid var(--bs-gray-200);
+    position: relative;
+}
+
+[data-theme="dark"] .nav-section-header {
+    background: var(--bs-gray-700);
+    color: var(--bs-gray-200);
+    border-bottom: 1px solid var(--bs-gray-600);
+}
+
+.nav-section-header:hover {
+    background: var(--bs-primary);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+}
+
+[data-theme="dark"] .nav-section-header:hover {
+    background: var(--bs-primary);
+    color: white;
+}
+
+.nav-section-header i {
+    margin-right: 0.75rem;
+    width: 18px;
+    font-size: 1rem;
+}
+
+.nav-section-header .float-end {
+    transition: transform 0.3s ease;
+}
+
+.nav-section.expanded .nav-section-header .float-end {
+    transform: rotate(180deg);
+}
+
+/* Links de Navegação */
+.nav-menu {
+    background: var(--bs-gray-50);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+[data-theme="dark"] .nav-menu {
+    background: var(--bs-gray-800);
+}
+
+.nav-menu.show {
+    max-height: 500px;
+}
+
+.nav-link {
+    padding: 0.75rem 1.5rem 0.75rem 3.5rem;
+    color: var(--bs-gray-600);
+    text-decoration: none;
+    display: block;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+    position: relative;
+    font-size: 0.9rem;
+}
+
+[data-theme="dark"] .nav-link {
+    color: var(--bs-gray-400);
+}
+
+.nav-link:hover {
+    background: var(--bs-light);
+    color: var(--bs-primary);
+    border-left-color: var(--bs-primary);
+    text-decoration: none;
+    padding-left: 4rem;
+}
+
+[data-theme="dark"] .nav-link:hover {
+    background: var(--bs-gray-600);
+    color: var(--bs-primary);
+}
+
+.nav-link.active {
+    background: var(--bs-primary);
+    color: white;
+    border-left-color: var(--bs-primary);
+    font-weight: 600;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] .nav-link.active {
+    background: var(--bs-primary);
+    color: white;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: white;
+}
+
+.nav-link i {
+    margin-right: 0.75rem;
+    width: 16px;
+    text-align: center;
+}
+
+/* Conteúdo Principal */
+.config-content {
+    padding: 2.5rem;
+    background: var(--bs-gray-50);
+    min-height: calc(100vh - 76px);
+}
+
+[data-theme="dark"] .config-content {
+    background: var(--bs-gray-900);
+}
+
+/* Cards de Configuração */
+.config-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
+    border: 1px solid var(--bs-gray-200);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .config-card {
+    background: var(--bs-gray-800);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    border: 1px solid var(--bs-gray-700);
+}
+
+.config-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+[data-theme="dark"] .config-card:hover {
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+}
+
+.config-card-header {
+    padding: 2rem;
+    border-bottom: 2px solid var(--bs-gray-200);
+    background: linear-gradient(135deg, var(--bs-gray-50), white);
+    border-radius: 12px 12px 0 0;
+    position: relative;
+}
+
+[data-theme="dark"] .config-card-header {
+    border-bottom: 2px solid var(--bs-gray-700);
+    background: linear-gradient(135deg, var(--bs-gray-700), var(--bs-gray-800));
+}
+
+.config-card-header h3, .config-card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    color: var(--bs-gray-800);
+}
+
+[data-theme="dark"] .config-card-header h3,
+[data-theme="dark"] .config-card-header h5 {
+    color: var(--bs-gray-100);
+}
+
+.config-card-body {
+    padding: 2rem;
+}
+
+.config-actions {
+    padding: 1.5rem 2rem;
+    border-top: 2px solid var(--bs-gray-200);
+    background: var(--bs-gray-50);
+    border-radius: 0 0 12px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+[data-theme="dark"] .config-actions {
+    border-top: 2px solid var(--bs-gray-700);
+    background: var(--bs-gray-700);
+}
+
+/* Breadcrumb Aprimorado */
+.breadcrumb {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid var(--bs-gray-200);
+}
+
+[data-theme="dark"] .breadcrumb {
+    background: var(--bs-gray-800);
+    border: 1px solid var(--bs-gray-700);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.breadcrumb-item a {
+    color: var(--bs-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+[data-theme="dark"] .breadcrumb-item a {
+    color: var(--bs-primary-light);
+}
+
+.breadcrumb-item.active {
+    color: var(--bs-gray-600);
+    font-weight: 600;
+}
+
+[data-theme="dark"] .breadcrumb-item.active {
+    color: var(--bs-gray-300);
+}
+
+/* Responsividade Aprimorada */
+@media (max-width: 1200px) {
+    .config-sidebar {
+        position: static;
+        min-height: auto;
+        border-right: none;
+        border-bottom: 2px solid var(--bs-primary);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .config-content {
+        padding: 2rem 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .config-container .row {
+        flex-direction: column;
+    }
+
+    .config-sidebar {
+        order: 2;
+        border-bottom: none;
+        border-top: 2px solid var(--bs-primary);
+    }
+
+    .config-content {
+        order: 1;
+        padding: 1.5rem 1rem;
+    }
+
+    .config-nav {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .nav-section {
+        margin: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .nav-section-header {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .nav-link {
+        padding: 0.5rem 1rem 0.5rem 2.5rem;
+        font-size: 0.85rem;
+    }
+
+    .config-card {
+        margin-bottom: 1.5rem;
+    }
+
+    .config-card-header,
+    .config-card-body,
+    .config-actions {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .config-nav {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .config-content {
+        padding: 1rem 0.5rem;
+    }
+
+    .breadcrumb {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Animações */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.config-card {
+    animation: slideIn 0.3s ease-out;
+}
+
+.nav-section {
+    animation: slideIn 0.2s ease-out;
+}
+
+/* Estados de Loading */
+.config-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.config-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid var(--bs-primary);
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Tooltips Aprimorados */
+.nav-link[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bs-gray-800);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 1000;
+    margin-left: 10px;
+}
+
+[data-theme="dark"] .nav-link[title]:hover::after {
+    background: var(--bs-gray-200);
+    color: var(--bs-gray-800);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="config-container">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar de navegação -->
+            <div class="col-lg-3 col-xl-2 px-0">
+                <div class="config-sidebar">
+                    <div class="config-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-cogs me-2"></i>
+                            Configurações
+                        </h4>
+                        <div class="mt-2">
+                            <small class="text-white-50">Sistema de Gerenciamento</small>
+                        </div>
+                    </div>
+
+                    <nav class="config-nav" aria-label="Navegação de configurações do sistema">
+                        <!-- Gerenciamento do Sistema -->
+                        <div class="nav-section">
+                            <button class="nav-section-header" data-toggle="system-menu" aria-expanded="false" aria-controls="system-menu">
+                                <i class="fas fa-server"></i>
+                                Gerenciamento do Sistema
+                                <i class="fas fa-chevron-down float-end"></i>
+                            </button>
+                            <div id="system-menu" class="nav-menu collapse" aria-labelledby="system-menu">
+                                <a href="{{ url_for('system_config.list_users') }}" class="nav-link {% if request.endpoint == 'system_config.list_users' %}active{% endif %}"
+                                   title="Gerenciar usuários, perfis e permissões">
+                                    <i class="fas fa-users"></i> Gerenciar Usuários
+                                </a>
+                                <a href="{{ url_for('system_config.general_settings') }}" class="nav-link {% if request.endpoint == 'system_config.general_settings' %}active{% endif %}"
+                                   title="Configurações gerais do sistema">
+                                    <i class="fas fa-sliders-h"></i> Configurações Gerais
+                                </a>
+                                <a href="{{ url_for('system_config.security_settings') }}" class="nav-link {% if request.endpoint == 'system_config.security_settings' %}active{% endif %}"
+                                   title="Políticas de segurança e autenticação">
+                                    <i class="fas fa-shield-alt"></i> Segurança
+                                </a>
+                                <a href="{{ url_for('system_config.backup_settings') }}" class="nav-link {% if request.endpoint == 'system_config.backup_settings' %}active{% endif %}"
+                                   title="Configuração de backups automáticos">
+                                    <i class="fas fa-save"></i> Backup
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Integrações -->
+                        <div class="nav-section">
+                            <button class="nav-section-header" data-toggle="integrations-menu" aria-expanded="false" aria-controls="integrations-menu">
+                                <i class="fas fa-plug"></i>
+                                Integrações
+                                <i class="fas fa-chevron-down float-end"></i>
+                            </button>
+                            <div id="integrations-menu" class="nav-menu collapse" aria-labelledby="integrations-menu">
+                                <a href="{{ url_for('system_config.email_integration') }}" class="nav-link {% if request.endpoint == 'system_config.email_integration' %}active{% endif %}"
+                                   title="Configuração do servidor SMTP">
+                                    <i class="fas fa-envelope"></i> Email
+                                </a>
+                                <a href="{{ url_for('system_config.api_integrations') }}" class="nav-link {% if request.endpoint == 'system_config.api_integrations' %}active{% endif %}"
+                                   title="Integrações com APIs externas">
+                                    <i class="fas fa-code-branch"></i> APIs Externas
+                                </a>
+                                <a href="{{ url_for('system_config.rfid_integration') }}" class="nav-link {% if request.endpoint == 'system_config.rfid_integration' %}active{% endif %}"
+                                   title="Configuração do sistema RFID">
+                                    <i class="fas fa-rss"></i> RFID
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Notificações -->
+                        <div class="nav-section">
+                            <button class="nav-section-header" data-toggle="notifications-menu" aria-expanded="false" aria-controls="notifications-menu">
+                                <i class="fas fa-bell"></i>
+                                Notificações
+                                <i class="fas fa-chevron-down float-end"></i>
+                            </button>
+                            <div id="notifications-menu" class="nav-menu collapse" aria-labelledby="notifications-menu">
+                                <a href="{{ url_for('system_config.notification_templates') }}" class="nav-link {% if request.endpoint == 'system_config.notification_templates' %}active{% endif %}"
+                                   title="Gerenciar templates de email">
+                                    <i class="fas fa-file-alt"></i> Templates
+                                </a>
+                                <a href="{{ url_for('system_config.notification_rules') }}" class="nav-link {% if request.endpoint == 'system_config.notification_rules' %}active{% endif %}"
+                                   title="Configurar regras de notificação">
+                                    <i class="fas fa-filter"></i> Regras
+                                </a>
+                                <a href="{{ url_for('system_config.notification_history') }}" class="nav-link {% if request.endpoint == 'system_config.notification_history' %}active{% endif %}"
+                                   title="Histórico de notificações enviadas">
+                                    <i class="fas fa-history"></i> Histórico
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Ferramentas -->
+                        <div class="nav-section">
+                            <button class="nav-section-header" data-toggle="tools-menu" aria-expanded="false" aria-controls="tools-menu">
+                                <i class="fas fa-tools"></i>
+                                Ferramentas
+                                <i class="fas fa-chevron-down float-end"></i>
+                            </button>
+                            <div id="tools-menu" class="nav-menu collapse" aria-labelledby="tools-menu">
+                                <a href="{{ url_for('system_config.system_logs') }}" class="nav-link {% if request.endpoint == 'system_config.system_logs' %}active{% endif %}"
+                                   title="Visualizar logs do sistema">
+                                    <i class="fas fa-file-code"></i> Logs do Sistema
+                                </a>
+                                <a href="{{ url_for('system_config.performance_optimization') }}" class="nav-link {% if request.endpoint == 'system_config.performance_optimization' %}active{% endif %}"
+                                   title="Ferramentas de otimização de performance">
+                                    <i class="fas fa-tachometer-alt"></i> Otimização
+                                </a>
+                                <a href="{{ url_for('system_config.system_alerts') }}" class="nav-link {% if request.endpoint == 'system_config.system_alerts' %}active{% endif %}"
+                                   title="Configuração de alertas do sistema">
+                                    <i class="fas fa-exclamation-triangle"></i> Alertas
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Ações Rápidas (Admin) -->
+                        <div class="nav-section">
+                            <button class="nav-section-header" data-toggle="quick-actions-menu" aria-expanded="false" aria-controls="quick-actions-menu">
+                                <i class="fas fa-bolt"></i>
+                                Ações Rápidas
+                                <i class="fas fa-chevron-down float-end"></i>
+                            </button>
+                            <div id="quick-actions-menu" class="nav-menu collapse" aria-labelledby="quick-actions-menu">
+                                <a href="{{ url_for('system_config.create_user') }}" class="nav-link {% if request.endpoint == 'system_config.create_user' %}active{% endif %}"
+                                   title="Criar novo usuário rapidamente">
+                                    <i class="fas fa-user-plus"></i> Novo Usuário
+                                </a>
+                                <a href="{{ url_for('system_config.bulk_user_actions') }}" class="nav-link {% if request.endpoint == 'system_config.bulk_user_actions' %}active{% endif %}"
+                                   title="Ações em lote para usuários">
+                                    <i class="fas fa-users-cog"></i> Ações em Lote
+                                </a>
+                                <a href="{{ url_for('system_config.manage_profiles') }}" class="nav-link {% if request.endpoint == 'system_config.manage_profiles' %}active{% endif %}"
+                                   title="Gerenciar perfis e permissões">
+                                    <i class="fas fa-user-shield"></i> Perfis
+                                </a>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Conteúdo principal -->
+            <div class="col-lg-9 col-xl-10">
+                <div class="config-content">
+                    <!-- Breadcrumb Aprimorado -->
+                    <nav aria-label="Navegação estrutural" class="mb-4">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="{{ url_for('main.index') }}" aria-label="Ir para Dashboard principal">
+                                    <i class="fas fa-home me-1"></i>Dashboard
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{{ url_for('system_config.list_users') }}" aria-label="Ir para Configurações do Sistema">
+                                    <i class="fas fa-cogs me-1"></i>Configurações
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">
+                                {% block breadcrumb_title %}{% endblock %}
+                            </li>
+                        </ol>
+                    </nav>
+
+                    <!-- Área de conteúdo específica da página -->
+                    <div class="config-page-content">
+                        {% block config_content %}{% endblock %}
+                    </div>
+
+                    <!-- Footer da página -->
+                    <footer class="config-page-footer mt-5 pt-4 border-top">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Última atualização: <span id="last-updated">{{ now.strftime('%d/%m/%Y %H:%M') }}</span>
+                                </small>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <small class="text-muted">
+                                    <i class="fas fa-user-shield me-1"></i>
+                                    Acesso restrito a administradores
+                                </small>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ========================================
+// SISTEMA DE CONFIGURAÇÃO - JAVASCRIPT APRIMORADO
+// ========================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Sistema de navegação aprimorado
+    initializeNavigation();
+
+    // Sistema de tooltips
+    initializeTooltips();
+
+    // Sistema de feedback visual
+    initializeFeedback();
+
+    // Atualização automática do timestamp
+    initializeAutoUpdate();
+
+    // Sistema de atalhos de teclado
+    initializeKeyboardShortcuts();
+});
+
+// Sistema de Navegação Aprimorado
+function initializeNavigation() {
+    const sectionHeaders = document.querySelectorAll('.nav-section-header');
+
+    sectionHeaders.forEach(header => {
+        header.addEventListener('click', function(e) {
+            e.preventDefault();
+            toggleSection(this);
+        });
+
+        // Suporte a teclado
+        header.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleSection(this);
+            }
+        });
+    });
+
+    // Auto-expand menu da seção atual
+    autoExpandActiveSection();
+
+    // Animações de entrada
+    animateNavigationEntrance();
+}
+
+function toggleSection(header) {
+    const targetId = header.getAttribute('data-toggle');
+    const target = document.getElementById(targetId);
+    const icon = header.querySelector('.fa-chevron-down');
+    const section = header.closest('.nav-section');
+
+    if (target && icon) {
+        const isExpanded = target.classList.contains('show');
+
+        // Toggle visual states
+        target.classList.toggle('show');
+        section.classList.toggle('expanded', !isExpanded);
+
+        // Animate icon
+        icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+
+        // Update accessibility
+        header.setAttribute('aria-expanded', !isExpanded);
+
+        // Add ripple effect
+        createRippleEffect(header);
+
+        // Analytics tracking (se disponível)
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'navigation_toggle', {
+                'section': targetId,
+                'action': isExpanded ? 'collapse' : 'expand'
+            });
+        }
+    }
+}
+
+function autoExpandActiveSection() {
+    const activeLink = document.querySelector('.nav-link.active');
+    if (activeLink) {
+        const parentMenu = activeLink.closest('.nav-menu');
+        if (parentMenu) {
+            const section = parentMenu.closest('.nav-section');
+            const header = section.querySelector('.nav-section-header');
+
+            parentMenu.classList.add('show');
+            section.classList.add('expanded');
+
+            if (header) {
+                header.setAttribute('aria-expanded', 'true');
+                const icon = header.querySelector('.fa-chevron-down');
+                if (icon) {
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            }
+        }
+    }
+}
+
+function animateNavigationEntrance() {
+    const navSections = document.querySelectorAll('.nav-section');
+    navSections.forEach((section, index) => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateX(-20px)';
+
+        setTimeout(() => {
+            section.style.transition = 'all 0.3s ease';
+            section.style.opacity = '1';
+            section.style.transform = 'translateX(0)';
+        }, index * 50);
+    });
+}
+
+// Sistema de Tooltips Aprimorado
+function initializeTooltips() {
+    const navLinks = document.querySelectorAll('.nav-link[title]');
+
+    navLinks.forEach(link => {
+        let tooltip = null;
+
+        link.addEventListener('mouseenter', function(e) {
+            showTooltip(this, e);
+        });
+
+        link.addEventListener('mouseleave', function() {
+            hideTooltip();
+        });
+
+        link.addEventListener('focus', function(e) {
+            showTooltip(this, e);
+        });
+
+        link.addEventListener('blur', function() {
+            hideTooltip();
+        });
+    });
+}
+
+function showTooltip(element, event) {
+    hideTooltip(); // Remove tooltip existente
+
+    const title = element.getAttribute('title');
+    if (!title) return;
+
+    const tooltip = document.createElement('div');
+    tooltip.className = 'config-tooltip';
+    tooltip.textContent = title;
+
+    // Posicionamento
+    const rect = element.getBoundingClientRect();
+    tooltip.style.position = 'fixed';
+    tooltip.style.left = `${rect.right + 10}px`;
+    tooltip.style.top = `${rect.top + rect.height / 2}px`;
+    tooltip.style.transform = 'translateY(-50%)';
+    tooltip.style.zIndex = '9999';
+
+    document.body.appendChild(tooltip);
+
+    // Animação de entrada
+    requestAnimationFrame(() => {
+        tooltip.style.opacity = '1';
+        tooltip.style.transform = 'translateY(-50%) translateX(0)';
+    });
+}
+
+function hideTooltip() {
+    const tooltip = document.querySelector('.config-tooltip');
+    if (tooltip) {
+        tooltip.style.opacity = '0';
+        setTimeout(() => tooltip.remove(), 200);
+    }
+}
+
+// Sistema de Feedback Visual
+function initializeFeedback() {
+    // Feedback para ações de formulário
+    const forms = document.querySelectorAll('.config-card form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function() {
+            showLoadingState(this);
+        });
+    });
+
+    // Feedback para botões de ação
+    const actionButtons = document.querySelectorAll('.config-actions button');
+    actionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            if (this.type === 'submit') {
+                showButtonLoading(this);
+            }
+        });
+    });
+}
+
+function showLoadingState(form) {
+    const card = form.closest('.config-card');
+    card.classList.add('config-loading');
+
+    // Desabilitar todos os inputs
+    const inputs = card.querySelectorAll('input, select, textarea, button');
+    inputs.forEach(input => {
+        input.disabled = true;
+    });
+}
+
+function showButtonLoading(button) {
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
+    button.disabled = true;
+
+    // Restaurar após timeout (fallback)
+    setTimeout(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    }, 10000);
+}
+
+// Atualização Automática do Timestamp
+function initializeAutoUpdate() {
+    const lastUpdatedElement = document.getElementById('last-updated');
+    if (lastUpdatedElement) {
+        setInterval(() => {
+            const now = new Date();
+            lastUpdatedElement.textContent = now.toLocaleString('pt-BR');
+        }, 60000); // Atualiza a cada minuto
+    }
+}
+
+// Sistema de Atalhos de Teclado
+function initializeKeyboardShortcuts() {
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + S para salvar
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            const saveButton = document.querySelector('button[type="submit"], .btn-success');
+            if (saveButton && !saveButton.disabled) {
+                saveButton.click();
+            }
+        }
+
+        // Escape para fechar modais ou voltar
+        if (e.key === 'Escape') {
+            const modal = document.querySelector('.modal.show');
+            if (modal) {
+                const closeButton = modal.querySelector('[data-bs-dismiss="modal"]');
+                if (closeButton) closeButton.click();
+            }
+        }
+    });
+}
+
+// Efeitos Visuais
+function createRippleEffect(element) {
+    const ripple = document.createElement('div');
+    ripple.className = 'ripple-effect';
+
+    const rect = element.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+
+    ripple.style.width = ripple.style.height = `${size}px`;
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+
+    element.appendChild(ripple);
+
+    setTimeout(() => ripple.remove(), 600);
+}
+
+// Utilitários
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    }
+}
+
+// Sistema de Notificações Toast (se necessário)
+function showToast(message, type = 'info') {
+    // Implementação de toast notifications
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+
+// Export para uso global (se necessário)
+window.ConfigSystem = {
+    toggleSection,
+    showToast,
+    createRippleEffect
+};
+</script>
+
+<!-- CSS adicional para tooltips -->
+<style>
+.config-tooltip {
+    background: var(--bs-gray-900);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateY(-50%) translateX(-10px);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: 250px;
+    word-wrap: break-word;
+}
+
+[data-theme="dark"] .config-tooltip {
+    background: var(--bs-gray-100);
+    color: var(--bs-gray-900);
+}
+
+.ripple-effect {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+</style>
+{% endblock %}

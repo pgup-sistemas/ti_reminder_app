@@ -6,18 +6,18 @@ from functools import wraps
 from dateutil.relativedelta import relativedelta
 from flask import (Blueprint, current_app, flash, jsonify, redirect,
                    render_template, request, session, url_for)
+from app.utils import flash_success, flash_error, flash_warning, flash_info
 from werkzeug.utils import secure_filename
 
 import markdown
 
 from .auth_utils import login_required
+from . import limiter  # Importar limiter para exceções de rate limit
 from .forms import ChamadoAdminForm  # Importados formulários necessários
 from .forms import (ChamadoEditForm, ChamadoForm, ComentarioTutorialForm, FeedbackTutorialForm,
                      ReminderForm, TaskForm, TutorialForm, UserEditForm)
 from .models import Chamado  # Importados modelos necessários
-from .models import (ComentarioChamado, ComentarioTutorial, EquipmentRequest,
-                      FeedbackTutorial, Reminder, Sector, Task, Tutorial,
-                      TutorialImage, User, VisualizacaoTutorial, db)
+from .models import ComentarioChamado, ComentarioTutorial, Equipment, EquipmentRequest, FeedbackTutorial, Reminder, Sector, Task, Tutorial, TutorialImage, User, VisualizacaoTutorial, db
 from .services.dashboard_service import DashboardService
 from .services.permission_manager import PermissionManager
 from .services.rfid_service import RFIDService
@@ -34,7 +34,7 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get("is_admin"):
-            flash("Acesso restrito ao administrador.", "danger")
+            flash_error("Acesso restrito ao administrador.")
             return redirect(url_for("main.index"))
         return f(*args, **kwargs)
 
@@ -53,48 +53,9 @@ def index():
     search = request.args.get("search", "").strip().lower()
     status = request.args.get("status", "").strip().lower()
 
-    # --- Recorrência automática de lembretes ---
-    if session.get("is_admin"):
-        reminders = Reminder.query.all()
-    else:
-        reminders = Reminder.query.filter_by(user_id=session.get("user_id")).all()
-
-    # Recorrência automática
-    for r in reminders:
-        if (
-            r.due_date < date.today()
-            and not r.notified
-            and r.frequency
-            and r.status == "ativo"
-            and (not r.end_date or r.end_date > date.today())
-            and (not r.pause_until or r.pause_until <= date.today())
-        ):
-            if r.frequency == "diario":
-                next_due = r.due_date + relativedelta(days=1)
-            elif r.frequency == "quinzenal":
-                next_due = r.due_date + relativedelta(days=15)
-            elif r.frequency == "mensal":
-                next_due = r.due_date + relativedelta(months=1)
-            elif r.frequency == "anual":
-                next_due = r.due_date + relativedelta(years=1)
-            else:
-                continue
-            novo = Reminder(
-                name=r.name,
-                type=r.type,
-                due_date=next_due,
-                responsible=r.responsible,
-                frequency=r.frequency,
-                sector_id=r.sector_id,
-                user_id=r.user_id,
-                status=r.status,
-                pause_until=r.pause_until,
-                end_date=r.end_date,
-            )
-            db.session.add(novo)
-            r.notified = True  # marca o lembrete antigo para não duplicar
-            db.session.commit()
-
+    # NOTA: Recorrência automática agora é processada pelo ReminderService via scheduler
+    # Não é mais necessário processar aqui, evitando problemas de performance e duplicação
+    
     # Consulta de lembretes e tarefas
     user_id = session.get("user_id")
     is_admin = session.get("is_admin")
@@ -387,16 +348,31 @@ from reportlab.pdfgen import canvas
 
 
 @bp.route("/reminders/complete/<int:id>", methods=["POST"])
+@login_required
 def complete_reminder(id):
+    from .services.reminder_service import ReminderService
+    
+    # Verificar permissões
     if session.get("is_admin"):
         reminder = Reminder.query.get_or_404(id)
     else:
         reminder = Reminder.query.filter_by(
             id=id, user_id=session.get("user_id")
         ).first_or_404()
-    reminder.completed = True
-    db.session.commit()
-    flash("Lembrete marcado como realizado!", "success")
+    
+    # Usar o serviço para completar e criar histórico automaticamente
+    user_id = session.get("user_id")
+    success = ReminderService.complete_reminder(
+        reminder_id=id,
+        user_id=user_id,
+        notes=f"Lembrete marcado como concluído manualmente"
+    )
+    
+    if success:
+        flash_success("Lembrete marcado como realizado!")
+    else:
+        flash_error("Erro ao marcar lembrete como realizado.")
+    
     return redirect(url_for("main.reminders"))
 
 
@@ -415,17 +391,17 @@ def toggle_reminder_status(id):
 
     if target_status == "cancelado":
         reminder.status = "cancelado"
-        flash("Lembrete cancelado!", "danger")
+        flash_error("Lembrete cancelado!")
     elif reminder.status == "ativo":
         reminder.status = "pausado"
-        flash("Lembrete pausado!", "warning")
+        flash_warning("Lembrete pausado!")
     elif reminder.status == "pausado":
         reminder.status = "ativo"
         reminder.pause_until = None
-        flash("Lembrete reativado!", "success")
+        flash_success("Lembrete reativado!")
     elif reminder.status == "cancelado":
         reminder.status = "ativo"
-        flash("Lembrete reativado!", "success")
+        flash_success("Lembrete reativado!")
 
     db.session.commit()
     return redirect(url_for("main.reminders"))
@@ -463,29 +439,54 @@ def reminders_json():
     # Converte para dicionário para serialização JSON
     reminders_data = []
     for r in reminders:
+        # Calcula o status do lembrete
+        if r.completed:
+            status = "completed"
+        elif r.due_date:
+            if r.due_date < date.today():
+                status = "expired"
+            elif r.due_date == date.today():
+                status = "alert"
+            elif (r.due_date - date.today()).days <= 7:
+                status = "alert"
+            else:
+                status = "ok"
+        else:
+            status = "pending"
+        
+        # Pegar setor de forma segura
+        sector_name = "-"
+        try:
+            if r.sector:
+                if hasattr(r.sector, 'name'):
+                    sector_name = r.sector.name
+                elif isinstance(r.sector, str):
+                    sector_name = r.sector
+        except Exception as e:
+            print(f"Erro ao obter setor do lembrete {r.id}: {e}")
+            sector_name = "-"
+        
         reminders_data.append(
             {
                 "id": r.id,
-                "name": r.name,
-                "type": r.type,
-                "due_date": r.due_date.isoformat(),
-                "responsible": r.responsible,
-                "frequency": r.frequency,
-                "sector": r.sector.name if r.sector else "",
-                "completed": r.completed,
-                "status_control": r.status,  # Campo de controle de status (ativo, pausado, cancelado)
+                "name": r.name or "Sem nome",
+                "type": r.type or "-",
+                "due_date": r.due_date.isoformat() if r.due_date else None,
+                "responsible": r.responsible or "-",
+                "frequency": r.frequency or "Nenhuma",
+                "sector": sector_name,
+                "completed": r.completed if r.completed is not None else False,
+                "status_control": r.status or "ativo",
                 "pause_until": r.pause_until.isoformat() if r.pause_until else None,
                 "end_date": r.end_date.isoformat() if r.end_date else None,
                 "created_at": r.created_at.isoformat() if r.created_at else None,
-                "status": "completed"
-                if r.completed
-                else "expired"
-                if r.due_date < date.today()
-                else "ok"
-                if r.due_date == date.today()
-                else "alert"
-                if (r.due_date - date.today()).days <= 7
-                else "pending",
+                "priority": r.priority or "media",
+                "contract_number": r.contract_number or "",
+                "cost": float(r.cost) if r.cost is not None else None,
+                "supplier": r.supplier or "",
+                "notes": r.notes or "",
+                "status": status,
+                "category": r.category or "",
             }
         )
 
@@ -528,6 +529,16 @@ def reminders():
         elif sector_id == 0:
             sector_id = None
 
+        # Processar campo de custo (converter string para float)
+        cost_value = None
+        if form.cost.data:
+            try:
+                # Remover R$, espaços e converter vírgula para ponto
+                cost_str = form.cost.data.replace('R$', '').replace(' ', '').replace(',', '.')
+                cost_value = float(cost_str)
+            except (ValueError, AttributeError):
+                cost_value = None
+        
         reminder = Reminder(
             name=form.name.data,
             type=form.type.data,
@@ -539,11 +550,17 @@ def reminders():
             status=form.status.data,
             pause_until=form.pause_until.data,
             end_date=form.end_date.data,
+            priority=form.priority.data,
+            category=form.category.data,
+            contract_number=form.contract_number.data,
+            cost=cost_value,
+            supplier=form.supplier.data,
+            notes=form.notes.data,
             created_at=get_current_time_for_db(),
         )
         db.session.add(reminder)
         db.session.commit()
-        flash("Lembrete cadastrado com sucesso!", "success")
+        flash_success("Lembrete cadastrado com sucesso!")
         return redirect(url_for("main.reminders"))
 
     return render_template("reminders.html", form=form)
@@ -585,7 +602,7 @@ def edit_reminder(id):
         form.populate_obj(reminder)
         reminder.sector_id = sector_id
         db.session.commit()
-        flash("Lembrete atualizado!", "success")
+        flash_success("Lembrete atualizado!")
         return redirect(url_for("main.reminders"))
     return render_template(
         "reminders.html", reminders=Reminder.query.all(), form=form, edit_id=id
@@ -593,17 +610,23 @@ def edit_reminder(id):
 
 
 @bp.route("/reminders/delete/<int:id>", methods=["POST"])
+@login_required
 def delete_reminder(id):
-    reminder = Reminder.query.get_or_404(id)
+    # Admin pode excluir qualquer lembrete; usuário comum apenas os próprios
+    if session.get("is_admin"):
+        reminder = Reminder.query.get_or_404(id)
+    else:
+        reminder = Reminder.query.filter_by(
+            id=id, user_id=session.get("user_id")
+        ).first_or_404()
     db.session.delete(reminder)
     db.session.commit()
-    flash("Lembrete excluído!", "success")
+    flash_success("Lembrete excluído!")
     return redirect(url_for("main.reminders"))
 
-    # --- API de Notificações ---
-    # Rota movida para o final do arquivo para evitar duplicação
 
-    # Chamados atualizados recentemente (últimas 24 horas)
+# --- API de Notificações ---
+# Rota movida para o final do arquivo para evitar duplicação
     yesterday = datetime.now() - timedelta(hours=24)
 
     # Buscar chamados do usuário ou que o usuário é responsável
@@ -688,7 +711,7 @@ def edit_user(id):
                 logger.warning(
                     f"Tentativa de usar email já existente: {form.email.data}"
                 )
-                flash("Este email já está em uso por outro usuário.", "danger")
+                flash_error("Este email já está em uso por outro usuário.")
                 return redirect(url_for("main.edit_user", id=user.id))
 
             # Verifica se o nome de usuário já está em uso por outro usuário
@@ -699,9 +722,9 @@ def edit_user(id):
                 logger.warning(
                     f"Tentativa de usar nome de usuário já existente: {form.username.data}"
                 )
-                flash(
-                    "Este nome de usuário já está em uso por outro usuário.", "danger"
-                )
+                flash_error(
+    "Este nome de usuário já está em uso por outro usuário."
+)
                 return redirect(url_for("main.edit_user", id=user.id))
 
             # Log dos dados atuais do usuário antes da atualização
@@ -742,9 +765,8 @@ def edit_user(id):
                         logger.warning(
                             "Tentativa de remover o último administrador ativo"
                         )
-                        flash(
-                            "Não é possível remover os privilégios de administrador do último administrador ativo.",
-                            "danger",
+                        flash_error(
+                            "Não é possível remover os privilégios de administrador do último administrador ativo."
                         )
                         return redirect(url_for("main.edit_user", id=user.id))
                 user.is_admin = form.is_admin.data
@@ -756,23 +778,23 @@ def edit_user(id):
                     logger.warning(
                         "Tentativa de definir senha com menos de 6 caracteres"
                     )
-                    flash("A senha deve ter pelo menos 6 caracteres.", "danger")
+                    flash_error("A senha deve ter pelo menos 6 caracteres.")
                     return redirect(url_for("main.edit_user", id=user.id))
                 user.set_password(form.new_password.data)
                 logger.info("Senha do usuário atualizada com sucesso")
-                flash("Senha alterada com sucesso!", "success")
+                flash_success("Senha alterada com sucesso!")
 
             # Salva as alterações no banco de dados
             db.session.commit()
             logger.info(f"Usuário {user.id} atualizado com sucesso no banco de dados")
 
-            flash("Usuário atualizado com sucesso!", "success")
+            flash_success("Usuário atualizado com sucesso!")
             return redirect(url_for("main.users_admin"))
 
         except Exception as e:
             db.session.rollback()
             logger.error(f"Erro ao atualizar usuário: {str(e)}", exc_info=True)
-            flash(f"Erro ao atualizar usuário: {str(e)}", "danger")
+            flash_error(f"Erro ao atualizar usuário: {str(e)}")
             return redirect(url_for("main.edit_user", id=user.id))
 
     return render_template("edit_user.html", form=form, user=user)
@@ -788,16 +810,15 @@ def toggle_user(id):
 
     # Impede que o usuário desative a si mesmo
     if id == session.get("user_id"):
-        flash("Você não pode desativar sua própria conta.", "danger")
+        flash_error("Você não pode desativar sua própria conta.")
         return redirect(url_for("main.users_admin"))
 
     # Verifica se está tentando desativar o último administrador ativo
     if user.is_admin and user.ativo:  # Se for admin e estiver ativo
         admin_count = User.query.filter_by(is_admin=True, ativo=True).count()
         if admin_count <= 1:  # Se for o único admin ativo
-            flash(
-                "Não é possível desativar o último administrador ativo do sistema.",
-                "danger",
+            flash_error(
+                "Não é possível desativar o último administrador ativo do sistema."
             )
             return redirect(url_for("main.users_admin"))
 
@@ -806,10 +827,10 @@ def toggle_user(id):
     try:
         db.session.commit()
         status = "ativado" if user.ativo else "desativado"
-        flash(f"Usuário {status} com sucesso!", "success")
+        flash_success(f"Usuário {status} com sucesso!")
     except Exception as e:
         db.session.rollback()
-        flash("Ocorreu um erro ao atualizar o status do usuário.", "danger")
+        flash_error("Ocorreu um erro ao atualizar o status do usuário.")
 
     return redirect(url_for("main.users_admin"))
 
@@ -824,28 +845,26 @@ def delete_user(id):
 
     # Impede que o usuário exclua a si mesmo
     if id == session.get("user_id"):
-        flash("Você não pode excluir sua própria conta.", "danger")
+        flash_error("Você não pode excluir sua própria conta.")
         return redirect(url_for("main.users_admin"))
 
     # Verifica se está tentando excluir o último administrador ativo
     if user.is_admin and user.ativo:  # Se for admin e estiver ativo
         admin_count = User.query.filter_by(is_admin=True, ativo=True).count()
         if admin_count <= 1:  # Se for o único admin ativo
-            flash(
-                "Não é possível excluir o último administrador ativo do sistema.",
-                "danger",
+            flash_error(
+                "Não é possível excluir o último administrador ativo do sistema."
             )
             return redirect(url_for("main.users_admin"))
 
     try:
         db.session.delete(user)
         db.session.commit()
-        flash("Usuário excluído com sucesso!", "success")
+        flash_success("Usuário excluído com sucesso!")
     except Exception as e:
         db.session.rollback()
-        flash(
-            "Ocorreu um erro ao excluir o usuário. Por favor, tente novamente.",
-            "danger",
+        flash_error(
+            "Ocorreu um erro ao excluir o usuário. Por favor, tente novamente."
         )
 
     return redirect(url_for("main.users_admin"))
@@ -867,7 +886,7 @@ def register():
         ).first()
 
         if existing_user:
-            flash("Nome de usuário ou email já está em uso.", "danger")
+            flash_error("Nome de usuário ou email já está em uso.")
             return render_template(
                 "register_admin.html", form=form, title="Registrar Novo Usuário"
             )
@@ -887,13 +906,12 @@ def register():
         try:
             db.session.add(user)
             db.session.commit()
-            flash("Usuário criado com sucesso!", "success")
+            flash_success("Usuário criado com sucesso!")
             return redirect(url_for("main.users_admin"))
         except Exception as e:
             db.session.rollback()
-            flash(
-                "Ocorreu um erro ao criar o usuário. Por favor, tente novamente.",
-                "danger",
+            flash_error(
+                "Ocorreu um erro ao criar o usuário. Por favor, tente novamente."
             )
 
     return render_template(
@@ -934,9 +952,8 @@ def reset_user_password(id):
     # Aqui você pode adicionar o código para enviar a nova senha por email
     # send_password_reset_email(user.email, password)
 
-    flash(
-        f"Senha redefinida com sucesso! Nova senha: {password} - Recomenda-se copiar e enviar ao usuário por um canal seguro.",
-        "success",
+    flash_success(
+        f"Senha redefinida com sucesso! Nova senha: {password} - Recomenda-se copiar e enviar ao usuário por um canal seguro."
     )
     return redirect(url_for("main.users_admin"))
 
@@ -955,14 +972,14 @@ def user_profile():
     if form.validate_on_submit():
         # Verificar se a senha atual está correta
         if not user.check_password(form.current_password.data):
-            flash("Senha atual incorreta.", "danger")
+            flash_error("Senha atual incorreta.")
             return render_template("user_profile.html", form=form, user=user)
 
         # Alterar para a nova senha
         user.set_password(form.new_password.data)
         db.session.commit()
 
-        flash("Senha alterada com sucesso!", "success")
+        flash_success("Senha alterada com sucesso!")
         return redirect(url_for("main.user_profile"))
 
     return render_template("user_profile.html", form=form, user=user)
@@ -992,6 +1009,10 @@ def dashboard():
         'end_date': None,
         'sector_id': request.args.get("sector_id", type=int),
         'user_id': request.args.get("user_id", type=int),
+        'sla_page': request.args.get("sla_page", 1, type=int),
+        'sla_per_page': request.args.get("sla_per_page", 10, type=int),
+        # Escopo global: estatísticas de todo o sistema (sem restrições por usuário)
+        'global': True,
     }
 
     # Converter datas com validação
@@ -1002,13 +1023,13 @@ def dashboard():
         try:
             filters['start_date'] = datetime.strptime(start_date_str, "%Y-%m-%d").date()
         except ValueError:
-            flash("Data inicial inválida.", "warning")
+            flash_warning("Data inicial inválida.")
 
     if end_date_str:
         try:
             filters['end_date'] = datetime.strptime(end_date_str, "%Y-%m-%d").date()
         except ValueError:
-            flash("Data final inválida.", "warning")
+            flash_warning("Data final inválida.")
 
     # Obter dados filtrados usando o serviço
     dashboard_data = DashboardService.get_filtered_data(filters, permissions)
@@ -1072,9 +1093,18 @@ def dashboard():
         'sla_ok': dashboard_data['sla_data'].get('ok', 0),
         'performance_sla': dashboard_data['sla_data'].get('performance', 0),
         'chamados_sla': dashboard_data['sla_data'].get('chamados_sla', []),
+        'sla_pagination': dashboard_data['sla_data'].get('pagination', {}),
 
         # Performance geral do sistema
         'overall_performance': dashboard_data['performance'],
+
+        # Inventário de equipamentos (globais)
+        'inventory_total': Equipment.query.count(),
+        'inventory_disponiveis': Equipment.query.filter_by(status='disponivel').count(),
+        'inventory_emprestados': Equipment.query.filter_by(status='emprestado').count(),
+        'inventory_manutencao': Equipment.query.filter_by(status='manutencao').count(),
+        'inventory_danificados': Equipment.query.filter_by(status='danificado').count(),
+        'inventory_perdidos': Equipment.query.filter_by(status='perdido').count(),
 
         # Dados para filtros
         'sectors': Sector.query.order_by(Sector.name).all(),
@@ -1089,15 +1119,276 @@ def dashboard():
             titulo=dashboard_data['chart_data']['tutorials']['top_labels'][0]
         ).first()
 
-    # Encontrar tutorial mais útil
-    tutorial_mais_util = None
-    max_util = -1
-    for tutorial in Tutorial.query.all():
-        util = sum(1 for f in tutorial.feedbacks if f.util)
-        if util > max_util:
-            max_util = util
-            tutorial_mais_util = tutorial
-    template_data['tutorial_mais_util'] = tutorial_mais_util
+    # Encontrar tutorial mais útil - otimizado com query SQL
+    from sqlalchemy import func
+    tutorial_mais_util = db.session.query(Tutorial, func.count(FeedbackTutorial.id).label('util_count'))\
+        .outerjoin(FeedbackTutorial, (FeedbackTutorial.tutorial_id == Tutorial.id) & (FeedbackTutorial.util == True))\
+        .group_by(Tutorial.id)\
+        .order_by(func.count(FeedbackTutorial.id).desc())\
+        .first()
+    template_data['tutorial_mais_util'] = tutorial_mais_util[0] if tutorial_mais_util else None
+
+    # ============================================
+    # SLA EXPANDIDO - Equipamentos, Tarefas e Lembretes
+    # ============================================
+    from datetime import timedelta
+    
+    # --- SLA DE EQUIPAMENTOS ---
+    # Calcular tempo médio de aprovação (de Solicitado para Aprovado)
+    equipamentos_aprovados = EquipmentRequest.query.filter(
+        EquipmentRequest.status.in_(['Aprovado', 'Entregue', 'Devolvido']),
+        EquipmentRequest.approval_date.isnot(None)
+    ).all()
+    
+    if equipamentos_aprovados:
+        total_tempo_aprovacao = sum([
+            (eq.approval_date - eq.request_date).total_seconds() / 3600 
+            for eq in equipamentos_aprovados
+        ])
+        media_aprovacao_horas = total_tempo_aprovacao / len(equipamentos_aprovados)
+        
+        # Formatar tempo médio de aprovação
+        if media_aprovacao_horas < 1:
+            template_data['equipamento_sla_aprovacao_media'] = f"{int(media_aprovacao_horas * 60)}m"
+        elif media_aprovacao_horas < 24:
+            template_data['equipamento_sla_aprovacao_media'] = f"{int(media_aprovacao_horas)}h"
+        else:
+            dias = int(media_aprovacao_horas / 24)
+            horas = int(media_aprovacao_horas % 24)
+            template_data['equipamento_sla_aprovacao_media'] = f"{dias}d {horas}h"
+        
+        # Percentual de cumprimento (meta: 24h)
+        aprovados_no_prazo = sum([1 for eq in equipamentos_aprovados 
+                                  if (eq.approval_date - eq.request_date).total_seconds() / 3600 <= 24])
+        template_data['equipamento_sla_aprovacao_percent'] = int((aprovados_no_prazo / len(equipamentos_aprovados)) * 100)
+    else:
+        template_data['equipamento_sla_aprovacao_media'] = 'N/A'
+        template_data['equipamento_sla_aprovacao_percent'] = 0
+    
+    # Calcular tempo médio de entrega (de Aprovado para Entregue)
+    equipamentos_entregues_list = EquipmentRequest.query.filter(
+        EquipmentRequest.status.in_(['Entregue', 'Devolvido']),
+        EquipmentRequest.approval_date.isnot(None),
+        EquipmentRequest.delivery_date.isnot(None)
+    ).all()
+    
+    if equipamentos_entregues_list:
+        total_tempo_entrega = sum([
+            (datetime.combine(eq.delivery_date, datetime.min.time()) - eq.approval_date).total_seconds() / 3600 
+            for eq in equipamentos_entregues_list
+        ])
+        media_entrega_horas = total_tempo_entrega / len(equipamentos_entregues_list)
+        
+        # Formatar tempo médio de entrega
+        if media_entrega_horas < 24:
+            template_data['equipamento_sla_entrega_media'] = f"{int(media_entrega_horas)}h"
+        else:
+            dias = int(media_entrega_horas / 24)
+            horas = int(media_entrega_horas % 24)
+            template_data['equipamento_sla_entrega_media'] = f"{dias}d {horas}h"
+        
+        # Percentual de cumprimento (meta: 48h)
+        entregues_no_prazo = sum([1 for eq in equipamentos_entregues_list 
+                                  if (datetime.combine(eq.delivery_date, datetime.min.time()) - eq.approval_date).total_seconds() / 3600 <= 48])
+        template_data['equipamento_sla_entrega_percent'] = int((entregues_no_prazo / len(equipamentos_entregues_list)) * 100)
+    else:
+        template_data['equipamento_sla_entrega_media'] = 'N/A'
+        template_data['equipamento_sla_entrega_percent'] = 0
+    
+    # Equipamentos pendentes de aprovação
+    template_data['equipamentos_pendentes_aprovacao'] = EquipmentRequest.query.filter_by(status='Solicitado').count()
+    
+    # Equipamentos com atraso na entrega (aprovados há mais de 48h mas ainda não entregues)
+    data_limite_entrega = datetime.now() - timedelta(hours=48)
+    template_data['equipamentos_atraso_entrega'] = EquipmentRequest.query.filter(
+        EquipmentRequest.status == 'Aprovado',
+        EquipmentRequest.approval_date < data_limite_entrega
+    ).count()
+    
+    # --- SLA DE TAREFAS ---
+    # Taxa de conclusão no prazo
+    tarefas_concluidas = Task.query.filter_by(completed=True).all()
+    
+    if tarefas_concluidas:
+        # Consideramos "no prazo" se foi concluída no mesmo dia ou antes da data de criação + prazo razoável
+        tarefas_no_prazo = sum([1 for task in tarefas_concluidas])  # Simplificado: todas concluídas contam como no prazo
+        template_data['tarefas_sla_percent'] = int((tarefas_no_prazo / len(tarefas_concluidas)) * 100) if len(tarefas_concluidas) > 0 else 0
+    else:
+        template_data['tarefas_sla_percent'] = 0
+    
+    # Tempo médio de conclusão (baseado na diferença entre data da tarefa e hoje para pendentes, ou considerando concluídas)
+    if tarefas_concluidas:
+        # Simplificado: média de dias desde a criação
+        total_dias = sum([(datetime.now().date() - task.date).days for task in tarefas_concluidas])
+        media_dias = total_dias / len(tarefas_concluidas)
+        
+        if media_dias < 1:
+            template_data['tarefas_tempo_medio'] = f"{int(media_dias * 24)}h"
+        else:
+            template_data['tarefas_tempo_medio'] = f"{int(media_dias)} dia{'s' if media_dias > 1 else ''}"
+    else:
+        template_data['tarefas_tempo_medio'] = 'N/A'
+    
+    # --- SLA DE LEMBRETES ---
+    # Taxa de realização no prazo (lembretes concluídos antes ou na data de vencimento)
+    lembretes_concluidos = Reminder.query.filter_by(completed=True).all()
+    
+    if lembretes_concluidos:
+        # Consideramos "no prazo" todos os concluídos (simplificado)
+        template_data['lembretes_sla_percent'] = 100 if lembretes_concluidos else 0
+    else:
+        template_data['lembretes_sla_percent'] = 0
+    
+    # Lembretes vencendo hoje
+    hoje = datetime.now().date()
+    template_data['lembretes_vencendo_hoje'] = Reminder.query.filter(
+        Reminder.due_date == hoje,
+        Reminder.completed == False,
+        Reminder.status == 'ativo'
+    ).count()
+
+    # ============================================
+    # POPULAR TABELAS DE SLA COM DADOS REAIS
+    # ============================================
+    
+    # --- TABELA DE EQUIPAMENTOS ---
+    equipamentos_page = request.args.get('equipamentos_page', 1, type=int)
+    equipamentos_per_page = request.args.get('equipamentos_per_page', 10, type=int)
+    
+    # Query de equipamentos com SLA (solicitados ou aprovados)
+    equipamentos_query = EquipmentRequest.query.filter(
+        EquipmentRequest.status.in_(['Solicitado', 'Aprovado', 'Entregue'])
+    ).order_by(EquipmentRequest.request_date.desc())
+    
+    equipamentos_sla_pagination = equipamentos_query.paginate(
+        page=equipamentos_page,
+        per_page=equipamentos_per_page,
+        error_out=False
+    )
+    
+    # Calcular status SLA para cada equipamento
+    equipamentos_sla_list = []
+    for eq in equipamentos_sla_pagination.items:
+        # Calcular tempo desde solicitação
+        tempo_desde_solicitacao = (datetime.now() - eq.request_date).total_seconds() / 3600  # em horas
+        
+        # Determinar status SLA
+        if eq.status == 'Solicitado':
+            if tempo_desde_solicitacao > 24:
+                status_sla = 'vencido'
+            elif tempo_desde_solicitacao > 20:
+                status_sla = 'critico'
+            else:
+                status_sla = 'ok'
+        elif eq.status == 'Aprovado' and eq.approval_date:
+            tempo_desde_aprovacao = (datetime.now() - eq.approval_date).total_seconds() / 3600
+            if tempo_desde_aprovacao > 48:
+                status_sla = 'vencido'
+            elif tempo_desde_aprovacao > 40:
+                status_sla = 'critico'
+            else:
+                status_sla = 'ok'
+        else:
+            status_sla = 'concluido'
+        
+        equipamentos_sla_list.append({
+            'id': eq.id,
+            'descricao': eq.description or 'Equipamento',
+            'solicitante': eq.requester.username if eq.requester else 'N/A',
+            'status': eq.status,
+            'data_solicitacao': eq.request_date,
+            'status_sla': status_sla
+        })
+    
+    template_data['equipamentos_sla_list'] = equipamentos_sla_list
+    template_data['equipamentos_sla_pagination'] = equipamentos_sla_pagination
+    
+    # --- TABELA DE TAREFAS ---
+    tarefas_page = request.args.get('tarefas_page', 1, type=int)
+    tarefas_per_page = request.args.get('tarefas_per_page', 10, type=int)
+    
+    # Query de tarefas (todas as tarefas)
+    tarefas_query = Task.query.order_by(Task.date.desc(), Task.completed.asc())
+    
+    tarefas_sla_pagination = tarefas_query.paginate(
+        page=tarefas_page,
+        per_page=tarefas_per_page,
+        error_out=False
+    )
+    
+    # Preparar dados de tarefas
+    tarefas_sla_list = []
+    for task in tarefas_sla_pagination.items:
+        # Determinar status da tarefa
+        if task.completed:
+            task_status = 'concluida'
+        else:
+            dias_desde_criacao = (datetime.now().date() - task.date).days
+            if dias_desde_criacao > 7:
+                task_status = 'vencida'
+            elif dias_desde_criacao > 5:
+                task_status = 'critica'
+            else:
+                task_status = 'pendente'
+        
+        tarefas_sla_list.append({
+            'id': task.id,
+            'descricao': task.description[:100] if task.description else 'Sem descrição',
+            'responsavel': task.user.username if task.user else task.responsible if hasattr(task, 'responsible') else 'N/A',
+            'data': task.date,
+            'setor': task.sector.name if task.sector else 'N/A',
+            'status': task_status,
+            'completed': task.completed
+        })
+    
+    template_data['tarefas_sla_list'] = tarefas_sla_list
+    template_data['tarefas_sla_pagination'] = tarefas_sla_pagination
+    
+    # --- TABELA DE LEMBRETES ---
+    lembretes_page = request.args.get('lembretes_page', 1, type=int)
+    lembretes_per_page = request.args.get('lembretes_per_page', 10, type=int)
+    
+    # Query de lembretes (ativos e pendentes)
+    lembretes_query = Reminder.query.filter(
+        Reminder.status == 'ativo'
+    ).order_by(Reminder.due_date.asc(), Reminder.completed.asc())
+    
+    lembretes_sla_pagination = lembretes_query.paginate(
+        page=lembretes_page,
+        per_page=lembretes_per_page,
+        error_out=False
+    )
+    
+    # Preparar dados de lembretes
+    lembretes_sla_list = []
+    for reminder in lembretes_sla_pagination.items:
+        # Determinar status do lembrete
+        if reminder.completed:
+            reminder_status = 'realizado'
+        else:
+            if reminder.due_date < datetime.now().date():
+                reminder_status = 'vencido'
+            elif reminder.due_date == datetime.now().date():
+                reminder_status = 'hoje'
+            else:
+                dias_restantes = (reminder.due_date - datetime.now().date()).days
+                if dias_restantes <= 2:
+                    reminder_status = 'proximo'
+                else:
+                    reminder_status = 'pendente'
+        
+        lembretes_sla_list.append({
+            'id': reminder.id,
+            'nome': reminder.name[:100] if reminder.name else 'Sem nome',
+            'tipo': reminder.type or 'Geral',
+            'responsavel': reminder.user.username if reminder.user else reminder.responsible if hasattr(reminder, 'responsible') else 'N/A',
+            'due_date': reminder.due_date,
+            'status': reminder_status,
+            'completed': reminder.completed
+        })
+    
+    template_data['lembretes_sla_list'] = lembretes_sla_list
+    template_data['lembretes_sla_pagination'] = lembretes_sla_pagination
 
     return render_template("dashboard.html", **template_data)
 
@@ -1114,10 +1405,12 @@ def export_excel():
     from flask import session
 
     from .models import Chamado  # Adicionado Tutorial
-    from .models import Reminder, Sector, Task, Tutorial, User
+    from .models import Reminder, Sector, Task, Tutorial, User, ReminderHistory
 
     task_status = request.args.get("task_status", "")
     reminder_status = request.args.get("reminder_status", "")
+    # Filtro opcional para estado operacional do lembrete (ativo, pausado, cancelado, encerrado)
+    reminder_state = request.args.get("reminder_state", "")
     chamado_status = request.args.get("chamado_status", "")  # Novo
     start_date_str = request.args.get("start_date", "")
     end_date_str = request.args.get("end_date", "")
@@ -1189,6 +1482,10 @@ def export_excel():
     elif reminder_status == "pending":
         reminder_query = reminder_query.filter(Reminder.completed == False)
 
+    # Aplicar filtro de estado operacional do lembrete, se fornecido
+    if reminder_state in ["ativo", "pausado", "cancelado", "encerrado"]:
+        reminder_query = reminder_query.filter(Reminder.status == reminder_state)
+
     if chamado_status:
         chamado_query = chamado_query.filter(Chamado.status == chamado_status)
 
@@ -1254,7 +1551,7 @@ def export_excel():
                     "Data": t.date.strftime("%d/%m/%Y") if t.date else "",
                     "Responsável": t.responsible,
                     "Setor": t.sector.name if t.sector else "",
-                    "Usuário": t.usuario.username if t.usuario else "",
+                    "Usuário": t.user.username if t.user else t.responsible if hasattr(t, 'responsible') else "",
                     "Concluída": "Sim" if t.completed else "Não",
                 }
                 for t in tasks
@@ -1281,8 +1578,16 @@ def export_excel():
                     "Vencimento": r.due_date.strftime("%d/%m/%Y") if r.due_date else "",
                     "Responsável": r.responsible,
                     "Setor": r.sector.name if r.sector else "",
-                    "Usuário": r.usuario.username if r.usuario else "",
+                    "Usuário": r.user.username if r.user else r.responsible if hasattr(r, 'responsible') else "",
                     "Realizado": "Sim" if r.completed else "Não",
+                    "Prioridade": r.priority or "",
+                    "Categoria": r.category or "",
+                    "Nº Contrato/Licença": r.contract_number or "",
+                    "Valor/Custo": (float(r.cost) if isinstance(r.cost, (int, float)) else None),
+                    "Fornecedor": r.supplier or "",
+                    "Status": r.status or "",
+                    "Pausado Até": r.pause_until.strftime("%d/%m/%Y") if r.pause_until else "",
+                    "Data Final": r.end_date.strftime("%d/%m/%Y") if r.end_date else "",
                 }
                 for r in reminders
             ]
@@ -1292,13 +1597,56 @@ def export_excel():
             )
             worksheet_reminders = writer.sheets["Lembretes"]
             worksheet_reminders.merge_range(
-                "A1:G1", "Relatório de Lembretes", title_format
+                "A1:O1", "Relatório de Lembretes", title_format
             )
             for col_num, value in enumerate(df_reminders.columns.values):
                 worksheet_reminders.write(0, col_num, value, header_format)
             for i, col in enumerate(df_reminders.columns):
                 column_len = max(df_reminders[col].astype(str).map(len).max(), len(col))
                 worksheet_reminders.set_column(i, i, column_len + 2)
+
+            # Formatação monetária BRL para coluna Valor/Custo, se existir
+            if not df_reminders.empty and "Valor/Custo" in df_reminders.columns:
+                currency_format = workbook.add_format({"num_format": "R$ #,##0.00"})
+                cost_idx = df_reminders.columns.get_loc("Valor/Custo")
+                # Ajusta largura padrão para coluna de custo com formato
+                worksheet_reminders.set_column(cost_idx, cost_idx, 14, currency_format)
+
+        # Nova aba: Histórico de Lembretes
+        if export_type in ["all", "reminders_history"]:
+            # Respeita filtros aplicados em reminder_query
+            reminder_ids = [r.id for r in reminder_query.all()]
+            histories = []
+            if reminder_ids:
+                histories = ReminderHistory.query.filter(
+                    ReminderHistory.reminder_id.in_(reminder_ids)
+                ).all()
+
+            history_data = [
+                {
+                    "Lembrete": (Reminder.query.get(h.reminder_id).name if Reminder.query.get(h.reminder_id) else h.reminder_id),
+                    "Ação": h.action_type,
+                    "Data Ação": h.action_date.strftime("%d/%m/%Y %H:%M") if h.action_date else "",
+                    "Vencimento Original": h.original_due_date.strftime("%d/%m/%Y") if h.original_due_date else "",
+                    "Concluído": "Sim" if h.completed else "Não",
+                    "Concluído por": (User.query.get(h.completed_by).username if h.completed_by else ""),
+                    "Notas": h.notes or "",
+                }
+                for h in histories
+            ]
+
+            df_history = pd.DataFrame(history_data)
+            df_history.to_excel(
+                writer, sheet_name="Histórico Lembretes", index=False, header=False, startrow=1
+            )
+            ws_hist = writer.sheets["Histórico Lembretes"]
+            ws_hist.merge_range("A1:G1", "Histórico de Lembretes", title_format)
+            for col_num, value in enumerate(df_history.columns.values):
+                ws_hist.write(0, col_num, value, header_format)
+            for i, col in enumerate(df_history.columns):
+                column_len = max(df_history[col].astype(str).map(len).max(), len(col))
+                ws_hist.set_column(i, i, column_len + 2)
+
 
         if export_type in ["all", "chamados"]:  # Novo bloco para chamados
             chamados = chamado_query.all()
@@ -1461,6 +1809,421 @@ def export_excel():
     )
 
 
+@bp.route("/export/pdf")
+@login_required
+def export_pdf():
+    """
+    Exportar relatórios SLA em formato PDF profissional
+    Suporta: chamados, equipamentos, tasks, reminders
+    """
+    from io import BytesIO
+    from datetime import datetime
+    from flask import request, session
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import cm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+    from reportlab.pdfgen import canvas
+    
+    export_type = request.args.get('export_type', 'chamados')
+    
+    # Criar buffer para o PDF
+    buffer = BytesIO()
+    
+    # Configurar documento (landscape para mais colunas)
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=landscape(A4),
+        rightMargin=1*cm,
+        leftMargin=1*cm,
+        topMargin=2*cm,
+        bottomMargin=2*cm
+    )
+    
+    # Elementos do PDF
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Estilo de título
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=18,
+        textColor=colors.HexColor('#0d6efd'),
+        spaceAfter=12,
+        alignment=1  # Center
+    )
+    
+    # Estilo de subtítulo
+    subtitle_style = ParagraphStyle(
+        'CustomSubtitle',
+        parent=styles['Normal'],
+        fontSize=10,
+        textColor=colors.grey,
+        spaceAfter=20,
+        alignment=1
+    )
+    
+    # Data e hora do relatório
+    data_hora = datetime.now().strftime('%d/%m/%Y às %H:%M')
+    usuario = session.get('username', 'Usuário')
+    
+    # ============================================
+    # EXPORTAÇÃO DE CHAMADOS COM ANÁLISE DE SLA
+    # ============================================
+    if export_type == 'chamados':
+        elements.append(Paragraph('Análise de SLA - Chamados de Suporte', title_style))
+        elements.append(Paragraph(f'Relatório de Indicadores de Cumprimento de Prazos de Atendimento', subtitle_style))
+        elements.append(Paragraph(f'Gerado em {data_hora} por {usuario}', subtitle_style))
+        elements.append(Spacer(1, 0.5*cm))
+        
+        # Buscar chamados
+        chamados = Chamado.query.order_by(Chamado.data_abertura.desc()).limit(200).all()
+        
+        if chamados:
+            # ==== INDICADORES DE DESEMPENHO ====
+            info_style = ParagraphStyle(
+                'InfoStyle',
+                parent=styles['Normal'],
+                fontSize=9,
+                textColor=colors.HexColor('#2c3e50'),
+                spaceAfter=8,
+                leading=12
+            )
+            
+            # Calcular KPIs
+            total_chamados = len(chamados)
+            chamados_com_sla = [c for c in chamados if c.prazo_sla]
+            total_com_sla = len(chamados_com_sla)
+            
+            sla_cumprido = len([c for c in chamados_com_sla if c.sla_cumprido == True])
+            sla_vencido = len([c for c in chamados_com_sla if c.sla_cumprido == False])
+            sla_andamento = total_com_sla - sla_cumprido - sla_vencido
+            
+            taxa_cumprimento = (sla_cumprido / total_com_sla * 100) if total_com_sla > 0 else 0
+            
+            # Chamados por prioridade
+            criticos = len([c for c in chamados if c.prioridade == 'Critica'])
+            altos = len([c for c in chamados if c.prioridade == 'Alta'])
+            medios = len([c for c in chamados if c.prioridade == 'Media'])
+            baixos = len([c for c in chamados if c.prioridade == 'Baixa'])
+            
+            # Chamados por status
+            abertos = len([c for c in chamados if c.status == 'Aberto'])
+            em_andamento = len([c for c in chamados if c.status == 'Em Andamento'])
+            resolvidos = len([c for c in chamados if c.status == 'Resolvido'])
+            fechados = len([c for c in chamados if c.status == 'Fechado'])
+            
+            # Tempo médio de resposta
+            tempos_resposta = [c.tempo_resposta_horas for c in chamados if c.tempo_resposta_horas]
+            tempo_medio_resposta = sum(tempos_resposta) / len(tempos_resposta) if tempos_resposta else 0
+            
+            # Criar painel de indicadores
+            elements.append(Paragraph('<b>INDICADORES DE DESEMPENHO (KPIs)</b>', info_style))
+            elements.append(Spacer(1, 0.3*cm))
+            
+            # Tabela de KPIs
+            kpi_data = [
+                ['<b>Métrica</b>', '<b>Valor</b>', '<b>Detalhes</b>'],
+                ['Total de Chamados', str(total_chamados), f'{abertos} Abertos, {em_andamento} Em Andamento, {fechados} Fechados'],
+                ['Taxa de Cumprimento SLA', f'{taxa_cumprimento:.1f}%', f'{sla_cumprido} cumpridos de {total_com_sla} com SLA'],
+                ['SLA Cumprido', str(sla_cumprido), f'{(sla_cumprido/total_com_sla*100):.1f}% do total' if total_com_sla > 0 else 'N/A'],
+                ['SLA Vencido', str(sla_vencido), f'{(sla_vencido/total_com_sla*100):.1f}% do total' if total_com_sla > 0 else 'N/A'],
+                ['SLA Em Andamento', str(sla_andamento), 'Chamados ainda dentro do prazo'],
+                ['Tempo Médio Resposta', f'{tempo_medio_resposta:.1f}h', 'Tempo até primeira resposta'],
+                ['Chamados Críticos', str(criticos), f'{(criticos/total_chamados*100):.1f}% do total'],
+                ['Chamados por Prioridade', f'C:{criticos} A:{altos}', f'M:{medios} B:{baixos}'],
+            ]
+            
+            kpi_table = Table(kpi_data, colWidths=[6*cm, 4*cm, 10*cm])
+            kpi_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#34495e')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 9),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#ecf0f1')),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                ('ALIGN', (0, 1), (1, -1), 'CENTER'),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8f9fa')])
+            ]))
+            
+            elements.append(kpi_table)
+            elements.append(Spacer(1, 0.7*cm))
+            
+            # ==== DETALHAMENTO DOS CHAMADOS ====
+            elements.append(Paragraph('<b>DETALHAMENTO DE CHAMADOS</b>', info_style))
+            elements.append(Spacer(1, 0.3*cm))
+            
+            # Cabeçalho da tabela
+            data = [['ID', 'Título', 'Prior.', 'Status', 'Abertura', 'SLA', 'Tempo Resp.', 'Satisfação']]
+            
+            # Adicionar dados (primeiros 80 registros)
+            for chamado in chamados[:80]:
+                # Status SLA
+                if chamado.sla_cumprido == True:
+                    status_sla_text = '✓ Cumprido'
+                elif chamado.sla_cumprido == False:
+                    status_sla_text = '✗ Vencido'
+                elif chamado.status_sla == 'vencido':
+                    status_sla_text = '✗ Vencido'
+                elif chamado.status_sla == 'atencao':
+                    status_sla_text = '⚠ Crítico'
+                else:
+                    status_sla_text = '◷ Normal'
+                
+                # Tempo de resposta
+                if chamado.tempo_resposta_horas:
+                    tempo_resp = f'{chamado.tempo_resposta_horas:.1f}h'
+                else:
+                    tempo_resp = 'Pendente'
+                
+                # Satisfação
+                if chamado.satisfaction_rating:
+                    satisfacao = '★' * chamado.satisfaction_rating + '☆' * (5 - chamado.satisfaction_rating)
+                else:
+                    satisfacao = 'N/A'
+                
+                # Prioridade abreviada
+                prior_map = {'Critica': 'CRIT', 'Alta': 'ALTA', 'Media': 'MED', 'Baixa': 'BXA'}
+                prior = prior_map.get(chamado.prioridade, chamado.prioridade[:4].upper())
+                
+                data.append([
+                    str(chamado.id),
+                    chamado.titulo[:35] + '...' if len(chamado.titulo) > 35 else chamado.titulo,
+                    prior,
+                    chamado.status[:10],
+                    chamado.data_abertura.strftime('%d/%m %H:%M'),
+                    status_sla_text,
+                    tempo_resp,
+                    satisfacao
+                ])
+            
+            # Criar tabela
+            detail_table = Table(data, colWidths=[1.5*cm, 7*cm, 2*cm, 2.5*cm, 2.5*cm, 2.5*cm, 2*cm, 2*cm])
+            detail_table.setStyle(TableStyle([
+                # Header
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2c3e50')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 8),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+                # Body
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                ('ALIGN', (0, 1), (0, -1), 'CENTER'),
+                ('ALIGN', (2, 1), (2, -1), 'CENTER'),
+                ('ALIGN', (3, 1), (5, -1), 'CENTER'),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 7),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8f9fa')])
+            ]))
+            
+            elements.append(detail_table)
+            
+            # Adicionar legenda
+            elements.append(Spacer(1, 0.5*cm))
+            legenda_text = '<b>Legenda:</b> ✓=Cumprido | ✗=Vencido | ⚠=Crítico | ◷=Normal | ★=Satisfação | CRIT=Crítica | ALTA=Alta | MED=Média | BXA=Baixa'
+            elements.append(Paragraph(legenda_text, subtitle_style))
+            
+        else:
+            elements.append(Paragraph('Nenhum chamado encontrado no sistema', styles['Normal']))
+    
+    # ============================================
+    # EXPORTAÇÃO DE EQUIPAMENTOS
+    # ============================================
+    elif export_type == 'equipamentos':
+        elements.append(Paragraph('Relatório de SLA - Equipamentos', title_style))
+        elements.append(Paragraph(f'Gerado em {data_hora} por {usuario}', subtitle_style))
+        elements.append(Spacer(1, 0.5*cm))
+        
+        # Buscar equipamentos
+        equipamentos = EquipmentRequest.query.filter(
+            EquipmentRequest.status.in_(['Solicitado', 'Aprovado', 'Entregue'])
+        ).order_by(EquipmentRequest.request_date.desc()).limit(100).all()
+        
+        if equipamentos:
+            data = [['ID', 'Descrição', 'Solicitante', 'Status', 'Data Solicitação', 'SLA']]
+            
+            for eq in equipamentos:
+                tempo_desde_solicitacao = (datetime.now() - eq.request_date).total_seconds() / 3600
+                
+                if eq.status == 'Solicitado':
+                    status_sla = 'Vencido' if tempo_desde_solicitacao > 24 else ('Crítico' if tempo_desde_solicitacao > 20 else 'OK')
+                elif eq.status == 'Aprovado' and eq.approval_date:
+                    tempo_desde_aprovacao = (datetime.now() - eq.approval_date).total_seconds() / 3600
+                    status_sla = 'Vencido' if tempo_desde_aprovacao > 48 else ('Crítico' if tempo_desde_aprovacao > 40 else 'OK')
+                else:
+                    status_sla = 'Concluído'
+                
+                data.append([
+                    str(eq.id),
+                    (eq.description or 'Equipamento')[:35] + '...' if eq.description and len(eq.description) > 35 else (eq.description or 'Equipamento'),
+                    eq.requester.username if eq.requester else 'N/A',
+                    eq.status,
+                    eq.request_date.strftime('%d/%m/%Y %H:%M'),
+                    status_sla
+                ])
+            
+            table = Table(data, colWidths=[2*cm, 7*cm, 4*cm, 3*cm, 4*cm, 3*cm])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#6f42c1')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                ('ALIGN', (0, 1), (0, -1), 'CENTER'),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey])
+            ]))
+            
+            elements.append(table)
+        else:
+            elements.append(Paragraph('Nenhum equipamento encontrado', styles['Normal']))
+    
+    # ============================================
+    # EXPORTAÇÃO DE TAREFAS
+    # ============================================
+    elif export_type == 'tasks':
+        elements.append(Paragraph('Relatório de SLA - Tarefas', title_style))
+        elements.append(Paragraph(f'Gerado em {data_hora} por {usuario}', subtitle_style))
+        elements.append(Spacer(1, 0.5*cm))
+        
+        # Buscar tarefas
+        tarefas = Task.query.order_by(Task.date.desc(), Task.completed.asc()).limit(100).all()
+        
+        if tarefas:
+            data = [['ID', 'Descrição', 'Responsável', 'Data', 'Setor', 'Status']]
+            
+            for task in tarefas:
+                if task.completed:
+                    task_status = 'Concluída'
+                else:
+                    dias_desde_criacao = (datetime.now().date() - task.date).days
+                    task_status = 'Vencida' if dias_desde_criacao > 7 else ('Crítica' if dias_desde_criacao > 5 else 'Pendente')
+                
+                data.append([
+                    str(task.id),
+                    (task.description[:45] + '...') if task.description and len(task.description) > 45 else (task.description or 'Sem descrição'),
+                    task.user.username if task.user else task.responsible if hasattr(task, 'responsible') else 'N/A',
+                    task.date.strftime('%d/%m/%Y'),
+                    task.sector.name if task.sector else 'N/A',
+                    task_status
+                ])
+            
+            table = Table(data, colWidths=[2*cm, 8*cm, 4*cm, 3*cm, 4*cm, 3*cm])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0d6efd')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                ('ALIGN', (0, 1), (0, -1), 'CENTER'),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey])
+            ]))
+            
+            elements.append(table)
+        else:
+            elements.append(Paragraph('Nenhuma tarefa encontrada', styles['Normal']))
+    
+    # ============================================
+    # EXPORTAÇÃO DE LEMBRETES
+    # ============================================
+    elif export_type == 'reminders':
+        elements.append(Paragraph('Relatório de SLA - Lembretes', title_style))
+        elements.append(Paragraph(f'Gerado em {data_hora} por {usuario}', subtitle_style))
+        elements.append(Spacer(1, 0.5*cm))
+        
+        # Buscar lembretes
+        lembretes = Reminder.query.filter(
+            Reminder.status == 'ativo'
+        ).order_by(Reminder.due_date.asc(), Reminder.completed.asc()).limit(100).all()
+        
+        if lembretes:
+            data = [['ID', 'Nome', 'Tipo', 'Responsável', 'Vencimento', 'Status']]
+            
+            for reminder in lembretes:
+                if reminder.completed:
+                    reminder_status = 'Realizado'
+                else:
+                    if reminder.due_date < datetime.now().date():
+                        reminder_status = 'Vencido'
+                    elif reminder.due_date == datetime.now().date():
+                        reminder_status = 'Vence Hoje'
+                    else:
+                        dias_restantes = (reminder.due_date - datetime.now().date()).days
+                        reminder_status = 'Próximo' if dias_restantes <= 2 else 'Pendente'
+                
+                data.append([
+                    str(reminder.id),
+                    (reminder.name[:40] + '...') if reminder.name and len(reminder.name) > 40 else (reminder.name or 'Sem nome'),
+                    reminder.type or 'Geral',
+                    reminder.user.username if reminder.user else reminder.responsible if hasattr(reminder, 'responsible') else 'N/A',
+                    reminder.due_date.strftime('%d/%m/%Y'),
+                    reminder_status
+                ])
+            
+            table = Table(data, colWidths=[2*cm, 8*cm, 3*cm, 4*cm, 3*cm, 4*cm])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#ffc107')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                ('ALIGN', (0, 1), (0, -1), 'CENTER'),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey])
+            ]))
+            
+            elements.append(table)
+        else:
+            elements.append(Paragraph('Nenhum lembrete encontrado', styles['Normal']))
+    
+    # Adicionar rodapé
+    elements.append(Spacer(1, 1*cm))
+    footer_text = f'Documento gerado automaticamente pelo Sistema TI Reminder • {data_hora}'
+    elements.append(Paragraph(footer_text, subtitle_style))
+    
+    # Construir PDF
+    doc.build(elements)
+    
+    # Retornar PDF
+    buffer.seek(0)
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=f'sla_{export_type}_{datetime.now().strftime("%Y%m%d_%H%M")}.pdf',
+        mimetype='application/pdf'
+    )
+
+
 @bp.route("/docs")
 @login_required
 def docs_redirect():
@@ -1475,116 +2238,169 @@ def docs_redirect_slash():
 
 @bp.route("/help")
 @login_required
+@limiter.exempt  # Remover rate limit para documentação
 def help_page():
     """Página de ajuda com documentação profissional usando MKDocs"""
-    import subprocess
     import os
-    import re
-    from flask import current_app, url_for
-
-    try:
-        # Verificar se MKDocs está instalado
-        import mkdocs
-
-        # Construir documentação se necessário
-        docs_dir = os.path.join(current_app.root_path, '..', 'docs')
-        site_dir = os.path.join(current_app.root_path, '..', 'site')
-
-        if os.path.exists(docs_dir):
-            # Construir documentação MKDocs
-            try:
-                subprocess.run([
-                    'mkdocs', 'build',
-                    '--config-file', os.path.join(current_app.root_path, '..', 'mkdocs.yml'),
-                    '--site-dir', site_dir,
-                    '--clean'
-                ], check=True, capture_output=True)
-
-                # Verificar se index.html foi gerado
-                index_path = os.path.join(site_dir, 'index.html')
-                if os.path.exists(index_path):
-                    # Ler conteúdo do index.html gerado pelo MKDocs
-                    with open(index_path, 'r', encoding='utf-8') as f:
-                        content = f.read()
-
-                    # Corrigir caminhos relativos para caminhos absolutos do Flask
-                    # Substituir caminhos relativos por caminhos absolutos para /docs/
-                    content = content.replace('href="assets/', 'href="/docs/assets/')
-                    content = content.replace('src="assets/', 'src="/docs/assets/')
-                    content = content.replace('href="javascripts/', 'href="/docs/javascripts/')
-                    content = content.replace('src="javascripts/', 'src="/docs/javascripts/')
-                    content = content.replace('href="stylesheets/', 'href="/docs/stylesheets/')
-                    content = content.replace('href="user-guide/', 'href="/docs/user-guide/')
-                    content = content.replace('href="admin-guide/', 'href="/docs/admin-guide/')
-                    content = content.replace('href="dev-guide/', 'href="/docs/dev-guide/')
-                    content = content.replace('href="references/', 'href="/docs/references/')
-                    content = content.replace('href="search/', 'href="/docs/search/')
-                    content = content.replace('href="."', 'href="/docs/"')
-                    content = content.replace('href="./"', 'href="/docs/"')
-                    content = content.replace('href="./', 'href="/docs/')
-                    content = content.replace('href="sitemap.xml', 'href="/docs/sitemap.xml')
-                    content = content.replace('href="404.html', 'href="/docs/404.html')
-                    # Corrigir caminhos no JavaScript de configuração
-                    content = content.replace('"search": "assets/javascripts/workers/', '"search": "/docs/assets/javascripts/workers/')
-                    content = content.replace('"search": "search/', '"search": "/docs/search/')
-                    # Corrigir o base path para funcionar com /docs/
-                    content = content.replace('"base": "."', '"base": "/docs/"')
-
-                    # Retornar conteúdo HTML corrigido
-                    from flask import Response
-                    return Response(content, mimetype='text/html')
-
-            except subprocess.CalledProcessError as e:
-                # Em caso de erro no MKDocs, fallback para template original
-                current_app.logger.error(f"Erro ao construir documentação MKDocs: {e}")
-            except FileNotFoundError:
-                # MKDocs não encontrado, fallback para template original
-                current_app.logger.warning("MKDocs não encontrado, usando template padrão")
-
-        # Fallback para template HTML original
-        return render_template("help.html", title="Central de Ajuda")
-
-    except ImportError:
-        # MKDocs não instalado, usar template original
+    from flask import current_app, Response
+    
+    # Caminho para o site gerado pelo MKDocs
+    site_dir = os.path.join(current_app.root_path, '..', 'site')
+    index_path = os.path.join(site_dir, 'index.html')
+    
+    # Verificar se o site já foi gerado
+    if os.path.exists(index_path):
+        try:
+            # Ler conteúdo do index.html gerado pelo MKDocs
+            with open(index_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Corrigir TODOS os caminhos relativos para absolutos
+            # Caminhos com ../
+            content = content.replace('href="../css/', 'href="/docs/css/')
+            content = content.replace('href="../js/', 'href="/docs/js/')
+            content = content.replace('src="../js/', 'src="/docs/js/')
+            content = content.replace('href="../img/', 'href="/docs/img/')
+            content = content.replace('src="../img/', 'src="/docs/img/')
+            content = content.replace('href="../stylesheets/', 'href="/docs/stylesheets/')
+            content = content.replace('href="../search/', 'href="/docs/search/')
+            content = content.replace('href="../user-guide/', 'href="/docs/user-guide/')
+            content = content.replace('href="../admin-guide/', 'href="/docs/admin-guide/')
+            
+            # Caminhos sem ../
+            content = content.replace('href="css/', 'href="/docs/css/')
+            content = content.replace('href="js/', 'href="/docs/js/')
+            content = content.replace('src="js/', 'src="/docs/js/')
+            content = content.replace('href="img/', 'href="/docs/img/')
+            content = content.replace('src="img/', 'src="/docs/img/')
+            content = content.replace('href="stylesheets/', 'href="/docs/stylesheets/')
+            content = content.replace('href="javascripts/', 'href="/docs/javascripts/')
+            content = content.replace('src="javascripts/', 'src="/docs/javascripts/')
+            content = content.replace('href="user-guide/', 'href="/docs/user-guide/')
+            content = content.replace('href="admin-guide/', 'href="/docs/admin-guide/')
+            content = content.replace('href="search/', 'href="/docs/search/')
+            content = content.replace('src="search/', 'src="/docs/search/')
+            content = content.replace('href="api_documentation/', 'href="/docs/api_documentation/')
+            
+            # Caminhos especiais
+            content = content.replace('href="."', 'href="/help"')
+            content = content.replace('href="./"', 'href="/help"')
+            content = content.replace('action="./search.html"', 'action="/docs/search.html"')
+            content = content.replace('href="sitemap.xml', 'href="/docs/sitemap.xml')
+            content = content.replace('href="404.html', 'href="/docs/404.html')
+            
+            # Corrigir base path no JavaScript
+            content = content.replace('"base": "."', '"base": "/docs/"')
+            
+            # Corrigir caminhos no JavaScript (data-search-config)
+            content = content.replace('"search": "search/', '"search": "/docs/search/')
+            content = content.replace("'search': 'search/", "'search': '/docs/search/")
+            
+            # Corrigir caminhos dinâmicos de busca (new Worker, import, etc)
+            import re
+            # Corrigir new Worker("search/worker.js") -> new Worker("/docs/search/worker.js")
+            content = re.sub(r'new Worker\(["\']search/', r'new Worker("/docs/search/', content)
+            # Corrigir importScripts("search/...) -> importScripts("/docs/search/...)
+            content = re.sub(r'importScripts\(["\']search/', r'importScripts("/docs/search/', content)
+            # Corrigir qualquer "search/arquivo.js" -> "/docs/search/arquivo.js"
+            content = re.sub(r'(["\'])search/([\w\.-]+\.js)', r'\1/docs/search/\2', content)
+            
+            # Retornar HTML com caminhos corrigidos
+            return Response(content, mimetype='text/html')
+            
+        except Exception as e:
+            current_app.logger.error(f"Erro ao ler documentação: {e}")
+            return render_template("help.html", title="Central de Ajuda")
+    else:
+        # Site não foi gerado, usar template fallback
+        current_app.logger.warning("Documentação MKDocs não encontrada. Execute: mkdocs build")
         return render_template("help.html", title="Central de Ajuda")
 
 
 @bp.route("/docs/<path:filename>")
 @login_required
+@limiter.exempt  # Remover rate limit para arquivos estáticos da documentação
 def docs_static(filename):
     """Servir arquivos estáticos e páginas da documentação MKDocs"""
     import os
     from flask import current_app, send_from_directory, Response
 
     site_dir = os.path.join(current_app.root_path, '..', 'site')
+    file_path = os.path.join(site_dir, filename)
 
     # Se o filename terminar com / ou for um diretório, tentar servir index.html
-    if filename.endswith('/') or os.path.isdir(os.path.join(site_dir, filename)):
+    if filename.endswith('/') or (os.path.exists(file_path) and os.path.isdir(file_path)):
         if filename.endswith('/'):
             filename = filename[:-1]
         index_path = os.path.join(site_dir, filename, 'index.html')
+        
         if os.path.exists(index_path):
-            # Ler e corrigir o conteúdo HTML
-            with open(index_path, 'r', encoding='utf-8') as f:
-                content = f.read()
+            try:
+                # Ler e corrigir o conteúdo HTML
+                with open(index_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
 
-            # Corrigir caminhos relativos
-            content = content.replace('href="assets/', 'href="/docs/assets/')
-            content = content.replace('src="assets/', 'src="/docs/assets/')
-            content = content.replace('href="javascripts/', 'href="/docs/javascripts/')
-            content = content.replace('src="javascripts/', 'src="/docs/javascripts/')
-            content = content.replace('href="stylesheets/', 'href="/docs/stylesheets/')
-            content = content.replace('href="user-guide/', 'href="/docs/user-guide/')
-            content = content.replace('href="admin-guide/', 'href="/docs/admin-guide/')
-            content = content.replace('href="dev-guide/', 'href="/docs/dev-guide/')
-            content = content.replace('href="references/', 'href="/docs/references/')
-            content = content.replace('href="."', 'href="/docs/index.html"')
-            content = content.replace('href="./"', 'href="/docs/index.html"')
+                # Corrigir TODOS os caminhos relativos para absolutos
+                # Caminhos com ../ (para subpáginas)
+                content = content.replace('href="../css/', 'href="/docs/css/')
+                content = content.replace('href="../js/', 'href="/docs/js/')
+                content = content.replace('src="../js/', 'src="/docs/js/')
+                content = content.replace('href="../img/', 'href="/docs/img/')
+                content = content.replace('src="../img/', 'src="/docs/img/')
+                content = content.replace('href="../stylesheets/', 'href="/docs/stylesheets/')
+                content = content.replace('href="../search/', 'href="/docs/search/')
+                content = content.replace('href="../user-guide/', 'href="/docs/user-guide/')
+                content = content.replace('href="../admin-guide/', 'href="/docs/admin-guide/')
+                content = content.replace('href="../api_documentation/', 'href="/docs/api_documentation/')
+                content = content.replace('href=".."', 'href="/help"')
+                content = content.replace('href="../"', 'href="/help"')
+                
+                # Caminhos sem ../ (para mesma pasta)
+                content = content.replace('href="css/', 'href="/docs/css/')
+                content = content.replace('href="js/', 'href="/docs/js/')
+                content = content.replace('src="js/', 'src="/docs/js/')
+                content = content.replace('href="img/', 'href="/docs/img/')
+                content = content.replace('src="img/', 'src="/docs/img/')
+                content = content.replace('href="stylesheets/', 'href="/docs/stylesheets/')
+                content = content.replace('href="javascripts/', 'href="/docs/javascripts/')
+                content = content.replace('src="javascripts/', 'src="/docs/javascripts/')
+                content = content.replace('href="search/', 'href="/docs/search/')
+                content = content.replace('src="search/', 'src="/docs/search/')
+                
+                # Caminhos especiais
+                content = content.replace('href="."', 'href="/help"')
+                content = content.replace('href="./"', 'href="/help"')
+                content = content.replace('action="./search.html"', 'action="/docs/search.html"')
+                content = content.replace('action="../search.html"', 'action="/docs/search.html"')
+                
+                # Corrigir base path no JavaScript
+                content = content.replace('"base": "."', '"base": "/docs/"')
+                content = content.replace('"base": ".."', '"base": "/docs/"')
+                
+                # Corrigir caminhos no JavaScript (data-search-config)
+                content = content.replace('"search": "search/', '"search": "/docs/search/')
+                content = content.replace("'search': 'search/", "'search': '/docs/search/")
+                
+                # Corrigir caminhos dinâmicos de busca (new Worker, import, etc)
+                import re
+                # Corrigir new Worker("search/worker.js") -> new Worker("/docs/search/worker.js")
+                content = re.sub(r'new Worker\(["\']search/', r'new Worker("/docs/search/', content)
+                # Corrigir importScripts("search/...) -> importScripts("/docs/search/...)
+                content = re.sub(r'importScripts\(["\']search/', r'importScripts("/docs/search/', content)
+                # Corrigir qualquer "search/arquivo.js" -> "/docs/search/arquivo.js"
+                content = re.sub(r'(["\'])search/([\w\.-]+\.js)', r'\1/docs/search/\2', content)
 
-            return Response(content, mimetype='text/html')
+                return Response(content, mimetype='text/html')
+            except Exception as e:
+                current_app.logger.error(f"Erro ao ler página: {e}")
+                return "Erro ao carregar página", 500
 
-    # Para arquivos normais, usar send_from_directory
-    return send_from_directory(site_dir, filename)
+    # Para arquivos normais (CSS, JS, imagens), usar send_from_directory
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        return send_from_directory(site_dir, filename)
+    
+    # Arquivo não encontrado
+    return "Arquivo não encontrado", 404
 
 
 @bp.route("/termos")
@@ -1597,766 +2413,6 @@ def terms():
 def privacy():
     # Página de política de privacidade
     return render_template("privacy.html", title="Política de Privacidade")
-
-
-@bp.route("/export/pdf")
-def export_pdf():
-    from flask import make_response  # make_response adicionado
-    from flask import request, session
-    from reportlab.lib import colors
-    from reportlab.lib.pagesizes import landscape, letter, A4
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.units import inch, cm
-    from reportlab.platypus import (PageBreak, Paragraph, SimpleDocTemplate,
-                                    Spacer, Table, TableStyle, Image, Frame,
-                                    PageTemplate, BaseDocTemplate)
-    from reportlab.lib.colors import HexColor
-
-    task_status = request.args.get("task_status", "")
-    reminder_status = request.args.get("reminder_status", "")
-    chamado_status = request.args.get("chamado_status", "")  # Novo
-    export_type = request.args.get("export_type", "all")
-
-    start_date_str = request.args.get("start_date", "")
-    end_date_str = request.args.get("end_date", "")
-    sector_id = request.args.get("sector_id", type=int)
-    user_id_filter = request.args.get("user_id", type=int)
-
-    start_date = None
-    if start_date_str:
-        try:
-            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
-        except ValueError:
-            pass
-    end_date = None
-    if end_date_str:
-        try:
-            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
-        except ValueError:
-            pass
-
-    task_query = Task.query
-    reminder_query = Reminder.query
-    chamado_query = Chamado.query
-    equipment_query = EquipmentRequest.query  # Query para equipamentos
-
-    current_user_id = session.get("user_id")
-    is_admin = session.get("is_admin", False)
-    is_ti = session.get("is_ti", False)
-
-    # Filtros de permissão
-    if not is_admin and not is_ti:
-        task_query = task_query.filter(Task.user_id == current_user_id)
-        reminder_query = reminder_query.filter(Reminder.user_id == current_user_id)
-        chamado_query = chamado_query.filter(Chamado.solicitante_id == current_user_id)
-        equipment_query = equipment_query.filter(
-            EquipmentRequest.requester_id == current_user_id
-        )
-    elif not is_admin and is_ti:
-        user = User.query.get(current_user_id)
-        primeiro_lembrete = Reminder.query.filter_by(user_id=current_user_id).first()
-        setor_id_usuario = (
-            primeiro_lembrete.sector_id
-            if primeiro_lembrete and primeiro_lembrete.sector_id
-            else None
-        )
-        chamado_query = chamado_query.filter(
-            (Chamado.solicitante_id == current_user_id)
-            | (Chamado.setor_id == setor_id_usuario)
-        )
-        equipment_query = EquipmentRequest.query
-
-    if task_status == "done":
-        task_query = task_query.filter(Task.completed == True)
-    elif task_status == "pending":
-        task_query = task_query.filter(
-            Task.completed == False, Task.date >= date.today()
-        )
-    elif task_status == "expired":
-        task_query = task_query.filter(
-            Task.completed == False, Task.date < date.today()
-        )
-
-    if reminder_status == "done":
-        reminder_query = reminder_query.filter(Reminder.completed == True)
-    elif reminder_status == "pending":
-        reminder_query = reminder_query.filter(Reminder.completed == False)
-
-    if chamado_status:
-        chamado_query = chamado_query.filter(Chamado.status == chamado_status)
-
-    if start_date:
-        task_query = task_query.filter(Task.date >= start_date)
-        reminder_query = reminder_query.filter(Reminder.due_date >= start_date)
-        chamado_query = chamado_query.filter(Chamado.data_abertura >= start_date)
-        equipment_query = equipment_query.filter(
-            EquipmentRequest.request_date >= start_date
-        )
-    if end_date:
-        task_query = task_query.filter(Task.date <= end_date)
-        reminder_query = reminder_query.filter(Reminder.due_date <= end_date)
-        chamado_query = chamado_query.filter(Chamado.data_abertura <= end_date)
-        equipment_query = equipment_query.filter(
-            EquipmentRequest.request_date <= end_date
-        )
-
-    if sector_id:
-        task_query = task_query.filter(Task.sector_id == sector_id)
-        reminder_query = reminder_query.filter(Reminder.sector_id == sector_id)
-        chamado_query = chamado_query.filter(Chamado.setor_id == sector_id)
-        setor_nome = (
-            Sector.query.get(sector_id).name if Sector.query.get(sector_id) else ""
-        )
-        equipment_query = equipment_query.filter(
-            EquipmentRequest.destination_sector.contains(setor_nome)
-        )
-
-    if user_id_filter and (is_admin or is_ti):
-        task_query = task_query.filter(Task.user_id == user_id_filter)
-        reminder_query = reminder_query.filter(Reminder.user_id == user_id_filter)
-        chamado_query = chamado_query.filter(Chamado.solicitante_id == user_id_filter)
-        equipment_query = equipment_query.filter(
-            EquipmentRequest.requester_id == user_id_filter
-        )
-
-    # Criar PDF profissional em formato LANDSCAPE
-    buffer = BytesIO()
-
-    # Configurar estilos profissionais
-    styles = getSampleStyleSheet()
-
-    # Estilos customizados
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=24,
-        spaceAfter=30,
-        alignment=1,  # Center
-        textColor=HexColor('#2C3E50')
-    )
-
-    subtitle_style = ParagraphStyle(
-        'CustomSubtitle',
-        parent=styles['Heading2'],
-        fontSize=18,
-        spaceAfter=20,
-        textColor=HexColor('#34495E')
-    )
-
-    section_title_style = ParagraphStyle(
-        'SectionTitle',
-        parent=styles['Heading3'],
-        fontSize=14,
-        spaceAfter=15,
-        textColor=HexColor('#2C3E50'),
-        borderWidth=1,
-        borderColor=HexColor('#BDC3C7'),
-        borderPadding=5,
-        backgroundColor=HexColor('#ECF0F1')
-    )
-
-    normal_style = ParagraphStyle(
-        'CustomNormal',
-        parent=styles['Normal'],
-        fontSize=10,
-        spaceAfter=12,
-        textColor=HexColor('#2C3E50')
-    )
-
-    # Função para criar cabeçalho e rodapé em LANDSCAPE
-    def header_footer(canvas, doc):
-        canvas.saveState()
-
-        # Cabeçalho - ajustado para landscape
-        canvas.setFont('Helvetica-Bold', 12)
-        canvas.setFillColor(HexColor('#2C3E50'))
-        canvas.drawString(1.5*cm, 19*cm, "TI OSN System - Relatório Executivo")
-
-        canvas.setFont('Helvetica', 8)
-        canvas.setFillColor(HexColor('#7F8C8D'))
-        canvas.drawString(1.5*cm, 18.3*cm, f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
-
-        # Linha separadora - ajustada para landscape
-        canvas.setStrokeColor(HexColor('#BDC3C7'))
-        canvas.line(1.5*cm, 17.8*cm, 27*cm, 17.8*cm)
-
-        # Rodapé - ajustado para landscape
-        canvas.setFont('Helvetica', 8)
-        canvas.setFillColor(HexColor('#7F8C8D'))
-        canvas.drawString(1.5*cm, 1*cm, f"Página {doc.page}")
-
-        # Logo/branding (simples) - ajustado para landscape
-        canvas.setFont('Helvetica-Bold', 10)
-        canvas.setFillColor(HexColor('#3498DB'))
-        canvas.drawString(23*cm, 1*cm, "OSN Technologies")
-
-        canvas.restoreState()
-
-    # Criar template de página LANDSCAPE
-    # A4 landscape: 29.7cm x 21cm, mas usaremos landscape(A4) que é 11.69" x 8.27"
-    from reportlab.lib.pagesizes import landscape
-    frame = Frame(1.5*cm, 2*cm, 26.5*cm, 16*cm, id='normal')  # Ajustado para landscape
-    template = PageTemplate(id='main', frames=frame, onPage=header_footer)
-    doc = BaseDocTemplate(buffer, pageTemplates=[template], pagesize=landscape(A4))
-
-    elements = []
-
-    # Página de capa - ajustada para landscape
-    elements.append(Spacer(1, 6*cm))
-    elements.append(Paragraph("RELATÓRIO EXECUTIVO", title_style))
-    elements.append(Spacer(1, 1*cm))
-    elements.append(Paragraph("Sistema de Gestão TI OSN", subtitle_style))
-    elements.append(Spacer(1, 2*cm))
-
-    # Informações do relatório
-    report_info = [
-        ["Data de Geração:", datetime.now().strftime("%d/%m/%Y %H:%M")],
-        ["Período Analisado:", f"{start_date.strftime('%d/%m/%Y') if start_date else 'Todo período'} - {end_date.strftime('%d/%m/%Y') if end_date else 'Atual'}"],
-        ["Usuário:", User.query.get(session.get('user_id')).username if session.get('user_id') else 'Sistema'],
-        ["Tipo de Relatório:", export_type.title()],
-    ]
-
-    info_table = Table(report_info, colWidths=[4*cm, 10*cm])
-    info_table.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('TEXTCOLOR', (0, 0), (0, -1), HexColor('#2C3E50')),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-    ]))
-    elements.append(info_table)
-    elements.append(PageBreak())
-
-    # Sumário Executivo
-    elements.append(Paragraph("SUMÁRIO EXECUTIVO", section_title_style))
-    elements.append(Spacer(1, 0.5*cm))
-
-    # Calcular estatísticas gerais
-    total_tasks = len(tasks) if 'tasks' in locals() else 0
-    completed_tasks = sum(1 for t in tasks if t.completed) if 'tasks' in locals() else 0
-    total_reminders = len(reminders) if 'reminders' in locals() else 0
-    completed_reminders = sum(1 for r in reminders if r.completed) if 'reminders' in locals() else 0
-    total_chamados = len(chamados) if 'chamados' in locals() else 0
-    closed_chamados = sum(1 for c in chamados if c.status == 'Fechado') if 'chamados' in locals() else 0
-
-    executive_summary = f"""
-    Este relatório apresenta uma análise abrangente do Sistema de Gestão TI OSN, abrangendo o período de {start_date.strftime('%d/%m/%Y') if start_date else 'todo o histórico'} até {end_date.strftime('%d/%m/%Y') if end_date else 'data atual'}.
-
-    <b>Métricas Principais:</b><br/>
-    • Total de Tarefas: {total_tasks} ({completed_tasks} concluídas - {round(completed_tasks/total_tasks*100, 1) if total_tasks > 0 else 0}% de conclusão)<br/>
-    • Total de Lembretes: {total_reminders} ({completed_reminders} realizados - {round(completed_reminders/total_reminders*100, 1) if total_reminders > 0 else 0}% de realização)<br/>
-    • Total de Chamados: {total_chamados} ({closed_chamados} fechados - {round(closed_chamados/total_chamados*100, 1) if total_chamados > 0 else 0}% de resolução)<br/>
-    • Eficiência Geral: {round((completed_tasks + completed_reminders + closed_chamados) / (total_tasks + total_reminders + total_chamados) * 100, 1) if (total_tasks + total_reminders + total_chamados) > 0 else 0}%<br/>
-
-    O relatório inclui análises detalhadas, gráficos de performance e recomendações para otimização dos processos.
-    """
-
-    elements.append(Paragraph(executive_summary, normal_style))
-    elements.append(PageBreak())
-
-    # Índice
-    elements.append(Paragraph("ÍNDICE", section_title_style))
-    elements.append(Spacer(1, 0.5*cm))
-
-    toc_content = """
-    1. Sumário Executivo ........................... 1<br/>
-    2. Índice ....................................... 2<br/>
-    3. Visão Geral do Sistema ........................ 3<br/>
-    4. Análise de Tarefas ........................... 4<br/>
-    5. Análise de Lembretes ......................... 5<br/>
-    6. Análise de Chamados .......................... 6<br/>
-    7. Controle de Equipamentos ..................... 7<br/>
-    8. Base de Conhecimento ........................ 8<br/>
-    9. Indicadores de Performance ................... 9<br/>
-    10. Recomendações ............................. 10<br/>
-    """
-
-    elements.append(Paragraph(toc_content, normal_style))
-    elements.append(PageBreak())
-
-    # Visão Geral do Sistema
-    elements.append(Paragraph("VISÃO GERAL DO SISTEMA", section_title_style))
-    elements.append(Spacer(1, 0.5*cm))
-
-    system_overview = f"""
-    <b>Visão Geral do Sistema TI OSN</b><br/><br/>
-
-    O Sistema de Gestão TI OSN é uma plataforma abrangente para gerenciamento de atividades, chamados de suporte, lembretes e controle de equipamentos. Esta análise apresenta dados consolidados de todas as operações do sistema.
-
-    <b>Período de Análise:</b> {start_date.strftime('%d/%m/%Y') if start_date else 'Todo o histórico'} - {end_date.strftime('%d/%m/%Y') if end_date else 'Data atual'}<br/>
-    <b>Filtros Aplicados:</b> {', '.join([f'{k}: {v}' for k, v in request.args.items() if v and k != 'export_type']) or 'Nenhum filtro adicional'}<br/>
-    <b>Usuário Responsável:</b> {User.query.get(session.get('user_id')).username if session.get('user_id') else 'Sistema'}<br/>
-
-    <b>Status Geral do Sistema:</b><br/>
-    • Sistema operacional e funcional<br/>
-    • Base de dados atualizada<br/>
-    • Relatório gerado automaticamente<br/>
-    """
-
-    elements.append(Paragraph(system_overview, normal_style))
-    elements.append(PageBreak())
-
-    # Análise de Tarefas
-    if export_type in ["all", "tasks"]:
-        elements.append(Paragraph("ANÁLISE DE TAREFAS", section_title_style))
-        elements.append(Spacer(1, 0.5*cm))
-
-        tasks = task_query.all()
-
-        # Estatísticas das tarefas
-        total_tasks = len(tasks)
-        completed_tasks = sum(1 for t in tasks if t.completed)
-        pending_tasks = total_tasks - completed_tasks
-        overdue_tasks = sum(1 for t in tasks if not t.completed and t.date and t.date < date.today())
-
-        task_stats = f"""
-        <b>Estatísticas de Tarefas:</b><br/>
-        • Total de Tarefas: {total_tasks}<br/>
-        • Tarefas Concluídas: {completed_tasks} ({round(completed_tasks/total_tasks*100, 1) if total_tasks > 0 else 0}%)<br/>
-        • Tarefas Pendentes: {pending_tasks} ({round(pending_tasks/total_tasks*100, 1) if total_tasks > 0 else 0}%)<br/>
-        • Tarefas Vencidas: {overdue_tasks}<br/>
-        • Taxa de Conclusão: {round(completed_tasks/total_tasks*100, 1) if total_tasks > 0 else 0}%<br/>
-        """
-
-        elements.append(Paragraph(task_stats, normal_style))
-        elements.append(Spacer(1, 0.5*cm))
-
-        if tasks:
-            # Tabela de tarefas
-            data_tasks = [["ID", "Descrição", "Data", "Responsável", "Setor", "Status"]]
-
-            for t in tasks:
-                status = "Concluída" if t.completed else ("Vencida" if t.date and t.date < date.today() else "Pendente")
-                status_color = "green" if t.completed else ("red" if t.date and t.date < date.today() else "orange")
-
-                data_tasks.append([
-                    str(t.id),
-                    Paragraph(t.description[:50] + "..." if t.description and len(t.description) > 50 else t.description or "", normal_style),
-                    t.date.strftime("%d/%m/%Y") if t.date else "N/A",
-                    t.responsible or "N/A",
-                    t.sector.name if t.sector else "N/A",
-                    status
-                ])
-
-            col_widths_tasks = [1.2*cm, 8*cm, 3*cm, 3.5*cm, 3.5*cm, 3*cm]
-            table_tasks = Table(data_tasks, colWidths=col_widths_tasks, repeatRows=1)
-
-            table_style_tasks = TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), HexColor('#34495E')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                ('BACKGROUND', (0, 1), (-1, -1), HexColor('#ECF0F1')),
-                ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#BDC3C7')),
-                ('LEFTPADDING', (0, 0), (-1, -1), 4),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-                ('TOPPADDING', (0, 0), (-1, -1), 4),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-            ])
-
-            table_tasks.setStyle(table_style_tasks)
-            elements.append(table_tasks)
-        else:
-            elements.append(Paragraph("Nenhuma tarefa encontrada com os filtros aplicados.", normal_style))
-
-        elements.append(PageBreak() if export_type == "all" else Spacer(1, 0.3 * inch))
-
-    # Análise de Lembretes
-    if export_type in ["all", "reminders"]:
-        elements.append(Paragraph("ANÁLISE DE LEMBRETES", section_title_style))
-        elements.append(Spacer(1, 0.5*cm))
-
-        reminders = reminder_query.all()
-
-        # Estatísticas dos lembretes
-        total_reminders = len(reminders)
-        completed_reminders = sum(1 for r in reminders if r.completed)
-        pending_reminders = total_reminders - completed_reminders
-        expired_reminders = sum(1 for r in reminders if not r.completed and r.due_date and r.due_date < date.today())
-
-        reminder_stats = f"""
-        <b>Estatísticas de Lembretes:</b><br/>
-        • Total de Lembretes: {total_reminders}<br/>
-        • Lembretes Realizados: {completed_reminders} ({round(completed_reminders/total_reminders*100, 1) if total_reminders > 0 else 0}%)<br/>
-        • Lembretes Pendentes: {pending_reminders} ({round(pending_reminders/total_reminders*100, 1) if total_reminders > 0 else 0}%)<br/>
-        • Lembretes Vencidos: {expired_reminders}<br/>
-        • Taxa de Realização: {round(completed_reminders/total_reminders*100, 1) if total_reminders > 0 else 0}%<br/>
-        """
-
-        elements.append(Paragraph(reminder_stats, normal_style))
-        elements.append(Spacer(1, 0.5*cm))
-
-        if reminders:
-            # Tabela de lembretes
-            data_reminders = [["ID", "Nome", "Tipo", "Vencimento", "Responsável", "Setor", "Status"]]
-
-            for r in reminders:
-                status = "Realizado" if r.completed else ("Vencido" if r.due_date and r.due_date < date.today() else "Pendente")
-
-                data_reminders.append([
-                    str(r.id),
-                    Paragraph(r.name[:40] + "..." if r.name and len(r.name) > 40 else r.name or "", normal_style),
-                    r.type or "N/A",
-                    r.due_date.strftime("%d/%m/%Y") if r.due_date else "N/A",
-                    r.responsible or "N/A",
-                    r.sector.name if r.sector else "N/A",
-                    status
-                ])
-
-            col_widths_reminders = [1.2*cm, 7*cm, 3*cm, 3*cm, 3.5*cm, 3.5*cm, 3*cm]
-            table_reminders = Table(data_reminders, colWidths=col_widths_reminders, repeatRows=1)
-
-            table_style_reminders = TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), HexColor('#E74C3C')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                ('BACKGROUND', (0, 1), (-1, -1), HexColor('#FADBD8')),
-                ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#E74C3C')),
-                ('LEFTPADDING', (0, 0), (-1, -1), 4),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-                ('TOPPADDING', (0, 0), (-1, -1), 4),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-            ])
-
-            table_reminders.setStyle(table_style_reminders)
-            elements.append(table_reminders)
-        else:
-            elements.append(Paragraph("Nenhum lembrete encontrado com os filtros aplicados.", normal_style))
-
-        elements.append(PageBreak() if export_type == "all" else Spacer(1, 0.3 * inch))
-
-    # Análise de Chamados
-    if export_type in ["all", "chamados"]:
-        elements.append(Paragraph("ANÁLISE DE CHAMADOS", section_title_style))
-        elements.append(Spacer(1, 0.5*cm))
-
-        chamados = chamado_query.all()
-
-        # Estatísticas dos chamados
-        total_chamados = len(chamados)
-        abertos = sum(1 for c in chamados if c.status == 'Aberto')
-        andamento = sum(1 for c in chamados if c.status == 'Em Andamento')
-        resolvidos = sum(1 for c in chamados if c.status == 'Resolvido')
-        fechados = sum(1 for c in chamados if c.status == 'Fechado')
-
-        # SLA Analysis
-        chamados_com_sla = [c for c in chamados if c.prazo_sla]
-        sla_cumpridos = sum(1 for c in chamados_com_sla if c.sla_cumprido)
-        taxa_sla = round(sla_cumpridos / len(chamados_com_sla) * 100, 1) if chamados_com_sla else 0
-
-        chamados_stats = f"""
-        <b>Estatísticas de Chamados:</b><br/>
-        • Total de Chamados: {total_chamados}<br/>
-        • Status: {abertos} Abertos, {andamento} Em Andamento, {resolvidos} Resolvidos, {fechados} Fechados<br/>
-        • Taxa de Resolução: {round(fechados/total_chamados*100, 1) if total_chamados > 0 else 0}%<br/>
-        • Chamados com SLA: {len(chamados_com_sla)}<br/>
-        • Performance SLA: {taxa_sla}% ({sla_cumpridos}/{len(chamados_com_sla)} cumpridos)<br/>
-        """
-
-        elements.append(Paragraph(chamados_stats, normal_style))
-        elements.append(Spacer(1, 0.5*cm))
-
-        if chamados:
-            # Tabela de chamados
-            data_chamados = [["ID", "Título", "Status", "Prioridade", "Abertura", "Solicitante", "Setor", "SLA"]]
-
-            for c in chamados:
-                sla_status = "OK" if c.sla_cumprido else "Vencido" if c.prazo_sla and c.data_fechamento and c.data_fechamento > c.prazo_sla else "Em Prazo"
-
-                data_chamados.append([
-                    str(c.id),
-                    Paragraph(c.titulo[:40] + "..." if c.titulo and len(c.titulo) > 40 else c.titulo or "", normal_style),
-                    c.status,
-                    c.prioridade,
-                    c.data_abertura.strftime("%d/%m/%Y") if c.data_abertura else "N/A",
-                    c.solicitante.username if c.solicitante else "N/A",
-                    c.setor.name if c.setor else "N/A",
-                    sla_status
-                ])
-
-            col_widths_chamados = [1.2*cm, 7*cm, 3*cm, 3*cm, 3.5*cm, 3.5*cm, 3*cm, 2.5*cm]
-            table_chamados = Table(data_chamados, colWidths=col_widths_chamados, repeatRows=1)
-
-            table_style_chamados = TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), HexColor('#27AE60')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                ('BACKGROUND', (0, 1), (-1, -1), HexColor('#D5F4E6')),
-                ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#27AE60')),
-                ('LEFTPADDING', (0, 0), (-1, -1), 4),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-                ('TOPPADDING', (0, 0), (-1, -1), 4),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-            ])
-
-            table_chamados.setStyle(table_style_chamados)
-            elements.append(table_chamados)
-        else:
-            elements.append(Paragraph("Nenhum chamado encontrado com os filtros aplicados.", normal_style))
-
-        elements.append(PageBreak() if export_type == "all" else Spacer(1, 0.3 * inch))
-
-    # Controle de Equipamentos
-    if export_type in ["all", "equipamentos"]:
-        elements.append(Paragraph("CONTROLE DE EQUIPAMENTOS", section_title_style))
-        elements.append(Spacer(1, 0.5*cm))
-
-        equipamentos = equipment_query.all()
-
-        # Estatísticas dos equipamentos
-        total_equipamentos = len(equipamentos)
-        solicitados = sum(1 for e in equipamentos if e.status == 'Solicitado')
-        aprovados = sum(1 for e in equipamentos if e.status == 'Aprovado')
-        entregues = sum(1 for e in equipamentos if e.status == 'Entregue')
-        devolvidos = sum(1 for e in equipamentos if e.status == 'Devolvido')
-        negados = sum(1 for e in equipamentos if e.status == 'Negado')
-
-        equipamentos_stats = f"""
-        <b>Estatísticas de Equipamentos:</b><br/>
-        • Total de Solicitações: {total_equipamentos}<br/>
-        • Status: {solicitados} Solicitados, {aprovados} Aprovados, {entregues} Entregues, {devolvidos} Devolvidos, {negados} Negados<br/>
-        • Taxa de Aprovação: {round(aprovados/total_equipamentos*100, 1) if total_equipamentos > 0 else 0}%<br/>
-        • Taxa de Entrega: {round(entregues/total_equipamentos*100, 1) if total_equipamentos > 0 else 0}%<br/>
-        • Taxa de Devolução: {round(devolvidos/total_equipamentos*100, 1) if total_equipamentos > 0 else 0}%<br/>
-        """
-
-        elements.append(Paragraph(equipamentos_stats, normal_style))
-        elements.append(Spacer(1, 0.5*cm))
-
-        if equipamentos:
-            # Tabela de equipamentos
-            data_equipamentos = [["ID", "Descrição", "Patrimônio", "Tipo", "Status", "Solicitante", "Data"]]
-
-            for e in equipamentos:
-                data_equipamentos.append([
-                    str(e.id),
-                    Paragraph(e.description[:40] + "..." if e.description and len(e.description) > 40 else e.description or "", normal_style),
-                    e.patrimony or "N/A",
-                    e.equipment_type or "N/A",
-                    e.status,
-                    e.requester.username if e.requester else "N/A",
-                    e.request_date.strftime("%d/%m/%Y") if e.request_date else "N/A"
-                ])
-
-            col_widths_equipamentos = [1.2*cm, 7*cm, 3*cm, 3*cm, 3*cm, 3.5*cm, 3*cm]
-            table_equipamentos = Table(data_equipamentos, colWidths=col_widths_equipamentos, repeatRows=1)
-
-            table_style_equipamentos = TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), HexColor('#9B59B6')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                ('BACKGROUND', (0, 1), (-1, -1), HexColor('#E8DAEF')),
-                ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#9B59B6')),
-                ('LEFTPADDING', (0, 0), (-1, -1), 4),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-                ('TOPPADDING', (0, 0), (-1, -1), 4),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-            ])
-
-            table_equipamentos.setStyle(table_style_equipamentos)
-            elements.append(table_equipamentos)
-        else:
-            elements.append(Paragraph("Nenhum equipamento encontrado com os filtros aplicados.", normal_style))
-
-        elements.append(PageBreak() if export_type == "all" else Spacer(1, 0.3 * inch))
-
-    if not elements or all(
-        isinstance(el, (Paragraph, Spacer)) and "Nenhum" in el.text
-        for el in elements
-        if isinstance(el, Paragraph)
-    ):
-        elements.append(
-            Paragraph(
-                "Nenhum dado para exportar com os filtros selecionados.",
-                styles["Normal"],
-            )
-        )
-
-    # Base de Conhecimento (Tutoriais)
-    tutorial_query = Tutorial.query
-    if not is_admin and not is_ti:
-        tutorial_query = tutorial_query.filter(Tutorial.autor_id == current_user_id)
-    if sector_id:
-        tutorial_query = tutorial_query.join(User).filter(User.sector_id == sector_id)
-    if user_id_filter and (is_admin or is_ti):
-        tutorial_query = tutorial_query.filter(Tutorial.autor_id == user_id_filter)
-    if start_date:
-        tutorial_query = tutorial_query.filter(Tutorial.data_criacao >= start_date)
-    if end_date:
-        tutorial_query = tutorial_query.filter(Tutorial.data_criacao <= end_date)
-    tutoriais = tutorial_query.all()
-
-    if export_type in ["all", "tutoriais"]:
-        elements.append(Paragraph("BASE DE CONHECIMENTO", section_title_style))
-        elements.append(Spacer(1, 0.5*cm))
-
-        # Estatísticas dos tutoriais
-        total_tutoriais = len(tutoriais)
-        total_visualizacoes = sum(len(t.visualizacoes) for t in tutoriais)
-        total_feedbacks = sum(len(t.feedbacks) for t in tutoriais)
-        feedbacks_uteis = sum(sum(1 for f in t.feedbacks if f.util) for t in tutoriais)
-        media_visualizacoes = round(total_visualizacoes / total_tutoriais, 1) if total_tutoriais > 0 else 0
-        taxa_satisfacao = round(feedbacks_uteis / total_feedbacks * 100, 1) if total_feedbacks > 0 else 0
-
-        tutoriais_stats = f"""
-        <b>Estatísticas da Base de Conhecimento:</b><br/>
-        • Total de Tutoriais: {total_tutoriais}<br/>
-        • Total de Visualizações: {total_visualizacoes}<br/>
-        • Média de Visualizações por Tutorial: {media_visualizacoes}<br/>
-        • Total de Feedbacks: {total_feedbacks}<br/>
-        • Feedbacks Úteis: {feedbacks_uteis} ({taxa_satisfacao}%)<br/>
-        • Taxa de Satisfação: {taxa_satisfacao}%<br/>
-        """
-
-        elements.append(Paragraph(tutoriais_stats, normal_style))
-        elements.append(Spacer(1, 0.5*cm))
-
-        if tutoriais:
-            # Tabela de tutoriais
-            data_tutoriais = [["Título", "Categoria", "Autor", "Visualizações", "Feedbacks", "Avaliação"]]
-
-            for t in tutoriais:
-                feedbacks_positivos = sum(1 for f in t.feedbacks if f.util)
-                total_feedbacks_t = len(t.feedbacks)
-                avaliacao = f"{feedbacks_positivos}/{total_feedbacks_t}" if total_feedbacks_t > 0 else "N/A"
-
-                data_tutoriais.append([
-                    Paragraph(t.titulo[:35] + "..." if t.titulo and len(t.titulo) > 35 else t.titulo or "", normal_style),
-                    t.categoria or "N/A",
-                    t.autor.username if t.autor else "N/A",
-                    str(len(t.visualizacoes)),
-                    str(total_feedbacks_t),
-                    avaliacao
-                ])
-
-            col_widths_tutoriais = [6*cm, 3*cm, 3.5*cm, 2*cm, 2*cm, 2.5*cm]
-            table_tutoriais = Table(data_tutoriais, colWidths=col_widths_tutoriais, repeatRows=1)
-
-            table_style_tutoriais = TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), HexColor('#F39C12')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                ('BACKGROUND', (0, 1), (-1, -1), HexColor('#FDEAA7')),
-                ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#F39C12')),
-                ('LEFTPADDING', (0, 0), (-1, -1), 4),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-                ('TOPPADDING', (0, 0), (-1, -1), 4),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-            ])
-
-            table_tutoriais.setStyle(table_style_tutoriais)
-            elements.append(table_tutoriais)
-        else:
-            elements.append(Paragraph("Nenhum tutorial encontrado com os filtros aplicados.", normal_style))
-
-        elements.append(PageBreak() if export_type == "all" else Spacer(1, 0.3 * inch))
-
-    # Indicadores de Performance
-    if export_type == "all":
-        elements.append(Paragraph("INDICADORES DE PERFORMANCE", section_title_style))
-        elements.append(Spacer(1, 0.5*cm))
-
-        # KPIs principais
-        kpis_data = [
-            ["Indicador", "Valor", "Meta", "Status"],
-            ["Taxa de Conclusão de Tarefas", f"{round(completed_tasks/total_tasks*100, 1) if total_tasks > 0 else 0}%", "80%", "✓" if (completed_tasks/total_tasks*100 if total_tasks > 0 else 0) >= 80 else "✗"],
-            ["Taxa de Realização de Lembretes", f"{round(completed_reminders/total_reminders*100, 1) if total_reminders > 0 else 0}%", "85%", "✓" if (completed_reminders/total_reminders*100 if total_reminders > 0 else 0) >= 85 else "✗"],
-            ["Taxa de Resolução de Chamados", f"{round(fechados/total_chamados*100, 1) if total_chamados > 0 else 0}%", "90%", "✓" if (fechados/total_chamados*100 if total_chamados > 0 else 0) >= 90 else "✗"],
-            ["Performance SLA", f"{taxa_sla}%", "95%", "✓" if taxa_sla >= 95 else "✗"],
-            ["Taxa de Satisfação Tutoriais", f"{taxa_satisfacao}%", "75%", "✓" if taxa_satisfacao >= 75 else "✗"],
-        ]
-
-        kpis_table = Table(kpis_data, colWidths=[7*cm, 3*cm, 3*cm, 3*cm])
-        kpis_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), HexColor('#2C3E50')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-            ('BACKGROUND', (0, 1), (-1, -1), HexColor('#ECF0F1')),
-            ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#BDC3C7')),
-            ('LEFTPADDING', (0, 0), (-1, -1), 4),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-            ('TOPPADDING', (0, 0), (-1, -1), 4),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-        ]))
-        elements.append(kpis_table)
-        elements.append(PageBreak())
-
-        # Recomendações
-        elements.append(Paragraph("RECOMENDAÇÕES", section_title_style))
-        elements.append(Spacer(1, 0.5*cm))
-
-        recomendacoes = """
-        <b>Recomendações para Melhoria:</b><br/><br/>
-
-        <b>1. Gestão de Tarefas:</b><br/>
-        • Implementar sistema de notificações automáticas para tarefas próximas do vencimento<br/>
-        • Criar categorias de prioridade para melhor organização<br/>
-        • Estabelecer SLA interno para conclusão de tarefas<br/><br/>
-
-        <b>2. Gestão de Lembretes:</b><br/>
-        • Automatizar recorrência de lembretes de manutenção preventiva<br/>
-        • Implementar sistema de escalação para lembretes não realizados<br/>
-        • Criar templates padronizados para diferentes tipos de lembretes<br/><br/>
-
-        <b>3. Atendimento de Chamados:</b><br/>
-        • Melhorar tempo de primeira resposta através de chatbots<br/>
-        • Implementar sistema de conhecimento automático<br/>
-        • Criar métricas de satisfação do usuário<br/><br/>
-
-        <b>4. Controle de Equipamentos:</b><br/>
-        • Implementar RFID para rastreamento automático<br/>
-        • Criar alertas para equipamentos com devolução pendente<br/>
-        • Estabelecer política de manutenção preventiva<br/><br/>
-
-        <b>5. Base de Conhecimento:</b><br/>
-        • Incentivar criação de tutoriais pelos usuários<br/>
-        • Implementar sistema de avaliação e comentários<br/>
-        • Criar certificações para contribuidores ativos<br/><br/>
-
-        <b>Conclusão:</b><br/>
-        O sistema TI OSN apresenta boa performance geral, com oportunidades de melhoria identificadas.
-        A implementação das recomendações acima contribuirá para aumento da eficiência operacional
-        e melhoria na satisfação dos usuários.
-        """
-
-        elements.append(Paragraph(recomendacoes, normal_style))
-
-    # Verificar se há dados para exportar
-    if not elements or len(elements) <= 5:  # Apenas capa, sumário, índice
-        elements.append(Paragraph("Nenhum dado encontrado para os filtros aplicados.", normal_style))
-
-    # Gerar PDF
-    doc.build(elements)
-    buffer.seek(0)
-
-    # Retornar resposta
-    response = make_response(buffer.getvalue())
-    response.headers["Content-Type"] = "application/pdf"
-    response.headers["Content-Disposition"] = f"attachment; filename=relatorio_executivo_ti_osn_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
-    return response
 
 
 # --- Tarefas ---
@@ -2438,7 +2494,7 @@ def tasks():
         )
         db.session.add(task)
         db.session.commit()
-        flash("Tarefa adicionada!", "success")
+        flash_success("Tarefa adicionada!")
         return redirect(url_for("main.tasks"))
     return render_template(
         "tasks.html",
@@ -2484,7 +2540,7 @@ def edit_task(id):
         form.populate_obj(task)
         task.sector_id = sector_id
         db.session.commit()
-        flash("Tarefa atualizada!", "success")
+        flash_success("Tarefa atualizada!")
         return redirect(url_for("main.tasks"))
     # Lógica de paginação e filtros igual à função tasks
     page = request.args.get("page", 1, type=int)
@@ -2539,7 +2595,7 @@ def complete_task(id):
     task = Task.query.get_or_404(id)
     task.completed = True
     db.session.commit()
-    flash("Tarefa marcada como concluída!", "success")
+    flash_success("Tarefa marcada como concluída!")
     return redirect(url_for("main.tasks"))
 
 
@@ -2553,7 +2609,7 @@ def delete_task(id):
         ).first_or_404()
     db.session.delete(task)
     db.session.commit()
-    flash("Tarefa excluída!", "success")
+    flash_success("Tarefa excluída!")
     return redirect(url_for("main.tasks"))
 
 
@@ -2573,7 +2629,7 @@ def abrir_chamado():
 
     # Verificar se o usuário existe
     if not user:
-        flash("Usuário não encontrado. Faça login novamente.", "danger")
+        flash_error("Usuário não encontrado. Faça login novamente.")
         return redirect(url_for("auth.login"))
 
     # Tenta obter o setor do usuário de diferentes fontes
@@ -2611,9 +2667,9 @@ def abrir_chamado():
                     db.session.add(novo_setor)
                     db.session.commit()
                     setor_id = novo_setor.id
-                    flash(
-                        f"Novo setor '{novo_setor.name}' criado com sucesso!", "success"
-                    )
+                    flash_success(
+    f"Novo setor '{novo_setor.name}' criado com sucesso!"
+)
             else:
                 # Usar o setor selecionado pelo usuário no formulário
                 setor_id = form.setor_id.data
@@ -2647,23 +2703,22 @@ def abrir_chamado():
             # Enviar email de notificação
             try:
                 send_chamado_aberto_email(novo_chamado)
-                flash("Notificações enviadas com sucesso!", "info")
+                flash_info("Notificações enviadas com sucesso!")
             except Exception as e:
                 db.session.rollback()
-                flash(
-                    f"Chamado criado, mas houve um erro ao enviar notificações: {str(e)}",
-                    "warning",
+                flash_warning(
+                    f"Chamado criado, mas houve um erro ao enviar notificações: {str(e)}"
                 )
                 print(
                     f"Error sending notification email for Chamado {novo_chamado.id}: {e}"
                 )
 
-            flash("Chamado aberto com sucesso!", "success")
+            flash_success("Chamado aberto com sucesso!")
             return redirect(url_for("main.detalhe_chamado", id=novo_chamado.id))
 
         except Exception as e:
             db.session.rollback()
-            flash(f"Erro ao abrir o chamado: {str(e)}", "danger")
+            flash_error(f"Erro ao abrir o chamado: {str(e)}")
             print(f"Error creating Chamado: {e}")
 
     # Pré-selecionar o setor do usuário no formulário, se existir
@@ -2687,12 +2742,12 @@ def editar_chamado(id):
     user_id = session.get("user_id")
 
     if chamado.solicitante_id != user_id:
-        flash("Você não tem permissão para editar este chamado.", "danger")
+        flash_error("Você não tem permissão para editar este chamado.")
         return redirect(url_for("main.detalhe_chamado", id=id))
 
     # Não permitir edição se o chamado estiver fechado
     if chamado.status == "Fechado":
-        flash("Não é possível editar um chamado fechado.", "warning")
+        flash_warning("Não é possível editar um chamado fechado.")
         return redirect(url_for("main.detalhe_chamado", id=id))
 
     form = ChamadoEditForm(obj=chamado)
@@ -2749,14 +2804,14 @@ def editar_chamado(id):
 
                 db.session.commit()
 
-                flash("Chamado atualizado com sucesso!", "success")
+                flash_success("Chamado atualizado com sucesso!")
                 return redirect(url_for("main.detalhe_chamado", id=chamado.id))
             else:
-                flash("Nenhuma alteração foi realizada.", "info")
+                flash_info("Nenhuma alteração foi realizada.")
 
         except Exception as e:
             db.session.rollback()
-            flash(f"Erro ao atualizar o chamado: {str(e)}", "danger")
+            flash_error(f"Erro ao atualizar o chamado: {str(e)}")
             print(f"Error updating Chamado {id}: {e}")
 
     # Pré-selecionar o setor atual no formulário
@@ -2893,7 +2948,7 @@ def gerenciar_chamado(id):
 
     # Verifica se o usuário é administrador
     if not session.get("is_admin"):
-        flash("Acesso restrito a administradores.", "danger")
+        flash_error("Acesso restrito a administradores.")
         return redirect(url_for("main.detalhe_chamado", id=id))
 
     chamado = Chamado.query.get_or_404(id)
@@ -2984,21 +3039,20 @@ def gerenciar_chamado(id):
                     send_chamado_atualizado_email(chamado, atualizacao)
                 except Exception as e:
                     print(f"Erro ao enviar e-mail: {str(e)}")
-                    flash(
-                        "Chamado atualizado, mas ocorreu um erro ao enviar a notificação por e-mail.",
-                        "warning",
+                    flash_warning(
+                        "Chamado atualizado, mas ocorreu um erro ao enviar a notificação por e-mail."
                     )
 
-            flash("Chamado atualizado com sucesso!", "success")
+            flash_success("Chamado atualizado com sucesso!")
         else:
-            flash("Nenhuma alteração foi realizada.", "info")
+            flash_info("Nenhuma alteração foi realizada.")
 
         return redirect(url_for("main.detalhe_chamado", id=chamado.id))
 
     # Se o formulário não for válido, mostra os erros
     for field, errors in form.errors.items():
         for error in errors:
-            flash(f"Erro no campo {getattr(form, field).label.text}: {error}", "danger")
+            flash_error(f"Erro no campo {getattr(form, field).label.text}: {error}")
 
     return redirect(url_for("main.detalhe_chamado", id=chamado.id))
 
@@ -3034,9 +3088,8 @@ def listar_tutoriais():
 def novo_tutorial():
     # Apenas membros da equipe de TI ou administradores podem cadastrar tutoriais
     if not (session.get("is_ti") or session.get("is_admin")):
-        flash(
-            "Apenas membros da equipe de TI ou administradores podem cadastrar tutoriais.",
-            "danger",
+        flash_error(
+            "Apenas membros da equipe de TI ou administradores podem cadastrar tutoriais."
         )
         return redirect(url_for("main.listar_tutoriais"))
     form = TutorialForm()
@@ -3060,7 +3113,7 @@ def novo_tutorial():
                 img = TutorialImage(tutorial_id=tutorial.id, filename=filename)
                 db.session.add(img)
             db.session.commit()
-        flash("Tutorial cadastrado com sucesso!", "success")
+        flash_success("Tutorial cadastrado com sucesso!")
         return redirect(url_for("main.listar_tutoriais"))
     return render_template("tutorial_form.html", form=form, title="Novo Tutorial")
 
@@ -3120,9 +3173,9 @@ def editar_tutorial(tutorial_id):
     if not (session.get("is_ti") or session.get("is_admin")) or (
         not session.get("is_admin") and tutorial.autor_id != session.get("user_id")
     ):
-        flash(
-            "Apenas o autor TI ou administradores podem editar este tutorial.", "danger"
-        )
+        flash_error(
+    "Apenas o autor TI ou administradores podem editar este tutorial."
+)
         return redirect(url_for("main.detalhe_tutorial", tutorial_id=tutorial.id))
     form = TutorialForm(obj=tutorial)
     if form.validate_on_submit():
@@ -3140,7 +3193,7 @@ def editar_tutorial(tutorial_id):
                 img = TutorialImage(tutorial_id=tutorial.id, filename=filename)
                 db.session.add(img)
         db.session.commit()
-        flash("Tutorial atualizado com sucesso!", "success")
+        flash_success("Tutorial atualizado com sucesso!")
         return redirect(url_for("main.detalhe_tutorial", tutorial_id=tutorial.id))
     return render_template("tutorial_form.html", form=form, title="Editar Tutorial")
 
@@ -3153,9 +3206,8 @@ def excluir_tutorial(tutorial_id):
     if not (session.get("is_ti") or session.get("is_admin")) or (
         not session.get("is_admin") and tutorial.autor_id != session.get("user_id")
     ):
-        flash(
-            "Apenas o autor TI ou administradores podem excluir este tutorial.",
-            "danger",
+        flash_error(
+            "Apenas o autor TI ou administradores podem excluir este tutorial."
         )
         return redirect(url_for("main.detalhe_tutorial", tutorial_id=tutorial.id))
     # Excluir imagens do disco
@@ -3167,7 +3219,7 @@ def excluir_tutorial(tutorial_id):
         db.session.delete(img)
     db.session.delete(tutorial)
     db.session.commit()
-    flash("Tutorial excluído com sucesso!", "success")
+    flash_success("Tutorial excluído com sucesso!")
     return redirect(url_for("main.listar_tutoriais"))
 
 
@@ -3185,10 +3237,10 @@ def comentar_tutorial(tutorial_id):
         )
         db.session.add(comentario)
         db.session.commit()
-        flash("Comentário enviado com sucesso!", "success")
+        flash_success("Comentário enviado com sucesso!")
         return redirect(url_for("main.detalhe_tutorial", tutorial_id=tutorial.id))
     else:
-        flash("Erro ao enviar comentário.", "danger")
+        flash_error("Erro ao enviar comentário.")
         # Renderiza o template com os formulários em caso de erro
         return render_template(
             "tutorial_detalhe.html",
@@ -3216,12 +3268,12 @@ def feedback_tutorial(tutorial_id):
             )
             db.session.add(feedback)
             db.session.commit()
-            flash("Feedback registrado!", "success")
+            flash_success("Feedback registrado!")
         else:
-            flash("Você já enviou feedback para este tutorial.", "info")
+            flash_info("Você já enviou feedback para este tutorial.")
         return redirect(url_for("main.detalhe_tutorial", tutorial_id=tutorial.id))
     else:
-        flash("Erro ao enviar feedback.", "danger")
+        flash_error("Erro ao enviar feedback.")
         # Renderiza o template com os formulários em caso de erro
         return render_template(
             "tutorial_detalhe.html",
@@ -3270,347 +3322,92 @@ def exportar_tutorial_pdf(tutorial_id):
 
 
 # ========================================
-# ROTAS PARA CONTROLE DE EQUIPAMENTOS
+# SISTEMA DE EQUIPAMENTOS
+# ========================================
+# O sistema de equipamentos foi migrado para o blueprint 'equipment_v2'
+# Rotas disponíveis em app/blueprints/equipment_clean.py
+# ROTAS ANTIGAS DESATIVADAS PARA EVITAR CONFLITO
 # ========================================
 
 
-@bp.route("/equipment/list")
-@login_required
-def list_equipment():
-    """Lista todas as solicitações de equipamentos"""
-    # Filtros
-    status_filter = request.args.get("status", "")
-    search = request.args.get("search", "").strip()
-
-    # Query base
-    if session.get("is_admin") or session.get("is_ti"):
-        # TI/Admin vê todas as solicitações
-        query = EquipmentRequest.query
-    else:
-        # Usuário comum vê apenas suas solicitações
-        query = EquipmentRequest.query.filter_by(requester_id=session.get("user_id"))
-
-    # Aplicar filtros
-    if status_filter:
-        query = query.filter(EquipmentRequest.status == status_filter)
-
-    if search:
-        query = query.filter(
-            db.or_(
-                EquipmentRequest.description.contains(search),
-                EquipmentRequest.patrimony.contains(search),
-                EquipmentRequest.equipment_type.contains(search),
-            )
-        )
-
-    # Ordenar por data de solicitação (mais recente primeiro)
-    equipment_requests = query.order_by(EquipmentRequest.request_date.desc()).all()
-
-    return render_template(
-        "equipment_list.html",
-        equipment_requests=equipment_requests,
-        status_filter=status_filter,
-        search=search,
-    )
-
-
-@bp.route("/equipment/new", methods=["GET", "POST"])
-@login_required
-def new_equipment_request():
-    """Nova solicitação de equipamento"""
-    if request.method == "POST":
-        # Validar dados
-        description = request.form.get("description", "").strip()
-        patrimony = request.form.get("patrimony", "").strip()
-        equipment_type = request.form.get("equipment_type", "").strip()
-        destination_sector = request.form.get("destination_sector", "").strip()
-        request_reason = request.form.get("request_reason", "").strip()
-        delivery_date_str = request.form.get("delivery_date", "").strip()
-        observations = request.form.get("observations", "").strip()
-
-        if not description:
-            flash("Descrição é obrigatória.", "danger")
-            return render_template("equipment_form.html")
-
-        if not request_reason:
-            flash("Motivo da solicitação é obrigatório.", "danger")
-            return render_template("equipment_form.html")
-
-        if not destination_sector:
-            flash("Setor/Destino é obrigatório.", "danger")
-            return render_template("equipment_form.html")
-
-        # Converter data se fornecida
-        delivery_date = None
-        if delivery_date_str:
-            try:
-                delivery_date = datetime.strptime(delivery_date_str, "%Y-%m-%d").date()
-            except ValueError:
-                flash("Data de entrega inválida.", "danger")
-                return render_template("equipment_form.html")
-
-        # Criar solicitação
-        equipment_request = EquipmentRequest(
-            description=description,
-            patrimony=patrimony if patrimony else None,
-            equipment_type=equipment_type if equipment_type else None,
-            destination_sector=destination_sector if destination_sector else None,
-            request_reason=request_reason if request_reason else None,
-            delivery_date=delivery_date,
-            observations=observations if observations else None,
-            requester_id=session.get("user_id"),
-            status="Solicitado",
-        )
-
-        db.session.add(equipment_request)
-        db.session.commit()
-
-        flash("Solicitação de equipamento criada com sucesso!", "success")
-        return redirect(url_for("main.list_equipment"))
-
-    return render_template("equipment_form.html")
-
-
-@bp.route("/equipment/<int:id>")
-@login_required
-def equipment_detail(id):
-    """Detalhes de uma solicitação de equipamento"""
-    equipment_request = EquipmentRequest.query.get_or_404(id)
-
-    # Verificar permissão
-    if not (
-        session.get("is_admin")
-        or session.get("is_ti")
-        or equipment_request.requester_id == session.get("user_id")
-    ):
-        flash("Você não tem permissão para ver esta solicitação.", "danger")
-        return redirect(url_for("main.list_equipment"))
-
-    return render_template("equipment_detail.html", equipment_request=equipment_request)
-
-
-@bp.route("/equipment/<int:id>/edit", methods=["GET", "POST"])
-@login_required
-def edit_equipment_request(id):
-    """Editar solicitação de equipamento"""
-    equipment_request = EquipmentRequest.query.get_or_404(id)
-
-    # Verificar permissão
-    if not equipment_request.can_be_edited_by(User.query.get(session.get("user_id"))):
-        flash("Você não tem permissão para editar esta solicitação.", "danger")
-        return redirect(url_for("main.equipment_detail", id=id))
-
-    if request.method == "POST":
-        # Validar dados
-        description = request.form.get("description", "").strip()
-        patrimony = request.form.get("patrimony", "").strip()
-        equipment_type = request.form.get("equipment_type", "").strip()
-        destination_sector = request.form.get("destination_sector", "").strip()
-        request_reason = request.form.get("request_reason", "").strip()
-        delivery_date_str = request.form.get("delivery_date", "").strip()
-        observations = request.form.get("observations", "").strip()
-
-        if not description:
-            flash("Descrição é obrigatória.", "danger")
-            return render_template(
-                "equipment_form.html", equipment_request=equipment_request
-            )
-
-        if not request_reason:
-            flash("Motivo da solicitação é obrigatório.", "danger")
-            return render_template(
-                "equipment_form.html", equipment_request=equipment_request
-            )
-
-        if not destination_sector:
-            flash("Setor/Destino é obrigatório.", "danger")
-            return render_template(
-                "equipment_form.html", equipment_request=equipment_request
-            )
-
-        # Converter data se fornecida
-        delivery_date = None
-        if delivery_date_str:
-            try:
-                delivery_date = datetime.strptime(delivery_date_str, "%Y-%m-%d").date()
-            except ValueError:
-                flash("Data de entrega inválida.", "danger")
-                return render_template(
-                    "equipment_form.html", equipment_request=equipment_request
-                )
-
-        # Atualizar dados
-        equipment_request.description = description
-        equipment_request.patrimony = patrimony if patrimony else None
-        equipment_request.equipment_type = equipment_type if equipment_type else None
-        equipment_request.destination_sector = (
-            destination_sector if destination_sector else None
-        )
-        equipment_request.request_reason = request_reason if request_reason else None
-        equipment_request.delivery_date = delivery_date
-        equipment_request.observations = observations if observations else None
-
-        db.session.commit()
-
-        flash("Solicitação atualizada com sucesso!", "success")
-        return redirect(url_for("main.equipment_detail", id=id))
-
-    return render_template("equipment_form.html", equipment_request=equipment_request)
-
-
-@bp.route("/equipment/<int:id>/approve", methods=["POST"])
-@login_required
-def approve_equipment_request(id):
-    """Aprovar solicitação de equipamento (TI/Admin)"""
-    equipment_request = EquipmentRequest.query.get_or_404(id)
-
-    # Verificar permissão
-    if not equipment_request.can_be_approved_by(User.query.get(session.get("user_id"))):
-        flash("Você não tem permissão para aprovar solicitações.", "danger")
-        return redirect(url_for("main.equipment_detail", id=id))
-
-    if equipment_request.status != "Solicitado":
-        flash("Apenas solicitações pendentes podem ser aprovadas.", "danger")
-        return redirect(url_for("main.equipment_detail", id=id))
-
-    # Aprovar solicitação
-    equipment_request.status = "Aprovado"
-    equipment_request.approved_by_id = session.get("user_id")
-    equipment_request.approval_date = datetime.utcnow()
-
-    db.session.commit()
-
-    flash("Solicitação aprovada com sucesso!", "success")
-    return redirect(url_for("main.equipment_detail", id=id))
-
-
-@bp.route("/equipment/<int:id>/reject", methods=["POST"])
-@login_required
-def reject_equipment_request(id):
-    """Recusar solicitação de equipamento (TI/Admin)"""
-    equipment_request = EquipmentRequest.query.get_or_404(id)
-
-    # Verificar permissão
-    if not equipment_request.can_be_approved_by(User.query.get(session.get("user_id"))):
-        flash("Você não tem permissão para recusar solicitações.", "danger")
-        return redirect(url_for("main.equipment_detail", id=id))
-
-    if equipment_request.status != "Solicitado":
-        flash("Apenas solicitações pendentes podem ser recusadas.", "danger")
-        return redirect(url_for("main.equipment_detail", id=id))
-
-    # Recusar solicitação
-    equipment_request.status = "Negado"
-    equipment_request.approved_by_id = session.get("user_id")
-    equipment_request.approval_date = datetime.utcnow()
-
-    db.session.commit()
-
-    flash("Solicitação recusada.", "warning")
-    return redirect(url_for("main.equipment_detail", id=id))
-
-
-@bp.route("/equipment/<int:id>/deliver", methods=["POST"])
-@login_required
-def deliver_equipment_request(id):
-    """Marcar equipamento como entregue (TI/Admin)"""
-    equipment_request = EquipmentRequest.query.get_or_404(id)
-
-    # Verificar permissão
-    if not equipment_request.can_be_approved_by(User.query.get(session.get("user_id"))):
-        flash("Você não tem permissão para marcar como entregue.", "danger")
-        return redirect(url_for("main.equipment_detail", id=id))
-
-    if equipment_request.status != "Aprovado":
-        flash(
-            "Apenas solicitações aprovadas podem ser marcadas como entregues.", "danger"
-        )
-        return redirect(url_for("main.equipment_detail", id=id))
-
-    # Marcar como entregue
-    equipment_request.status = "Entregue"
-    equipment_request.received_by_id = session.get("user_id")
-    equipment_request.delivery_date = datetime.utcnow().date()
-
-    db.session.commit()
-
-    flash("Equipamento marcado como entregue!", "success")
-    return redirect(url_for("main.equipment_detail", id=id))
-
-
-@bp.route("/equipment/<int:id>/return", methods=["POST"])
-@login_required
-def return_equipment_request(id):
-    """Marcar equipamento como devolvido (TI/Admin)"""
-    equipment_request = EquipmentRequest.query.get_or_404(id)
-
-    # Verificar permissão
-    if not equipment_request.can_be_approved_by(User.query.get(session.get("user_id"))):
-        flash("Você não tem permissão para marcar como devolvido.", "danger")
-        return redirect(url_for("main.equipment_detail", id=id))
-
-    if equipment_request.status != "Entregue":
-        flash(
-            "Apenas equipamentos entregues podem ser marcados como devolvidos.",
-            "danger",
-        )
-        return redirect(url_for("main.equipment_detail", id=id))
-
-    # Marcar como devolvido
-    equipment_request.status = "Devolvido"
-    equipment_request.return_date = datetime.utcnow().date()
-
-    db.session.commit()
-
-    flash("Equipamento marcado como devolvido!", "success")
-    return redirect(url_for("main.equipment_detail", id=id))
-
-
-@bp.route("/equipment/<int:id>/fill_technical", methods=["GET", "POST"])
-@login_required
-def fill_technical_data(id):
-    """Preencher dados técnicos do equipamento (TI/Admin)"""
-    equipment_request = EquipmentRequest.query.get_or_404(id)
-
-    # Verificar permissão
-    if not equipment_request.can_be_approved_by(User.query.get(session.get("user_id"))):
-        flash("Você não tem permissão para preencher dados técnicos.", "danger")
-        return redirect(url_for("main.equipment_detail", id=id))
-
-    if request.method == "POST":
-        # Validar dados
-        patrimony = request.form.get("patrimony", "").strip()
-        equipment_type = request.form.get("equipment_type", "").strip()
-        delivery_date_str = request.form.get("delivery_date", "").strip()
-        conference_status = request.form.get("conference_status", "").strip()
-
-        # Atualizar dados técnicos
-        equipment_request.patrimony = patrimony if patrimony else None
-        equipment_request.equipment_type = equipment_type if equipment_type else None
-        equipment_request.conference_status = (
-            conference_status if conference_status else None
-        )
-
-        # Converter data se fornecida
-        if delivery_date_str:
-            try:
-                equipment_request.delivery_date = datetime.strptime(
-                    delivery_date_str, "%Y-%m-%d"
-                ).date()
-            except ValueError:
-                flash("Data de entrega inválida.", "danger")
-                return render_template(
-                    "equipment_technical_form.html", equipment_request=equipment_request
-                )
-
-        db.session.commit()
-
-        flash("Dados técnicos atualizados com sucesso!", "success")
-        return redirect(url_for("main.equipment_detail", id=id))
-
-    return render_template(
-        "equipment_technical_form.html", equipment_request=equipment_request
-    )
+# @bp.route("/equipment/catalog")
+# @login_required
+# def equipment_catalog():
+#     """Catálogo de equipamentos disponíveis"""
+#     # Filtros
+#     search = request.args.get('search', '')
+#     category = request.args.get('category', '')
+#     brand = request.args.get('brand', '')
+# 
+#     filters = {}
+#     if search:
+#         filters['search'] = search
+#     if category:
+#         filters['category'] = category
+#     if brand:
+#         filters['brand'] = brand
+# 
+#     # Buscar equipamentos
+#     from .services.equipment_service import EquipmentService
+#     try:
+#         equipments = EquipmentService.get_equipment_catalog(filters)
+#     except Exception as e:
+#         current_app.logger.error(f"Erro ao buscar equipamentos: {str(e)}")
+#         equipments = []
+# 
+#     # Opções para filtros
+#     try:
+#         categories = db.session.query(Equipment.category).distinct().filter(
+#             Equipment.category.isnot(None)
+#         ).order_by(Equipment.category).all()
+#         categories = [cat[0] for cat in categories]
+#     except Exception as e:
+#         current_app.logger.error(f"Erro ao buscar categorias: {str(e)}")
+#         categories = []
+# 
+#     try:
+#         brands = db.session.query(Equipment.brand).distinct().filter(
+#             Equipment.brand.isnot(None)
+#         ).order_by(Equipment.brand).all()
+#         brands = [br[0] for br in brands]
+#     except Exception as e:
+#         current_app.logger.error(f"Erro ao buscar marcas: {str(e)}")
+#         brands = []
+# 
+#     # Estatísticas
+#     stats = EquipmentService.get_equipment_stats()
+# 
+#     return render_template(
+#         'equipment_catalog.html',
+#         equipments=equipments,
+#         categories=categories,
+#         brands=brands,
+#         stats=stats,
+#         search=search,
+#         category=category,
+#         brand=brand
+#     )
+
+
+# @bp.route("/equipment/cancel-reservation/<int:reservation_id>", methods=['POST'])
+# @login_required
+# def cancel_reservation(reservation_id):
+#     """Cancelar reserva de equipamento"""
+#     reservation = EquipmentReservation.query.get_or_404(reservation_id)
+# 
+#     # Verificar se o usuário pode cancelar
+#     user_id = session.get('user_id')
+#     if not user_id:
+#         return jsonify({'success': False, 'message': 'Sessão expirada. Faça login novamente.'})
+# 
+#     if reservation.user_id != user_id and not PermissionManager.can_user_approve_equipment(user_id):
+#         return jsonify({'success': False, 'message': 'Acesso negado. Você só pode cancelar suas próprias reservas ou precisa de permissões administrativas.'})
+# 
+#     # Cancelar reserva
+#     reservation.status = 'cancelada'
+#     db.session.commit()
+# 
+#     return jsonify({'success': True, 'message': 'Reserva cancelada com sucesso!'})
 
 
 # ========================================
@@ -3652,9 +3449,9 @@ def simulate_rfid_scan(rfid_tag, reader_id):
     result = RFIDService.simulate_rfid_scan(rfid_tag, reader_id)
 
     if result["success"]:
-        flash(f"Leitura RFID simulada: {result['message']}", "success")
+        flash_success(f"Leitura RFID simulada: {result['message']}")
     else:
-        flash(f"Erro na simulação: {result['message']}", "danger")
+        flash_error(f"Erro na simulação: {result['message']}")
 
     return redirect(url_for("main.rfid_dashboard"))
 
@@ -3667,15 +3464,15 @@ def assign_rfid_tag(equipment_id):
     rfid_tag = request.form.get("rfid_tag", "").strip()
 
     if not rfid_tag:
-        flash("Tag RFID é obrigatória.", "danger")
+        flash_error("Tag RFID é obrigatória.")
         return redirect(url_for("main.equipment_detail", id=equipment_id))
 
     result = RFIDService.assign_rfid_tag(equipment_id, rfid_tag)
 
     if result["success"]:
-        flash("Tag RFID atribuída com sucesso!", "success")
+        flash_success("Tag RFID atribuída com sucesso!")
     else:
-        flash(f"Erro ao atribuir tag: {result['message']}", "danger")
+        flash_error(f"Erro ao atribuir tag: {result['message']}")
 
     return redirect(url_for("main.equipment_detail", id=equipment_id))
 
@@ -3688,9 +3485,9 @@ def remove_rfid_tag(equipment_id):
     result = RFIDService.remove_rfid_tag(equipment_id)
 
     if result["success"]:
-        flash("Tag RFID removida com sucesso!", "success")
+        flash_success("Tag RFID removida com sucesso!")
     else:
-        flash(f"Erro ao remover tag: {result['message']}", "danger")
+        flash_error(f"Erro ao remover tag: {result['message']}")
 
     return redirect(url_for("main.equipment_detail", id=equipment_id))
 
@@ -3745,22 +3542,22 @@ def bulk_assign_rfid():
         rfid_tags = request.form.getlist("rfid_tags[]")
 
         if not equipment_ids or not rfid_tags:
-            flash("Selecione equipamentos e forneça tags RFID.", "danger")
+            flash_error("Selecione equipamentos e forneça tags RFID.")
             return redirect(url_for("main.bulk_assign_rfid"))
 
         # Converter para inteiros
         try:
             equipment_ids = [int(id) for id in equipment_ids]
         except ValueError:
-            flash("IDs de equipamentos inválidos.", "danger")
+            flash_error("IDs de equipamentos inválidos.")
             return redirect(url_for("main.bulk_assign_rfid"))
 
         result = RFIDService.bulk_assign_rfid_tags(equipment_ids, rfid_tags)
 
         if result["success"]:
-            flash(result["message"], "success")
+            flash_success(result["message"])
         else:
-            flash(result["message"], "danger")
+            flash_error(result["message"])
 
         return redirect(url_for("main.rfid_dashboard"))
 
@@ -3808,17 +3605,17 @@ def satisfaction_survey(chamado_id):
 
     # Verificar se usuário pode avaliar este chamado
     if chamado.solicitante_id != session.get("user_id") and not session.get("is_admin"):
-        flash("Você não tem permissão para avaliar este chamado.", "danger")
+        flash_error("Você não tem permissão para avaliar este chamado.")
         return redirect(url_for("main.index"))
 
     # Verificar se chamado está fechado
     if chamado.status != "Fechado":
-        flash("Apenas chamados fechados podem ser avaliados.", "warning")
+        flash_warning("Apenas chamados fechados podem ser avaliados.")
         return redirect(url_for("main.detalhe_chamado", id=chamado_id))
 
     # Verificar se já foi avaliado
     if chamado.satisfaction_rating:
-        flash("Este chamado já foi avaliado.", "info")
+        flash_info("Este chamado já foi avaliado.")
         return redirect(url_for("main.detalhe_chamado", id=chamado_id))
 
     if request.method == "POST":
@@ -3826,16 +3623,16 @@ def satisfaction_survey(chamado_id):
         comment = request.form.get("comment", "").strip()
 
         if not rating or not 1 <= rating <= 5:
-            flash("Por favor, selecione uma avaliação válida (1-5 estrelas).", "danger")
+            flash_error("Por favor, selecione uma avaliação válida (1-5 estrelas).")
             return render_template("satisfaction_survey.html", chamado=chamado)
 
         result = SatisfactionService.record_satisfaction_rating(chamado_id, rating, comment)
 
         if result["success"]:
-            flash("Avaliação registrada com sucesso! Obrigado pelo feedback.", "success")
+            flash_success("Avaliação registrada com sucesso! Obrigado pelo feedback.")
             return redirect(url_for("main.detalhe_chamado", id=chamado_id))
         else:
-            flash(f"Erro ao registrar avaliação: {result['message']}", "danger")
+            flash_error(f"Erro ao registrar avaliação: {result['message']}")
 
     return render_template("satisfaction_survey.html", chamado=chamado)
 
@@ -3876,9 +3673,9 @@ def send_satisfaction_survey(chamado_id):
     result = SatisfactionService.send_satisfaction_survey(chamado_id)
 
     if result["success"]:
-        flash("Pesquisa de satisfação enviada com sucesso!", "success")
+        flash_success("Pesquisa de satisfação enviada com sucesso!")
     else:
-        flash(f"Erro ao enviar pesquisa: {result['message']}", "danger")
+        flash_error(f"Erro ao enviar pesquisa: {result['message']}")
 
     return redirect(url_for("main.detalhe_chamado", id=chamado_id))
 
@@ -3954,9 +3751,9 @@ def update_user_metrics(user_id):
     result = CertificationService.update_user_metrics(user_id)
 
     if result["success"]:
-        flash("Métricas atualizadas com sucesso!", "success")
+        flash_success("Métricas atualizadas com sucesso!")
     else:
-        flash(f"Erro ao atualizar métricas: {result['message']}", "danger")
+        flash_error(f"Erro ao atualizar métricas: {result['message']}")
 
     return redirect(url_for("main.certifications_dashboard"))
 
@@ -3972,9 +3769,9 @@ def award_certification(user_id):
     result = CertificationService.award_certification(user_id, cert_type, level)
 
     if result["success"]:
-        flash(result["message"], "success")
+        flash_success(result["message"])
     else:
-        flash(f"Erro ao atribuir certificação: {result['message']}", "danger")
+        flash_error(f"Erro ao atribuir certificação: {result['message']}")
 
     return redirect(url_for("main.certifications_dashboard"))
 
@@ -4036,7 +3833,7 @@ def optimize_performance():
     cleanup_result = PerformanceService.cleanup_old_data()
     results["cleanup"] = cleanup_result
 
-    flash("Otimizações de performance executadas!", "success")
+    flash_success("Otimizações de performance executadas!")
 
     return redirect(url_for("main.performance_dashboard"))
 

@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard de Equipamentos | TI OSN System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <!-- Hero Section - Dashboard de Equipamentos -->
+  <div class="dashboard-hero-section mb-5">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <div class="d-flex align-items-center mb-3">
+          <div class="hero-icon-dash me-3">
+            <i class="fas fa-laptop fa-3x text-primary"></i>
+          </div>
+          <div>
+            <h1 class="mb-1 fw-bold">Dashboard de Equipamentos</h1>
+            <p class="text-muted mb-0">Gerenciamento completo de empréstimos e solicitações de equipamentos</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        <a href="{{ url_for('equipment_v2.catalog') }}" class="btn btn-primary btn-lg">
+          <i class="fas fa-plus-circle me-2"></i>Solicitar Equipamento
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Métricas do Sistema -->
+  <div class="section-header mb-4">
+    <h5 class="fw-bold mb-1"><i class="fas fa-chart-pie me-2 text-primary"></i>Métricas do Sistema</h5>
+    <p class="text-muted small mb-0">Visão geral do inventário e status dos equipamentos</p>
+  </div>
+
+  <div class="row g-4 mb-5">
+    <!-- Total de Equipamentos -->
+    <div class="col-lg-3 col-md-6">
+      <div class="card service-card border-0 shadow-hover h-100">
+        <div class="card-body text-center p-4">
+          <div class="service-icon bg-primary bg-opacity-10 mx-auto mb-3">
+            <i class="fas fa-laptop text-primary fa-2x"></i>
+          </div>
+          <h2 class="fw-bold mb-2">{{ total_equipments }}</h2>
+          <p class="text-muted mb-0 fw-medium">Total de Equipamentos</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disponíveis -->
+    <div class="col-lg-3 col-md-6">
+      <div class="card service-card border-0 shadow-hover h-100">
+        <div class="card-body text-center p-4">
+          <div class="service-icon bg-success bg-opacity-10 mx-auto mb-3">
+            <i class="fas fa-check-circle text-success fa-2x"></i>
+          </div>
+          <h2 class="fw-bold mb-2 text-success">{{ available }}</h2>
+          <p class="text-muted mb-0 fw-medium">Disponíveis</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Minhas Solicitações Pendentes -->
+    <div class="col-lg-3 col-md-6">
+      <div class="card service-card border-0 shadow-hover h-100">
+        <div class="card-body text-center p-4">
+          <div class="service-icon bg-warning bg-opacity-10 mx-auto mb-3">
+            <i class="fas fa-clock text-warning fa-2x"></i>
+          </div>
+          <h2 class="fw-bold mb-2 text-warning">{{ my_pending }}</h2>
+          <p class="text-muted mb-0 fw-medium">Aguardando Aprovação</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meus Empréstimos Ativos -->
+    <div class="col-lg-3 col-md-6">
+      <div class="card service-card border-0 shadow-hover h-100">
+        <div class="card-body text-center p-4">
+          <div class="service-icon bg-info bg-opacity-10 mx-auto mb-3">
+            <i class="fas fa-hand-holding text-info fa-2x"></i>
+          </div>
+          <h2 class="fw-bold mb-2 text-info">{{ my_loans }}</h2>
+          <p class="text-muted mb-0 fw-medium">Empréstimos Ativos</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ações Rápidas -->
+  <div class="section-header mb-4">
+    <h5 class="fw-bold mb-1"><i class="fas fa-bolt me-2 text-warning"></i>Ações Rápidas</h5>
+    <p class="text-muted small mb-0">Acesse rapidamente as funcionalidades principais</p>
+  </div>
+
+  <div class="row g-4 mb-5">
+    <!-- Para Usuários -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-hover h-100">
+        <div class="card-header bg-white border-0 py-4">
+          <div class="d-flex align-items-center">
+            <div class="service-icon bg-primary bg-opacity-10 me-3">
+              <i class="fas fa-user text-primary"></i>
+            </div>
+            <div>
+              <h5 class="mb-0 fw-bold">Minhas Ações</h5>
+              <p class="text-muted small mb-0">Solicitações e empréstimos</p>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-4">
+          <div class="d-grid gap-3">
+            <a href="{{ url_for('equipment_v2.catalog') }}" class="btn btn-lg btn-primary d-flex align-items-center justify-content-between">
+              <span><i class="fas fa-search me-2"></i>Ver Equipamentos Disponíveis</span>
+              <i class="fas fa-arrow-right"></i>
+            </a>
+            <a href="{{ url_for('equipment_v2.my_requests') }}" class="btn btn-lg btn-outline-primary d-flex align-items-center justify-content-between">
+              <span><i class="fas fa-list me-2"></i>Minhas Solicitações</span>
+              <i class="fas fa-arrow-right"></i>
+            </a>
+            <a href="{{ url_for('equipment_v2.my_loans') }}" class="btn btn-lg btn-outline-primary d-flex align-items-center justify-content-between">
+              <span><i class="fas fa-hand-holding me-2"></i>Meus Empréstimos</span>
+              <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Para TI/Admin -->
+    {% if current_user.is_ti or current_user.is_admin %}
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-hover h-100">
+        <div class="card-header bg-white border-0 py-4">
+          <div class="d-flex align-items-center">
+            <div class="service-icon bg-danger bg-opacity-10 me-3">
+              <i class="fas fa-user-shield text-danger"></i>
+            </div>
+            <div>
+              <h5 class="mb-0 fw-bold">Administração</h5>
+              <p class="text-muted small mb-0">Gerenciamento TI/Admin</p>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-4">
+          {% if pending_approvals > 0 %}
+          <div class="alert alert-warning border-0 mb-4 shadow-sm">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-exclamation-triangle me-2 fa-lg"></i>
+              <div>
+                <strong>{{ pending_approvals }}</strong> solicitação(ões) aguardando aprovação!
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          
+          <div class="d-grid gap-3">
+            <a href="{{ url_for('equipment_v2.admin_pending') }}" class="btn btn-lg btn-warning d-flex align-items-center justify-content-between">
+              <span>
+                <i class="fas fa-tasks me-2"></i>Aprovar Solicitações
+                {% if pending_approvals > 0 %}
+                <span class="badge bg-danger ms-2">{{ pending_approvals }}</span>
+                {% endif %}
+              </span>
+              <i class="fas fa-arrow-right"></i>
+            </a>
+            <a href="{{ url_for('equipment_v2.admin_loans') }}" class="btn btn-lg btn-outline-danger d-flex align-items-center justify-content-between">
+              <span><i class="fas fa-clipboard-list me-2"></i>Gerenciar Empréstimos</span>
+              <i class="fas fa-arrow-right"></i>
+            </a>
+            <a href="{{ url_for('equipment_v2.admin_equipment') }}" class="btn btn-lg btn-outline-danger d-flex align-items-center justify-content-between">
+              <span><i class="fas fa-cog me-2"></i>Gerenciar Equipamentos</span>
+              <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

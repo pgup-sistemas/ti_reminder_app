@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Alerta de Manutenção - Equipamento</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #fd7e14;">🔧 ALERTA DE MANUTENÇÃO - Equipamento</h2>
+
+        <p>Olá, {{ ti_user.username }}!</p>
+
+        <p>Um equipamento precisa de manutenção preventiva ou corretiva.</p>
+
+        <div style="background-color: #fff3cd; padding: 15px; border-left: 4px solid #fd7e14; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #856404;">Detalhes do Equipamento:</h3>
+            <p><strong>Equipamento:</strong> {{ equipment.name }}</p>
+            <p><strong>Patrimônio:</strong> {{ equipment.patrimony or 'N/A' }}</p>
+            <p><strong>Categoria:</strong> {{ equipment.category }}</p>
+            <p><strong>Marca/Modelo:</strong> {{ equipment.brand or 'N/A' }} {{ equipment.model or '' }}</p>
+            <p><strong>Localização:</strong> {{ equipment.location or 'N/A' }}</p>
+            <p><strong>Status Atual:</strong> {{ equipment.status }}</p>
+            <p><strong>Condição:</strong> {{ equipment.condition }}</p>
+            {% if equipment.next_maintenance %}
+            <p><strong>Próxima Manutenção:</strong> {{ equipment.next_maintenance.strftime('%d/%m/%Y') }}</p>
+            {% endif %}
+            {% if equipment.last_maintenance %}
+            <p><strong>Última Manutenção:</strong> {{ equipment.last_maintenance.strftime('%d/%m/%Y') }}</p>
+            {% endif %}
+            {% if equipment.maintenance_notes %}
+            <p><strong>Notas de Manutenção:</strong> {{ equipment.maintenance_notes }}</p>
+            {% endif %}
+        </div>
+
+        {% if equipment.days_until_maintenance() == 0 %}
+        <p><strong>⚠️ AÇÃO IMEDIATA NECESSÁRIA:</strong> A manutenção deste equipamento está vencida. Agende a manutenção o mais breve possível.</p>
+        {% elif equipment.days_until_maintenance() and equipment.days_until_maintenance() <= 7 %}
+        <p><strong>📅 AÇÃO RECOMENDADA:</strong> A manutenção preventiva está próxima ({{ equipment.days_until_maintenance() }} dias). Planeje a execução.</p>
+        {% else %}
+        <p><strong>📋 AÇÃO SUGERIDA:</strong> Verifique se este equipamento precisa de manutenção preventiva.</p>
+        {% endif %}
+
+        <p>Para mais detalhes ou para atualizar o status de manutenção, acesse o sistema: <a href="{{ url_for('equipment_v2.admin_equipment', _external=True) }}">Gerenciar Equipamentos</a></p>
+
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+        <p style="color: #6c757d; font-size: 12px;">
+            Este é um email automático do sistema de monitoramento de manutenção.<br>
+            Sistema de Gestão de Equipamentos - TI OSN System
+        </p>
+    </div>
+</body>
+</html>

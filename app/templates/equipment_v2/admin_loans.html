@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciar Empréstimos | TI OSN System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-clipboard-list me-2 text-info"></i>Empréstimos Ativos</h2>
+                    <p class="text-muted mb-0">Gerencie devoluções de equipamentos</p>
+                </div>
+                <a href="{{ url_for('equipment_v2.index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if loans %}
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="border-0">Equipamento</th>
+                            <th class="border-0">Usuário</th>
+                            <th class="border-0">Emprestado em</th>
+                            <th class="border-0">Devolução Prevista</th>
+                            <th class="border-0">Status</th>
+                            <th class="border-0">Ações</th>
+                        </tr>
+                    </thead>
+            <tbody>
+                {% for loan in loans %}
+                <tr {% if loan.is_overdue() %}class="table-danger"{% endif %}>
+                    <td>
+                        <strong>{{ loan.equipment.name }}</strong><br>
+                        <small class="text-muted">
+                            {% if loan.equipment.patrimony %}Pat: {{ loan.equipment.patrimony }}{% endif %}
+                        </small>
+                    </td>
+                    <td>
+                        {{ loan.user.username }}<br>
+                        {% if loan.user.sector %}
+                        <small class="text-muted">{{ loan.user.sector.name }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <small>{{ loan.loan_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                    </td>
+                    <td>
+                        {{ loan.expected_return_date.strftime('%d/%m/%Y') }}
+                        {% if loan.expected_return_time %}
+                        <small class="text-muted d-block">às {{ loan.expected_return_time.strftime('%H:%M') }}</small>
+                        {% endif %}
+                        {% if loan.is_overdue() %}
+                        <span class="badge bg-danger d-block mt-1">Atrasado {{ loan.days_overdue() }} dia(s)!</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge bg-success">
+                            <i class="fas fa-check-circle me-1"></i>Ativo
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#returnModal{{ loan.id }}">
+                            <i class="fas fa-undo me-1"></i>Confirmar Devolução
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals de Devolução (fora da tabela) -->
+    {% for loan in loans %}
+    <div class="modal fade" id="returnModal{{ loan.id }}" tabindex="-1" aria-labelledby="returnModalLabel{{ loan.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content shadow-sm border-0">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title text-dark fw-semibold" id="returnModalLabel{{ loan.id }}">
+                        <i class="fas fa-undo me-2 text-secondary"></i>Confirmar Devolução
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form method="POST" action="{{ url_for('equipment_v2.admin_return', loan_id=loan.id) }}">
+                    <div class="modal-body px-4 py-3">
+                        <!-- Informações do Empréstimo -->
+                        <div class="border rounded p-3 mb-3 bg-light bg-opacity-50">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <small class="text-muted d-block mb-1">Equipamento</small>
+                                    <strong>{{ loan.equipment.name }}</strong>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted d-block mb-1">Usuário</small>
+                                    <strong>{{ loan.user.username }}</strong>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted d-block mb-1">Emprestado em</small>
+                                    <strong>{{ loan.loan_date.strftime('%d/%m/%Y %H:%M') }}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campo de Observações -->
+                        <div class="mb-3">
+                            <label for="notes{{ loan.id }}" class="form-label text-dark">
+                                Observações sobre a devolução
+                            </label>
+                            <textarea class="form-control" id="notes{{ loan.id }}" name="notes" rows="3" 
+                                      placeholder="Estado do equipamento, observações, etc..."></textarea>
+                        </div>
+
+                        <!-- Alerta -->
+                        <div class="border rounded p-2 bg-light">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Ao confirmar, o equipamento ficará disponível novamente para empréstimo.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-2">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-dark">
+                            <i class="fas fa-check me-1"></i>Confirmar Devolução
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        Não há empréstimos ativos no momento.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

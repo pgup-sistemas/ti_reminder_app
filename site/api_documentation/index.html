@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt_BR" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Oézios Normando - Equipe TI OSN" /><link rel="canonical" href="http://192.168.1.86:5000/docs/api_documentation/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Documentação da API - Sistema de Gestão de Equipamentos - TI OSN System - Documentação Oficial</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Documenta\u00e7\u00e3o da API - Sistema de Gest\u00e3o de Equipamentos";
+        var mkdocs_page_input_path = "api_documentation.md";
+        var mkdocs_page_url = "/docs/api_documentation/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> TI OSN System - Documentação Oficial
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Início</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Usuário</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/overview/">Visão Geral</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/reminders/">Lembretes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/chamados/">Chamados</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/tasks/">Tarefas</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/tutorials/">Tutoriais</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/equipment/">Equipamentos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/dashboard/">Dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/rfid/">Sistema RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/satisfaction/">Avaliação de Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/certifications/">Certificações</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/performance/">Performance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Administrador</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/equipment-admin/">Equipamentos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/performance-admin/">Performance</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/rfid-admin/">RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/satisfaction-admin/">Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/certifications-admin/">Certificações</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">TI OSN System - Documentação Oficial</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Documentação da API - Sistema de Gestão de Equipamentos</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="documentacao-da-api-sistema-de-gestao-de-equipamentos">Documentação da API - Sistema de Gestão de Equipamentos<a class="headerlink" href="#documentacao-da-api-sistema-de-gestao-de-equipamentos" title="Permanent link">&para;</a></h1>
+<h2 id="visao-geral">Visão Geral<a class="headerlink" href="#visao-geral" title="Permanent link">&para;</a></h2>
+<p>A API REST do Sistema de Gestão de Equipamentos permite integração com aplicações externas, mobile apps e outros sistemas. A API utiliza autenticação JWT e implementa rate limiting para segurança.</p>
+<p><strong>Base URL:</strong> <code>http://192.168.1.86:5000/equipment/api/v1</code></p>
+<h2 id="autenticacao">Autenticação<a class="headerlink" href="#autenticacao" title="Permanent link">&para;</a></h2>
+<h3 id="login-jwt">Login JWT<a class="headerlink" href="#login-jwt" title="Permanent link">&para;</a></h3>
+<p><strong>Endpoint:</strong> <code>POST /api/v1/auth/login</code></p>
+<p><strong>Rate Limit:</strong> 5 tentativas por minuto</p>
+<p><strong>Request Body:</strong></p>
+<pre><code class="language-json">{
+  &quot;username&quot;: &quot;usuario&quot;,
+  &quot;password&quot;: &quot;senha&quot;
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;access_token&quot;: &quot;eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...&quot;,
+  &quot;user&quot;: {
+    &quot;id&quot;: 1,
+    &quot;username&quot;: &quot;usuario&quot;,
+    &quot;email&quot;: &quot;usuario@email.com&quot;,
+    &quot;is_admin&quot;: false,
+    &quot;is_ti&quot;: false
+  }
+}
+</code></pre>
+<p><strong>Uso do Token:</strong>
+Inclua o token no header <code>Authorization</code>:</p>
+<pre><code>Authorization: Bearer &lt;access_token&gt;
+</code></pre>
+<h2 id="endpoints">Endpoints<a class="headerlink" href="#endpoints" title="Permanent link">&para;</a></h2>
+<h3 id="1-listar-equipamentos">1. Listar Equipamentos<a class="headerlink" href="#1-listar-equipamentos" title="Permanent link">&para;</a></h3>
+<p><strong>Endpoint:</strong> <code>GET /api/v1/equipment</code></p>
+<p><strong>Rate Limit:</strong> 100 requisições por hora</p>
+<p><strong>Parâmetros de Query (opcionais):</strong>
+- <code>category</code>: Filtrar por categoria (Notebook, Monitor, etc.)
+- <code>brand</code>: Filtrar por marca
+- <code>search</code>: Busca por nome, patrimônio ou descrição</p>
+<p><strong>Exemplo:</strong></p>
+<pre><code>GET /api/v1/equipment?category=Notebook&amp;brand=Dell
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;name&quot;: &quot;Notebook Dell Latitude 5420&quot;,
+      &quot;patrimony&quot;: &quot;NB001&quot;,
+      &quot;category&quot;: &quot;Notebook&quot;,
+      &quot;brand&quot;: &quot;Dell&quot;,
+      &quot;model&quot;: &quot;Latitude 5420&quot;,
+      &quot;status&quot;: &quot;disponivel&quot;,
+      &quot;condition&quot;: &quot;bom&quot;,
+      &quot;location&quot;: &quot;Sala de TI - Prateleira A1&quot;,
+      &quot;max_loan_days&quot;: 30,
+      &quot;requires_approval&quot;: true
+    }
+  ],
+  &quot;count&quot;: 1
+}
+</code></pre>
+<h3 id="2-detalhes-do-equipamento">2. Detalhes do Equipamento<a class="headerlink" href="#2-detalhes-do-equipamento" title="Permanent link">&para;</a></h3>
+<p><strong>Endpoint:</strong> <code>GET /api/v1/equipment/{equipment_id}</code></p>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;data&quot;: {
+    &quot;id&quot;: 1,
+    &quot;name&quot;: &quot;Notebook Dell Latitude 5420&quot;,
+    &quot;description&quot;: &quot;Notebook para desenvolvimento...&quot;,
+    &quot;patrimony&quot;: &quot;NB001&quot;,
+    &quot;serial_number&quot;: &quot;ABC123&quot;,
+    &quot;category&quot;: &quot;Notebook&quot;,
+    &quot;brand&quot;: &quot;Dell&quot;,
+    &quot;model&quot;: &quot;Latitude 5420&quot;,
+    &quot;status&quot;: &quot;disponivel&quot;,
+    &quot;condition&quot;: &quot;bom&quot;,
+    &quot;location&quot;: &quot;Sala de TI - Prateleira A1&quot;,
+    &quot;responsible_sector&quot;: &quot;TI&quot;,
+    &quot;specifications&quot;: &quot;{\&quot;ram\&quot;: \&quot;16GB\&quot;, \&quot;hd\&quot;: \&quot;512GB SSD\&quot;}&quot;,
+    &quot;purchase_date&quot;: &quot;2023-01-15&quot;,
+    &quot;purchase_value&quot;: 3500.00,
+    &quot;warranty_expiration&quot;: &quot;2026-01-15&quot;,
+    &quot;max_loan_days&quot;: 30,
+    &quot;requires_approval&quot;: true,
+    &quot;last_maintenance&quot;: &quot;2024-06-15&quot;,
+    &quot;next_maintenance&quot;: &quot;2025-06-15&quot;,
+    &quot;rfid_tag&quot;: &quot;RFID001&quot;,
+    &quot;created_at&quot;: &quot;2023-01-15T10:00:00&quot;,
+    &quot;updated_at&quot;: &quot;2024-06-15T14:30:00&quot;
+  }
+}
+</code></pre>
+<h3 id="3-verificar-disponibilidade">3. Verificar Disponibilidade<a class="headerlink" href="#3-verificar-disponibilidade" title="Permanent link">&para;</a></h3>
+<p><strong>Endpoint:</strong> <code>GET /api/v1/equipment/{equipment_id}/availability</code></p>
+<p><strong>Parâmetros obrigatórios:</strong>
+- <code>start_date</code>: Data inicial (YYYY-MM-DD)
+- <code>end_date</code>: Data final (YYYY-MM-DD)</p>
+<p><strong>Exemplo:</strong></p>
+<pre><code>GET /api/v1/equipment/1/availability?start_date=2025-10-20&amp;end_date=2025-10-25
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;available&quot;: true,
+  &quot;message&quot;: &quot;Equipamento disponível para o período solicitado&quot;
+}
+</code></pre>
+<h3 id="4-criar-reserva">4. Criar Reserva<a class="headerlink" href="#4-criar-reserva" title="Permanent link">&para;</a></h3>
+<p><strong>Endpoint:</strong> <code>POST /api/v1/reservations</code></p>
+<p><strong>Rate Limit:</strong> 20 reservas por hora</p>
+<p><strong>Request Body:</strong></p>
+<pre><code class="language-json">{
+  &quot;equipment_id&quot;: 1,
+  &quot;user_id&quot;: 1,
+  &quot;start_date&quot;: &quot;2025-10-20&quot;,
+  &quot;end_date&quot;: &quot;2025-10-25&quot;,
+  &quot;purpose&quot;: &quot;Desenvolvimento de projeto&quot;
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;message&quot;: &quot;Reserva criada com sucesso&quot;,
+  &quot;reservation_id&quot;: 123,
+  &quot;status&quot;: &quot;confirmada&quot;
+}
+</code></pre>
+<h3 id="5-devolver-equipamento">5. Devolver Equipamento<a class="headerlink" href="#5-devolver-equipamento" title="Permanent link">&para;</a></h3>
+<p><strong>Endpoint:</strong> <code>POST /api/v1/loans/{loan_id}/return</code></p>
+<p><strong>Request Body:</strong></p>
+<pre><code class="language-json">{
+  &quot;returned_by_id&quot;: 1,
+  &quot;condition&quot;: &quot;bom&quot;,
+  &quot;notes&quot;: &quot;Equipamento devolvido em perfeitas condições&quot;
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;message&quot;: &quot;Equipamento devolvido com sucesso&quot;
+}
+</code></pre>
+<h3 id="6-estatisticas-gerais">6. Estatísticas Gerais<a class="headerlink" href="#6-estatisticas-gerais" title="Permanent link">&para;</a></h3>
+<p><strong>Endpoint:</strong> <code>GET /api/v1/stats</code></p>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;data&quot;: {
+    &quot;equipment&quot;: {
+      &quot;total_equipment&quot;: 50,
+      &quot;available_equipment&quot;: 35,
+      &quot;loaned_equipment&quot;: 15
+    },
+    &quot;sla&quot;: {
+      &quot;total_loans&quot;: 150,
+      &quot;sla_cumpridos&quot;: 135,
+      &quot;sla_normais&quot;: 10,
+      &quot;sla_atencao&quot;: 3,
+      &quot;sla_vencidos&quot;: 2,
+      &quot;sla_compliance_rate&quot;: 90.0
+    },
+    &quot;maintenance&quot;: {
+      &quot;total_with_maintenance&quot;: 45,
+      &quot;overdue_maintenance&quot;: 2,
+      &quot;due_soon_maintenance&quot;: 5,
+      &quot;upcoming_maintenance&quot;: 8
+    }
+  }
+}
+</code></pre>
+<h3 id="7-emprestimos-do-usuario">7. Empréstimos do Usuário<a class="headerlink" href="#7-emprestimos-do-usuario" title="Permanent link">&para;</a></h3>
+<p><strong>Endpoint:</strong> <code>GET /api/v1/user/{user_id}/loans</code></p>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;success&quot;: true,
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 123,
+      &quot;equipment&quot;: {
+        &quot;id&quot;: 1,
+        &quot;name&quot;: &quot;Notebook Dell Latitude 5420&quot;,
+        &quot;patrimony&quot;: &quot;NB001&quot;,
+        &quot;category&quot;: &quot;Notebook&quot;
+      },
+      &quot;loan_date&quot;: &quot;2025-10-15T09:00:00&quot;,
+      &quot;expected_return_date&quot;: &quot;2025-10-20&quot;,
+      &quot;is_overdue&quot;: false,
+      &quot;days_overdue&quot;: 0,
+      &quot;sla_status&quot;: &quot;normal&quot;,
+      &quot;sla_display&quot;: &quot;Normal&quot;
+    }
+  ],
+  &quot;count&quot;: 1
+}
+</code></pre>
+<h2 id="codigos-de-status-http">Códigos de Status HTTP<a class="headerlink" href="#codigos-de-status-http" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>200</code>: Sucesso</li>
+<li><code>201</code>: Criado com sucesso</li>
+<li><code>400</code>: Dados inválidos</li>
+<li><code>401</code>: Não autorizado (token inválido/expirado)</li>
+<li><code>403</code>: Acesso proibido</li>
+<li><code>404</code>: Recurso não encontrado</li>
+<li><code>429</code>: Rate limit excedido</li>
+<li><code>500</code>: Erro interno do servidor</li>
+</ul>
+<h2 id="rate-limiting">Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Login:</strong> 5 tentativas por minuto</li>
+<li><strong>Listar equipamentos:</strong> 100 requisições por hora</li>
+<li><strong>Criar reservas:</strong> 20 reservas por hora</li>
+<li><strong>Global:</strong> 200 requisições por dia, 50 por hora</li>
+</ul>
+<h2 id="tratamento-de-erros">Tratamento de Erros<a class="headerlink" href="#tratamento-de-erros" title="Permanent link">&para;</a></h2>
+<p>Todos os erros seguem o formato padrão:</p>
+<pre><code class="language-json">{
+  &quot;success&quot;: false,
+  &quot;error&quot;: &quot;Descrição do erro&quot;
+}
+</code></pre>
+<h2 id="exemplos-de-uso">Exemplos de Uso<a class="headerlink" href="#exemplos-de-uso" title="Permanent link">&para;</a></h2>
+<h3 id="python-com-requests">Python com Requests<a class="headerlink" href="#python-com-requests" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">import requests
+
+# Login
+login_data = {&quot;username&quot;: &quot;usuario&quot;, &quot;password&quot;: &quot;senha&quot;}
+login_response = requests.post(&quot;http://192.168.1.86:5000/equipment/api/v1/auth/login&quot;, json=login_data)
+token = login_response.json()[&quot;access_token&quot;]
+
+# Headers para requisições autenticadas
+headers = {&quot;Authorization&quot;: f&quot;Bearer {token}&quot;}
+
+# Listar equipamentos
+equipments = requests.get(&quot;http://192.168.1.86:5000/equipment/api/v1/equipment&quot;, headers=headers)
+print(equipments.json())
+</code></pre>
+<h3 id="javascriptfetch">JavaScript/Fetch<a class="headerlink" href="#javascriptfetch" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">// Login
+const loginResponse = await fetch('/equipment/api/v1/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ username: 'usuario', password: 'senha' })
+});
+const { access_token } = await loginResponse.json();
+
+// Usar token
+const headers = {
+  'Authorization': `Bearer ${access_token}`,
+  'Content-Type': 'application/json'
+};
+
+// Listar equipamentos
+const equipmentResponse = await fetch('/equipment/api/v1/equipment', { headers });
+const data = await equipmentResponse.json();
+console.log(data);
+</code></pre>
+<h2 id="consideracoes-de-seguranca">Considerações de Segurança<a class="headerlink" href="#consideracoes-de-seguranca" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Sempre use HTTPS</strong> em produção</li>
+<li><strong>Armazene tokens de forma segura</strong> no cliente</li>
+<li><strong>Implemente refresh tokens</strong> para sessões longas</li>
+<li><strong>Valide entrada de dados</strong> no cliente e servidor</li>
+<li><strong>Monitore logs de API</strong> para detectar abusos</li>
+</ol>
+<h2 id="suporte">Suporte<a class="headerlink" href="#suporte" title="Permanent link">&para;</a></h2>
+<p>Para dúvidas sobre a API, consulte a documentação técnica ou entre em contato com a equipe de desenvolvimento.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../javascripts/extra.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
