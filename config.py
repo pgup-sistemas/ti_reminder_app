@@ -2,7 +2,6 @@ import os
 import secrets
 from datetime import timezone, timedelta
 
-
 class Config:
     """Configuração base da aplicação."""
     
@@ -15,10 +14,15 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
     
     # Banco de dados
+    # Render define DATABASE_URL automaticamente, mas localmente usamos localhost
     db_url = os.environ.get('DATABASE_URL')
-    if not db_url or db_url.startswith("sqlite:///"):
-        # Fallback para desenvolvimento local
+    if db_url:
+        # Ajuste para Render: PostgreSQL usa esquema 'postgresql://', mas Render pode enviar 'postgres://'
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    else:
+        # Fallback para localhost (desenvolvimento)
         db_url = "postgresql://postgres:postgres@localhost:5432/ti_reminder_db"
+
     SQLALCHEMY_DATABASE_URI = db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = DEBUG and os.environ.get('SQL_ECHO', 'False').lower() == 'true'
@@ -31,7 +35,7 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'reminder@example.com')
     
-    # Timezone (Porto Velho, Rondônia - UTC-4)
+    # Timezone
     TIMEZONE = timezone(timedelta(hours=-4))
     TIMEZONE_NAME = os.environ.get('TIMEZONE', 'America/Porto_Velho')
     
@@ -41,10 +45,9 @@ class Config:
     
     # Logging
     LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT', 'True').lower() == 'true'
-    LOG_LEVEL = os.environ.get('LOG_LEVEL', 'WARNING')  # Alterado de INFO para WARNING
+    LOG_LEVEL = os.environ.get('LOG_LEVEL', 'WARNING')
     LOG_FILE = os.environ.get('LOG_FILE', 'logs/ti_reminder.log')
     
-    # Configurações de log para bibliotecas de terceiros
     LOGGING_CONFIG = {
         'version': 1,
         'disable_existing_loggers': False,
@@ -56,26 +59,14 @@ class Config:
         'handlers': {
             'console': {
                 'class': 'logging.StreamHandler',
-                'level': 'WARNING',  # Apenas erros e warnings
+                'level': 'WARNING',
                 'formatter': 'simple',
             },
         },
         'loggers': {
-            'werkzeug': {
-                'handlers': ['console'],
-                'level': 'WARNING',
-                'propagate': False,
-            },
-            'apscheduler': {
-                'handlers': ['console'],
-                'level': 'WARNING',
-                'propagate': False,
-            },
-            'sqlalchemy': {
-                'handlers': ['console'],
-                'level': 'WARNING',
-                'propagate': False,
-            },
+            'werkzeug': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+            'apscheduler': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+            'sqlalchemy': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
         },
     }
     
@@ -84,38 +75,32 @@ class Config:
 
 
 class DevelopmentConfig(Config):
-    """Configuração para ambiente de desenvolvimento."""
     DEBUG = True
     TESTING = False
 
 
 class ProductionConfig(Config):
-    """Configuração para ambiente de produção."""
     DEBUG = False
     TESTING = False
     LOG_TO_STDOUT = True
     
-    # Em produção, SECRET_KEY deve estar no ambiente
     @property
     def SECRET_KEY(self):
         key = os.environ.get('SECRET_KEY')
         if not key:
             raise ValueError(
-                "SECRET_KEY deve estar definida no ambiente de produção. "
-                "Gere uma com: python -c 'import secrets; print(secrets.token_hex(32))'"
+                "SECRET_KEY deve estar definida no ambiente de produção."
             )
         return key
 
 
 class TestingConfig(Config):
-    """Configuração para testes."""
     TESTING = True
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:postgres@localhost:5432/ti_reminder_test'
     WTF_CSRF_ENABLED = False
 
 
-# Mapeamento de configurações
 config_map = {
     'development': DevelopmentConfig,
     'production': ProductionConfig,
@@ -125,7 +110,6 @@ config_map = {
 
 
 def get_config(env_name=None):
-    """Retorna a configuração apropriada baseada no ambiente."""
     if env_name is None:
         env_name = os.environ.get('FLASK_ENV', 'development')
     return config_map.get(env_name, DevelopmentConfig)
