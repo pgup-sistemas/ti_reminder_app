@@ -4092,3 +4092,157 @@ def api_notifications():
             ],
         }
     )
+
+
+# ============================================================================
+# ANALYTICS API ENDPOINTS
+# ============================================================================
+
+@bp.route("/api/analytics/dashboard-kpis")
+@login_required
+def api_dashboard_kpis():
+    """Retorna KPIs principais para o dashboard"""
+    from .services.analytics.analytics_service import AnalyticsService
+    
+    # Apenas admin e TI podem acessar
+    if not session.get("is_admin") and not session.get("is_ti"):
+        return jsonify({'error': 'Sem permissão'}), 403
+    
+    try:
+        kpis = AnalyticsService.get_dashboard_kpis()
+        return jsonify(kpis)
+    except Exception as e:
+        current_app.logger.error(f"Erro ao buscar KPIs: {e}")
+        return jsonify({'error': 'Erro ao buscar métricas'}), 500
+
+
+@bp.route("/api/analytics/chamados-periodo")
+@login_required
+def api_chamados_periodo():
+    """Retorna chamados agrupados por período"""
+    from .services.analytics.analytics_service import AnalyticsService
+    
+    # Apenas admin e TI podem acessar
+    if not session.get("is_admin") and not session.get("is_ti"):
+        return jsonify({'error': 'Sem permissão'}), 403
+    
+    try:
+        # Parâmetros
+        start = request.args.get('start')
+        end = request.args.get('end')
+        group_by = request.args.get('group_by', 'day')
+        
+        # Converter strings para dates
+        if start:
+            start = datetime.strptime(start, '%Y-%m-%d').date()
+        else:
+            start = date.today() - timedelta(days=30)
+            
+        if end:
+            end = datetime.strptime(end, '%Y-%m-%d').date()
+        else:
+            end = date.today()
+        
+        data = AnalyticsService.get_chamados_por_periodo(start, end, group_by)
+        return jsonify(data)
+    except Exception as e:
+        current_app.logger.error(f"Erro ao buscar chamados por período: {e}")
+        return jsonify({'error': 'Erro ao buscar dados'}), 500
+
+
+@bp.route("/api/analytics/chamados-prioridade")
+@login_required
+def api_chamados_prioridade():
+    """Retorna distribuição de chamados por prioridade"""
+    from .services.analytics.analytics_service import AnalyticsService
+    
+    # Apenas admin e TI podem acessar
+    if not session.get("is_admin") and not session.get("is_ti"):
+        return jsonify({'error': 'Sem permissão'}), 403
+    
+    try:
+        # Parâmetros opcionais
+        start = request.args.get('start')
+        end = request.args.get('end')
+        
+        if start:
+            start = datetime.strptime(start, '%Y-%m-%d').date()
+        if end:
+            end = datetime.strptime(end, '%Y-%m-%d').date()
+        
+        data = AnalyticsService.get_chamados_por_prioridade(start, end)
+        return jsonify(data)
+    except Exception as e:
+        current_app.logger.error(f"Erro ao buscar chamados por prioridade: {e}")
+        return jsonify({'error': 'Erro ao buscar dados'}), 500
+
+
+@bp.route("/api/analytics/performance-tecnico")
+@login_required
+def api_performance_tecnico():
+    """Retorna performance de cada técnico"""
+    from .services.analytics.analytics_service import AnalyticsService
+    
+    # Apenas admin e TI podem acessar
+    if not session.get("is_admin") and not session.get("is_ti"):
+        return jsonify({'error': 'Sem permissão'}), 403
+    
+    try:
+        # Parâmetros
+        start = request.args.get('start')
+        end = request.args.get('end')
+        
+        if start:
+            start = datetime.strptime(start, '%Y-%m-%d').date()
+        else:
+            start = date.today() - timedelta(days=30)
+            
+        if end:
+            end = datetime.strptime(end, '%Y-%m-%d').date()
+        else:
+            end = date.today()
+        
+        data = AnalyticsService.get_performance_por_tecnico(start, end)
+        return jsonify(data)
+    except Exception as e:
+        current_app.logger.error(f"Erro ao buscar performance: {e}")
+        return jsonify({'error': 'Erro ao buscar dados'}), 500
+
+
+@bp.route("/api/analytics/chamados-setor")
+@login_required
+def api_chamados_setor():
+    """Retorna distribuição de chamados por setor"""
+    from .services.analytics.analytics_service import AnalyticsService
+    
+    # Apenas admin e TI podem acessar
+    if not session.get("is_admin") and not session.get("is_ti"):
+        return jsonify({'error': 'Sem permissão'}), 403
+    
+    try:
+        # Parâmetros opcionais
+        start = request.args.get('start')
+        end = request.args.get('end')
+        
+        if start:
+            start = datetime.strptime(start, '%Y-%m-%d').date()
+        if end:
+            end = datetime.strptime(end, '%Y-%m-%d').date()
+        
+        data = AnalyticsService.get_chamados_por_setor(start, end)
+        return jsonify(data)
+    except Exception as e:
+        current_app.logger.error(f"Erro ao buscar chamados por setor: {e}")
+        return jsonify({'error': 'Erro ao buscar dados'}), 500
+
+
+@bp.route("/analytics")
+@login_required
+def analytics_dashboard():
+    """Página do dashboard de analytics"""
+    # Apenas admin e TI podem acessar
+    if not session.get("is_admin") and not session.get("is_ti"):
+        flash_error("Acesso restrito a administradores e equipe de TI.")
+        return redirect(url_for("main.index"))
+    
+    return render_template("analytics/dashboard.html")

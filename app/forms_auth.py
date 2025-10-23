@@ -4,14 +4,39 @@ from wtforms.validators import (DataRequired, Email, EqualTo, Length,
                                 ValidationError)
 
 from .models import User
+from .validators import StrongPassword, UsernameValidator, NoCommonPassword
 
 
 class RegistrationForm(FlaskForm):
-    username = StringField("Usuário", validators=[DataRequired()])
-    email = StringField("Email", validators=[DataRequired(), Email()])
-    password = PasswordField("Senha", validators=[DataRequired()])
+    username = StringField(
+        "Usuário", 
+        validators=[
+            DataRequired(message="Nome de usuário é obrigatório."),
+            UsernameValidator(),
+            Length(min=3, max=64, message="Nome de usuário deve ter entre 3 e 64 caracteres.")
+        ]
+    )
+    email = StringField(
+        "Email", 
+        validators=[
+            DataRequired(message="Email é obrigatório."),
+            Email(message="Email inválido.")
+        ]
+    )
+    password = PasswordField(
+        "Senha", 
+        validators=[
+            DataRequired(message="Senha é obrigatória."),
+            StrongPassword(),
+            NoCommonPassword()
+        ]
+    )
     password2 = PasswordField(
-        "Repita a senha", validators=[DataRequired(), EqualTo("password")]
+        "Repita a senha", 
+        validators=[
+            DataRequired(message="Confirmação de senha é obrigatória."),
+            EqualTo("password", message="As senhas devem ser iguais.")
+        ]
     )
     submit = SubmitField("Registrar")
 
@@ -44,8 +69,19 @@ class RequestPasswordResetForm(FlaskForm):
 
 
 class ResetPasswordForm(FlaskForm):
-    password = PasswordField("Nova Senha", validators=[DataRequired(), Length(min=6)])
+    password = PasswordField(
+        "Nova Senha", 
+        validators=[
+            DataRequired(message="Nova senha é obrigatória."),
+            StrongPassword(),
+            NoCommonPassword()
+        ]
+    )
     password2 = PasswordField(
-        "Confirmar Nova Senha", validators=[DataRequired(), EqualTo("password")]
+        "Confirmar Nova Senha", 
+        validators=[
+            DataRequired(message="Confirmação de senha é obrigatória."),
+            EqualTo("password", message="As senhas devem ser iguais.")
+        ]
     )
     submit = SubmitField("Redefinir Senha")

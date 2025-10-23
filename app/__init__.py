@@ -26,6 +26,7 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_talisman import Talisman
 
 from .email_utils import mail_init_app
 
@@ -37,6 +38,7 @@ bootstrap = Bootstrap()
 jwt = JWTManager()
 limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
 login_manager = LoginManager()
+talisman = Talisman()
 
 
 def create_app():
@@ -120,6 +122,71 @@ def create_app():
     scheduler.start()
     migrate.init_app(app, db)
     bootstrap.init_app(app)
+    
+    # Configurar headers de segurança HTTP com Talisman
+    if not app.config.get('TESTING', False):
+        csp = {
+            'default-src': "'self'",
+            'script-src': [
+                "'self'",
+                "'unsafe-inline'",  # Necessário para Bootstrap e alguns scripts inline
+                "'unsafe-eval'",   # Necessário para alguns frameworks JS
+                'cdn.jsdelivr.net',
+                'code.jquery.com',
+                'stackpath.bootstrapcdn.com',
+                'cdnjs.cloudflare.com'
+            ],
+            'style-src': [
+                "'self'",
+                "'unsafe-inline'",  # Necessário para estilos inline
+                'cdn.jsdelivr.net',
+                'stackpath.bootstrapcdn.com',
+                'cdnjs.cloudflare.com',
+                'fonts.googleapis.com'
+            ],
+            'font-src': [
+                "'self'",
+                'cdn.jsdelivr.net',
+                'cdnjs.cloudflare.com',
+                'fonts.gstatic.com',
+                'data:'
+            ],
+            'img-src': [
+                "'self'",
+                'data:',
+                'https:'
+            ],
+            'connect-src': "'self'",
+            'frame-ancestors': "'none'",
+            'base-uri': "'self'",
+            'form-action': "'self'"
+        }
+        
+        talisman.init_app(
+            app,
+            force_https=app.config.get('SESSION_COOKIE_SECURE', False),
+            strict_transport_security=True,
+            strict_transport_security_max_age=31536000,  # 1 ano
+            strict_transport_security_include_subdomains=True,
+            content_security_policy=csp,
+            content_security_policy_report_only=False,
+            referrer_policy='strict-origin-when-cross-origin',
+            feature_policy={
+                'geolocation': "'none'",
+                'midi': "'none'",
+                'notifications': "'self'",
+                'push': "'self'",
+                'sync-xhr': "'self'",
+                'microphone': "'none'",
+                'camera': "'none'",
+                'magnetometer': "'none'",
+                'gyroscope': "'none'",
+                'speaker': "'self'",
+                'vibrate': "'none'",
+                'fullscreen': "'self'",
+                'payment': "'none'"
+            }
+        )
 
     # Configurar contexto de aplicação para disponibilizar variáveis em todos os templates
     @app.context_processor

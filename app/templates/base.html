@@ -387,6 +387,13 @@
             <li><h6 class="dropdown-header"><i class="fas fa-chart-line me-2 text-danger" aria-hidden="true"></i>Dashboards Especializados</h6></li>
             <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
             <li>
+              <a class="dropdown-item {% if request.endpoint == 'main.analytics_dashboard' %}active{% endif %}"
+                 href="{{ url_for('main.analytics_dashboard') }}"
+                 role="menuitem">
+                <i class="fas fa-chart-area me-2 text-danger" aria-hidden="true"></i> <strong>Analytics Dashboard</strong> <span class="badge bg-success ms-2">NOVO</span>
+              </a>
+            </li>
+            <li>
               <a class="dropdown-item {% if request.endpoint == 'main.performance_dashboard' %}active{% endif %}"
                  href="{{ url_for('main.performance_dashboard') }}"
                  role="menuitem">

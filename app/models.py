@@ -38,9 +38,17 @@ class User(UserMixin, db.Model):
     approved_reservations = db.relationship("EquipmentReservation", foreign_keys="[EquipmentReservation.approved_by_id]", back_populates="approved_by", lazy=True)
     reset_token = db.Column(db.String(100), nullable=True)
     reset_token_expiry = db.Column(db.DateTime, nullable=True)
+    
+    # Campos de segurança e auditoria
+    login_attempts = db.Column(db.Integer, default=0, nullable=False)  # Contador de tentativas falhas
+    locked_until = db.Column(db.DateTime, nullable=True)  # Bloqueio temporário
+    password_changed_at = db.Column(db.DateTime, nullable=True)  # Data da última troca de senha
+    last_failed_login = db.Column(db.DateTime, nullable=True)  # Último login falho
+    last_password_reset = db.Column(db.DateTime, nullable=True)  # Último reset de senha
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
+        self.password_changed_at = datetime.utcnow()
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -63,9 +71,10 @@ class User(UserMixin, db.Model):
         return True
 
     def clear_reset_token(self):
-        # Limpa o token após uso
+        # Limpa o token após uso e registra o reset
         self.reset_token = None
         self.reset_token_expiry = None
+        self.last_password_reset = datetime.utcnow()
         db.session.commit()
 
     @property

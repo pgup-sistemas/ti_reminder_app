@@ -1,6 +1,6 @@
 # Configuração do MKDocs para TI OSN System
 site_name: TI OSN System - Documentação Oficial
-site_description: Documentação completa do Sistema de Gerenciamento TI OSN - Versão 2.2.0
+site_description: Documentação completa do Sistema de Gerenciamento TI OSN - Versão 2.0 (Segurança Enterprise)
 site_author: Oézios Normando - Equipe TI OSN
 site_url: http://192.168.1.86:5000/docs/
 
@@ -18,6 +18,7 @@ nav:
   - Início: index.md
   - Guia do Usuário:
     - Visão Geral: user-guide/overview.md
+    - Segurança e Login: user-guide/security.md
     - Lembretes: user-guide/reminders.md
     - Chamados: user-guide/chamados.md
     - Tarefas: user-guide/tasks.md
@@ -29,11 +30,14 @@ nav:
     - Certificações: user-guide/certifications.md
     - Performance: user-guide/performance.md
   - Guia do Administrador:
+    - Gerenciamento de Segurança: admin-guide/security-admin.md
     - Equipamentos: admin-guide/equipment-admin.md
     - Performance: admin-guide/performance-admin.md
     - RFID: admin-guide/rfid-admin.md
     - Satisfação: admin-guide/satisfaction-admin.md
     - Certificações: admin-guide/certifications-admin.md
+  - Guia do Desenvolvedor:
+    - Implementação de Segurança: dev-guide/security-implementation.md
 
 # Configurações de Markdown
 markdown_extensions:

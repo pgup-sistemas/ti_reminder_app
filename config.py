@@ -13,6 +13,17 @@ class Config:
     # Segurança
     SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
     
+    # Sessões seguras
+    SESSION_COOKIE_SECURE = False  # Será True em produção (HTTPS)
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
+    
+    # CSRF Protection
+    WTF_CSRF_ENABLED = True
+    WTF_CSRF_TIME_LIMIT = None  # Token nunca expira (apenas com a sessão)
+    WTF_CSRF_SSL_STRICT = False  # Será True em produção
+    
     # Banco de dados
     # Render define DATABASE_URL automaticamente, mas localmente usamos localhost
     db_url = os.environ.get('DATABASE_URL')
@@ -33,7 +44,7 @@ class Config:
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True').lower() == 'true'
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'reminder@example.com')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'pageupsistemas@gmail.com')
     
     # Timezone
     TIMEZONE = timezone(timedelta(hours=-4))
@@ -47,6 +58,7 @@ class Config:
     LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT', 'True').lower() == 'true'
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'WARNING')
     LOG_FILE = os.environ.get('LOG_FILE', 'logs/ti_reminder.log')
+    SECURITY_LOG_FILE = os.environ.get('SECURITY_LOG_FILE', 'logs/security.log')
     
     LOGGING_CONFIG = {
         'version': 1,
@@ -55,6 +67,9 @@ class Config:
             'simple': {
                 'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             },
+            'security': {
+                'format': '%(asctime)s - SECURITY - %(levelname)s - %(message)s',
+            },
         },
         'handlers': {
             'console': {
@@ -62,11 +77,20 @@ class Config:
                 'level': 'WARNING',
                 'formatter': 'simple',
             },
+            'security_file': {
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': 'logs/security.log',
+                'maxBytes': 10485760,  # 10MB
+                'backupCount': 10,
+                'formatter': 'security',
+                'level': 'INFO',
+            },
         },
         'loggers': {
             'werkzeug': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
             'apscheduler': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
             'sqlalchemy': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+            'security': {'handlers': ['security_file', 'console'], 'level': 'INFO', 'propagate': False},
         },
     }
     
@@ -84,6 +108,14 @@ class ProductionConfig(Config):
     TESTING = False
     LOG_TO_STDOUT = True
     
+    # Sessões seguras em produção (HTTPS obrigatório)
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Strict'
+    
+    # CSRF mais rígido em produção
+    WTF_CSRF_SSL_STRICT = True
+    
     @property
     def SECRET_KEY(self):
         key = os.environ.get('SECRET_KEY')
@@ -92,6 +124,23 @@ class ProductionConfig(Config):
                 "SECRET_KEY deve estar definida no ambiente de produção."
             )
         return key
+    
+    @property
+    def JWT_SECRET_KEY(self):
+        key = os.environ.get('JWT_SECRET_KEY')
+        if not key:
+            raise ValueError(
+                "JWT_SECRET_KEY deve estar definida no ambiente de produção."
+            )
+        return key
+    
+    def __init__(self):
+        super().__init__()
+        # Validar configurações obrigatórias de email em produção
+        if not os.environ.get('MAIL_USERNAME'):
+            raise ValueError("MAIL_USERNAME deve estar definido em produção.")
+        if not os.environ.get('MAIL_PASSWORD'):
+            raise ValueError("MAIL_PASSWORD deve estar definido em produção.")
 
 
 class TestingConfig(Config):
@@ -99,6 +148,7 @@ class TestingConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:postgres@localhost:5432/ti_reminder_test'
     WTF_CSRF_ENABLED = False
+    SESSION_COOKIE_SECURE = False
 
 
 config_map = {
