@@ -1,3 +1,5 @@
-from app import create_app
+from app import app  # aqui 'app' é sua instância Flask
 
-app = create_app()
+if __name__ == "__main__":
+    app.run()
+
