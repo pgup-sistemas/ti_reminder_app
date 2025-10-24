@@ -31,7 +31,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
+<div class="container-fluid py-4" id="analytics-content">
     
     <!-- Header -->
     <div class="analytics-header mb-4">
@@ -42,10 +42,64 @@
                 </h2>
                 <p class="mb-0 opacity-90">Métricas e indicadores de performance em tempo real</p>
             </div>
-            <div>
-                <button class="btn btn-light" onclick="window.analyticsDashboard.loadKPIs(); window.analyticsDashboard.loadChartData();">
+            <div class="d-flex gap-2">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fas fa-download me-2"></i>Exportar
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" id="btn-export-pdf">
+                            <i class="fas fa-file-pdf me-2 text-danger"></i>PDF
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" id="btn-export-excel">
+                            <i class="fas fa-file-excel me-2 text-success"></i>Excel
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="btn-export-image">
+                            <i class="fas fa-image me-2 text-info"></i>Imagem
+                        </a></li>
+                    </ul>
+                </div>
+                <button class="btn btn-light" id="btn-refresh">
                     <i class="fas fa-sync-alt me-2"></i>Atualizar
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros de Período -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-end g-3">
+                <div class="col-md-3">
+                    <label for="filter-start-date" class="form-label small fw-bold">
+                        <i class="fas fa-calendar-alt me-1"></i>Data Inicial
+                    </label>
+                    <input type="date" class="form-control" id="filter-start-date">
+                </div>
+                <div class="col-md-3">
+                    <label for="filter-end-date" class="form-label small fw-bold">
+                        <i class="fas fa-calendar-alt me-1"></i>Data Final
+                    </label>
+                    <input type="date" class="form-control" id="filter-end-date">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">
+                        <i class="fas fa-filter me-1"></i>Período Rápido
+                    </label>
+                    <select class="form-select" id="filter-preset">
+                        <option value="7">Últimos 7 dias</option>
+                        <option value="30" selected>Últimos 30 dias</option>
+                        <option value="60">Últimos 60 dias</option>
+                        <option value="90">Últimos 90 dias</option>
+                        <option value="custom">Personalizado</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100" id="btn-apply-filters">
+                        <i class="fas fa-search me-2"></i>Aplicar Filtros
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -192,6 +246,85 @@
         </div>
     </div>
 
+    <!-- KPI Cards Row 3 - Tutoriais e Tarefas -->
+    <div class="row g-3 mb-4">
+        <!-- Total Tutoriais -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm kpi-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1 small text-uppercase fw-bold">Total Tutoriais</p>
+                            <h3 class="kpi-value mb-0" id="kpi-total-tutoriais">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </h3>
+                        </div>
+                        <div class="bg-purple bg-opacity-10 p-3 rounded" style="background-color: rgba(102, 16, 242, 0.1) !important;">
+                            <i class="fas fa-book fa-2x" style="color: #6610f2;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualizações de Tutoriais -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm kpi-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1 small text-uppercase fw-bold">Visualizações</p>
+                            <h3 class="kpi-value mb-0" id="kpi-total-visualizacoes">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </h3>
+                        </div>
+                        <div class="bg-indigo bg-opacity-10 p-3 rounded" style="background-color: rgba(75, 0, 130, 0.1) !important;">
+                            <i class="fas fa-eye fa-2x" style="color: #4b0082;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarefas Concluídas -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm kpi-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1 small text-uppercase fw-bold">Tarefas Concluídas</p>
+                            <h3 class="kpi-value mb-0" id="kpi-tasks-concluidas">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </h3>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarefas Pendentes -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm kpi-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1 small text-uppercase fw-bold">Tarefas Pendentes</p>
+                            <h3 class="kpi-value mb-0" id="kpi-tasks-pendentes">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </h3>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-hourglass-half fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Gráficos Row 1 -->
     <div class="row g-3 mb-4">
         <!-- Evolução de Chamados -->
@@ -268,6 +401,63 @@
         </div>
     </div>
 
+    <!-- Gráficos Row 3 - Tutoriais e Tarefas -->
+    <div class="row g-3 mb-4">
+        <!-- Tutoriais por Categoria -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2 text-primary"></i>
+                        Tutoriais por Categoria
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="chart-tutoriais-categoria"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tutoriais Mais Visualizados -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star me-2 text-primary"></i>
+                        Tutoriais Mais Visualizados
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="chart-tutoriais-top"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos Row 4 - Tarefas -->
+    <div class="row g-3 mb-4">
+        <!-- Evolução de Tarefas -->
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2 text-primary"></i>
+                        Evolução de Tarefas (Últimos 30 Dias)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="chart-tasks-periodo"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Info Footer -->
     <div class="alert alert-info border-0 shadow-sm">
         <i class="fas fa-info-circle me-2"></i>
@@ -278,10 +468,10 @@
 </div>
 {% endblock %}
 
-{% block extra_js %}
+{% block scripts %}
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-<!-- Analytics Dashboard Script -->
-<script src="{{ url_for('static', filename='js/analytics/analytics-dashboard.js') }}"></script>
+<!-- Analytics Dashboard Script - NOVO arquivo para bypass cache -->
+<script src="{{ url_for('static', filename='js/analytics/analytics-dashboard-v2.js') }}"></script>
 {% endblock %}

@@ -113,7 +113,7 @@ class CertificationService:
                 # Atualizar certificação existente
                 if existing_cert.level != level:
                     existing_cert.level = level
-                    existing_cert.awarded_date = get_current_time_for_db()
+                    existing_cert.awarded_at = get_current_time_for_db()
                     # Extender validade por 1 ano
                     existing_cert.expires_at = get_current_time_for_db() + timedelta(days=365)
 
@@ -253,7 +253,7 @@ class CertificationService:
         try:
             certifications = UserCertification.query.filter_by(
                 user_id=user_id
-            ).order_by(UserCertification.awarded_date.desc()).all()
+            ).order_by(UserCertification.awarded_at.desc()).all()
 
             return certifications
 
@@ -328,7 +328,7 @@ class CertificationService:
                 active_cert = UserCertification.query.filter_by(
                     user_id=metrics.user_id,
                     is_active=True
-                ).order_by(UserCertification.awarded_date.desc()).first()
+                ).order_by(UserCertification.awarded_at.desc()).first()
 
                 needs_update = False
                 if not active_cert:

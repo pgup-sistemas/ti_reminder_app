@@ -521,6 +521,7 @@
 // Variáveis globais
 let userToReset = null;
 let userToDelete = null;
+let resetPasswordModalInstance = null;
 let currentFilters = {
     search: '',
     status: '',
@@ -659,10 +660,14 @@ function updateBulkActionsState() {
 // Ações Individuais
 function resetPassword(userId, username) {
     userToReset = userId;
-    const modal = document.getElementById('resetPasswordModal');
-    if (modal) {
+    const modalElement = document.getElementById('resetPasswordModal');
+    if (modalElement) {
         document.getElementById('resetUserName').textContent = username;
-        new bootstrap.Modal(modal).show();
+        document.getElementById('newPasswordDisplay').style.display = 'none';
+        
+        // Obter ou criar instância do modal
+        resetPasswordModalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+        resetPasswordModalInstance.show();
     }
 }
 
@@ -792,10 +797,14 @@ function setupModalListeners() {
                         showToast('Senha redefinida com sucesso!', 'success');
                         document.getElementById('newPasswordDisplay').textContent = data.new_password;
                         document.getElementById('newPasswordDisplay').style.display = 'block';
+                        
+                        // Fechar modal após 3 segundos
                         setTimeout(() => {
-                            bootstrap.Modal.getInstance(document.getElementById('resetPasswordModal')).hide();
+                            if (resetPasswordModalInstance) {
+                                resetPasswordModalInstance.hide();
+                            }
                             location.reload();
-                        }, 2000);
+                        }, 3000);
                     } else {
                         showToast('Erro: ' + data.message, 'error');
                     }
@@ -934,8 +943,33 @@ function hideLoading() {
 }
 
 function showToast(message, type = 'info') {
-    // Implementar sistema de toast notifications
-    console.log(`${type}: ${message}`);
+    // Mapear tipos para classes Bootstrap
+    const typeMap = {
+        'success': 'success',
+        'error': 'danger',
+        'warning': 'warning',
+        'info': 'info'
+    };
+    
+    const toastClass = typeMap[type] || 'info';
+    
+    // Criar elemento toast
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${toastClass} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    `;
+    
+    // Adicionar ao body
+    document.body.appendChild(toast);
+    
+    // Remover automaticamente após 5 segundos
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 150);
+    }, 5000);
 }
 
 function showConfirmDialog(options) {

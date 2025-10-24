@@ -1,7 +1,7 @@
 """Decoradores de autenticação e autorização."""
 from functools import wraps
 
-from flask import redirect, url_for
+from flask import redirect, url_for, request
 from flask_login import current_user
 from app.utils import flash_error
 
@@ -13,15 +13,21 @@ def login_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        from flask import session, current_app
+        
         if not current_user.is_authenticated:
-            flash_error("Por favor, faça login para acessar esta página.")
-            return redirect(url_for("auth.login", next=url_for(f.__name__, **kwargs)))
+            # Mostrar mensagem apenas se não for acesso direto à página inicial
+            if request.endpoint != 'main.index' or request.referrer:
+                flash_error("Por favor, faça login para acessar esta página.")
+            
+            return redirect(url_for("auth.login", next=request.url))
         
         # Verificar se o usuário está ativo
         if not current_user.ativo:
             flash_error("Sua conta foi desativada pelo administrador.")
             from flask_login import logout_user
             logout_user()
+            session.clear()
             return redirect(url_for("auth.login"))
         
         return f(*args, **kwargs)
@@ -38,7 +44,7 @@ def admin_required(f):
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
             flash_error("Por favor, faça login para acessar esta página.")
-            return redirect(url_for("auth.login", next=url_for(f.__name__, **kwargs)))
+            return redirect(url_for("auth.login", next=request.url))
         
         if not current_user.is_admin:
             flash_error("Acesso restrito a administradores.")
@@ -58,7 +64,7 @@ def ti_required(f):
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
             flash_error("Por favor, faça login para acessar esta página.")
-            return redirect(url_for("auth.login", next=url_for(f.__name__, **kwargs)))
+            return redirect(url_for("auth.login", next=request.url))
         
         if not (current_user.is_ti or current_user.is_admin):
             flash_error("Acesso restrito à equipe de TI.")

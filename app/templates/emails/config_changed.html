@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuração Alterada - TI OSN System</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .alert-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .changes-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .changes-table th,
+        .changes-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .changes-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        .changes-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .badge-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .btn:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚙️ Configuração Alterada</h1>
+            <p>TI OSN System - Notificação de Alteração</p>
+        </div>
+
+        <div class="content">
+            <div class="alert-box">
+                <strong>🔔 Atenção:</strong> Uma configuração do sistema foi alterada.
+            </div>
+
+            <h2>Detalhes da Alteração</h2>
+            
+            <div class="info-box">
+                <p><strong>Módulo:</strong> <span class="badge badge-info">{{ category_display }}</span></p>
+                <p><strong>Alterado por:</strong> {{ actor.username }} ({{ actor.email }})</p>
+                <p><strong>Data/Hora:</strong> {{ timestamp.strftime('%d/%m/%Y às %H:%M:%S') }}</p>
+            </div>
+
+            <h3>Alterações Realizadas</h3>
+            
+            <table class="changes-table">
+                <thead>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Valor Anterior</th>
+                        <th>Novo Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for change in changes %}
+                    <tr>
+                        <td><strong>{{ change.field_display }}</strong></td>
+                        <td>{{ change.old_value if change.old_value is not none else '<em>não definido</em>' }}</td>
+                        <td><strong>{{ change.new_value }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if notes %}
+            <div class="info-box">
+                <strong>📝 Observações:</strong>
+                <p>{{ notes }}</p>
+            </div>
+            {% endif %}
+
+            <div style="text-align: center;">
+                <a href="{{ url }}" class="btn">Visualizar Configurações</a>
+            </div>
+
+            <p style="margin-top: 30px; font-size: 14px; color: #6c757d;">
+                <strong>Por que recebi este email?</strong><br>
+                Você está recebendo esta notificação porque é um administrador do sistema e configurou alertas de alterações de configuração.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>
+                <strong>TI OSN System</strong><br>
+                Sistema de Gerenciamento de TI<br>
+                © 2025 - Todos os direitos reservados
+            </p>
+            <p style="font-size: 12px; margin-top: 10px;">
+                Este é um email automático, por favor não responda.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

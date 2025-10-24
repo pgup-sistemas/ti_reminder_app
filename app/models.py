@@ -38,6 +38,7 @@ class User(UserMixin, db.Model):
     approved_reservations = db.relationship("EquipmentReservation", foreign_keys="[EquipmentReservation.approved_by_id]", back_populates="approved_by", lazy=True)
     reset_token = db.Column(db.String(100), nullable=True)
     reset_token_expiry = db.Column(db.DateTime, nullable=True)
+    config_changes = db.relationship("ConfigChangeLog", back_populates="actor", lazy=True)
     
     # Campos de segurança e auditoria
     login_attempts = db.Column(db.Integer, default=0, nullable=False)  # Contador de tentativas falhas
@@ -81,6 +82,29 @@ class User(UserMixin, db.Model):
     def is_active(self):
         """Sobrescreve o método is_active do UserMixin para usar o campo 'ativo'"""
         return self.ativo
+
+
+class ConfigChangeLog(db.Model):
+    __tablename__ = "config_change_log"
+
+    id = db.Column(db.Integer, primary_key=True)
+    module = db.Column(db.String(100), nullable=False)
+    entity_type = db.Column(db.String(100), nullable=True)
+    entity_id = db.Column(db.String(64), nullable=True)
+    field = db.Column(db.String(100), nullable=True)
+    old_value = db.Column(db.Text, nullable=True)
+    new_value = db.Column(db.Text, nullable=True)
+    audit_metadata = db.Column("metadata", db.JSON, nullable=True)
+    created_at = db.Column(db.DateTime, default=get_current_time_for_db, nullable=False)
+    actor_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+
+    actor = db.relationship("User", back_populates="config_changes")
+
+    def __repr__(self):
+        return (
+            f"<ConfigChangeLog module={self.module} entity_type={self.entity_type} "
+            f"entity_id={self.entity_id} field={self.field}>"
+        )
 
 
 class Sector(db.Model):
@@ -430,6 +454,9 @@ class Equipment(db.Model):
     # RFID e Rastreamento
     rfid_tag = db.Column(db.String(100), nullable=True, unique=True)  # Tag RFID
     rfid_status = db.Column(db.String(20), default="desconhecido")  # ativo, inativo, perdido
+    rfid_last_scan = db.Column(db.DateTime, nullable=True)  # Última leitura RFID
+    rfid_last_location = db.Column(db.String(100), nullable=True)  # Última localização detectada
+    rfid_reader_id = db.Column(db.String(50), nullable=True)  # ID do último leitor
 
     # Timestamps
     created_at = db.Column(db.DateTime, nullable=False, default=get_current_time_for_db)
@@ -604,6 +631,23 @@ class EquipmentReservation(db.Model):
             'duration_hours': self.get_duration_hours(),
             'created_at': self.created_at.isoformat()
         }
+
+
+class SecureConfig(db.Model):
+    """Armazena segredos de configuração de forma criptografada."""
+
+    key = db.Column(db.String(120), primary_key=True)
+    value = db.Column(db.LargeBinary, nullable=False)
+    created_at = db.Column(db.DateTime, default=get_current_time_for_db, nullable=False)
+    updated_at = db.Column(
+        db.DateTime,
+        default=get_current_time_for_db,
+        onupdate=get_current_time_for_db,
+        nullable=False,
+    )
+
+    def __repr__(self):
+        return f"<SecureConfig {self.key}>"
 
 
 class EquipmentLoan(db.Model):
@@ -918,7 +962,7 @@ class UserCertification(db.Model):
     certification_type = db.Column(db.String(50), nullable=False)  # Ex: "Contribuidor Ativo", "Especialista", "Moderador"
     level = db.Column(db.Integer, default=1)  # Nível da certificação (1-5)
     points = db.Column(db.Integer, default=0)  # Pontos acumulados
-    awarded_date = db.Column(db.DateTime, default=get_current_time_for_db)
+    awarded_at = db.Column(db.DateTime, default=get_current_time_for_db)
     expires_at = db.Column(db.DateTime, nullable=True)  # Data de expiração
     is_active = db.Column(db.Boolean, default=True)
 
@@ -967,3 +1011,57 @@ class ContributionMetrics(db.Model):
 
     def __repr__(self):
         return f"<ContributionMetrics {self.user.username} - {self.total_points} points>"
+
+
+class SystemConfig(db.Model):
+    """Armazenamento persistente de configurações do sistema"""
+    __tablename__ = "system_config"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(50), nullable=False)  # 'system', 'security', 'backup', 'email', 'performance'
+    key = db.Column(db.String(100), nullable=False)
+    value = db.Column(db.Text, nullable=True)
+    value_type = db.Column(db.String(20), default='string')  # string, int, bool, json, float
+    is_sensitive = db.Column(db.Boolean, default=False)  # Se deve ser ocultada em logs
+    description = db.Column(db.Text, nullable=True)  # Descrição da configuração
+    default_value = db.Column(db.Text, nullable=True)  # Valor padrão
+    created_at = db.Column(db.DateTime, default=get_current_time_for_db)
+    updated_at = db.Column(db.DateTime, default=get_current_time_for_db, onupdate=get_current_time_for_db)
+    updated_by_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    
+    # Relacionamentos
+    updated_by = db.relationship("User", backref=db.backref("config_updates", lazy=True))
+    
+    __table_args__ = (
+        db.UniqueConstraint('category', 'key', name='unique_config_key'),
+    )
+    
+    def get_typed_value(self):
+        """Retorna o valor convertido para o tipo apropriado"""
+        if self.value is None:
+            return None
+            
+        if self.value_type == 'bool':
+            return self.value.lower() in ('true', '1', 'yes', 'on')
+        elif self.value_type == 'int':
+            return int(self.value)
+        elif self.value_type == 'float':
+            return float(self.value)
+        elif self.value_type == 'json':
+            import json
+            return json.loads(self.value)
+        else:  # string
+            return self.value
+    
+    def set_typed_value(self, value):
+        """Define o valor convertendo para string"""
+        if value is None:
+            self.value = None
+        elif self.value_type == 'json':
+            import json
+            self.value = json.dumps(value)
+        else:
+            self.value = str(value)
+    
+    def __repr__(self):
+        return f"<SystemConfig {self.category}.{self.key}={self.value}>"

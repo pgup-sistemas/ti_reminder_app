@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste de Formulário Simples</title>
+</head>
+<body>
+    <h1>Teste de Formulário - Sem JavaScript</h1>
+    
+    <form method="POST" action="/configuracoes/usuarios/1/editar">
+        <input type="hidden" name="csrf_token" value="test">
+        
+        <label>Username:</label>
+        <input type="text" name="username" value="admin_test_TESTE"><br><br>
+        
+        <label>Email:</label>
+        <input type="email" name="email" value="admin@test.com"><br><br>
+        
+        <label>Setor ID:</label>
+        <input type="number" name="sector_id" value="1"><br><br>
+        
+        <label>
+            <input type="checkbox" name="is_admin" value="y" checked> Admin
+        </label><br>
+        
+        <label>
+            <input type="checkbox" name="is_ti" value="y" checked> TI
+        </label><br>
+        
+        <label>
+            <input type="checkbox" name="ativo" checked> Ativo
+        </label><br><br>
+        
+        <input type="hidden" name="change_password" value="">
+        <input type="hidden" name="new_password" value="">
+        <input type="hidden" name="confirm_password" value="">
+        
+        <button type="submit">ENVIAR TESTE</button>
+    </form>
+    
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            console.log('FORMULÁRIO SUBMETIDO!');
+            console.log('Action:', this.action);
+            console.log('Method:', this.method);
+            // NÃO prevenir default - deixar submeter
+        });
+    </script>
+</body>
+</html>

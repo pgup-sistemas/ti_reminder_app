@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Tuple
 
 from flask import current_app
 
-from ..models import EquipmentRequest, db
+from ..models import Equipment, db
 from ..utils.timezone_utils import get_current_time_for_db
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ class RFIDService:
         """
         try:
             # Buscar equipamento pela tag RFID
-            equipment = EquipmentRequest.query.filter_by(rfid_tag=rfid_tag).first()
+            equipment = Equipment.query.filter_by(rfid_tag=rfid_tag).first()
 
             if not equipment:
                 logger.warning(f"Tag RFID não encontrada: {rfid_tag}")
@@ -111,10 +111,10 @@ class RFIDService:
             Dict com resultado da operação
         """
         try:
-            equipment = EquipmentRequest.query.get_or_404(equipment_id)
+            equipment = Equipment.query.get_or_404(equipment_id)
 
             # Verificar se a tag já está em uso
-            existing = EquipmentRequest.query.filter_by(rfid_tag=rfid_tag).first()
+            existing = Equipment.query.filter_by(rfid_tag=rfid_tag).first()
             if existing and existing.id != equipment_id:
                 return {
                     "success": False,
@@ -156,7 +156,7 @@ class RFIDService:
             Dict com resultado da operação
         """
         try:
-            equipment = EquipmentRequest.query.get_or_404(equipment_id)
+            equipment = Equipment.query.get_or_404(equipment_id)
 
             old_tag = equipment.rfid_tag
             equipment.rfid_tag = None
@@ -195,7 +195,7 @@ class RFIDService:
             Dict com informações de localização
         """
         try:
-            equipment = EquipmentRequest.query.get_or_404(equipment_id)
+            equipment = Equipment.query.get_or_404(equipment_id)
 
             if not equipment.rfid_tag:
                 return {
@@ -224,7 +224,7 @@ class RFIDService:
             }
 
     @staticmethod
-    def get_lost_equipment() -> List[EquipmentRequest]:
+    def get_lost_equipment() -> List[Equipment]:
         """
         Retorna lista de equipamentos marcados como perdidos ou não localizados
 
@@ -232,20 +232,9 @@ class RFIDService:
             Lista de equipamentos perdidos
         """
         try:
-            # Equipamentos com status RFID "perdido" ou sem leitura há mais de 7 dias
-            cutoff_date = get_current_time_for_db() - timedelta(days=7)
-
-            lost_equipment = EquipmentRequest.query.filter(
-                db.or_(
-                    EquipmentRequest.rfid_status == "perdido",
-                    db.and_(
-                        EquipmentRequest.rfid_tag.isnot(None),
-                        db.or_(
-                            EquipmentRequest.rfid_last_scan.is_(None),
-                            EquipmentRequest.rfid_last_scan < cutoff_date
-                        )
-                    )
-                )
+            # Equipamentos com status RFID "perdido"
+            lost_equipment = Equipment.query.filter(
+                Equipment.rfid_status == "perdido"
             ).all()
 
             return lost_equipment

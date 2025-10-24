@@ -1,0 +1,133 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Editar Usuário{% endblock %}
+
+{% block config_content %}
+<div class="config-card">
+    <div class="config-card-header">
+        <h3><i class="fas fa-user-edit me-2"></i> Editar Usuário</h3>
+    </div>
+
+    <form method="POST" id="editUserForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token_value }}">
+        
+        <div class="config-card-body">
+            
+            <!-- Username -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Nome de Usuário *</label>
+                <input type="text" name="username" class="form-control" 
+                       value="{{ user.username }}" required>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Email *</label>
+                <input type="email" name="email" class="form-control" 
+                       value="{{ user.email }}" required>
+            </div>
+
+            <!-- Setor -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Setor</label>
+                <select name="sector_id" class="form-select">
+                    <option value="0">-- Nenhum --</option>
+                    {% for sector in sectors %}
+                    <option value="{{ sector.id }}" {% if user.sector_id == sector.id %}selected{% endif %}>
+                        {{ sector.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Permissões -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Permissões</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="is_admin" value="y" 
+                           {% if user.is_admin %}checked{% endif %}>
+                    <label class="form-check-label">Administrador</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="is_ti" value="y" 
+                           {% if user.is_ti %}checked{% endif %}>
+                    <label class="form-check-label">Equipe de TI</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="ativo" 
+                           {% if user.ativo %}checked{% endif %}>
+                    <label class="form-check-label">Usuário Ativo</label>
+                </div>
+            </div>
+
+            <hr class="my-4">
+            
+            <!-- Alterar Senha -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Alterar Senha</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="changePassword">
+                    <label class="form-check-label" for="changePassword">
+                        Alterar senha do usuário
+                    </label>
+                </div>
+            </div>
+
+            <div id="passwordFields" style="display: none;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Nova Senha</label>
+                            <input type="password" name="new_password" class="form-control" 
+                                   placeholder="Mínimo 6 caracteres">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Confirmar Senha</label>
+                            <input type="password" name="confirm_password" class="form-control" 
+                                   placeholder="Digite novamente">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="config-actions">
+            <a href="{{ url_for('system_config.list_users') }}" class="btn btn-secondary">
+                <i class="fas fa-times me-1"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-success" id="btnSubmit">
+                <i class="fas fa-save me-1"></i> Salvar Alterações
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editUserForm');
+    const changePasswordCheckbox = document.getElementById('changePassword');
+    const passwordFields = document.getElementById('passwordFields');
+    const btnSubmit = document.getElementById('btnSubmit');
+    
+    // Toggle senha
+    if (changePasswordCheckbox) {
+        changePasswordCheckbox.addEventListener('change', function() {
+            passwordFields.style.display = this.checked ? 'block' : 'none';
+            if (!this.checked) {
+                passwordFields.querySelectorAll('input').forEach(i => i.value = '');
+            }
+        });
+    }
+    
+    // Submit
+    form.addEventListener('submit', function(e) {
+        console.log('✓ Submetendo formulário...');
+        
+        // Desabilitar botão
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Salvando...';
+    });
+});
+</script>
+{% endblock %}

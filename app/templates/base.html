@@ -155,7 +155,7 @@
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>-->
   
   <!-- Navegação principal -->
-  {% if session.get('user_id') %}
+  {% if current_user.is_authenticated %}
 <nav class="navbar navbar-expand-lg shadow-sm mb-4">
   <div class="container-fluid">
     <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') }}">
@@ -308,7 +308,7 @@
             </li>
             
             <!-- Seção Administrativa -->
-            {% if session.get('is_admin') or session.get('is_ti') %}
+            {% if current_user.is_admin or current_user.is_ti %}
             <li><hr class="dropdown-divider mt-2" role="separator" aria-label="Separador de seção"></li>
             <li><h6 class="dropdown-header"><i class="fas fa-user-shield me-2 text-warning" aria-hidden="true"></i>Administração</h6></li>
             <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
@@ -370,7 +370,7 @@
         </li>
 
         <!-- Dropdown Monitoramento (Admin Only) -->
-        {% if session.get('is_admin') %}
+        {% if current_user.is_admin %}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.rfid_dashboard', 'main.satisfaction_dashboard', 'main.certifications_dashboard', 'main.performance_dashboard'] %}active{% endif %}"
            href="#"
@@ -436,7 +436,7 @@
         </li>
 
         <!-- Administração (Admin Only) -->
-        {% if session.get('is_admin') %}
+        {% if current_user.is_admin %}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle {% if request.endpoint and request.endpoint.startswith('system_config') %}active{% endif %}"
            href="#"
@@ -588,14 +588,14 @@
             <div class="user-avatar me-2" aria-hidden="true">
               <i class="fas fa-user-circle"></i>
             </div>
-            <span class="d-none d-md-inline fw-medium">{{ session['username'] }}</span>
+            <span class="d-none d-md-inline fw-medium">{{ current_user.username }}</span>
             <span class="visually-hidden">Menu do usuário</span>
           </a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" role="menu">
             <li><h2 class="visually-hidden">Menu do Usuário</h2></li>
             <li><h6 class="dropdown-header">
-              <i class="fas fa-user me-2" aria-hidden="true"></i>{{ session['username'] }}
-              {% if session.get('is_admin') %}
+              <i class="fas fa-user me-2" aria-hidden="true"></i>{{ current_user.username }}
+              {% if current_user.is_admin %}
                 <span class="badge bg-primary ms-2">Admin</span>
               {% endif %}
             </h6></li>
@@ -607,7 +607,7 @@
                 <i class="fas fa-chart-pie me-2" aria-hidden="true"></i> Visão Geral
               </a>
             </li>
-            {% if session.get('is_admin') %}
+            {% if current_user.is_admin %}
             <li role="none">
               <a class="dropdown-item"
                  href="{{ url_for('main.dashboard') }}"
@@ -644,9 +644,7 @@
         <!-- Flash messages serão convertidos em toasts pelo adapter -->
         <div id="flask-messages" data-messages='[
           {% for category, message in messages %}
-            {% if message != "Faça login para acessar esta página." %}
-              {"type": "{{ category }}", "message": "{{ message|safe }}"}{{ "," if not loop.last else "" }}
-            {% endif %}
+            {"type": "{{ category }}", "message": "{{ message|safe }}"}{{ "," if not loop.last else "" }}
           {% endfor %}
         ]' style="display:none;"></div>
       {% endif %}

@@ -20,8 +20,28 @@
         </div>
     </div>
 
-    <form method="POST" novalidate>
+    <form method="POST" novalidate id="userForm">
+        {{ form.hidden_tag() }}
         <div class="config-card-body">
+            
+            <!-- Exibir erros gerais do formulário -->
+            {% if form.errors %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <h5 class="alert-heading">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Erros de Validação
+                </h5>
+                <hr>
+                <ul class="mb-0">
+                    {% for field, errors in form.errors.items() %}
+                        {% for error in errors %}
+                        <li><strong>{{ form[field].label.text }}:</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
             <div class="row">
                 <!-- Informações Básicas -->
                 <div class="col-md-6">
@@ -239,9 +259,16 @@
     </form>
 </div>
 
+<!-- Script de validação de senha -->
+<!-- password-validator.js removido temporariamente - causava bloqueio de submit -->
+
 <script>
-// Toggle de mudança de senha
+// Toggle de mudança de senha e utilidades do formulário
 document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('userForm');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const emailField = form.querySelector('input[name="email"]');
+
     const changePasswordCheckbox = document.querySelector('input[name="change_password"]');
     const passwordFields = document.querySelectorAll('input[name="new_password"], input[name="confirm_password"]');
 
@@ -250,7 +277,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const isChecked = changePasswordCheckbox.checked;
             passwordFields.forEach(field => {
                 field.required = isChecked;
-                field.closest('.mb-3').style.display = isChecked ? 'block' : 'none';
+                // NÃO desabilitar os campos - apenas torná-los required ou não
+                // Campos desabilitados não são enviados no POST
+                if (!isChecked) {
+                    field.value = ''; // Limpa o valor quando não está marcado
+                }
+                // Adiciona feedback visual
+                const parentDiv = field.closest('.mb-3');
+                if (parentDiv) {
+                    if (isChecked) {
+                        parentDiv.classList.remove('opacity-50');
+                        field.readOnly = false;
+                    } else {
+                        parentDiv.classList.add('opacity-50');
+                        field.readOnly = true; // readonly ao invés de disabled
+                    }
+                }
             });
         }
 
@@ -258,12 +300,13 @@ document.addEventListener('DOMContentLoaded', function() {
         togglePasswordFields(); // Inicial
     }
 
-    // Validação de senha em tempo real
+    // Validação SIMPLES de senha (SEM PasswordValidatorUI que pode bloquear)
     const newPasswordField = document.querySelector('input[name="new_password"]');
     const confirmPasswordField = document.querySelector('input[name="confirm_password"]');
 
+    // Validação mínima de confirmação de senha
     if (newPasswordField && confirmPasswordField) {
-        function validatePasswords() {
+        confirmPasswordField.addEventListener('blur', function() {
             const password = newPasswordField.value;
             const confirmPassword = confirmPasswordField.value;
 
@@ -272,10 +315,44 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 confirmPasswordField.setCustomValidity('');
             }
-        }
+        });
+    }
 
-        newPasswordField.addEventListener('input', validatePasswords);
-        confirmPasswordField.addEventListener('input', validatePasswords);
+    // Sanitiza email antes do envio e evita double submit
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('=== FORMULÁRIO SENDO SUBMETIDO ===');
+            console.log('Form action:', form.action);
+            console.log('Form method:', form.method);
+            console.log('Username:', form.querySelector('input[name="username"]')?.value);
+            console.log('Email:', form.querySelector('input[name="email"]')?.value);
+            console.log('CSRF Token presente:', !!form.querySelector('input[name="csrf_token"]'));
+            console.log('Change password:', changePasswordCheckbox?.checked);
+            
+            // Limpar validações customizadas que podem bloquear submit
+            if (confirmPasswordField) {
+                confirmPasswordField.setCustomValidity('');
+            }
+            if (newPasswordField) {
+                newPasswordField.setCustomValidity('');
+            }
+            
+            if (emailField) {
+                emailField.value = emailField.value.trim().toLowerCase();
+            }
+
+            // Desabilitar botão de submit para evitar duplo clique
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.classList.add('disabled');
+                
+                // Adicionar indicador visual de loading
+                const originalText = submitButton.innerHTML;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Salvando...';
+            }
+            
+            console.log('✓ Submit permitido, enviando formulário...');
+        });
     }
 });
 </script>

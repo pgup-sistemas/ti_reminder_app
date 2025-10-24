@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conta Atualizada - TI OSN System</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .info-box {
+            background: #d1ecf1;
+            border-left: 4px solid #0c5460;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .changes-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .changes-table th,
+        .changes-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .changes-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✏️ Conta Atualizada</h1>
+            <p>TI OSN System</p>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <strong>ℹ️ Informação:</strong> Sua conta foi atualizada no sistema.
+            </div>
+
+            <p>Olá, <strong>{{ user.username }}</strong>!</p>
+            
+            <p>As informações da sua conta foram atualizadas por <strong>{{ updater.username }}</strong> em {{ timestamp.strftime('%d/%m/%Y às %H:%M') }}.</p>
+
+            {% if changes %}
+            <h3>Alterações Realizadas:</h3>
+            <table class="changes-table">
+                <thead>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Valor Anterior</th>
+                        <th>Novo Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for change in changes %}
+                    <tr>
+                        <td>{{ change.field }}</td>
+                        <td>{{ change.old_value }}</td>
+                        <td><strong>{{ change.new_value }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            {% if password_changed %}
+            <div class="info-box">
+                <strong>🔐 Senha Alterada:</strong> Sua senha foi redefinida. Use a nova senha no próximo acesso.
+            </div>
+            {% endif %}
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ login_url }}" class="btn">Acessar o Sistema</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>TI OSN System</strong><br>© 2025</p>
+        </div>
+    </div>
+</body>
+</html>

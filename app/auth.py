@@ -116,6 +116,8 @@ def login():
         
         # Verificar senha
         if user.check_password(form.password.data):
+            from flask import session
+            
             # Atualizar o timestamp de último login e resetar tentativas
             from .utils.timezone_utils import get_current_time_for_db
             user.last_login = get_current_time_for_db()
@@ -123,9 +125,30 @@ def login():
             user.locked_until = None
             db.session.commit()
             
-            # Usar Flask-Login para fazer login (APENAS ISSO - sem sessões duplicadas)
+            # NÃO LIMPAR SESSÃO - causa problemas com Flask-Login!
+            # session.clear() <- REMOVIDO
+            
+            # DEBUG
+            with open('debug_login.txt', 'a') as f:
+                f.write(f"\n[{datetime.now()}] ANTES LOGIN_USER\n")
+                f.write(f"session antes: {dict(session)}\n")
+            
+            # Usar Flask-Login para fazer login
             remember = form.remember_me.data if hasattr(form, 'remember_me') else True
             login_user(user, remember=remember)
+            
+            # DEBUG
+            with open('debug_login.txt', 'a') as f:
+                f.write(f"DEPOIS LOGIN_USER\n")
+                f.write(f"session depois: {dict(session)}\n")
+                f.write(f"current_user.is_authenticated: {current_user.is_authenticated}\n")
+            
+            # CRÍTICO: Preencher dados da sessão (necessário para templates legados)
+            session['user_id'] = user.id
+            session['username'] = user.username
+            session['is_admin'] = user.is_admin
+            session['is_ti'] = user.is_ti
+            session.permanent = remember
             
             # Log de segurança - LOGIN BEM-SUCEDIDO
             security_logger.info(
@@ -185,6 +208,8 @@ def login():
 
 @bp_auth.route("/logout")
 def logout():
+    from flask import session
+    
     if current_user.is_authenticated:
         # Log de segurança
         security_logger.info(
@@ -192,13 +217,24 @@ def logout():
             f"IP: {request.remote_addr}"
         )
     
+    # Limpar completamente a sessão Flask-Login
     logout_user()
+    
+    # CRÍTICO: Limpar TODA a sessão do Flask para remover dados em cache
+    session.clear()
+    
     flash_info("Logout realizado com sucesso.")
-    return redirect(url_for("auth.login"))
+    
+    # Redirecionar com cache disabled para forçar reload
+    response = redirect(url_for("auth.login"))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 
 @bp_auth.route("/reset_password_request", methods=["GET", "POST"])
-@limiter.limit("3 per hour")
+@limiter.limit("5 per hour")
 def reset_password_request():
     # Se o usuário já está logado, redireciona para a página principal
     if current_user.is_authenticated:

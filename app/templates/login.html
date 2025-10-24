@@ -11,7 +11,7 @@
     <div class="row justify-content-center w-100">
         <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4">
             <div class="card shadow border-0">
-                <div class="card-header bg-gradient text-white text-center py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-header text-white text-center py-4" style="background: #008bcd;">
                     <i class="fas fa-sign-in-alt fa-2x mb-2" aria-hidden="true"></i>
                     <h1 class="h3 mb-0 fw-bold">Acesso ao Sistema</h1>
                     <p class="mb-0 small opacity-75">TI OSN System</p>
@@ -30,16 +30,16 @@
              {{ form.hidden_tag() }}
 
              <div class="form-floating mb-3">
-               {{ form.username(class_='form-control', placeholder='Nome de usuário', autocomplete='username') }}
-               <label for="{{ form.username.id }}">Usuário</label>
+               {{ form.username(class_='form-control', placeholder=' ', autocomplete='username', id='username') }}
+               <label for="username">Usuário</label>
                {% for error in form.username.errors %}
                  <div class="text-danger small mt-1">{{ error }}</div>
                {% endfor %}
              </div>
 
              <div class="form-floating mb-3">
-               {{ form.password(class_='form-control', placeholder='Senha', autocomplete='current-password', id='password-field') }}
-               <label for="{{ form.password.id }}">Senha</label>
+               {{ form.password(class_='form-control', placeholder=' ', autocomplete='current-password', id='password', type='password') }}
+               <label for="password">Senha</label>
                {% for error in form.password.errors %}
                  <div class="text-danger small mt-1">{{ error }}</div>
                {% endfor %}
@@ -51,7 +51,7 @@
              </div>
 
              <div class="d-grid">
-                 <button type="submit" class="btn btn-lg py-3 fw-bold" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white;" aria-label="Entrar no sistema">
+                 <button type="submit" class="btn btn-lg py-3 fw-bold" style="background: #008bcd; border: none; color: white;" aria-label="Entrar no sistema">
                      <i class="fas fa-sign-in-alt me-2" aria-hidden="true"></i>Entrar
                  </button>
              </div>

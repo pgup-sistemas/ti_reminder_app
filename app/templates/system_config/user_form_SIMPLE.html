@@ -1,0 +1,143 @@
+{% extends 'system_config_base.html' %}
+{% block breadcrumb_title %}Editar Usuário - VERSÃO SIMPLES{% endblock %}
+
+{% block config_content %}
+<div class="config-card">
+    <div class="config-card-header">
+        <h3>Editar Usuário - FORMULÁRIO SIMPLES (SEM JAVASCRIPT)</h3>
+    </div>
+
+    <form method="POST" action="{{ url_for('system_config.edit_user', user_id=user.id) }}">
+        {{ form.hidden_tag() }}
+        
+        <div class="config-card-body">
+            
+            <!-- Erros -->
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <h5>Erros:</h5>
+                <ul>
+                    {% for field, errors in form.errors.items() %}
+                        {% for error in errors %}
+                        <li><strong>{{ form[field].label.text }}:</strong> {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            
+            <!-- Username -->
+            <div class="mb-3">
+                <label class="form-label">Nome de Usuário</label>
+                <input type="text" name="username" class="form-control" value="{{ user.username }}" required>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+            </div>
+
+            <!-- Setor -->
+            <div class="mb-3">
+                <label class="form-label">Setor</label>
+                <select name="sector_id" class="form-select">
+                    <option value="0">-- Nenhum --</option>
+                    <option value="1" {% if user.sector_id == 1 %}selected{% endif %}>TI</option>
+                    <option value="2" {% if user.sector_id == 2 %}selected{% endif %}>RH</option>
+                </select>
+            </div>
+
+            <!-- Checkboxes -->
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="is_admin" value="y" 
+                           {% if user.is_admin %}checked{% endif %}>
+                    <label class="form-check-label">É Administrador</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="is_ti" value="y" 
+                           {% if user.is_ti %}checked{% endif %}>
+                    <label class="form-check-label">É da Equipe de TI</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="ativo" 
+                           {% if user.ativo %}checked{% endif %}>
+                    <label class="form-check-label">Usuário Ativo</label>
+                </div>
+            </div>
+
+            <hr class="my-4">
+            <h5>Alterar Senha (Opcional)</h5>
+            
+            <!-- Checkbox para alterar senha -->
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="change_password" id="changePassword">
+                    <label class="form-check-label" for="changePassword">
+                        Alterar senha do usuário
+                    </label>
+                </div>
+            </div>
+
+            <!-- Campos de senha -->
+            <div id="passwordFields" style="display: none;">
+                <div class="mb-3">
+                    <label class="form-label">Nova Senha</label>
+                    <input type="password" name="new_password" class="form-control" 
+                           placeholder="Mínimo 6 caracteres">
+                    <small class="text-muted">Deixe em branco para não alterar</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Confirmar Nova Senha</label>
+                    <input type="password" name="confirm_password" class="form-control" 
+                           placeholder="Digite a senha novamente">
+                </div>
+            </div>
+        </div>
+
+        <div class="config-actions">
+            <a href="{{ url_for('system_config.list_users') }}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> SALVAR AGORA
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+// Toggle campos de senha
+document.addEventListener('DOMContentLoaded', function() {
+    const changePasswordCheckbox = document.getElementById('changePassword');
+    const passwordFields = document.getElementById('passwordFields');
+    
+    if (changePasswordCheckbox) {
+        changePasswordCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                passwordFields.style.display = 'block';
+            } else {
+                passwordFields.style.display = 'none';
+                // Limpar campos
+                passwordFields.querySelectorAll('input').forEach(input => input.value = '');
+            }
+        });
+    }
+    
+    // Log mínimo no submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+        console.log('✓ FORMULÁRIO SENDO SUBMETIDO!');
+        console.log('Action:', this.action);
+        console.log('Method:', this.method);
+        console.log('Alterar senha:', changePasswordCheckbox?.checked);
+        // NÃO PREVENIR - deixar submeter normalmente
+    });
+});
+</script>
+{% endblock %}

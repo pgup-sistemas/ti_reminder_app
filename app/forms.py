@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileField
 from wtforms import (BooleanField, DateField, PasswordField, SelectField,
                       StringField, SubmitField, TextAreaField, ValidationError)
-from wtforms.validators import DataRequired, EqualTo, Length, Optional
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 from markupsafe import Markup
 
 
@@ -163,18 +163,28 @@ class UserRegisterForm(FlaskForm):
 
 
 class UserEditForm(FlaskForm):
-    username = StringField("Nome de Usuário", validators=[DataRequired()])
-    email = StringField("Email", validators=[DataRequired()])
+    username = StringField(
+        "Nome de Usuário",
+        validators=[
+            DataRequired(message="Informe o nome de usuário"),
+            Length(min=3, max=64, message="O nome de usuário deve ter entre 3 e 64 caracteres"),
+        ],
+    )
+    email = StringField(
+        "Email",
+        validators=[
+            DataRequired(message="Informe o email"),
+            Email(message="Informe um email válido"),
+            Length(max=120, message="O email deve ter no máximo 120 caracteres"),
+        ],
+    )
     is_admin = BooleanField("É Administrador")
     is_ti = BooleanField("É da Equipe de TI")
     sector_id = SelectField("Setor", coerce=int, validators=[Optional()], choices=[])
     change_password = BooleanField("Alterar Senha")
     new_password = PasswordField(
         "Nova Senha",
-        validators=[
-            Optional(),
-            Length(min=6, message="A senha deve ter pelo menos 6 caracteres"),
-        ],
+        validators=[Optional()],  # Validação dinâmica será feita no método validate()
     )
     confirm_password = PasswordField(
         "Confirmar Nova Senha",
@@ -195,14 +205,37 @@ class UserEditForm(FlaskForm):
         ]
 
     def validate(self, extra_validators=None):
+        """Normaliza dados e executa validações adicionais."""
+        if self.username.data:
+            self.username.data = self.username.data.strip()
+
+        if self.email.data:
+            self.email.data = self.email.data.strip().lower()
+
         # Validação padrão do Flask-WTF
         if not super().validate(extra_validators):
             return False
 
         # Validação personalizada para a senha
-        if self.change_password.data and not self.new_password.data:
-            self.new_password.errors.append("Por favor, insira a nova senha")
-            return False
+        # Só valida se change_password estiver marcado E o campo existir (não for disabled)
+        if self.change_password.data:
+            if not self.new_password.data:
+                self.new_password.errors.append("Por favor, insira a nova senha")
+                return False
+            
+            # Validar senha usando PasswordValidator (configurações dinâmicas do banco)
+            if self.new_password.data:
+                from .validators.password_validator import PasswordValidator
+                errors = PasswordValidator.validate(self.new_password.data, return_errors=True)
+                if errors:
+                    for error in errors:
+                        self.new_password.errors.append(error)
+                    return False
+            
+            if self.new_password.data and self.confirm_password.data:
+                if self.new_password.data != self.confirm_password.data:
+                    self.confirm_password.errors.append("As senhas não conferem")
+                    return False
 
         return True
 
@@ -214,10 +247,7 @@ class ChangePasswordForm(FlaskForm):
     )
     new_password = PasswordField(
         "Nova Senha",
-        validators=[
-            DataRequired(message="Por favor, insira a nova senha"),
-            Length(min=6, message="A senha deve ter pelo menos 6 caracteres"),
-        ],
+        validators=[DataRequired(message="Por favor, insira a nova senha")],  # Validação dinâmica em validate()
     )
     confirm_password = PasswordField(
         "Confirmar Nova Senha",
@@ -227,6 +257,15 @@ class ChangePasswordForm(FlaskForm):
         ],
     )
     submit = SubmitField("Alterar Senha")
+    
+    def validate_new_password(self, field):
+        """Valida senha usando configurações dinâmicas do banco"""
+        if field.data:
+            from .validators.password_validator import PasswordValidator
+            errors = PasswordValidator.validate(field.data, return_errors=True)
+            if errors:
+                # Lança apenas o primeiro erro (WTForms padrão)
+                raise ValidationError(errors[0])
 
 
 class ChamadoAdminForm(FlaskForm):

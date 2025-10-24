@@ -6,7 +6,7 @@ class Config:
     """Configuração base da aplicação."""
     
     # Ambiente
-    FLASK_ENV = os.environ.get('FLASK_ENV', 'development')
+    # FLASK_ENV está deprecado no Flask 2.3+, usar apenas DEBUG
     DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
     TESTING = os.environ.get('TESTING', 'False').lower() == 'true'
     
@@ -45,6 +45,9 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'pageupsistemas@gmail.com')
+
+    # Criptografia de segredos de configurações
+    CONFIG_SECRET_KEY = os.environ.get('CONFIG_SECRET_KEY')
     
     # Timezone
     TIMEZONE = timezone(timedelta(hours=-4))
@@ -161,5 +164,6 @@ config_map = {
 
 def get_config(env_name=None):
     if env_name is None:
-        env_name = os.environ.get('FLASK_ENV', 'development')
+        # Usar APP_ENV ao invés de FLASK_ENV (deprecado no Flask 2.3+)
+        env_name = os.environ.get('APP_ENV', 'development')
     return config_map.get(env_name, DevelopmentConfig)

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DEBUG - Edição de Usuário</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .debug-log { 
+            background: #000; 
+            color: #0f0; 
+            padding: 10px; 
+            font-family: monospace; 
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 DEBUG - Formulário de Edição</h1>
+        
+        <div class="alert alert-info">
+            <strong>Instruções:</strong>
+            <ol>
+                <li>Preencha o formulário abaixo</li>
+                <li>Marque "Alterar senha" se quiser mudar a senha</li>
+                <li>Clique em "ENVIAR"</li>
+                <li>Veja o log abaixo mostrando o que aconteceu</li>
+            </ol>
+        </div>
+
+        <form id="debugForm" method="POST" action="/configuracoes/usuarios/1/editar-sem-auth">
+            <input type="hidden" name="csrf_token" value="DEBUG-TOKEN">
+            
+            <div class="mb-3">
+                <label class="form-label">Username:</label>
+                <input type="text" name="username" class="form-control" value="admin_test_DEBUG" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email:</label>
+                <input type="email" name="email" class="form-control" value="admin@test.com" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Setor:</label>
+                <select name="sector_id" class="form-select">
+                    <option value="0">-- Nenhum --</option>
+                    <option value="1" selected>TI</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="is_admin" value="y" checked>
+                    <label class="form-check-label">Administrador</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="is_ti" value="y" checked>
+                    <label class="form-check-label">TI</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="ativo" checked>
+                    <label class="form-check-label">Ativo</label>
+                </div>
+            </div>
+
+            <hr>
+            <h5>Alterar Senha</h5>
+            
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="change_password" id="changePassword">
+                    <label class="form-check-label" for="changePassword">
+                        <strong>Alterar senha do usuário</strong>
+                    </label>
+                </div>
+            </div>
+
+            <div id="passwordFields" style="display: none;">
+                <div class="mb-3">
+                    <label class="form-label">Nova Senha:</label>
+                    <input type="password" name="new_password" class="form-control" placeholder="Mínimo 6 caracteres">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Confirmar Senha:</label>
+                    <input type="password" name="confirm_password" class="form-control" placeholder="Digite novamente">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-lg">
+                🚀 ENVIAR AGORA
+            </button>
+        </form>
+
+        <div class="debug-log" id="debugLog">
+            <div>🔍 LOG DE DEBUG:</div>
+        </div>
+    </div>
+
+    <script>
+        const log = document.getElementById('debugLog');
+        const changePasswordCheckbox = document.getElementById('changePassword');
+        const passwordFields = document.getElementById('passwordFields');
+        const form = document.getElementById('debugForm');
+
+        function addLog(msg) {
+            const now = new Date().toLocaleTimeString();
+            log.innerHTML += `<div>[${now}] ${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Toggle senha
+        changePasswordCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                passwordFields.style.display = 'block';
+                addLog('✓ Campos de senha exibidos');
+            } else {
+                passwordFields.style.display = 'none';
+                addLog('✗ Campos de senha ocultados');
+            }
+        });
+
+        // Submit
+        form.addEventListener('submit', function(e) {
+            addLog('');
+            addLog('🚀 FORMULÁRIO SENDO SUBMETIDO!');
+            addLog('Action: ' + this.action);
+            addLog('Method: ' + this.method);
+            
+            const formData = new FormData(this);
+            addLog('');
+            addLog('📦 Dados do formulário:');
+            for (let [key, value] of formData.entries()) {
+                if (key.includes('password') && value) {
+                    addLog(`  ${key}: *** (${value.length} caracteres)`);
+                } else {
+                    addLog(`  ${key}: ${value}`);
+                }
+            }
+            
+            addLog('');
+            addLog('⏳ Aguardando resposta do servidor...');
+            
+            // NÃO PREVENIR - deixar enviar
+        });
+
+        addLog('✓ Página carregada - Pronto para testar!');
+    </script>
+</body>
+</html>

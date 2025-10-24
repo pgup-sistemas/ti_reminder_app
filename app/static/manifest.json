@@ -11,33 +11,13 @@
     "start_url": "/",
     "icons": [
         {
-            "src": "/static/icons/icon-144x144.png",
-            "sizes": "144x144",
-            "type": "image/png",
-            "purpose": "maskable any"
-        },
-        {
-            "src": "/static/icons/icon-192x192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "maskable any"
+            "src": "/static/favicon.ico",
+            "sizes": "any",
+            "type": "image/x-icon"
         }
     ],
     "categories": ["productivity", "business", "utilities"],
-    "screenshots": [
-        {
-            "src": "/static/screenshots/desktop-home.png",
-            "sizes": "1280x720",
-            "type": "image/png",
-            "form_factor": "wide"
-        },
-        {
-            "src": "/static/screenshots/mobile-home.png",
-            "sizes": "360x640",
-            "type": "image/png",
-            "form_factor": "narrow"
-        }
-    ],
+    "screenshots": [],
     "shortcuts": [
         {
             "name": "Novo Lembrete",

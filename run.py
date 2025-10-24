@@ -9,7 +9,7 @@ load_dotenv()
 
 # Configuração básica de logging
 logging.basicConfig(
-    level=logging.WARNING,  # Nível padrão mais alto
+    level=logging.INFO,  # Mudado para INFO para ver logs de debug
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler()

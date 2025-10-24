@@ -2,6 +2,10 @@
 import sys
 from markupsafe import Markup
 
+# IMPORTANTE: Carregar .env ANTES de qualquer import que use config
+from dotenv import load_dotenv
+load_dotenv()  # Carrega variáveis de ambiente do arquivo .env
+
 # Adicionar Markup ao módulo flask antes de importar flask_wtf
 import flask
 flask.Markup = Markup
@@ -26,7 +30,6 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from flask_talisman import Talisman
 
 from .email_utils import mail_init_app
 
@@ -38,7 +41,6 @@ bootstrap = Bootstrap()
 jwt = JWTManager()
 limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
 login_manager = LoginManager()
-talisman = Talisman()
 
 
 def create_app():
@@ -116,77 +118,70 @@ def create_app():
     
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
-    login_manager.login_message = 'Por favor, faça login para acessar esta página.'
+    login_manager.login_message = None  # Desabilitar mensagem automática
     login_manager.login_message_category = 'info'
+    
+    # Handler para acesso não autorizado
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        from flask import flash, redirect, url_for, request
+        # NÃO mostrar mensagem ao carregar a página inicial ou vir da página de login
+        # Apenas mostrar se o usuário estava navegando e tentou acessar uma rota protegida
+        if request.referrer and '/login' not in request.referrer and request.endpoint != 'main.index':
+            flash('Por favor, faça login para acessar esta página.', 'warning')
+        return redirect(url_for('auth.login'))
+    
     scheduler.init_app(app)
     scheduler.start()
     migrate.init_app(app, db)
     bootstrap.init_app(app)
     
-    # Configurar headers de segurança HTTP com Talisman
-    if not app.config.get('TESTING', False):
-        csp = {
-            'default-src': "'self'",
-            'script-src': [
-                "'self'",
-                "'unsafe-inline'",  # Necessário para Bootstrap e alguns scripts inline
-                "'unsafe-eval'",   # Necessário para alguns frameworks JS
-                'cdn.jsdelivr.net',
-                'code.jquery.com',
-                'stackpath.bootstrapcdn.com',
-                'cdnjs.cloudflare.com'
-            ],
-            'style-src': [
-                "'self'",
-                "'unsafe-inline'",  # Necessário para estilos inline
-                'cdn.jsdelivr.net',
-                'stackpath.bootstrapcdn.com',
-                'cdnjs.cloudflare.com',
-                'fonts.googleapis.com'
-            ],
-            'font-src': [
-                "'self'",
-                'cdn.jsdelivr.net',
-                'cdnjs.cloudflare.com',
-                'fonts.gstatic.com',
-                'data:'
-            ],
-            'img-src': [
-                "'self'",
-                'data:',
-                'https:'
-            ],
-            'connect-src': "'self'",
-            'frame-ancestors': "'none'",
-            'base-uri': "'self'",
-            'form-action': "'self'"
-        }
+    # Configurar headers de segurança HTTP manualmente
+    @app.after_request
+    def set_security_headers(response):
+        """Adiciona headers de segurança HTTP às respostas"""
+        if not app.config.get('TESTING', False):
+            # Content Security Policy
+            csp_directives = [
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net code.jquery.com stackpath.bootstrapcdn.com cdnjs.cloudflare.com",
+                "style-src 'self' 'unsafe-inline' cdn.jsdelivr.net stackpath.bootstrapcdn.com cdnjs.cloudflare.com fonts.googleapis.com",
+                "font-src 'self' cdn.jsdelivr.net cdnjs.cloudflare.com fonts.gstatic.com data:",
+                "img-src 'self' data: https:",
+                "media-src 'self' data:",  # Permitir data URIs para áudio/vídeo
+                "connect-src 'self' cdn.jsdelivr.net stackpath.bootstrapcdn.com cdnjs.cloudflare.com",  # Permitir CDNs para source maps
+                "frame-ancestors 'none'",
+                "base-uri 'self'",
+                "form-action 'self'"
+            ]
+            response.headers['Content-Security-Policy'] = '; '.join(csp_directives)
+            
+            # HTTP Strict Transport Security (HSTS)
+            if app.config.get('SESSION_COOKIE_SECURE', False):
+                response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+            
+            # Outros headers de segurança
+            response.headers['X-Content-Type-Options'] = 'nosniff'
+            response.headers['X-Frame-Options'] = 'DENY'
+            response.headers['X-XSS-Protection'] = '1; mode=block'
+            response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+            
+            # Permissions Policy (substitui Feature Policy)
+            permissions_directives = [
+                "geolocation=()",
+                "midi=()",
+                "notifications=(self)",
+                "push=(self)",
+                "microphone=()",
+                "camera=()",
+                "magnetometer=()",
+                "gyroscope=()",
+                "fullscreen=(self)",
+                "payment=()"
+            ]
+            response.headers['Permissions-Policy'] = ', '.join(permissions_directives)
         
-        talisman.init_app(
-            app,
-            force_https=app.config.get('SESSION_COOKIE_SECURE', False),
-            strict_transport_security=True,
-            strict_transport_security_max_age=31536000,  # 1 ano
-            strict_transport_security_include_subdomains=True,
-            content_security_policy=csp,
-            content_security_policy_report_only=False,
-            referrer_policy='strict-origin-when-cross-origin',
-            feature_policy={
-                'geolocation': "'none'",
-                'midi': "'none'",
-                'notifications': "'self'",
-                'push': "'self'",
-                'sync-xhr': "'self'",
-                'microphone': "'none'",
-                'camera': "'none'",
-                'magnetometer': "'none'",
-                'gyroscope': "'none'",
-                'speaker': "'self'",
-                'vibrate': "'none'",
-                'fullscreen': "'self'",
-                'payment': "'none'"
-            }
-        )
+        return response
 
     # Configurar contexto de aplicação para disponibilizar variáveis em todos os templates
     @app.context_processor
@@ -206,6 +201,45 @@ def create_app():
                 pending_count = 0
         
         return {'pending_approvals_count': pending_count}
+
+    # Error handlers customizados
+    @app.errorhandler(400)
+    def bad_request(e):
+        """Handler para erro 400 (Bad Request)"""
+        from flask import render_template
+        return render_template('errors/400.html'), 400
+    
+    @app.errorhandler(403)
+    def forbidden(e):
+        """Handler para erro 403 (Forbidden)"""
+        from flask import render_template
+        return render_template('errors/403.html'), 403
+    
+    @app.errorhandler(404)
+    def not_found(e):
+        """Handler para erro 404 (Not Found)"""
+        from flask import render_template
+        return render_template('errors/404.html'), 404
+    
+    @app.errorhandler(429)
+    def ratelimit_handler(e):
+        """Handler para erro 429 (Rate Limit Exceeded)"""
+        from flask import render_template
+        return render_template('errors/429.html'), 429
+    
+    @app.errorhandler(500)
+    def internal_server_error(e):
+        """Handler para erro 500 (Internal Server Error)"""
+        from flask import render_template
+        # Log do erro
+        app.logger.error(f"Erro 500: {str(e)}")
+        return render_template('errors/500.html'), 500
+    
+    @app.errorhandler(503)
+    def service_unavailable(e):
+        """Handler para erro 503 (Service Unavailable)"""
+        from flask import render_template
+        return render_template('errors/503.html'), 503
 
     # Configurar tarefas agendadas para notificações
     with app.app_context():
@@ -346,13 +380,14 @@ def create_app():
 
     # Registrar blueprint de configurações do sistema
     try:
-        # Simplesmente importar o módulo diretamente
         from .blueprints.system_config import system_config
         app.register_blueprint(system_config)
-        # Blueprint de configurações do sistema registrado
-    except Exception as e:
-        app.logger.warning(f"Blueprint de configurações não pôde ser registrado")
-        # Não mostrar traceback completo para não poluir logs
+    except Exception as exc:
+        app.logger.warning(
+            "Blueprint de configurações não pôde ser registrado: %s",
+            exc,
+            exc_info=True,
+        )
 
     # Configurar Flask-Login
     @login_manager.user_loader
@@ -377,5 +412,13 @@ def create_app():
         app.logger.info("Blueprint de equipamentos V2 (limpo) registrado com sucesso")
     except Exception as e:
         app.logger.error("Blueprint de equipamentos V2 não pôde ser registrado")
+
+    # Registrar blueprint de exportação Analytics
+    try:
+        from .analytics_routes import analytics_bp
+        app.register_blueprint(analytics_bp)
+        app.logger.info("✅ Blueprint de exportação Analytics registrado com sucesso")
+    except Exception as e:
+        app.logger.error(f"❌ Blueprint de exportação Analytics não pôde ser registrado: {e}")
 
     return app

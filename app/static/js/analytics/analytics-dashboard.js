@@ -7,31 +7,166 @@ class AnalyticsDashboard {
     constructor() {
         this.charts = {};
         this.refreshInterval = null;
+        this.dateRange = {
+            start: null,
+            end: null
+        };
         this.init();
     }
     
     async init() {
-        console.log('Inicializando Analytics Dashboard...');
-        await this.loadKPIs();
-        await this.loadChartData();
-        this.setupRefresh();
+        console.log('[Analytics] ========== INICIALIZANDO DASHBOARD ==========');
+        try {
+            console.log('[Analytics] 1/5 - Inicializando filtros de data...');
+            this.initializeDateFilters();
+            
+            console.log('[Analytics] 2/5 - Configurando event listeners...');
+            this.setupEventListeners();
+            
+            console.log('[Analytics] 3/5 - Carregando KPIs...');
+            await this.loadKPIs();
+            
+            console.log('[Analytics] 4/5 - Carregando gráficos...');
+            await this.loadChartData();
+            
+            console.log('[Analytics] 5/5 - Configurando auto-refresh...');
+            this.setupRefresh();
+            
+            console.log('[Analytics] ========== DASHBOARD INICIALIZADO ==========');
+        } catch (error) {
+            console.error('[Analytics] ERRO FATAL na inicialização:', error);
+        }
+    }
+    
+    /**
+     * Configura event listeners
+     */
+    setupEventListeners() {
+        // Botão aplicar filtros
+        const btnApplyFilters = document.getElementById('btn-apply-filters');
+        if (btnApplyFilters) {
+            btnApplyFilters.addEventListener('click', () => this.applyFilters());
+        }
+        
+        // Botão refresh
+        const btnRefresh = document.getElementById('btn-refresh');
+        if (btnRefresh) {
+            btnRefresh.addEventListener('click', () => {
+                this.loadKPIs();
+                this.loadChartData();
+            });
+        }
+        
+        // Select de preset
+        const filterPreset = document.getElementById('filter-preset');
+        if (filterPreset) {
+            filterPreset.addEventListener('change', () => this.applyPreset());
+        }
+        
+        console.log('[Analytics] Event listeners configurados!');
+    }
+    
+    /**
+     * Inicializa os filtros de data
+     */
+    initializeDateFilters() {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 30);
+        
+        const startInput = document.getElementById('filter-start-date');
+        const endInput = document.getElementById('filter-end-date');
+        
+        if (startInput) {
+            startInput.value = this.formatDateInput(startDate);
+            this.dateRange.start = startDate;
+        }
+        
+        if (endInput) {
+            endInput.value = this.formatDateInput(endDate);
+            this.dateRange.end = endDate;
+        }
+    }
+    
+    /**
+     * Formata data para input type="date"
+     */
+    formatDateInput(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    
+    /**
+     * Aplica preset de período
+     */
+    applyPreset() {
+        const preset = document.getElementById('filter-preset').value;
+        const endDate = new Date();
+        let startDate = new Date();
+        
+        if (preset === 'custom') {
+            // Deixa usuário definir
+            return;
+        }
+        
+        const days = parseInt(preset);
+        startDate.setDate(startDate.getDate() - days);
+        
+        document.getElementById('filter-start-date').value = this.formatDateInput(startDate);
+        document.getElementById('filter-end-date').value = this.formatDateInput(endDate);
+        
+        this.dateRange.start = startDate;
+        this.dateRange.end = endDate;
+    }
+    
+    /**
+     * Aplica filtros personalizados
+     */
+    async applyFilters() {
+        const startInput = document.getElementById('filter-start-date');
+        const endInput = document.getElementById('filter-end-date');
+        
+        if (startInput && endInput) {
+            this.dateRange.start = new Date(startInput.value);
+            this.dateRange.end = new Date(endInput.value);
+            
+            // Validação
+            if (this.dateRange.start > this.dateRange.end) {
+                alert('A data inicial não pode ser maior que a data final!');
+                return;
+            }
+            
+            // Recarregar gráficos com novo período
+            await this.loadChartData();
+            
+            // Feedback visual
+            this.showToast('success', 'Filtros aplicados com sucesso!');
+        }
     }
     
     /**
      * Carrega KPIs principais
      */
     async loadKPIs() {
+        console.log('[Analytics] Iniciando loadKPIs...');
         try {
+            console.log('[Analytics] Fazendo fetch para /api/analytics/dashboard-kpis');
             const response = await fetch('/api/analytics/dashboard-kpis');
+            console.log('[Analytics] Response status:', response.status);
             
             if (!response.ok) {
-                throw new Error('Erro ao carregar KPIs');
+                console.error('[Analytics] Response não OK:', response.status, response.statusText);
+                throw new Error(`Erro ao carregar KPIs: ${response.status}`);
             }
             
             const data = await response.json();
+            console.log('[Analytics] Dados recebidos:', data);
             this.updateKPIs(data);
+            console.log('[Analytics] KPIs atualizados com sucesso!');
         } catch (error) {
-            console.error('Erro ao carregar KPIs:', error);
+            console.error('[Analytics] ERRO ao carregar KPIs:', error);
             this.showError('Erro ao carregar métricas');
         }
     }
@@ -98,39 +233,49 @@ class AnalyticsDashboard {
      * Carrega dados dos gráficos
      */
     async loadChartData() {
+        console.log('[Analytics] Iniciando loadChartData...');
         try {
-            // Calcular período (últimos 30 dias)
-            const endDate = new Date();
-            const startDate = new Date();
-            startDate.setDate(startDate.getDate() - 30);
+            // Usar período do filtro ou padrão
+            const startDate = this.dateRange.start || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+            const endDate = this.dateRange.end || new Date();
             
             const params = new URLSearchParams({
                 start: startDate.toISOString().split('T')[0],
                 end: endDate.toISOString().split('T')[0]
             });
+            console.log('[Analytics] Período:', params.toString());
             
             // Chamados por período
+            console.log('[Analytics] Carregando: chamados por período...');
             const chamadosResponse = await fetch(`/api/analytics/chamados-periodo?${params}`);
             const chamadosData = await chamadosResponse.json();
+            console.log('[Analytics] Dados período:', chamadosData.length, 'registros');
             this.createLineChart('chart-chamados-periodo', chamadosData);
             
             // Chamados por prioridade
+            console.log('[Analytics] Carregando: chamados por prioridade...');
             const prioridadeResponse = await fetch(`/api/analytics/chamados-prioridade?${params}`);
             const prioridadeData = await prioridadeResponse.json();
+            console.log('[Analytics] Dados prioridade:', prioridadeData.length, 'registros');
             this.createPieChart('chart-prioridade', prioridadeData);
             
             // Performance por técnico
+            console.log('[Analytics] Carregando: performance por técnico...');
             const performanceResponse = await fetch(`/api/analytics/performance-tecnico?${params}`);
             const performanceData = await performanceResponse.json();
+            console.log('[Analytics] Dados performance:', performanceData.length, 'registros');
             this.createBarChart('chart-performance', performanceData);
             
             // Chamados por setor
+            console.log('[Analytics] Carregando: chamados por setor...');
             const setorResponse = await fetch(`/api/analytics/chamados-setor?${params}`);
             const setorData = await setorResponse.json();
+            console.log('[Analytics] Dados setor:', setorData.length, 'registros');
             this.createHorizontalBarChart('chart-setor', setorData);
             
+            console.log('[Analytics] Todos os gráficos carregados!');
         } catch (error) {
-            console.error('Erro ao carregar dados dos gráficos:', error);
+            console.error('[Analytics] ERRO ao carregar dados dos gráficos:', error);
             this.showError('Erro ao carregar gráficos');
         }
     }
@@ -372,6 +517,170 @@ class AnalyticsDashboard {
     }
     
     /**
+     * Mostra toast de sucesso
+     */
+    showToast(type, message) {
+        if (window.components && window.components.toast) {
+            window.components.toast(type, type === 'success' ? 'Sucesso' : 'Aviso', message);
+        } else {
+            console.log(`${type}: ${message}`);
+        }
+    }
+    
+    /**
+     * Exporta dashboard como PDF
+     */
+    async exportPDF() {
+        try {
+            // Usando html2canvas e jsPDF
+            const element = document.querySelector('.container-fluid');
+            
+            // Verificar se bibliotecas estão carregadas
+            if (typeof html2canvas === 'undefined' || typeof jsPDF === 'undefined') {
+                alert('Carregando bibliotecas de exportação...\nPor favor, tente novamente em alguns segundos.');
+                // Carregar dinamicamente
+                await this.loadExportLibraries();
+                return;
+            }
+            
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                logging: false,
+                useCORS: true
+            });
+            
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('l', 'mm', 'a4');
+            const imgWidth = 297; // A4 landscape width
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            
+            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+            pdf.save(`analytics_dashboard_${this.formatDateInput(new Date())}.pdf`);
+            
+            this.showToast('success', 'PDF exportado com sucesso!');
+        } catch (error) {
+            console.error('Erro ao exportar PDF:', error);
+            alert('Erro ao exportar PDF. Tente novamente.');
+        }
+    }
+    
+    /**
+     * Exporta dados como Excel
+     */
+    async exportExcel() {
+        try {
+            // Coletar todos os dados
+            const kpisResponse = await fetch('/api/analytics/dashboard-kpis');
+            const kpis = await kpisResponse.json();
+            
+            const params = new URLSearchParams({
+                start: this.dateRange.start.toISOString().split('T')[0],
+                end: this.dateRange.end.toISOString().split('T')[0]
+            });
+            
+            const chamadosResponse = await fetch(`/api/analytics/chamados-periodo?${params}`);
+            const chamados = await chamadosResponse.json();
+            
+            const performanceResponse = await fetch(`/api/analytics/performance-tecnico?${params}`);
+            const performance = await performanceResponse.json();
+            
+            // Criar CSV simples (compatível com Excel)
+            let csv = 'Analytics Dashboard - TI OSN System\n\n';
+            
+            // KPIs
+            csv += 'INDICADORES PRINCIPAIS\n';
+            csv += 'Métrica,Valor\n';
+            csv += `Chamados Abertos,${kpis.chamados_abertos}\n`;
+            csv += `Chamados do Mês,${kpis.chamados_mes}\n`;
+            csv += `Taxa de SLA,${kpis.sla_taxa}%\n`;
+            csv += `Satisfação Média,${kpis.satisfacao_media}/5\n\n`;
+            
+            // Evolução
+            csv += 'EVOLUÇÃO DE CHAMADOS\n';
+            csv += 'Data,Total\n';
+            chamados.forEach(item => {
+                csv += `${item.periodo},${item.total}\n`;
+            });
+            csv += '\n';
+            
+            // Performance
+            csv += 'PERFORMANCE POR TÉCNICO\n';
+            csv += 'Técnico,Total Chamados,Tempo Médio (h),SLA (%)\n';
+            performance.forEach(item => {
+                csv += `${item.tecnico},${item.total},${item.tempo_medio},${item.sla_taxa}\n`;
+            });
+            
+            // Download
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `analytics_dashboard_${this.formatDateInput(new Date())}.csv`;
+            link.click();
+            
+            this.showToast('success', 'Dados exportados com sucesso!');
+        } catch (error) {
+            console.error('Erro ao exportar Excel:', error);
+            alert('Erro ao exportar dados. Tente novamente.');
+        }
+    }
+    
+    /**
+     * Exporta dashboard como imagem
+     */
+    async exportImage() {
+        try {
+            const element = document.querySelector('.container-fluid');
+            
+            if (typeof html2canvas === 'undefined') {
+                await this.loadExportLibraries();
+                return;
+            }
+            
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                logging: false,
+                useCORS: true
+            });
+            
+            canvas.toBlob(blob => {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `analytics_dashboard_${this.formatDateInput(new Date())}.png`;
+                link.click();
+                
+                this.showToast('success', 'Imagem exportada com sucesso!');
+            });
+        } catch (error) {
+            console.error('Erro ao exportar imagem:', error);
+            alert('Erro ao exportar imagem. Tente novamente.');
+        }
+    }
+    
+    /**
+     * Carrega bibliotecas de exportação dinamicamente
+     */
+    async loadExportLibraries() {
+        return new Promise((resolve, reject) => {
+            // html2canvas
+            const script1 = document.createElement('script');
+            script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+            script1.onload = () => {
+                // jsPDF
+                const script2 = document.createElement('script');
+                script2.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                script2.onload = () => {
+                    window.jsPDF = window.jspdf.jsPDF;
+                    resolve();
+                };
+                script2.onerror = reject;
+                document.head.appendChild(script2);
+            };
+            script1.onerror = reject;
+            document.head.appendChild(script1);
+        });
+    }
+    
+    /**
      * Limpa recursos
      */
     destroy() {
@@ -391,11 +700,18 @@ class AnalyticsDashboard {
 
 // Inicializar quando página carregar
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('[Analytics] DOM Content Loaded!');
+    console.log('[Analytics] Verificando Chart.js...');
+    
     // Verificar se Chart.js está disponível
     if (typeof Chart === 'undefined') {
-        console.error('Chart.js não está carregado!');
+        console.error('[Analytics] ❌ ERRO: Chart.js não está carregado!');
+        alert('ERRO: Chart.js não foi carregado. Verifique sua conexão com a internet.');
         return;
     }
+    
+    console.log('[Analytics] ✅ Chart.js disponível!');
+    console.log('[Analytics] Criando instância do AnalyticsDashboard...');
     
     // Inicializar dashboard
     window.analyticsDashboard = new AnalyticsDashboard();
