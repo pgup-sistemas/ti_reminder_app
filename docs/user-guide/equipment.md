@@ -1,10 +1,10 @@
-# Gestão de Equipamentos
+# Gestão de Ativos
 
 Sistema profissional de gestão de ativos de TI com inventário central, reservas automáticas e controle completo do ciclo de vida.
 
 ## 🎯 Visão Geral
 
-O novo sistema de equipamentos oferece controle profissional do parque de TI:
+O sistema de gestão de ativos oferece controle profissional do parque de TI:
 - ✅ **Inventário Central** com catálogo completo
 - ✅ **Sistema de Reservas** com calendário de disponibilidade
 - ✅ **Aprovação Automática** baseada em regras de negócio
@@ -12,42 +12,43 @@ O novo sistema de equipamentos oferece controle profissional do parque de TI:
 - ✅ **Alertas Inteligentes** de manutenção e devolução
 - ✅ **API REST** para integrações
 
-## 🛒 Catálogo de Equipamentos
+## 🛒 Catálogo de Ativos
 
 ### Navegando pelo Inventário
 
 1. **Acesse o catálogo**:
-   - Menu principal → **"Equipamentos"** → **"Catálogo"**
+   - Menu principal → **"Gestão de Ativos"** → **"Catálogo"**
    - URL: `http://192.168.1.86:5000/equipment/catalog`
 
-2. **Explore equipamentos disponíveis**:
+2. **Explore ativos disponíveis**:
    - **Filtros inteligentes**: Por categoria, marca, localização
    - **Busca avançada**: Nome, patrimônio, especificações
    - **Visualização**: Fotos, especificações técnicas, status
 
 3. **Verifique disponibilidade**:
    - **Calendário visual** de reservas existentes
-   - **Verificação automática** de conflitos
+   - **Sistema verifica** disponibilidade automaticamente
    - **Datas sugeridas** de disponibilidade
 
 ## 📅 Sistema de Reservas
 
 ### Fazendo uma Reserva
 
-1. **Selecione equipamento** no catálogo
+1. **Selecione ativo** no catálogo
 2. **Escolha período** de empréstimo
 3. **Sistema verifica** disponibilidade automaticamente
 4. **Confirmação instantânea** (alguns equipamentos)
 
 ### Regras de Aprovação
 
-- **🟢 Auto-aprovado**: Equipamentos de baixo risco, empréstimos curtos
-- **🟡 Pendente**: Equipamentos de alto valor, períodos longos
+- **🟢 Auto-aprovado**: Ativos de baixo risco, empréstimos curtos
+- **🟡 Pendente**: Ativos de alto valor, períodos longos
 - **🔴 Rejeitado**: Violação de políticas ou restrições
 
 ### Benefícios do Sistema
 - **⏰ Reserva 24/7** sem depender de aprovação manual
 - **📊 Transparência** total na disponibilidade
+- **⏱️ Processamento rápido** de solicitações simples
 - **⚡ Processamento rápido** de solicitações simples
 - **🔄 Auto-renovação** quando disponível
 
@@ -62,7 +63,7 @@ O novo sistema de equipamentos oferece controle profissional do parque de TI:
 
     ---
 
-    Equipamento reservado no sistema, aguardando aprovação automática
+    Ativo reservado no sistema, aguardando aprovação automática
 
 -   :material-clock-outline:
     **Pendente**

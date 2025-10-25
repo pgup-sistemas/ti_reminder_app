@@ -42,6 +42,48 @@
   transform: translateY(-4px);
 }
 
+/* Cards de estatísticas compactos */
+.stats-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none !important;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="dark"] .stats-card {
+  background: var(--bs-gray-800);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.4);
+}
+
+.stats-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12) !important;
+}
+
+.stats-card .progress {
+  background-color: rgba(15, 23, 42, 0.08);
+  height: 4px;
+  border-radius: 999px;
+}
+
+[data-theme="dark"] .stats-card .progress {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+  .stats-card .d-flex {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stats-card .me-3 {
+    margin-right: 0 !important;
+    margin-bottom: 0.5rem;
+  }
+}
+
 /* Dashboard Cards - Tamanho Profissional */
 .dashboard-card {
   background: linear-gradient(145deg, #ffffff, #f8f9fa);
@@ -698,6 +740,26 @@
   vertical-align: bottom;
   border-bottom: 2px solid var(--border-color);
   background-color: var(--bg-surface-alt);
+}
+
+/* Tabelas com cabeçalhos destacados */
+.table-modern thead th {
+  border-top: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table-modern td {
+  vertical-align: middle;
+  border-color: var(--bs-border-color-light, var(--border-color));
+}
+
+@media (max-width: 768px) {
+  .table-modern-wrapper {
+    font-size: 0.875rem;
+  }
 }
 
 /* Modal */

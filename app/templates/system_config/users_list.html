@@ -2,96 +2,97 @@
 {% block breadcrumb_title %}Gerenciar Usuários{% endblock %}
 
 {% block config_content %}
-<!-- Header com Ações Rápidas -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="mb-1">
-            <i class="fas fa-users me-3 text-primary"></i>
-            Gerenciamento de Usuários
-        </h2>
-        <p class="text-muted mb-0">Administre usuários, permissões e configurações de acesso do sistema</p>
+<div class="config-card mb-4">
+    <div class="config-card-header d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+        <div>
+            <h3 class="mb-2">
+                <i class="fas fa-users me-3 text-primary"></i>
+                Gerenciamento de Usuários
+            </h3>
+            <p class="text-muted mb-0">Administre usuários, permissões e configurações de acesso do sistema</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('system_config.bulk_user_actions') }}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-tasks me-2"></i>
+                <span class="d-none d-lg-inline">Ações em Lote</span>
+            </a>
+            <a href="{{ url_for('system_config.create_user') }}" class="btn btn-success btn-lg">
+                <i class="fas fa-user-plus me-2"></i>
+                <span class="d-none d-lg-inline">Novo Usuário</span>
+            </a>
+        </div>
     </div>
-    <div class="d-flex gap-3">
-        <a href="{{ url_for('system_config.bulk_user_actions') }}" class="btn btn-outline-primary btn-lg">
-            <i class="fas fa-tasks me-2"></i>
-            <span class="d-none d-lg-inline">Ações em Lote</span>
-        </a>
-        <a href="{{ url_for('system_config.create_user') }}" class="btn btn-success btn-lg">
-            <i class="fas fa-user-plus me-2"></i>
-            <span class="d-none d-lg-inline">Novo Usuário</span>
-        </a>
-    </div>
-</div>
-
-<!-- Cards de Estatísticas Interativos -->
-<div class="row mb-4">
-    <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
-        <div class="stats-card border-start border-primary border-4 shadow-sm h-100" onclick="filterByStatus('')">
-            <div class="card-body d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="fas fa-users fa-2x text-primary me-3"></i>
-                        <div>
-                            <h3 class="mb-0 text-primary fw-bold">{{ stats.total_users }}</h3>
-                            <small class="text-muted">Total de Usuários</small>
+    <div class="config-card-body py-4">
+        <div class="row g-3">
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="stats-card border-start border-primary border-4 h-100" onclick="filterByStatus('')">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-users fa-2x text-primary me-3"></i>
+                                <div>
+                                    <h3 class="mb-0 text-primary fw-bold">{{ stats.total_users }}</h3>
+                                    <small class="text-muted">Total de Usuários</small>
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 4px;">
+                                <div class="progress-bar bg-primary" style="width: 100%"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="progress" style="height: 4px;">
-                        <div class="progress-bar bg-primary" style="width: 100%"></div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
-        <div class="stats-card border-start border-success border-4 shadow-sm h-100" onclick="filterByStatus('active')">
-            <div class="card-body d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="fas fa-user-check fa-2x text-success me-3"></i>
-                        <div>
-                            <h3 class="mb-0 text-success fw-bold">{{ stats.active_users }}</h3>
-                            <small class="text-muted">Usuários Ativos</small>
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="stats-card border-start border-success border-4 h-100" onclick="filterByStatus('active')">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-user-check fa-2x text-success me-3"></i>
+                                <div>
+                                    <h3 class="mb-0 text-success fw-bold">{{ stats.active_users }}</h3>
+                                    <small class="text-muted">Usuários Ativos</small>
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 4px;">
+                                <div class="progress-bar bg-success" style="width: {{ (stats.active_users / stats.total_users * 100) if stats.total_users > 0 else 0 }}%"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="progress" style="height: 4px;">
-                        <div class="progress-bar bg-success" style="width: {{ (stats.active_users / stats.total_users * 100) if stats.total_users > 0 else 0 }}%"></div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
-        <div class="stats-card border-start border-warning border-4 shadow-sm h-100" onclick="filterByRole('admin')">
-            <div class="card-body d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="fas fa-crown fa-2x text-warning me-3"></i>
-                        <div>
-                            <h3 class="mb-0 text-warning fw-bold">{{ stats.admin_users }}</h3>
-                            <small class="text-muted">Administradores</small>
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="stats-card border-start border-warning border-4 h-100" onclick="filterByRole('admin')">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-crown fa-2x text-warning me-3"></i>
+                                <div>
+                                    <h3 class="mb-0 text-warning fw-bold">{{ stats.admin_users }}</h3>
+                                    <small class="text-muted">Administradores</small>
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 4px;">
+                                <div class="progress-bar bg-warning" style="width: {{ (stats.admin_users / stats.total_users * 100) if stats.total_users > 0 else 0 }}%"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="progress" style="height: 4px;">
-                        <div class="progress-bar bg-warning" style="width: {{ (stats.admin_users / stats.total_users * 100) if stats.total_users > 0 else 0 }}%"></div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
-        <div class="stats-card border-start border-info border-4 shadow-sm h-100" onclick="filterByRole('ti')">
-            <div class="card-body d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="fas fa-user-shield fa-2x text-info me-3"></i>
-                        <div>
-                            <h3 class="mb-0 text-info fw-bold">{{ stats.ti_users }}</h3>
-                            <small class="text-muted">Equipe TI</small>
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="stats-card border-start border-info border-4 h-100" onclick="filterByRole('ti')">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-user-shield fa-2x text-info me-3"></i>
+                                <div>
+                                    <h3 class="mb-0 text-info fw-bold">{{ stats.ti_users }}</h3>
+                                    <small class="text-muted">Equipe TI</small>
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 4px;">
+                                <div class="progress-bar bg-info" style="width: {{ (stats.ti_users / stats.total_users * 100) if stats.total_users > 0 else 0 }}%"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="progress" style="height: 4px;">
-                        <div class="progress-bar bg-info" style="width: {{ (stats.ti_users / stats.total_users * 100) if stats.total_users > 0 else 0 }}%"></div>
                     </div>
                 </div>
             </div>
@@ -162,7 +163,7 @@
 </div>
 
 <!-- Tabela de Usuários Aprimorada -->
-<div class="card border-0 shadow-sm">
+<div class="card border-0 shadow-sm table-modern-wrapper">
     <div class="card-header bg-white border-bottom-0 py-3">
         <div class="d-flex justify-content-between align-items-center">
             <div>
@@ -205,7 +206,7 @@
 
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0" id="usersTable">
+            <table class="table table-hover table-modern mb-0" id="usersTable">
                 <thead class="table-light">
                     <tr>
                         <th class="border-0" style="width: 40px;">
@@ -351,7 +352,7 @@
 
         <!-- Estado Vazio -->
         {% if not users %}
-        <div class="text-center py-5">
+        <div class="text-center py-5 empty-state">
             <div class="mb-3">
                 <i class="fas fa-users fa-4x text-muted"></i>
             </div>
@@ -1022,23 +1023,6 @@ function debounce(func, wait) {
 
 <!-- CSS Adicional -->
 <style>
-/* Cards de Estatísticas */
-.stats-card {
-    transition: all 0.3s ease;
-    cursor: pointer;
-    border: none !important;
-    background: white;
-}
-
-.stats-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
-}
-
-.stats-card .progress {
-    background-color: rgba(0,0,0,0.1);
-}
-
 /* Avatares */
 .user-avatar {
     position: relative;
@@ -1070,37 +1054,13 @@ function debounce(func, wait) {
     border: 2px solid white;
 }
 
-/* Tabela */
-.table th {
-    border-top: none;
-    font-weight: 600;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.table td {
-    vertical-align: middle;
-    border-color: var(--bs-border-color-light);
-}
-
 /* Estados Vazios */
-.text-center.py-5 {
+.empty-state {
     padding: 3rem 1rem;
 }
 
 /* Responsividade */
 @media (max-width: 768px) {
-    .stats-card .d-flex {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .stats-card .me-3 {
-        margin-right: 0 !important;
-        margin-bottom: 0.5rem;
-    }
-
     .table-responsive {
         font-size: 0.875rem;
     }

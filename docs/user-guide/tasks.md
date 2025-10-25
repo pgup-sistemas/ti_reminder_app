@@ -1,25 +1,25 @@
-# Gestão de Tarefas
+# Atividades & Projetos
 
-O sistema de tarefas permite organizar e acompanhar atividades específicas com datas definidas e responsáveis atribuídos.
+O sistema de atividades permite organizar e acompanhar workflows específicos com datas definidas e responsáveis atribuídos.
 
 ## 🎯 Visão Geral
 
-Diferentemente dos lembretes (que são recorrentes), as tarefas são atividades pontuais com:
+Diferentemente das notificações programadas (que são recorrentes), as atividades são workflows pontuais com:
 - ✅ **Data específica** para conclusão
 - ✅ **Responsável definido**
 - ✅ **Status de conclusão** (pendente/concluída)
 - ✅ **Controle por setor**
 - ✅ **Filtros avançados**
 
-## 📝 Criando uma Tarefa
+## 📝 Criando uma Atividade
 
 ### Passo a Passo
 
 1. **Acesse o módulo**:
-   - Menu principal → **"Tarefas"**
+   - Menu principal → **"Atividades & Projetos"**
    - URL: `http://192.168.1.86:5000/tasks`
 
-2. **Clique em "Nova Tarefa"**:
+2. **Clique em "Nova Atividade"**:
    - Formulário será exibido
 
 3. **Preencha os campos**:
@@ -39,9 +39,9 @@ Diferentemente dos lembretes (que são recorrentes), as tarefas são atividades 
         | **Setor** | Setor responsável | "TI", "RH", "Financeiro" |
         | **Concluída** | Marcar se já foi finalizada | Checkbox |
 
-4. **Clique em "Adicionar Tarefa"** para salvar
+4. **Clique em "Adicionar Atividade"** para salvar
 
-## 📊 Visualizando Tarefas
+## 📊 Visualizando Atividades
 
 ### Filtros Disponíveis
 
@@ -52,34 +52,34 @@ Diferentemente dos lembretes (que são recorrentes), as tarefas são atividades 
 
     ---
 
-    Tarefas que ainda precisam ser concluídas
+    Atividades que ainda precisam ser concluídas
 
 -   :material-clock-check-outline:
     **Concluídas**
 
     ---
 
-    Tarefas já finalizadas
+    Atividades já finalizadas
 
 -   :material-clock-alert-outline:
     **Vencidas**
 
     ---
 
-    Tarefas com data anterior a hoje
+    Atividades com data anterior a hoje
 
 -   :material-calendar-today:
     **Hoje**
 
     ---
 
-    Tarefas com vencimento hoje
+    Atividades com vencimento hoje
 
 </div>
 
 ### Organização Visual
 
-Cada tarefa mostra:
+Cada atividade mostra:
 - 📝 **Descrição** da atividade
 - 📅 **Data de vencimento**
 - 👤 **Responsável** pela execução
@@ -87,21 +87,22 @@ Cada tarefa mostra:
 - ✅ **Status** (pendente/concluída)
 - ⏰ **Dias restantes** ou **dias em atraso**
 
-## 🎮 Controles de Tarefa
+## 🎮 Controles de Atividade
 
 ### Ações Disponíveis
 
 | Ação | Ícone | Função | Quando Usar |
 |------|-------|--------|-------------|
-| **✅ Concluir** | Botão verde | Marca como finalizada | Quando tarefa foi executada |
+| **✅ Concluir** | Botão verde | Marca como finalizada | Quando atividade foi executada |
 | **✏️ Editar** | Botão azul | Modifica informações | Para alterar data ou descrição |
-| **🗑️ Excluir** | Botão vermelho | Remove tarefa | Apenas administradores |
+| **🗑️ Excluir** | Botão vermelho | Remove atividade | Apenas administradores |
 
 ### Como Usar
 
-1. **Concluir Tarefa**:
+1. **Concluir Atividade**:
    - Clique no botão ✅ verde
-   - Tarefa fica marcada como concluída
+   - Atividade fica marcada como concluída
+   - Move para seção de atividades finalizadas
    - Move para seção de tarefas finalizadas
 
 2. **Editar Tarefa**:

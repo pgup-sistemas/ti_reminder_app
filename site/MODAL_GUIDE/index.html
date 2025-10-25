@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt_BR" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Oézios Normando - Equipe TI OSN" /><link rel="canonical" href="http://192.168.1.86:5000/docs/MODAL_GUIDE/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>🎨 Guia Completo do Sistema de Modais Modernos - TI OSN System - Documentação Oficial</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "\ud83c\udfa8 Guia Completo do Sistema de Modais Modernos";
+        var mkdocs_page_input_path = "MODAL_GUIDE.md";
+        var mkdocs_page_url = "/docs/MODAL_GUIDE/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> TI OSN System - Documentação Oficial
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" title="Digite o termo a ser buscado aqui" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Início</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Usuário</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/overview/">Visão Geral</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/security/">Segurança</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/tasks/">Atividades & Projetos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/reminders/">Notificações Programadas</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/chamados/">Tickets & Suporte</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/equipment/">Gestão de Ativos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/tutorials/">Base de Conhecimento</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/equipment/">Equipamentos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/dashboard/">Dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/rfid/">Sistema RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/satisfaction/">Avaliação de Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/certifications/">Certificações</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/performance/">Performance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Administrador</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/security-admin/">Gerenciamento de Segurança</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/equipment-admin/">Equipamentos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/performance-admin/">Performance</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/rfid-admin/">RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/satisfaction-admin/">Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/certifications-admin/">Certificações</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Desenvolvedor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../dev-guide/security-implementation/">Implementação de Segurança</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Menu de navegação em dispositivo móvel">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">TI OSN System - Documentação Oficial</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Documentos"></a></li>
+      <li class="breadcrumb-item active">🎨 Guia Completo do Sistema de Modais Modernos</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="guia-completo-do-sistema-de-modais-modernos">🎨 Guia Completo do Sistema de Modais Modernos<a class="headerlink" href="#guia-completo-do-sistema-de-modais-modernos" title="Permanent link">&para;</a></h1>
+<h2 id="indice">📚 Índice<a class="headerlink" href="#indice" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="#introdução">Introdução</a></li>
+<li><a href="#instalação">Instalação</a></li>
+<li><a href="#uso-básico">Uso Básico</a></li>
+<li><a href="#funções-helper">Funções Helper</a></li>
+<li><a href="#exemplos-práticos">Exemplos Práticos</a></li>
+<li><a href="#api-completa">API Completa</a></li>
+<li><a href="#customização">Customização</a></li>
+<li><a href="#acessibilidade">Acessibilidade</a></li>
+<li><a href="#migração">Migração</a></li>
+</ul>
+<hr />
+<h2 id="introducao">🎯 Introdução<a class="headerlink" href="#introducao" title="Permanent link">&para;</a></h2>
+<p>O Sistema de Modais Modernos do TI OSN substitui completamente os <code>alert()</code> e <code>confirm()</code> nativos do JavaScript por uma solução profissional, elegante e acessível.</p>
+<h3 id="caracteristicas">✨ Características<a class="headerlink" href="#caracteristicas" title="Permanent link">&para;</a></h3>
+<ul>
+<li>✅ <strong>Design Moderno</strong> - Visual profissional alinhado com o design system</li>
+<li>✅ <strong>Totalmente Acessível</strong> - WCAG 2.1 AAA compliant</li>
+<li>✅ <strong>Responsivo</strong> - Funciona perfeitamente em mobile</li>
+<li>✅ <strong>Dark Mode</strong> - Suporte automático ao tema escuro</li>
+<li>✅ <strong>Animações Suaves</strong> - Transições elegantes</li>
+<li>✅ <strong>Customizável</strong> - Flexível para qualquer necessidade</li>
+<li>✅ <strong>Promise-based</strong> - API moderna com async/await</li>
+<li>✅ <strong>Zero Dependências</strong> - Apenas JavaScript vanilla</li>
+</ul>
+<hr />
+<h2 id="instalacao">🚀 Instalação<a class="headerlink" href="#instalacao" title="Permanent link">&para;</a></h2>
+<h3 id="ja-integrado">Já Integrado!<a class="headerlink" href="#ja-integrado" title="Permanent link">&para;</a></h3>
+<p>O sistema já está completamente integrado no <code>base.html</code>. Não é necessário nenhum setup adicional!</p>
+<p><strong>Arquivos carregados automaticamente:</strong>
+- <code>css/modern-modals.css</code> - Estilos dos modais
+- <code>js/modals.js</code> - Sistema principal
+- <code>js/modal-helpers.js</code> - Funções auxiliares</p>
+<hr />
+<h2 id="uso-basico">💡 Uso Básico<a class="headerlink" href="#uso-basico" title="Permanent link">&para;</a></h2>
+<h3 id="metodo-1-usando-helpers-recomendado">Método 1: Usando Helpers (Recomendado)<a class="headerlink" href="#metodo-1-usando-helpers-recomendado" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">// Confirmar exclusão
+const confirmed = await confirmDelete('Relatório de Vendas', 'relatório');
+if (confirmed) {
+    // Executar exclusão
+}
+
+// Mostrar sucesso
+await showSuccess('Usuário criado com sucesso!');
+
+// Mostrar erro
+await showError('Não foi possível salvar os dados.');
+
+// Confirmar ação
+const result = await confirmAction(
+    'Limpar Cache',
+    'Isso irá limpar todo o cache do sistema. Continuar?',
+    'Sim, Limpar'
+);
+</code></pre>
+<h3 id="metodo-2-api-completa">Método 2: API Completa<a class="headerlink" href="#metodo-2-api-completa" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">// Modal customizado
+const result = await window.Modal.show({
+    type: 'confirm',
+    title: 'Confirmar Ação',
+    message: 'Deseja realmente executar esta operação?',
+    buttons: [
+        { text: 'Cancelar', action: 'cancel', class: 'btn-outline-secondary' },
+        { text: 'Confirmar', action: 'confirm', class: 'btn-primary' }
+    ]
+});
+
+if (result.action === 'confirm') {
+    // Executar ação
+}
+</code></pre>
+<hr />
+<h2 id="funcoes-helper">🛠️ Funções Helper<a class="headerlink" href="#funcoes-helper" title="Permanent link">&para;</a></h2>
+<h3 id="confirmdeleteitemname-itemtype">confirmDelete(itemName, itemType)<a class="headerlink" href="#confirmdeleteitemname-itemtype" title="Permanent link">&para;</a></h3>
+<p>Confirma exclusão de um item.</p>
+<pre><code class="language-javascript">const deleted = await confirmDelete('João Silva', 'usuário');
+if (deleted) {
+    console.log('Item excluído!');
+}
+</code></pre>
+<p><strong>Parâmetros:</strong>
+- <code>itemName</code> (string) - Nome do item
+- <code>itemType</code> (string) - Tipo do item (padrão: 'item')</p>
+<p><strong>Retorna:</strong> <code>boolean</code> - true se confirmado</p>
+<hr />
+<h3 id="confirmactiontitle-message-confirmtext-type">confirmAction(title, message, confirmText, type)<a class="headerlink" href="#confirmactiontitle-message-confirmtext-type" title="Permanent link">&para;</a></h3>
+<p>Confirma ação genérica.</p>
+<pre><code class="language-javascript">const confirmed = await confirmAction(
+    'Reprocessar Dados',
+    'Isso pode levar alguns minutos. Continuar?',
+    'Sim, Reprocessar',
+    'warning'
+);
+</code></pre>
+<p><strong>Parâmetros:</strong>
+- <code>title</code> (string) - Título do modal
+- <code>message</code> (string) - Mensagem
+- <code>confirmText</code> (string) - Texto do botão (padrão: 'Confirmar')
+- <code>type</code> (string) - Tipo: info, success, warning, error, confirm</p>
+<p><strong>Retorna:</strong> <code>boolean</code> - true se confirmado</p>
+<hr />
+<h3 id="showsuccessmessage-title">showSuccess(message, title)<a class="headerlink" href="#showsuccessmessage-title" title="Permanent link">&para;</a></h3>
+<p>Mostra mensagem de sucesso.</p>
+<pre><code class="language-javascript">await showSuccess('Dados salvos com sucesso!', 'Sucesso');
+</code></pre>
+<p><strong>Parâmetros:</strong>
+- <code>message</code> (string) - Mensagem
+- <code>title</code> (string) - Título (padrão: 'Sucesso!')</p>
+<hr />
+<h3 id="showerrormessage-title">showError(message, title)<a class="headerlink" href="#showerrormessage-title" title="Permanent link">&para;</a></h3>
+<p>Mostra mensagem de erro.</p>
+<pre><code class="language-javascript">await showError('Falha ao conectar com o servidor.', 'Erro de Conexão');
+</code></pre>
+<p><strong>Parâmetros:</strong>
+- <code>message</code> (string) - Mensagem
+- <code>title</code> (string) - Título (padrão: 'Erro')</p>
+<hr />
+<h3 id="showwarningmessage-title">showWarning(message, title)<a class="headerlink" href="#showwarningmessage-title" title="Permanent link">&para;</a></h3>
+<p>Mostra aviso.</p>
+<pre><code class="language-javascript">await showWarning('Esta ação não pode ser desfeita.', 'Atenção');
+</code></pre>
+<hr />
+<h3 id="showinfomessage-title">showInfo(message, title)<a class="headerlink" href="#showinfomessage-title" title="Permanent link">&para;</a></h3>
+<p>Mostra informação.</p>
+<pre><code class="language-javascript">await showInfo('Sistema será atualizado em 5 minutos.', 'Manutenção Agendada');
+</code></pre>
+<hr />
+<h3 id="promptinputquestion-defaultvalue-placeholder-inputtype">promptInput(question, defaultValue, placeholder, inputType)<a class="headerlink" href="#promptinputquestion-defaultvalue-placeholder-inputtype" title="Permanent link">&para;</a></h3>
+<p>Solicita input do usuário.</p>
+<pre><code class="language-javascript">const name = await promptInput(
+    'Digite o nome do projeto:',
+    '',
+    'Ex: Projeto Alpha',
+    'text'
+);
+
+if (name) {
+    console.log('Nome:', name);
+}
+</code></pre>
+<p><strong>Parâmetros:</strong>
+- <code>question</code> (string) - Pergunta/label
+- <code>defaultValue</code> (string) - Valor padrão
+- <code>placeholder</code> (string) - Placeholder
+- <code>inputType</code> (string) - Tipo: text, email, number, etc</p>
+<p><strong>Retorna:</strong> <code>string|null</code> - Valor digitado ou null se cancelado</p>
+<hr />
+<h3 id="showloadingmessage-hideloading">showLoading(message) / hideLoading()<a class="headerlink" href="#showloadingmessage-hideloading" title="Permanent link">&para;</a></h3>
+<p>Mostra/esconde loading.</p>
+<pre><code class="language-javascript">showLoading('Processando dados...');
+
+// Executar operação
+await fetch('/api/process');
+
+hideLoading();
+</code></pre>
+<hr />
+<h3 id="confirmdangerousactionitemname-warningmessage">confirmDangerousAction(itemName, warningMessage)<a class="headerlink" href="#confirmdangerousactionitemname-warningmessage" title="Permanent link">&para;</a></h3>
+<p>Confirma operação perigosa com aviso destacado.</p>
+<pre><code class="language-javascript">const confirmed = await confirmDangerousAction(
+    'Banco de Dados de Produção',
+    'Esta ação irá deletar TODOS os dados permanentemente!'
+);
+</code></pre>
+<hr />
+<h3 id="confirmcleardatadatatype-details">confirmClearData(dataType, details)<a class="headerlink" href="#confirmcleardatadatatype-details" title="Permanent link">&para;</a></h3>
+<p>Confirma limpeza de dados.</p>
+<pre><code class="language-javascript">const clear = await confirmClearData(
+    'Logs do Sistema',
+    'Últimos 30 dias - aproximadamente 2GB'
+);
+</code></pre>
+<hr />
+<h3 id="showprogresstitle-message-estimatedseconds">showProgress(title, message, estimatedSeconds)<a class="headerlink" href="#showprogresstitle-message-estimatedseconds" title="Permanent link">&para;</a></h3>
+<p>Mostra progresso de operação.</p>
+<pre><code class="language-javascript">showProgress(
+    'Otimizando Banco de Dados',
+    'Recriando índices...',
+    30
+);
+
+// Após completar
+hideLoading();
+</code></pre>
+<hr />
+<h3 id="confirmwithcheckboxtitle-message-checkboxlabel">confirmWithCheckbox(title, message, checkboxLabel)<a class="headerlink" href="#confirmwithcheckboxtitle-message-checkboxlabel" title="Permanent link">&para;</a></h3>
+<p>Confirma com opção de checkbox.</p>
+<pre><code class="language-javascript">const result = await confirmWithCheckbox(
+    'Tutorial',
+    'Deseja ver o tutorial do sistema?',
+    'Não mostrar novamente'
+);
+
+if (result.confirmed &amp;&amp; result.checkboxValue) {
+    localStorage.setItem('hideT tutorial', 'true');
+}
+</code></pre>
+<hr />
+<h3 id="chooseoptiontitle-message-options">chooseOption(title, message, options)<a class="headerlink" href="#chooseoptiontitle-message-options" title="Permanent link">&para;</a></h3>
+<p>Escolhe entre múltiplas opções.</p>
+<pre><code class="language-javascript">const format = await chooseOption(
+    'Exportar Dados',
+    'Escolha o formato de exportação:',
+    [
+        { value: 'pdf', label: 'PDF', description: 'Documento em PDF' },
+        { value: 'excel', label: 'Excel', description: 'Planilha Excel (.xlsx)' },
+        { value: 'csv', label: 'CSV', description: 'Valores separados por vírgula' }
+    ]
+);
+
+console.log('Formato escolhido:', format);
+</code></pre>
+<hr />
+<h2 id="exemplos-praticos">📖 Exemplos Práticos<a class="headerlink" href="#exemplos-praticos" title="Permanent link">&para;</a></h2>
+<h3 id="exemplo-1-deletar-usuario">Exemplo 1: Deletar Usuário<a class="headerlink" href="#exemplo-1-deletar-usuario" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">async function deleteUser(userId, userName) {
+    const confirmed = await confirmDelete(userName, 'usuário');
+
+    if (confirmed) {
+        showLoading('Excluindo usuário...');
+
+        try {
+            const response = await fetch(`/api/users/${userId}`, {
+                method: 'DELETE'
+            });
+
+            hideLoading();
+
+            if (response.ok) {
+                await showSuccess(`Usuário &quot;${userName}&quot; excluído com sucesso!`);
+                location.reload();
+            } else {
+                await showError('Erro ao excluir usuário.');
+            }
+        } catch (error) {
+            hideLoading();
+            await showError('Erro de conexão com o servidor.');
+        }
+    }
+}
+</code></pre>
+<h3 id="exemplo-2-limpar-cache-com-confirmacao-dupla">Exemplo 2: Limpar Cache com Confirmação Dupla<a class="headerlink" href="#exemplo-2-limpar-cache-com-confirmacao-dupla" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">async function clearSystemCache() {
+    const confirmed = await confirmDangerousAction(
+        'Cache do Sistema',
+        'Limpar o cache pode causar lentidão temporária no sistema!'
+    );
+
+    if (!confirmed) return;
+
+    showProgress('Limpando Cache', 'Aguarde...', 10);
+
+    await fetch('/api/cache/clear', { method: 'POST' });
+
+    hideLoading();
+    await showSuccess('Cache limpo com sucesso!');
+}
+</code></pre>
+<h3 id="exemplo-3-formulario-de-input">Exemplo 3: Formulário de Input<a class="headerlink" href="#exemplo-3-formulario-de-input" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">async function renameProject(projectId, currentName) {
+    const newName = await promptInput(
+        'Digite o novo nome do projeto:',
+        currentName,
+        'Nome do projeto',
+        'text'
+    );
+
+    if (newName &amp;&amp; newName !== currentName) {
+        showLoading('Renomeando...');
+
+        await fetch(`/api/projects/${projectId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: newName })
+        });
+
+        hideLoading();
+        await showSuccess('Projeto renomeado!');
+    }
+}
+</code></pre>
+<h3 id="exemplo-4-exportar-com-opcoes">Exemplo 4: Exportar com Opções<a class="headerlink" href="#exemplo-4-exportar-com-opcoes" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">async function exportData() {
+    const format = await chooseOption(
+        'Exportar Relatório',
+        'Escolha o formato desejado:',
+        [
+            { value: 'pdf', label: 'PDF', description: 'Melhor para impressão' },
+            { value: 'xlsx', label: 'Excel', description: 'Editável em planilhas' },
+            { value: 'csv', label: 'CSV', description: 'Dados brutos' }
+        ]
+    );
+
+    if (format) {
+        showLoading(`Gerando arquivo ${format.toUpperCase()}...`);
+        window.location.href = `/api/export?format=${format}`;
+
+        setTimeout(hideLoading, 2000);
+    }
+}
+</code></pre>
+<hr />
+<h2 id="api-completa">🎨 API Completa<a class="headerlink" href="#api-completa" title="Permanent link">&para;</a></h2>
+<h3 id="modalshowoptions">Modal.show(options)<a class="headerlink" href="#modalshowoptions" title="Permanent link">&para;</a></h3>
+<p>Método principal para criar modais customizados.</p>
+<pre><code class="language-javascript">const result = await Modal.show({
+    type: 'confirm',           // Tipo do modal
+    title: 'Título',           // Título
+    message: 'Mensagem',       // Conteúdo
+    html: true,                // Permite HTML no message
+    size: 'medium',            // Tamanho: small, medium, large, xl
+    closable: true,            // Botão X para fechar
+    backdrop: true,            // Fechar ao clicar fora
+    animation: true,           // Animações
+    customClass: 'my-modal',   // Classes CSS adicionais
+
+    // Callbacks
+    onShow: () =&gt; {},          // Ao mostrar
+    onHide: () =&gt; {},          // Ao esconder
+    onConfirm: () =&gt; {},       // Ao confirmar
+    onCancel: () =&gt; {},        // Ao cancelar
+
+    // Botões customizados
+    buttons: [
+        {
+            text: 'Cancelar',
+            action: 'cancel',
+            class: 'btn-outline-secondary',
+            icon: 'fas fa-times'
+        },
+        {
+            text: 'Confirmar',
+            action: 'confirm',
+            class: 'btn-primary',
+            icon: 'fas fa-check',
+            autofocus: true
+        }
+    ]
+});
+
+// Resultado
+console.log(result.action);  // 'confirm', 'cancel', 'ok', etc
+console.log(result.value);   // true/false/custom
+</code></pre>
+<h3 id="tipos-de-modal">Tipos de Modal<a class="headerlink" href="#tipos-de-modal" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>info</strong> - Informação (azul)</li>
+<li><strong>success</strong> - Sucesso (verde)</li>
+<li><strong>warning</strong> - Aviso (laranja)</li>
+<li><strong>error</strong> - Erro (vermelho)</li>
+<li><strong>confirm</strong> - Confirmação (azul sistema)</li>
+</ul>
+<h3 id="tamanhos">Tamanhos<a class="headerlink" href="#tamanhos" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>small</strong> - 400px</li>
+<li><strong>medium</strong> - 500px (padrão)</li>
+<li><strong>large</strong> - 700px</li>
+<li><strong>xl</strong> - 900px</li>
+</ul>
+<hr />
+<h2 id="customizacao">🎨 Customização<a class="headerlink" href="#customizacao" title="Permanent link">&para;</a></h2>
+<h3 id="modal-com-html-customizado">Modal com HTML Customizado<a class="headerlink" href="#modal-com-html-customizado" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">await Modal.show({
+    type: 'info',
+    title: 'Informações do Sistema',
+    message: `
+        &lt;div class=&quot;alert alert-info&quot;&gt;
+            &lt;h6&gt;&lt;i class=&quot;fas fa-info-circle me-2&quot;&gt;&lt;/i&gt;Versão&lt;/h6&gt;
+            &lt;p class=&quot;mb-0&quot;&gt;TI OSN System v2.0&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;ul class=&quot;list-unstyled mt-3&quot;&gt;
+            &lt;li&gt;&lt;strong&gt;Servidor:&lt;/strong&gt; PostgreSQL 14&lt;/li&gt;
+            &lt;li&gt;&lt;strong&gt;Python:&lt;/strong&gt; 3.11&lt;/li&gt;
+            &lt;li&gt;&lt;strong&gt;Framework:&lt;/strong&gt; Flask 3.0&lt;/li&gt;
+        &lt;/ul&gt;
+    `,
+    html: true,
+    size: 'large'
+});
+</code></pre>
+<h3 id="modal-com-formulario-complexo">Modal com Formulário Complexo<a class="headerlink" href="#modal-com-formulario-complexo" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">const result = await Modal.show({
+    type: 'confirm',
+    title: 'Configurar Notificações',
+    message: `
+        &lt;div class=&quot;mb-3&quot;&gt;
+            &lt;label class=&quot;form-label&quot;&gt;Email&lt;/label&gt;
+            &lt;input type=&quot;email&quot; id=&quot;emailNotif&quot; class=&quot;form-control&quot;&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;mb-3&quot;&gt;
+            &lt;div class=&quot;form-check&quot;&gt;
+                &lt;input type=&quot;checkbox&quot; id=&quot;pushNotif&quot; class=&quot;form-check-input&quot; checked&gt;
+                &lt;label class=&quot;form-check-label&quot; for=&quot;pushNotif&quot;&gt;
+                    Notificações push
+                &lt;/label&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    `,
+    html: true,
+    buttons: [
+        { text: 'Cancelar', action: 'cancel', class: 'btn-outline-secondary' },
+        { text: 'Salvar', action: 'save', class: 'btn-success' }
+    ]
+});
+
+if (result.action === 'save') {
+    const email = document.getElementById('emailNotif').value;
+    const push = document.getElementById('pushNotif').checked;
+    // Salvar configurações
+}
+</code></pre>
+<hr />
+<h2 id="acessibilidade">♿ Acessibilidade<a class="headerlink" href="#acessibilidade" title="Permanent link">&para;</a></h2>
+<p>O sistema implementa todas as melhores práticas de acessibilidade:</p>
+<h3 id="recursos-implementados">Recursos Implementados<a class="headerlink" href="#recursos-implementados" title="Permanent link">&para;</a></h3>
+<p>✅ <strong>Gerenciamento de Foco</strong>
+- Foco automático no botão primário
+- Trap focus (Tab navega apenas dentro do modal)
+- Restauração do foco ao fechar</p>
+<p>✅ <strong>Navegação por Teclado</strong>
+- <code>ESC</code> fecha o modal
+- <code>Tab</code> navega entre elementos
+- <code>Enter</code> confirma ação</p>
+<p>✅ <strong>ARIA</strong>
+- <code>role="dialog"</code>
+- <code>aria-modal="true"</code>
+- Labels adequados</p>
+<p>✅ <strong>Screen Readers</strong>
+- Anúncios automáticos
+- Descrições claras</p>
+<p>✅ <strong>Reduced Motion</strong>
+- Respeita <code>prefers-reduced-motion</code>
+- Sem animações se configurado</p>
+<p>✅ <strong>High Contrast</strong>
+- Bordas visíveis em modo alto contraste</p>
+<hr />
+<h2 id="migracao">🔄 Migração<a class="headerlink" href="#migracao" title="Permanent link">&para;</a></h2>
+<h3 id="de-confirm-para-modal">De <code>confirm()</code> para Modal<a class="headerlink" href="#de-confirm-para-modal" title="Permanent link">&para;</a></h3>
+<p><strong>Antes:</strong></p>
+<pre><code class="language-javascript">if (confirm('Deseja excluir?')) {
+    deleteItem();
+}
+</code></pre>
+<p><strong>Depois:</strong></p>
+<pre><code class="language-javascript">const confirmed = await confirmAction('Excluir Item', 'Deseja excluir?');
+if (confirmed) {
+    deleteItem();
+}
+</code></pre>
+<h3 id="de-alert-para-modal">De <code>alert()</code> para Modal<a class="headerlink" href="#de-alert-para-modal" title="Permanent link">&para;</a></h3>
+<p><strong>Antes:</strong></p>
+<pre><code class="language-javascript">alert('Operação concluída!');
+</code></pre>
+<p><strong>Depois:</strong></p>
+<pre><code class="language-javascript">await showSuccess('Operação concluída!');
+</code></pre>
+<h3 id="de-prompt-para-modal">De <code>prompt()</code> para Modal<a class="headerlink" href="#de-prompt-para-modal" title="Permanent link">&para;</a></h3>
+<p><strong>Antes:</strong></p>
+<pre><code class="language-javascript">const name = prompt('Digite o nome:');
+if (name) {
+    saveName(name);
+}
+</code></pre>
+<p><strong>Depois:</strong></p>
+<pre><code class="language-javascript">const name = await promptInput('Digite o nome:');
+if (name) {
+    saveName(name);
+}
+</code></pre>
+<hr />
+<h2 id="checklist-de-migracao">📋 Checklist de Migração<a class="headerlink" href="#checklist-de-migracao" title="Permanent link">&para;</a></h2>
+<p>Use este checklist para migrar páginas:</p>
+<ul>
+<li>[ ] Identificar todos <code>confirm()</code> na página</li>
+<li>[ ] Identificar todos <code>alert()</code> na página</li>
+<li>[ ] Identificar todos <code>prompt()</code> na página</li>
+<li>[ ] Substituir por funções helper apropriadas</li>
+<li>[ ] Testar todos os fluxos</li>
+<li>[ ] Testar navegação por teclado</li>
+<li>[ ] Testar em mobile</li>
+<li>[ ] Testar em dark mode</li>
+</ul>
+<hr />
+<h2 id="dicas-e-boas-praticas">💡 Dicas e Boas Práticas<a class="headerlink" href="#dicas-e-boas-praticas" title="Permanent link">&para;</a></h2>
+<h3 id="1-use-helpers-quando-possivel">1. Use Helpers quando possível<a class="headerlink" href="#1-use-helpers-quando-possivel" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">// ❌ Não faça isso
+Modal.show({
+    type: 'error',
+    title: 'Erro',
+    message: 'Algo deu errado',
+    buttons: [{ text: 'OK', action: 'ok', class: 'btn-danger' }]
+});
+
+// ✅ Faça isso
+showError('Algo deu errado');
+</code></pre>
+<h3 id="2-sempre-use-asyncawait">2. Sempre use async/await<a class="headerlink" href="#2-sempre-use-asyncawait" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">// ✅ Correto
+async function deleteUser() {
+    const confirmed = await confirmDelete('João');
+    if (confirmed) {
+        // deletar
+    }
+}
+
+// ❌ Evite callbacks
+confirmDelete('João').then(confirmed =&gt; {
+    if (confirmed) {
+        // deletar
+    }
+});
+</code></pre>
+<h3 id="3-forneca-contexto-adequado">3. Forneça contexto adequado<a class="headerlink" href="#3-forneca-contexto-adequado" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">// ❌ Vago
+confirmDelete('Item');
+
+// ✅ Específico
+confirmDelete('Relatório de Vendas Q4 2024', 'relatório');
+</code></pre>
+<h3 id="4-use-loading-para-operacoes-longas">4. Use loading para operações longas<a class="headerlink" href="#4-use-loading-para-operacoes-longas" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">async function processData() {
+    showLoading('Processando 1000 registros...');
+
+    await heavyOperation();
+
+    hideLoading();
+    await showSuccess('Processamento concluído!');
+}
+</code></pre>
+<hr />
+<h2 id="troubleshooting">🐛 Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="modal-nao-aparece">Modal não aparece<a class="headerlink" href="#modal-nao-aparece" title="Permanent link">&para;</a></h3>
+<p><strong>Problema:</strong> Modal não é exibido.</p>
+<p><strong>Solução:</strong>
+1. Verifique se <code>modals.js</code> está carregado
+2. Verifique console por erros
+3. Confirme que está usando <code>await</code> ou <code>.then()</code></p>
+<h3 id="foco-nao-funciona">Foco não funciona<a class="headerlink" href="#foco-nao-funciona" title="Permanent link">&para;</a></h3>
+<p><strong>Problema:</strong> Foco não vai para o modal.</p>
+<p><strong>Solução:</strong>
+- Aguarde 100-200ms após abrir
+- Verifique se há outros modais abertos</p>
+<h3 id="estilo-incorreto">Estilo incorreto<a class="headerlink" href="#estilo-incorreto" title="Permanent link">&para;</a></h3>
+<p><strong>Problema:</strong> Modal aparece sem estilo.</p>
+<p><strong>Solução:</strong>
+1. Verifique se <code>modern-modals.css</code> está carregado
+2. Limpe o cache do navegador
+3. Verifique ordem de carregamento dos CSS</p>
+<hr />
+<h2 id="suporte">📞 Suporte<a class="headerlink" href="#suporte" title="Permanent link">&para;</a></h2>
+<p>Para dúvidas ou problemas:</p>
+<ol>
+<li>Consulte este guia</li>
+<li>Verifique os exemplos em <code>/docs/examples/</code></li>
+<li>Contate a equipe de desenvolvimento</li>
+</ol>
+<hr />
+<h2 id="changelog">📝 Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h2>
+<h3 id="v20-2025-01-22">v2.0 (2025-01-22)<a class="headerlink" href="#v20-2025-01-22" title="Permanent link">&para;</a></h3>
+<ul>
+<li>✨ Sistema completo de modals modernos</li>
+<li>✨ 10+ funções helper</li>
+<li>✨ Suporte total a acessibilidade</li>
+<li>✨ Dark mode automático</li>
+<li>✨ Animações suaves</li>
+<li>✨ API promise-based</li>
+</ul>
+<hr />
+<p><strong>Desenvolvido com ❤️ para TI OSN System</strong></p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Construído com <a href="https://www.mkdocs.org/">MkDocs</a> usando <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provido por <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versões">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../javascripts/extra.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

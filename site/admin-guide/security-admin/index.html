@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt_BR" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Oézios Normando - Equipe TI OSN" /><link rel="canonical" href="http://192.168.1.86:5000/docs/admin-guide/security-admin/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Gerenciamento de Segurança - TI OSN System - Documentação Oficial</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Gerenciamento de Seguran\u00e7a";
+        var mkdocs_page_input_path = "admin-guide\\security-admin.md";
+        var mkdocs_page_url = "/docs/admin-guide/security-admin/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> TI OSN System - Documentação Oficial
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" title="Digite o termo a ser buscado aqui" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Início</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Usuário</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/overview/">Visão Geral</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/security/">Segurança</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/tasks/">Atividades & Projetos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/reminders/">Notificações Programadas</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/chamados/">Tickets & Suporte</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/equipment/">Gestão de Ativos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/tutorials/">Base de Conhecimento</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/equipment/">Equipamentos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/dashboard/">Dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/rfid/">Sistema RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/satisfaction/">Avaliação de Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/certifications/">Certificações</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/performance/">Performance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Administrador</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Gerenciamento de Segurança</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#visao-geral">Visão Geral</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#gerenciamento-de-usuarios">👥 Gerenciamento de Usuários</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#desbloquear-conta-de-usuario">Desbloquear Conta de Usuário</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#via-interface-admin">Via Interface Admin</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#via-console-python">Via Console Python</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#via-sql-direto">Via SQL Direto</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#monitoramento-de-seguranca">📊 Monitoramento de Segurança</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#dashboard-de-seguranca">Dashboard de Segurança</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#1-contas-atualmente-bloqueadas">1. Contas Atualmente Bloqueadas</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#2-usuarios-com-multiplas-tentativas-falhas">2. Usuários com Múltiplas Tentativas Falhas</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#3-senhas-nao-alteradas-recentemente">3. Senhas Não Alteradas Recentemente</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#4-ultimos-logins">4. Últimos Logins</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#5-contas-inativas">5. Contas Inativas</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#analise-de-logs-de-seguranca">📝 Análise de Logs de Segurança</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#localizacao">Localização</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#comandos-uteis-powershell">Comandos Úteis (PowerShell)</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#ver-ultimas-50-linhas">Ver últimas 50 linhas</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#monitorar-em-tempo-real">Monitorar em tempo real</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#filtrar-logins-bem-sucedidos-hoje">Filtrar logins bem-sucedidos hoje</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#filtrar-tentativas-falhas">Filtrar tentativas falhas</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#contar-tentativas-por-ip">Contar tentativas por IP</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#contas-bloqueadas-hoje">Contas bloqueadas hoje</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#resposta-a-incidentes">🚨 Resposta a Incidentes</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#cenario-1-conta-comprometida">Cenário 1: Conta Comprometida</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#cenario-2-ataque-de-forca-bruta">Cenário 2: Ataque de Força Bruta</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#cenario-3-senhas-fracas-detectadas">Cenário 3: Senhas Fracas Detectadas</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#politicas-de-seguranca-recomendadas">📋 Políticas de Segurança Recomendadas</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#politica-de-senhas">Política de Senhas</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#politica-de-sessoes">Política de Sessões</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#politica-de-auditoria">Política de Auditoria</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#configuracoes-avancadas">🔧 Configurações Avançadas</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#ajustar-rate-limiting">Ajustar Rate Limiting</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#ajustar-tempo-de-bloqueio">Ajustar Tempo de Bloqueio</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#configurar-https-obrigatorio">Configurar HTTPS Obrigatório</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#relatorios-de-seguranca">📊 Relatórios de Segurança</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#script-de-relatorio-semanal">Script de Relatório Semanal</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#executar">Executar</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#treinamento-de-usuarios">🎓 Treinamento de Usuários</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#topicos-para-treinamento">Tópicos para Treinamento</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#contatos-de-emergencia">📞 Contatos de Emergência</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#checklist-mensal">✅ Checklist Mensal</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../equipment-admin/">Equipamentos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../performance-admin/">Performance</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../rfid-admin/">RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../satisfaction-admin/">Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../certifications-admin/">Certificações</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Desenvolvedor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev-guide/security-implementation/">Implementação de Segurança</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Menu de navegação em dispositivo móvel">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">TI OSN System - Documentação Oficial</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Documentos"></a></li>
+          <li class="breadcrumb-item">Guia do Administrador</li>
+      <li class="breadcrumb-item active">Gerenciamento de Segurança</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="gerenciamento-de-seguranca-guia-do-administrador">🔐 Gerenciamento de Segurança - Guia do Administrador<a class="headerlink" href="#gerenciamento-de-seguranca-guia-do-administrador" title="Permanent link">&para;</a></h1>
+<h2 id="visao-geral">Visão Geral<a class="headerlink" href="#visao-geral" title="Permanent link">&para;</a></h2>
+<p>Guia completo para administradores gerenciarem a segurança do TI OSN System v2.0, incluindo monitoramento, políticas e resposta a incidentes.</p>
+<hr />
+<h2 id="gerenciamento-de-usuarios">👥 Gerenciamento de Usuários<a class="headerlink" href="#gerenciamento-de-usuarios" title="Permanent link">&para;</a></h2>
+<h3 id="desbloquear-conta-de-usuario">Desbloquear Conta de Usuário<a class="headerlink" href="#desbloquear-conta-de-usuario" title="Permanent link">&para;</a></h3>
+<p><strong>Cenário:</strong> Usuário bloqueado após 5 tentativas falhas.</p>
+<h4 id="via-interface-admin">Via Interface Admin<a class="headerlink" href="#via-interface-admin" title="Permanent link">&para;</a></h4>
+<ol>
+<li>Acesse <strong>Admin → Gerenciar Usuários</strong></li>
+<li>Localize o usuário bloqueado</li>
+<li>Clique em <strong>Editar</strong></li>
+<li>Limpe os campos:</li>
+<li><code>locked_until</code> → NULL</li>
+<li><code>login_attempts</code> → 0</li>
+<li>Salve as alterações</li>
+</ol>
+<h4 id="via-console-python">Via Console Python<a class="headerlink" href="#via-console-python" title="Permanent link">&para;</a></h4>
+<pre><code class="language-python">from app import create_app, db
+from app.models import User
+
+app = create_app()
+with app.app_context():
+    user = User.query.filter_by(username='nome_usuario').first()
+    user.locked_until = None
+    user.login_attempts = 0
+    db.session.commit()
+    print(f&quot;Usuário {user.username} desbloqueado!&quot;)
+</code></pre>
+<h4 id="via-sql-direto">Via SQL Direto<a class="headerlink" href="#via-sql-direto" title="Permanent link">&para;</a></h4>
+<pre><code class="language-sql">UPDATE &quot;user&quot;
+SET locked_until = NULL, login_attempts = 0
+WHERE username = 'nome_usuario';
+</code></pre>
+<hr />
+<h2 id="monitoramento-de-seguranca">📊 Monitoramento de Segurança<a class="headerlink" href="#monitoramento-de-seguranca" title="Permanent link">&para;</a></h2>
+<h3 id="dashboard-de-seguranca">Dashboard de Segurança<a class="headerlink" href="#dashboard-de-seguranca" title="Permanent link">&para;</a></h3>
+<p><strong>Queries úteis para monitoramento:</strong></p>
+<h4 id="1-contas-atualmente-bloqueadas">1. Contas Atualmente Bloqueadas<a class="headerlink" href="#1-contas-atualmente-bloqueadas" title="Permanent link">&para;</a></h4>
+<pre><code class="language-sql">SELECT 
+    id,
+    username,
+    email,
+    login_attempts,
+    locked_until,
+    EXTRACT(MINUTE FROM (locked_until - NOW())) as minutos_restantes
+FROM &quot;user&quot;
+WHERE locked_until &gt; NOW()
+ORDER BY locked_until DESC;
+</code></pre>
+<h4 id="2-usuarios-com-multiplas-tentativas-falhas">2. Usuários com Múltiplas Tentativas Falhas<a class="headerlink" href="#2-usuarios-com-multiplas-tentativas-falhas" title="Permanent link">&para;</a></h4>
+<pre><code class="language-sql">SELECT 
+    username,
+    email,
+    login_attempts,
+    last_failed_login,
+    last_login
+FROM &quot;user&quot;
+WHERE login_attempts &gt; 0
+ORDER BY login_attempts DESC, last_failed_login DESC
+LIMIT 20;
+</code></pre>
+<h4 id="3-senhas-nao-alteradas-recentemente">3. Senhas Não Alteradas Recentemente<a class="headerlink" href="#3-senhas-nao-alteradas-recentemente" title="Permanent link">&para;</a></h4>
+<pre><code class="language-sql">SELECT 
+    username,
+    email,
+    password_changed_at,
+    EXTRACT(DAY FROM (NOW() - password_changed_at)) as dias_sem_alterar
+FROM &quot;user&quot;
+WHERE 
+    password_changed_at &lt; NOW() - INTERVAL '90 days'
+    OR password_changed_at IS NULL
+ORDER BY password_changed_at ASC NULLS FIRST;
+</code></pre>
+<h4 id="4-ultimos-logins">4. Últimos Logins<a class="headerlink" href="#4-ultimos-logins" title="Permanent link">&para;</a></h4>
+<pre><code class="language-sql">SELECT 
+    username,
+    email,
+    last_login,
+    last_failed_login,
+    login_attempts
+FROM &quot;user&quot;
+ORDER BY last_login DESC NULLS LAST
+LIMIT 50;
+</code></pre>
+<h4 id="5-contas-inativas">5. Contas Inativas<a class="headerlink" href="#5-contas-inativas" title="Permanent link">&para;</a></h4>
+<pre><code class="language-sql">SELECT 
+    username,
+    email,
+    last_login,
+    created_at,
+    ativo
+FROM &quot;user&quot;
+WHERE 
+    last_login &lt; NOW() - INTERVAL '90 days'
+    OR last_login IS NULL
+ORDER BY last_login ASC NULLS FIRST;
+</code></pre>
+<hr />
+<h2 id="analise-de-logs-de-seguranca">📝 Análise de Logs de Segurança<a class="headerlink" href="#analise-de-logs-de-seguranca" title="Permanent link">&para;</a></h2>
+<h3 id="localizacao">Localização<a class="headerlink" href="#localizacao" title="Permanent link">&para;</a></h3>
+<pre><code>logs/security.log
+</code></pre>
+<h3 id="comandos-uteis-powershell">Comandos Úteis (PowerShell)<a class="headerlink" href="#comandos-uteis-powershell" title="Permanent link">&para;</a></h3>
+<h4 id="ver-ultimas-50-linhas">Ver últimas 50 linhas<a class="headerlink" href="#ver-ultimas-50-linhas" title="Permanent link">&para;</a></h4>
+<pre><code class="language-powershell">Get-Content logs\security.log -Tail 50
+</code></pre>
+<h4 id="monitorar-em-tempo-real">Monitorar em tempo real<a class="headerlink" href="#monitorar-em-tempo-real" title="Permanent link">&para;</a></h4>
+<pre><code class="language-powershell">Get-Content logs\security.log -Wait
+</code></pre>
+<h4 id="filtrar-logins-bem-sucedidos-hoje">Filtrar logins bem-sucedidos hoje<a class="headerlink" href="#filtrar-logins-bem-sucedidos-hoje" title="Permanent link">&para;</a></h4>
+<pre><code class="language-powershell">Get-Content logs\security.log | Select-String &quot;Login bem-sucedido&quot; | Select-String (Get-Date -Format &quot;yyyy-MM-dd&quot;)
+</code></pre>
+<h4 id="filtrar-tentativas-falhas">Filtrar tentativas falhas<a class="headerlink" href="#filtrar-tentativas-falhas" title="Permanent link">&para;</a></h4>
+<pre><code class="language-powershell">Get-Content logs\security.log | Select-String &quot;Tentativa falha&quot;
+</code></pre>
+<h4 id="contar-tentativas-por-ip">Contar tentativas por IP<a class="headerlink" href="#contar-tentativas-por-ip" title="Permanent link">&para;</a></h4>
+<pre><code class="language-powershell">Get-Content logs\security.log | 
+    Select-String &quot;IP: (\d+\.\d+\.\d+\.\d+)&quot; | 
+    ForEach-Object { $_.Matches.Groups[1].Value } | 
+    Group-Object | 
+    Sort-Object Count -Descending
+</code></pre>
+<h4 id="contas-bloqueadas-hoje">Contas bloqueadas hoje<a class="headerlink" href="#contas-bloqueadas-hoje" title="Permanent link">&para;</a></h4>
+<pre><code class="language-powershell">Get-Content logs\security.log | Select-String &quot;Conta bloqueada&quot; | Select-String (Get-Date -Format &quot;yyyy-MM-dd&quot;)
+</code></pre>
+<hr />
+<h2 id="resposta-a-incidentes">🚨 Resposta a Incidentes<a class="headerlink" href="#resposta-a-incidentes" title="Permanent link">&para;</a></h2>
+<h3 id="cenario-1-conta-comprometida">Cenário 1: Conta Comprometida<a class="headerlink" href="#cenario-1-conta-comprometida" title="Permanent link">&para;</a></h3>
+<p><strong>Sinais:</strong>
+- Logins de IPs suspeitos
+- Atividade fora do horário normal
+- Múltiplas tentativas de acesso</p>
+<p><strong>Ações Imediatas:</strong></p>
+<ol>
+<li><strong>Desativar conta</strong></li>
+</ol>
+<pre><code class="language-sql">UPDATE &quot;user&quot;
+SET ativo = false
+WHERE username = 'usuario_comprometido';
+</code></pre>
+<ol>
+<li><strong>Invalidar sessões</strong></li>
+<li>Restart do servidor Flask (todas sessões expiram)</li>
+<li>
+<p>Ou aguarde timeout de 24h</p>
+</li>
+<li>
+<p><strong>Forçar reset de senha</strong></p>
+</li>
+</ol>
+<pre><code class="language-sql">UPDATE &quot;user&quot;
+SET 
+    reset_token = NULL,
+    reset_token_expiry = NULL,
+    login_attempts = 0,
+    locked_until = NULL
+WHERE username = 'usuario_comprometido';
+</code></pre>
+<ol>
+<li><strong>Notificar usuário</strong></li>
+<li>Email informando sobre atividade suspeita</li>
+<li>
+<p>Instruções para reset de senha</p>
+</li>
+<li>
+<p><strong>Investigar logs</strong></p>
+</li>
+</ol>
+<pre><code class="language-powershell">Get-Content logs\security.log | Select-String &quot;usuario_comprometido&quot;
+</code></pre>
+<ol>
+<li><strong>Documentar incidente</strong></li>
+<li>Horário da detecção</li>
+<li>IPs suspeitos</li>
+<li>Ações tomadas</li>
+</ol>
+<hr />
+<h3 id="cenario-2-ataque-de-forca-bruta">Cenário 2: Ataque de Força Bruta<a class="headerlink" href="#cenario-2-ataque-de-forca-bruta" title="Permanent link">&para;</a></h3>
+<p><strong>Sinais:</strong>
+- Múltiplas tentativas de login de um mesmo IP
+- Tentativas em vários usuários
+- Padrão automatizado</p>
+<p><strong>Ações:</strong></p>
+<ol>
+<li><strong>Identificar IP atacante</strong></li>
+</ol>
+<pre><code class="language-powershell">Get-Content logs\security.log | 
+    Select-String &quot;Tentativa falha&quot; | 
+    Select-String &quot;IP: (\d+\.\d+\.\d+\.\d+)&quot; | 
+    ForEach-Object { $_.Matches.Groups[1].Value } | 
+    Group-Object | 
+    Sort-Object Count -Descending | 
+    Select-Object -First 10
+</code></pre>
+<ol>
+<li><strong>Bloquear IP no firewall</strong></li>
+</ol>
+<pre><code class="language-powershell"># Windows Firewall
+New-NetFirewallRule -DisplayName &quot;Block Attacker IP&quot; `
+    -Direction Inbound `
+    -RemoteAddress 192.168.1.100 `
+    -Action Block
+</code></pre>
+<ol>
+<li><strong>Revisar rate limiting</strong></li>
+<li>Verificar se está ativo</li>
+<li>
+<p>Ajustar limites se necessário</p>
+</li>
+<li>
+<p><strong>Notificar equipe</strong></p>
+</li>
+<li>Documentar ataque</li>
+<li>Compartilhar IPs suspeitos</li>
+</ol>
+<hr />
+<h3 id="cenario-3-senhas-fracas-detectadas">Cenário 3: Senhas Fracas Detectadas<a class="headerlink" href="#cenario-3-senhas-fracas-detectadas" title="Permanent link">&para;</a></h3>
+<p><strong>Ação Preventiva:</strong></p>
+<ol>
+<li><strong>Identificar usuários afetados</strong></li>
+<li>Verificar logs de registro antigos</li>
+<li>
+<p>Contas criadas antes da validação forte</p>
+</li>
+<li>
+<p><strong>Forçar troca de senha</strong></p>
+</li>
+</ol>
+<pre><code class="language-sql">-- Marcar senhas como expiradas (implementar campo)
+UPDATE &quot;user&quot;
+SET password_changed_at = '2020-01-01'
+WHERE password_changed_at IS NULL
+   OR password_changed_at &lt; '2025-01-23';
+</code></pre>
+<ol>
+<li><strong>Comunicar política</strong></li>
+<li>Email para todos usuários</li>
+<li>Explicar novos requisitos</li>
+</ol>
+<hr />
+<h2 id="politicas-de-seguranca-recomendadas">📋 Políticas de Segurança Recomendadas<a class="headerlink" href="#politicas-de-seguranca-recomendadas" title="Permanent link">&para;</a></h2>
+<h3 id="politica-de-senhas">Política de Senhas<a class="headerlink" href="#politica-de-senhas" title="Permanent link">&para;</a></h3>
+<p><strong>Requisitos obrigatórios:</strong>
+- ✅ Mínimo 8 caracteres
+- ✅ 1 maiúscula, 1 minúscula, 1 número, 1 especial
+- ✅ Não usar senhas comuns
+- ✅ Trocar a cada 90 dias (recomendado)</p>
+<p><strong>Bloqueio:</strong>
+- ✅ 5 tentativas falhas = 15 minutos bloqueado
+- ✅ Reset automático após período</p>
+<h3 id="politica-de-sessoes">Política de Sessões<a class="headerlink" href="#politica-de-sessoes" title="Permanent link">&para;</a></h3>
+<p><strong>Configuração atual:</strong>
+- ⏱️ Timeout: 24 horas de inatividade
+- 🍪 Cookies: HttpOnly, Secure (produção)
+- 🔒 SameSite: Lax (dev) / Strict (prod)</p>
+<h3 id="politica-de-auditoria">Política de Auditoria<a class="headerlink" href="#politica-de-auditoria" title="Permanent link">&para;</a></h3>
+<p><strong>Logs mantidos:</strong>
+- 📝 Segurança: 10 arquivos x 10MB = 100MB
+- 🔄 Rotação automática
+- 📊 Revisar mensalmente</p>
+<p><strong>Eventos críticos:</strong>
+1. Logins (sucesso/falha)
+2. Bloqueios de conta
+3. Resets de senha
+4. Mudanças de permissão</p>
+<hr />
+<h2 id="configuracoes-avancadas">🔧 Configurações Avançadas<a class="headerlink" href="#configuracoes-avancadas" title="Permanent link">&para;</a></h2>
+<h3 id="ajustar-rate-limiting">Ajustar Rate Limiting<a class="headerlink" href="#ajustar-rate-limiting" title="Permanent link">&para;</a></h3>
+<p><strong>Arquivo:</strong> <code>app/__init__.py</code></p>
+<pre><code class="language-python">limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=[&quot;200 per day&quot;, &quot;50 per hour&quot;]  # Ajustar aqui
+)
+</code></pre>
+<p><strong>Em rotas específicas:</strong></p>
+<pre><code class="language-python">@bp_auth.route(&quot;/login&quot;)
+@limiter.limit(&quot;5 per minute&quot;)  # Ajustar limite
+def login():
+    # ...
+</code></pre>
+<h3 id="ajustar-tempo-de-bloqueio">Ajustar Tempo de Bloqueio<a class="headerlink" href="#ajustar-tempo-de-bloqueio" title="Permanent link">&para;</a></h3>
+<p><strong>Arquivo:</strong> <code>app/auth.py</code> (linha ~152)</p>
+<pre><code class="language-python">if user.login_attempts &gt;= 5:
+    user.locked_until = datetime.utcnow() + timedelta(minutes=15)  # Ajustar aqui
+</code></pre>
+<h3 id="configurar-https-obrigatorio">Configurar HTTPS Obrigatório<a class="headerlink" href="#configurar-https-obrigatorio" title="Permanent link">&para;</a></h3>
+<p><strong>Arquivo:</strong> <code>config.py</code></p>
+<pre><code class="language-python">class ProductionConfig(Config):
+    SESSION_COOKIE_SECURE = True  # Força HTTPS
+    FORCE_HTTPS = True
+</code></pre>
+<hr />
+<h2 id="relatorios-de-seguranca">📊 Relatórios de Segurança<a class="headerlink" href="#relatorios-de-seguranca" title="Permanent link">&para;</a></h2>
+<h3 id="script-de-relatorio-semanal">Script de Relatório Semanal<a class="headerlink" href="#script-de-relatorio-semanal" title="Permanent link">&para;</a></h3>
+<p><strong>Arquivo:</strong> <code>scripts/security_report.py</code> (criar)</p>
+<pre><code class="language-python">&quot;&quot;&quot;Gerar relatório semanal de segurança&quot;&quot;&quot;
+from app import create_app, db
+from app.models import User
+from datetime import datetime, timedelta
+
+app = create_app()
+
+with app.app_context():
+    hoje = datetime.utcnow()
+    semana_passada = hoje - timedelta(days=7)
+
+    print(&quot;=&quot; * 60)
+    print(&quot;RELATÓRIO DE SEGURANÇA SEMANAL&quot;)
+    print(&quot;=&quot; * 60)
+
+    # Contas bloqueadas na semana
+    bloqueadas = User.query.filter(
+        User.locked_until.isnot(None)
+    ).count()
+    print(f&quot;\n📊 Contas bloqueadas atualmente: {bloqueadas}&quot;)
+
+    # Usuários com tentativas falhas
+    com_falhas = User.query.filter(
+        User.login_attempts &gt; 0
+    ).count()
+    print(f&quot;⚠️  Usuários com tentativas falhas: {com_falhas}&quot;)
+
+    # Senhas antigas
+    senhas_antigas = User.query.filter(
+        (User.password_changed_at &lt; semana_passada) | 
+        (User.password_changed_at.is_(None))
+    ).count()
+    print(f&quot;🔐 Senhas não alteradas há 90+ dias: {senhas_antigas}&quot;)
+
+    # Total de usuários
+    total = User.query.count()
+    ativos = User.query.filter_by(ativo=True).count()
+    print(f&quot;\n👥 Total de usuários: {total}&quot;)
+    print(f&quot;✅ Usuários ativos: {ativos}&quot;)
+
+    print(&quot;\n&quot; + &quot;=&quot; * 60)
+</code></pre>
+<h3 id="executar">Executar<a class="headerlink" href="#executar" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash">python scripts/security_report.py
+</code></pre>
+<hr />
+<h2 id="treinamento-de-usuarios">🎓 Treinamento de Usuários<a class="headerlink" href="#treinamento-de-usuarios" title="Permanent link">&para;</a></h2>
+<h3 id="topicos-para-treinamento">Tópicos para Treinamento<a class="headerlink" href="#topicos-para-treinamento" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Criação de Senhas Fortes</strong></li>
+<li>Use gerenciador de senhas</li>
+<li>Evite informações pessoais</li>
+<li>
+<p>Unique por serviço</p>
+</li>
+<li>
+<p><strong>Phishing e Engenharia Social</strong></p>
+</li>
+<li>Verificar remetente de emails</li>
+<li>Não clicar em links suspeitos</li>
+<li>
+<p>Confirmar solicitações por outro canal</p>
+</li>
+<li>
+<p><strong>Boas Práticas</strong></p>
+</li>
+<li>Logout em PCs compartilhados</li>
+<li>Não compartilhar credenciais</li>
+<li>Reportar atividades suspeitas</li>
+</ol>
+<hr />
+<h2 id="contatos-de-emergencia">📞 Contatos de Emergência<a class="headerlink" href="#contatos-de-emergencia" title="Permanent link">&para;</a></h2>
+<p><strong>Incidente de Segurança:</strong>
+- 🚨 Email: security@ti-osn.com
+- 📱 Telefone: (xx) xxxx-xxxx
+- 💬 Slack: #security-incidents</p>
+<p><strong>Suporte Técnico:</strong>
+- 📧 Email: suporte@ti-osn.com
+- 🎫 Sistema de chamados interno</p>
+<hr />
+<h2 id="checklist-mensal">✅ Checklist Mensal<a class="headerlink" href="#checklist-mensal" title="Permanent link">&para;</a></h2>
+<ul>
+<li>[ ] Revisar logs de segurança</li>
+<li>[ ] Verificar contas com múltiplas tentativas falhas</li>
+<li>[ ] Auditar permissões de usuários admin/TI</li>
+<li>[ ] Verificar contas inativas há mais de 90 dias</li>
+<li>[ ] Testar processo de reset de senha</li>
+<li>[ ] Backup de logs de segurança</li>
+<li>[ ] Atualizar dependências de segurança</li>
+<li>[ ] Gerar relatório mensal</li>
+</ul>
+<hr />
+<p><strong>Última atualização:</strong> Janeiro 2025<br />
+<strong>Versão:</strong> 2.0 - Segurança Enterprise<br />
+<strong>Responsável:</strong> Administradores do Sistema</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Navegação no rodapé">
+        <a href="../../user-guide/performance/" class="btn btn-neutral float-left" title="Performance"><span class="icon icon-circle-arrow-left"></span> Anterior</a>
+        <a href="../equipment-admin/" class="btn btn-neutral float-right" title="Equipamentos">Seguinte <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Construído com <a href="https://www.mkdocs.org/">MkDocs</a> usando <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provido por <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versões">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../user-guide/performance/" style="color: #fcfcfc">&laquo; Anterior</a></span>
+    
+    
+      <span><a href="../equipment-admin/" style="color: #fcfcfc">Seguinte &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../javascripts/extra.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

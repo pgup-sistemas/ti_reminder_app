@@ -9,7 +9,7 @@ Este documento foi criado para fornecer instruções claras e práticas sobre co
 ## 👤 Público Alvo
 
 Este guia é destinado a:
-- **Usuários finais** que precisam gerenciar lembretes, tarefas e chamados
+- **Usuários finais** que precisam gerenciar notificações, atividades e tickets
 - **Funcionários** que utilizam o sistema no dia a dia
 - **Novos usuários** que estão conhecendo o sistema
 
@@ -43,20 +43,30 @@ Após o primeiro login:
 
 O sistema está organizado em módulos principais:
 
-### 📅 **Lembretes**
-- Criar lembretes recorrentes
-- Gerenciar tarefas diárias
-- Configurar notificações automáticas
+### 🔔 **Notificações Programadas**
+- Criar alertas recorrentes automáticos
+- Gerenciar notificações inteligentes
+- Configurar lembretes programados
 
-### 🎫 **Chamados**
-- Abrir solicitações de suporte técnico
-- Acompanhar andamento dos chamados
-- Receber notificações de atualizações
+### 🎫 **Tickets & Suporte**
+- Abrir tickets de atendimento
+- Acompanhar status em tempo real
+- Receber atualizações automáticas
 
-### 📚 **Tutoriais**
-- Consultar guias e manuais
-- Deixar feedback sobre tutoriais
-- Baixar tutoriais em PDF
+### 📊 **Atividades & Projetos**
+- Gerenciar workflows e tarefas
+- Controlar prazos e entregas
+- Acompanhar progressão
+
+### 📚 **Base de Conhecimento**
+- Consultar artigos e guias
+- Deixar feedback e comentários
+- Exportar documentação em PDF
+
+### 📦 **Gestão de Ativos**
+- Solicitar equipamentos
+- Gerenciar empréstimos
+- Acompanhar reservas
 
 ### 🖥️ **Equipamentos**
 - Solicitar equipamentos de TI

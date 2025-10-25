@@ -12,7 +12,7 @@
 <!-- Card Principal -->
 <div class="card shadow-sm border-0">
     <div class="card-header bg-light border-0 py-3">
-        <h6 class="mb-0 text-secondary"><i class="fas fa-plus-circle me-2"></i>Abrir Novo Chamado</h6>
+        <h6 class="mb-0 text-secondary"><i class="fas fa-plus-circle me-2"></i>Abrir Novo Ticket</h6>
     </div>
     <div class="card-body">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -33,7 +33,7 @@
                 <i class="fas fa-info-circle text-info me-3 fs-5"></i>
                 <div>
                     <h6 class="text-info mb-1">Informação Importante</h6>
-                    <p class="mb-0 small">Selecione o setor relacionado ao chamado. Se o seu setor não estiver na lista, você pode criar um novo setor preenchendo o campo "Novo setor".</p>
+                    <p class="mb-0 small">Selecione o setor relacionado ao ticket. Se o seu setor não estiver na lista, você pode criar um novo setor preenchendo o campo "Novo setor".</p>
                 </div>
             </div>
         </div>
@@ -43,7 +43,7 @@
             
             <!-- Campo Título -->
             <div class="mb-4">
-                <label for="titulo" class="form-label text-muted mb-2">Título do Chamado <span class="text-danger">*</span></label>
+                <label for="titulo" class="form-label text-muted mb-2">Título do Ticket <span class="text-danger">*</span></label>
                 <div class="input-group">
                     <span class="input-group-text bg-light">
                         <i class="fas fa-heading text-muted"></i>
@@ -112,7 +112,7 @@
                     <i class="fas fa-times me-2"></i>Cancelar
                 </a>
                 <button type="submit" class="btn btn-success px-4">
-                    <i class="fas fa-paper-plane me-2"></i>Abrir Chamado
+                    <i class="fas fa-paper-plane me-2"></i>Abrir Ticket
                 </button>
             </div>
         </form>

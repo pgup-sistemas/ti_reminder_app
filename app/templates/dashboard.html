@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Análises e SLA | TI OSN System{% endblock %}
+{% block title %}Business Intelligence | TI OSN System{% endblock %}
 
 {% block content %}
 <!-- Dashboard Chart Data -->
@@ -30,8 +30,8 @@ window.dashboardChartData = {
             <i class="fas fa-chart-bar fa-3x text-primary"></i>
           </div>
           <div>
-            <h1 class="mb-1 fw-bold">Análises e SLA</h1>
-            <p class="text-muted mb-0">Relatórios avançados e monitoramento de acordos de nível de serviço</p>
+            <h1 class="mb-1 fw-bold">Business Intelligence</h1>
+            <p class="text-muted mb-0">Análises estratégicas, métricas de desempenho e monitoramento de SLA</p>
           </div>
         </div>
       </div>
@@ -89,7 +89,7 @@ window.dashboardChartData = {
             <h6 class="fw-bold mb-3"><i class="fas fa-filter me-2 text-secondary"></i>Filtrar por Status</h6>
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
-            <label for="task_status" class="form-label small fw-bold">Tarefas</label>
+            <label for="task_status" class="form-label small fw-bold">Atividades</label>
             <select id="task_status" name="task_status" class="form-select form-select-sm">
               <option value="">Todas</option>
               <option value="done" {% if request.args.get('task_status') == 'done' %}selected{% endif %}>Concluídas</option>
@@ -98,7 +98,7 @@ window.dashboardChartData = {
             </select>
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
-            <label for="reminder_status" class="form-label small fw-bold">Lembretes</label>
+            <label for="reminder_status" class="form-label small fw-bold">Notificações</label>
             <select id="reminder_status" name="reminder_status" class="form-select form-select-sm">
               <option value="">Todos</option>
               <option value="done" {% if request.args.get('reminder_status') == 'done' %}selected{% endif %}>Realizados</option>
@@ -106,7 +106,7 @@ window.dashboardChartData = {
             </select>
           </div>
           <div class="col-lg-2 col-md-4 col-sm-6">
-            <label for="chamado_status" class="form-label small fw-bold">Chamados</label>
+            <label for="chamado_status" class="form-label small fw-bold">Tickets</label>
             <select id="chamado_status" name="chamado_status" class="form-select form-select-sm">
               <option value="">Todos</option>
               <option value="Aberto" {% if request.args.get('chamado_status') == 'Aberto' %}selected{% endif %}>Aberto</option>
@@ -209,10 +209,10 @@ window.dashboardChartData = {
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div class="flex-grow-1">
               <div class="service-icon bg-primary bg-opacity-10 mb-3">
-                <i class="fas fa-tasks text-primary fa-2x"></i>
+                <i class="fas fa-clipboard-check text-primary fa-2x"></i>
               </div>
-              <h6 class="fw-bold mb-1">Tarefas</h6>
-              <p class="text-muted small mb-0">Gerenciamento de atividades</p>
+              <h6 class="fw-bold mb-1">Atividades & Projetos</h6>
+              <p class="text-muted small mb-0">Gestão de workflows</p>
             </div>
           </div>
           <h2 class="text-primary mb-3 fw-bold">{{ tasks_total }}</h2>
@@ -233,7 +233,7 @@ window.dashboardChartData = {
         </div>
         <div class="card-footer bg-light border-0 p-3">
           <a href="{{ url_for('main.tasks') }}" class="btn btn-sm btn-outline-primary w-100">
-            <i class="fas fa-arrow-right me-2"></i>Ver Tarefas
+            <i class="fas fa-arrow-right me-2"></i>Ver Atividades
           </a>
         </div>
       </div>
@@ -246,10 +246,10 @@ window.dashboardChartData = {
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div class="flex-grow-1">
               <div class="service-icon bg-warning bg-opacity-10 mb-3">
-                <i class="fas fa-bell text-warning fa-2x"></i>
+                <i class="fas fa-bell-concierge text-warning fa-2x"></i>
               </div>
-              <h6 class="fw-bold mb-1">Lembretes</h6>
-              <p class="text-muted small mb-0">Notificações e alertas</p>
+              <h6 class="fw-bold mb-1">Notificações Programadas</h6>
+              <p class="text-muted small mb-0">Alertas automáticos</p>
             </div>
           </div>
           <h2 class="text-warning mb-3 fw-bold">{{ reminders_total }}</h2>
@@ -266,7 +266,7 @@ window.dashboardChartData = {
         </div>
         <div class="card-footer bg-light border-0 p-3">
           <a href="{{ url_for('main.reminders') }}" class="btn btn-sm btn-outline-warning w-100">
-            <i class="fas fa-arrow-right me-2"></i>Ver Lembretes
+            <i class="fas fa-arrow-right me-2"></i>Ver Notificações
           </a>
         </div>
       </div>
@@ -281,8 +281,8 @@ window.dashboardChartData = {
               <div class="service-icon bg-info bg-opacity-10 mb-3">
                 <i class="fas fa-ticket-alt text-info fa-2x"></i>
               </div>
-              <h6 class="fw-bold mb-1">Chamados</h6>
-              <p class="text-muted small mb-0">Suporte e atendimento</p>
+              <h6 class="fw-bold mb-1">Tickets & Suporte</h6>
+              <p class="text-muted small mb-0">Central de atendimento</p>
             </div>
           </div>
           <h2 class="text-info mb-3 fw-bold">{{ chamados_total }}</h2>
@@ -303,7 +303,7 @@ window.dashboardChartData = {
         </div>
         <div class="card-footer bg-light border-0 p-3">
           <a href="{{ url_for('main.listar_chamados') }}" class="btn btn-sm btn-outline-info w-100">
-            <i class="fas fa-arrow-right me-2"></i>Ver Chamados
+            <i class="fas fa-arrow-right me-2"></i>Ver Tickets
           </a>
         </div>
       </div>
@@ -318,8 +318,8 @@ window.dashboardChartData = {
               <div class="service-icon bg-purple mb-3">
                 <i class="fas fa-desktop text-white fa-2x"></i>
               </div>
-              <h6 class="fw-bold mb-1">Equipamentos</h6>
-              <p class="text-muted small mb-0">Solicitações de Equipamentos</p>
+              <h6 class="fw-bold mb-1">Gestão de Ativos</h6>
+              <p class="text-muted small mb-0">Solicitações de ativos</p>
             </div>
           </div>
           <h2 class="text-purple mb-3 fw-bold">{{ equipamentos_total }}</h2>
@@ -340,7 +340,7 @@ window.dashboardChartData = {
         </div>
         <div class="card-footer bg-light border-0 p-3">
           <a href="{{ url_for('equipment_v2.catalog') }}" class="btn btn-sm btn-outline-secondary w-100">
-            <i class="fas fa-arrow-right me-2"></i>Ver Equipamentos
+            <i class="fas fa-arrow-right me-2"></i>Ver Ativos
           </a>
         </div>
       </div>
@@ -355,8 +355,8 @@ window.dashboardChartData = {
               <div class="service-icon bg-secondary bg-opacity-10 mb-3">
                 <i class="fas fa-boxes text-secondary fa-2x"></i>
               </div>
-              <h6 class="fw-bold mb-1">Inventário</h6>
-              <p class="text-muted small mb-0">Equipamentos cadastrados</p>
+              <h6 class="fw-bold mb-1">Inventário de Ativos</h6>
+              <p class="text-muted small mb-0">Ativos cadastrados</p>
             </div>
           </div>
           <h2 class="text-secondary mb-3 fw-bold">{{ inventory_total }}</h2>
@@ -400,8 +400,8 @@ window.dashboardChartData = {
               <div class="service-icon bg-success bg-opacity-10 mb-3">
                 <i class="fas fa-book text-success fa-2x"></i>
               </div>
-              <h6 class="fw-bold mb-1">Tutoriais</h6>
-              <p class="text-muted small mb-0">Base de conhecimento</p>
+              <h6 class="fw-bold mb-1">Base de Conhecimento</h6>
+              <p class="text-muted small mb-0">Artigos e documentação</p>
             </div>
           </div>
           <h2 class="text-success mb-3 fw-bold">{{ total_tutoriais }}</h2>

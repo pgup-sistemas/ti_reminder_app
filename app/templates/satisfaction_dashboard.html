@@ -1,15 +1,38 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard de Satisfação - Sistema TI OSN{% endblock %}
+{% block title %}Satisfação do Cliente | TI OSN System{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb breadcrumb-sm mb-1">
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('main.index') }}" class="d-inline-flex align-items-center gap-2">
+                    <i class="fas fa-th-large text-primary"></i>
+                    <span>Meu Workspace</span>
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('main.listar_chamados') }}" class="d-inline-flex align-items-center gap-2">
+                    <i class="fas fa-headset text-primary"></i>
+                    <span>Tickets &amp; Suporte</span>
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <span class="d-inline-flex align-items-center gap-2">
+                    <i class="fas fa-smile text-primary"></i>
+                    <span>Satisfação do Cliente</span>
+                </span>
+            </li>
+        </ol>
+    </nav>
+    <div class="border-bottom mb-4" style="border-color: var(--bs-gray-200) !important;"></div>
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-gradient-warning text-white">
                     <h3 class="card-title mb-0">
-                        <i class="fas fa-chart-line"></i> Dashboard de Satisfação do Cliente
+                        <i class="fas fa-chart-line"></i> Satisfação do Cliente &amp; Qualidade de Serviço
                     </h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-light btn-sm" onclick="refreshData()">

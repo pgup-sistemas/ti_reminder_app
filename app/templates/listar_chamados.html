@@ -1,13 +1,96 @@
 {% extends "base.html" %}
-{% block title %}Lista de Chamados | TI OSN System{% endblock %}
+{% block title %}Tickets & Suporte | TI OSN System{% endblock %}
 
 {% block content %}
+<style>
+    .tickets-page .table thead th {
+        position: sticky;
+        top: 0;
+        background-color: var(--bs-gray-100);
+        z-index: 5;
+    }
+
+    [data-theme="dark"] .tickets-page .table thead th {
+        background-color: var(--bs-gray-800);
+        color: var(--bs-gray-100);
+    }
+
+    [data-theme="dark"] .tickets-page .card,
+    [data-theme="dark"] .tickets-page .card-body,
+    [data-theme="dark"] .tickets-page .card-header,
+    [data-theme="dark"] .tickets-page .card-footer {
+        background-color: var(--bs-gray-900) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        color: var(--bs-gray-100);
+    }
+
+    [data-theme="dark"] .tickets-page .card-header.bg-light {
+        background-color: var(--bs-gray-800) !important;
+        color: var(--bs-gray-100);
+    }
+
+    [data-theme="dark"] .tickets-page .text-muted,
+    [data-theme="dark"] .tickets-page .table td,
+    [data-theme="dark"] .tickets-page .table th,
+    [data-theme="dark"] .tickets-page label,
+    [data-theme="dark"] .tickets-page small {
+        color: var(--bs-gray-300) !important;
+    }
+
+    [data-theme="dark"] .tickets-page .table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    [data-theme="dark"] .tickets-page .badge.bg-light {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: var(--bs-gray-100) !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
+    }
+
+    [data-theme="dark"] .tickets-page .form-select,
+    [data-theme="dark"] .tickets-page .form-control,
+    [data-theme="dark"] .tickets-page .btn-outline-secondary {
+        background-color: var(--bs-gray-900);
+        border-color: var(--bs-gray-700);
+        color: var(--bs-gray-100);
+    }
+
+    [data-theme="dark"] .tickets-page .btn-outline-secondary:hover {
+        background-color: var(--bs-gray-800);
+        color: var(--bs-gray-100);
+    }
+
+    [data-theme="dark"] .tickets-page .table th i,
+    [data-theme="dark"] .tickets-page .card-header i {
+        color: var(--bs-primary-light) !important;
+    }
+
+    [data-theme="dark"] .tickets-page .d-lg-none .card {
+        background-color: var(--bs-gray-900);
+        border-color: rgba(255,255,255,0.1);
+        color: var(--bs-gray-100);
+    }
+
+    [data-theme="dark"] .tickets-page .pagination .page-link {
+        background-color: var(--bs-gray-900);
+        border-color: var(--bs-gray-700);
+        color: var(--bs-gray-100);
+    }
+
+    [data-theme="dark"] .tickets-page .pagination .page-item.active .page-link {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+        color: #fff;
+    }
+</style>
+
+<div class="tickets-page">
 
 <!-- Header da Página -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="text-primary mb-0"><i class="fas fa-ticket-alt me-2"></i>Lista de Chamados</h4>
+    <h4 class="text-primary mb-0"><i class="fas fa-ticket-alt me-2"></i>Tickets & Suporte</h4>
     <a href="{{ url_for('main.abrir_chamado') }}" class="btn btn-success btn-sm">
-        <i class="fas fa-plus-circle me-1"></i>Abrir Novo Chamado
+        <i class="fas fa-plus-circle me-1"></i>Abrir Novo Ticket
     </a>
 </div>
 
@@ -65,9 +148,9 @@
 <div class="card shadow-sm border-0">
     <div class="card-header bg-light border-0 py-3">
         <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-0 text-secondary"><i class="fas fa-list-check me-2"></i>Chamados Cadastrados</h6>
+            <h6 class="mb-0 text-secondary"><i class="fas fa-list-check me-2"></i>Tickets Registrados</h6>
             <div class="badge bg-primary fs-6">
-                {{ chamados|length }} chamado{{ 's' if chamados|length != 1 }}
+                {{ chamados|length }} ticket{{ 's' if chamados|length != 1 }}
             </div>
         </div>
     </div>

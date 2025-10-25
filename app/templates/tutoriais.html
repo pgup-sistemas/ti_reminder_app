@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}Tutoriais | TI OSN System{% endblock %}
+{% block title %}Base de Conhecimento | TI OSN System{% endblock %}
 {% block content %}
 
 <!-- Header da Página -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="text-primary mb-0"><i class="fas fa-book me-2"></i>Tutoriais</h4>
+    <h4 class="text-primary mb-0"><i class="fas fa-database me-2"></i>Base de Conhecimento</h4>
     {% if session.get('is_ti') or session.get('is_admin') %}
     <a href="{{ url_for('main.novo_tutorial') }}" class="btn btn-success btn-sm">
-        <i class="fas fa-plus-circle me-1"></i>Novo Tutorial
+        <i class="fas fa-plus-circle me-1"></i>Novo Artigo
     </a>
     {% endif %}
 </div>
@@ -15,7 +15,7 @@
 <!-- Card de Busca -->
 <div class="card shadow-sm mb-4 border-0">
     <div class="card-header bg-light border-0 py-3">
-        <h6 class="mb-0 text-secondary"><i class="fas fa-search me-2"></i>Buscar Tutoriais</h6>
+        <h6 class="mb-0 text-secondary"><i class="fas fa-search me-2"></i>Buscar Artigos</h6>
     </div>
     <div class="card-body">
         <form method="get" class="row g-3">
@@ -42,9 +42,9 @@
 <div class="card shadow-sm border-0">
     <div class="card-header bg-light border-0 py-3">
         <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-0 text-secondary"><i class="fas fa-list-check me-2"></i>Lista de Tutoriais</h6>
+            <h6 class="mb-0 text-secondary"><i class="fas fa-list-check me-2"></i>Artigos Disponíveis</h6>
             <div class="badge bg-primary fs-6">
-                {{ tutoriais|length }} tutorial{{ 'ais' if tutoriais|length != 1 }}
+                {{ tutoriais|length }} artigo{{ 's' if tutoriais|length != 1 }}
             </div>
         </div>
     </div>

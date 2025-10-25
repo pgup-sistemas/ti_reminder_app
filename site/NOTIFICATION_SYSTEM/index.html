@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt_BR" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Oézios Normando - Equipe TI OSN" /><link rel="canonical" href="http://192.168.1.86:5000/docs/NOTIFICATION_SYSTEM/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>📚 SISTEMA DE NOTIFICAÇÕES - GUIA DE USO - TI OSN System - Documentação Oficial</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "\ud83d\udcda SISTEMA DE NOTIFICA\u00c7\u00d5ES - GUIA DE USO";
+        var mkdocs_page_input_path = "NOTIFICATION_SYSTEM.md";
+        var mkdocs_page_url = "/docs/NOTIFICATION_SYSTEM/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> TI OSN System - Documentação Oficial
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" title="Digite o termo a ser buscado aqui" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Início</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Usuário</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/overview/">Visão Geral</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/security/">Segurança</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/tasks/">Atividades & Projetos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/reminders/">Notificações Programadas</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/chamados/">Tickets & Suporte</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/equipment/">Gestão de Ativos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/tutorials/">Base de Conhecimento</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/equipment/">Equipamentos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/dashboard/">Dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/rfid/">Sistema RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/satisfaction/">Avaliação de Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/certifications/">Certificações</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/performance/">Performance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Administrador</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/security-admin/">Gerenciamento de Segurança</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/equipment-admin/">Equipamentos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/performance-admin/">Performance</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/rfid-admin/">RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/satisfaction-admin/">Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/certifications-admin/">Certificações</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Desenvolvedor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../dev-guide/security-implementation/">Implementação de Segurança</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Menu de navegação em dispositivo móvel">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">TI OSN System - Documentação Oficial</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Documentos"></a></li>
+      <li class="breadcrumb-item active">📚 SISTEMA DE NOTIFICAÇÕES - GUIA DE USO</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="sistema-de-notificacoes-guia-de-uso">📚 SISTEMA DE NOTIFICAÇÕES - GUIA DE USO<a class="headerlink" href="#sistema-de-notificacoes-guia-de-uso" title="Permanent link">&para;</a></h1>
+<p><strong>TI OSN System - Sistema Unificado de Toasts</strong><br />
+<strong>Versão:</strong> 1.0<br />
+<strong>Atualizado:</strong> 22 de Outubro de 2025</p>
+<hr />
+<h2 id="indice">📋 Índice<a class="headerlink" href="#indice" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#visão-geral">Visão Geral</a></li>
+<li><a href="#uso-no-backend">Uso no Backend (Python/Flask)</a></li>
+<li><a href="#uso-no-frontend">Uso no Frontend (JavaScript)</a></li>
+<li><a href="#exemplos-práticos">Exemplos Práticos</a></li>
+<li><a href="#opções-avançadas">Opções Avançadas</a></li>
+<li><a href="#boas-práticas">Boas Práticas</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+</ol>
+<hr />
+<h2 id="visao-geral">🎯 Visão Geral<a class="headerlink" href="#visao-geral" title="Permanent link">&para;</a></h2>
+<p>O sistema de notificações foi unificado para oferecer uma experiência consistente em todo o aplicativo. Todas as notificações são exibidas como <strong>toasts modernos</strong> que aparecem no canto superior direito (desktop) ou na parte superior (mobile).</p>
+<h3 id="caracteristicas">Características<a class="headerlink" href="#caracteristicas" title="Permanent link">&para;</a></h3>
+<ul>
+<li>✅ Auto-dismiss configurável</li>
+<li>✅ Progress bar visual</li>
+<li>✅ 4 tipos: success, error, warning, info</li>
+<li>✅ Totalmente responsivo</li>
+<li>✅ Dark mode automático</li>
+<li>✅ Acessível (WCAG AA)</li>
+</ul>
+<hr />
+<h2 id="uso-no-backend">🐍 Uso no Backend<a class="headerlink" href="#uso-no-backend" title="Permanent link">&para;</a></h2>
+<h3 id="importacao">Importação<a class="headerlink" href="#importacao" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">from app.utils import flash_success, flash_error, flash_warning, flash_info
+</code></pre>
+<h3 id="notificacao-de-sucesso">Notificação de Sucesso<a class="headerlink" href="#notificacao-de-sucesso" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python"># Simples
+flash_success(&quot;Usuário cadastrado com sucesso!&quot;)
+
+# Com título personalizado
+flash_success(&quot;Dados foram salvos no sistema.&quot;, title=&quot;Concluído&quot;)
+</code></pre>
+<h3 id="notificacao-de-erro">Notificação de Erro<a class="headerlink" href="#notificacao-de-erro" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python"># Simples
+flash_error(&quot;Não foi possível salvar os dados.&quot;)
+
+# Com título personalizado
+flash_error(&quot;Verifique sua conexão.&quot;, title=&quot;Erro de Rede&quot;)
+</code></pre>
+<h3 id="notificacao-de-aviso">Notificação de Aviso<a class="headerlink" href="#notificacao-de-aviso" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python"># Simples
+flash_warning(&quot;Alguns campos estão incompletos.&quot;)
+
+# Com título
+flash_warning(&quot;Prazo próximo do vencimento!&quot;, title=&quot;Aviso Importante&quot;)
+</code></pre>
+<h3 id="notificacao-informativa">Notificação Informativa<a class="headerlink" href="#notificacao-informativa" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python"># Simples
+flash_info(&quot;Nova atualização disponível.&quot;)
+
+# Com título
+flash_info(&quot;Sistema será atualizado amanhã às 02:00.&quot;, title=&quot;Manutenção Programada&quot;)
+</code></pre>
+<h3 id="exemplo-completo-em-rota">Exemplo Completo em Rota<a class="headerlink" href="#exemplo-completo-em-rota" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">@app.route('/usuario/novo', methods=['POST'])
+def criar_usuario():
+    try:
+        # Validação
+        if not request.form.get('email'):
+            flash_error(&quot;O campo email é obrigatório.&quot;)
+            return redirect(url_for('formulario'))
+
+        # Criar usuário
+        usuario = User(...)
+        db.session.add(usuario)
+        db.session.commit()
+
+        flash_success(&quot;Usuário criado com sucesso!&quot;, title=&quot;Cadastro Completo&quot;)
+        return redirect(url_for('listar_usuarios'))
+
+    except Exception as e:
+        db.session.rollback()
+        flash_error(f&quot;Erro ao criar usuário: {str(e)}&quot;)
+        return redirect(url_for('formulario'))
+</code></pre>
+<hr />
+<h2 id="uso-no-frontend">💻 Uso no Frontend<a class="headerlink" href="#uso-no-frontend" title="Permanent link">&para;</a></h2>
+<h3 id="api-principal">API Principal<a class="headerlink" href="#api-principal" title="Permanent link">&para;</a></h3>
+<h4 id="toasts-simples">Toasts Simples<a class="headerlink" href="#toasts-simples" title="Permanent link">&para;</a></h4>
+<pre><code class="language-javascript">// Sucesso
+Feedback.success('Título', 'Mensagem de sucesso');
+
+// Erro
+Feedback.error('Título', 'Mensagem de erro');
+
+// Aviso
+Feedback.warning('Título', 'Mensagem de aviso');
+
+// Informação
+Feedback.info('Título', 'Mensagem informativa');
+</code></pre>
+<h4 id="toast-generico">Toast Genérico<a class="headerlink" href="#toast-generico" title="Permanent link">&para;</a></h4>
+<pre><code class="language-javascript">Feedback.toast(type, title, message, options);
+
+// Exemplo
+Feedback.toast('success', 'Salvo!', 'Dados foram salvos', {
+    duration: 5000,
+    closable: true
+});
+</code></pre>
+<h4 id="loading-overlay">Loading Overlay<a class="headerlink" href="#loading-overlay" title="Permanent link">&para;</a></h4>
+<pre><code class="language-javascript">// Mostrar loading
+const loadingId = Feedback.showLoading(elemento, {
+    message: 'Carregando dados...',
+    size: 'medium'
+});
+
+// Esconder loading
+Feedback.hideLoading(loadingId);
+</code></pre>
+<h4 id="confirmacao">Confirmação<a class="headerlink" href="#confirmacao" title="Permanent link">&para;</a></h4>
+<pre><code class="language-javascript">Feedback.confirm('Título', 'Tem certeza?', () =&gt; {
+    // Usuário confirmou
+    console.log('Ação confirmada');
+});
+</code></pre>
+<h3 id="aliases-disponiveis">Aliases Disponíveis<a class="headerlink" href="#aliases-disponiveis" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">// Alias simples
+notify('success', 'Título', 'Mensagem');
+
+// Compatibilidade legada
+showToast('success', 'Título', 'Mensagem');
+</code></pre>
+<hr />
+<h2 id="exemplos-praticos">💡 Exemplos Práticos<a class="headerlink" href="#exemplos-praticos" title="Permanent link">&para;</a></h2>
+<h3 id="exemplo-1-formulario-com-validacao">Exemplo 1: Formulário com Validação<a class="headerlink" href="#exemplo-1-formulario-com-validacao" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">const form = document.getElementById('meuForm');
+
+form.addEventListener('submit', async (e) =&gt; {
+    e.preventDefault();
+
+    // Validar
+    const nome = form.querySelector('#nome').value;
+    if (!nome.trim()) {
+        Feedback.error('Validação', 'O campo nome é obrigatório');
+        return;
+    }
+
+    // Mostrar loading
+    const loadingId = Feedback.showLoading(form);
+
+    try {
+        const response = await fetch('/api/salvar', {
+            method: 'POST',
+            body: new FormData(form)
+        });
+
+        const data = await response.json();
+
+        Feedback.hideLoading(loadingId);
+
+        if (response.ok) {
+            Feedback.success('Sucesso!', 'Dados salvos com sucesso');
+            form.reset();
+        } else {
+            Feedback.error('Erro', data.message || 'Falha ao salvar');
+        }
+    } catch (error) {
+        Feedback.hideLoading(loadingId);
+        Feedback.error('Erro de Rede', 'Verifique sua conexão');
+    }
+});
+</code></pre>
+<h3 id="exemplo-2-deletar-com-confirmacao">Exemplo 2: Deletar com Confirmação<a class="headerlink" href="#exemplo-2-deletar-com-confirmacao" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">function deletarItem(id) {
+    Feedback.confirm(
+        'Confirmar Exclusão',
+        'Tem certeza que deseja excluir este item?',
+        async () =&gt; {
+            const loadingId = Feedback.showLoading(document.body);
+
+            try {
+                const response = await fetch(`/api/item/${id}`, {
+                    method: 'DELETE'
+                });
+
+                Feedback.hideLoading(loadingId);
+
+                if (response.ok) {
+                    Feedback.success('Excluído!', 'Item removido com sucesso');
+                    // Recarregar lista
+                    carregarLista();
+                } else {
+                    Feedback.error('Erro', 'Não foi possível excluir');
+                }
+            } catch (error) {
+                Feedback.hideLoading(loadingId);
+                Feedback.error('Erro', error.message);
+            }
+        }
+    );
+}
+</code></pre>
+<h3 id="exemplo-3-upload-de-arquivo">Exemplo 3: Upload de Arquivo<a class="headerlink" href="#exemplo-3-upload-de-arquivo" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">async function uploadArquivo(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const loadingId = Feedback.showLoading(document.body, {
+        message: `Enviando ${file.name}...`
+    });
+
+    try {
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        Feedback.hideLoading(loadingId);
+
+        if (response.ok) {
+            Feedback.success('Upload', 'Arquivo enviado com sucesso!');
+        } else {
+            Feedback.error('Falha', 'Não foi possível enviar o arquivo');
+        }
+    } catch (error) {
+        Feedback.hideLoading(loadingId);
+        Feedback.error('Erro de Rede', 'Verifique sua conexão');
+    }
+}
+</code></pre>
+<hr />
+<h2 id="opcoes-avancadas">⚙️ Opções Avançadas<a class="headerlink" href="#opcoes-avancadas" title="Permanent link">&para;</a></h2>
+<h3 id="configuracoes-de-toast">Configurações de Toast<a class="headerlink" href="#configuracoes-de-toast" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">Feedback.toast('success', 'Título', 'Mensagem', {
+    duration: 5000,        // Duração em ms (0 = não fecha automaticamente)
+    closable: true,        // Mostrar botão fechar
+    position: 'top-right', // Posição (futuro)
+    actions: [             // Botões de ação
+        {
+            text: 'Desfazer',
+            action: 'undo',
+            icon: 'fas fa-undo'
+        },
+        {
+            text: 'Ver Detalhes',
+            action: 'view',
+            icon: 'fas fa-eye'
+        }
+    ]
+});
+</code></pre>
+<h3 id="configuracoes-de-loading">Configurações de Loading<a class="headerlink" href="#configuracoes-de-loading" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">Feedback.showLoading(elemento, {
+    message: 'Carregando...',
+    spinner: 'default',    // default, dots, pulse, bars
+    backdrop: true,        // Overlay escuro
+    size: 'medium'         // small, medium, large
+});
+</code></pre>
+<h3 id="toast-com-acoes">Toast com Ações<a class="headerlink" href="#toast-com-acoes" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">const toastId = Feedback.toast('info', 'Atualização', 'Nova versão disponível', {
+    duration: 0,  // Não fechar automaticamente
+    closable: true,
+    actions: [
+        {
+            text: 'Atualizar Agora',
+            action: 'update'
+        },
+        {
+            text: 'Depois',
+            action: 'later'
+        }
+    ]
+});
+
+// Lidar com ações
+document.addEventListener('click', (e) =&gt; {
+    const action = e.target.dataset.action;
+    if (action === 'update') {
+        window.location.reload();
+    } else if (action === 'later') {
+        Feedback.removeToast(toastId);
+    }
+});
+</code></pre>
+<hr />
+<h2 id="boas-praticas">✨ Boas Práticas<a class="headerlink" href="#boas-praticas" title="Permanent link">&para;</a></h2>
+<h3 id="1-escolha-o-tipo-correto">1. Escolha o Tipo Correto<a class="headerlink" href="#1-escolha-o-tipo-correto" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">// ✅ BOM
+Feedback.success('Salvo!', 'Dados salvos com sucesso');
+Feedback.error('Erro!', 'Falha ao salvar dados');
+
+// ❌ EVITAR
+Feedback.info('Erro!', 'Falha ao salvar');  // Tipo errado
+</code></pre>
+<h3 id="2-mensagens-claras-e-concisas">2. Mensagens Claras e Concisas<a class="headerlink" href="#2-mensagens-claras-e-concisas" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">// ✅ BOM
+Feedback.success('Usuário Criado', 'O usuário foi cadastrado com sucesso');
+
+// ❌ EVITAR
+Feedback.success('OK', 'A operação de criação do usuário no banco de dados foi executada com sucesso e todos os dados foram persistidos corretamente');
+</code></pre>
+<h3 id="3-use-loading-para-operacoes-assincronas">3. Use Loading para Operações Assíncronas<a class="headerlink" href="#3-use-loading-para-operacoes-assincronas" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">// ✅ BOM
+const loadingId = Feedback.showLoading(form);
+await salvarDados();
+Feedback.hideLoading(loadingId);
+Feedback.success('Salvo!', 'Dados salvos');
+
+// ❌ EVITAR
+await salvarDados();  // Sem feedback visual
+Feedback.success('Salvo!', 'Dados salvos');
+</code></pre>
+<h3 id="4-confirmacao-para-acoes-destrutivas">4. Confirmação para Ações Destrutivas<a class="headerlink" href="#4-confirmacao-para-acoes-destrutivas" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">// ✅ BOM
+Feedback.confirm('Excluir', 'Tem certeza?', () =&gt; {
+    excluirItem();
+});
+
+// ❌ EVITAR
+excluirItem();  // Sem confirmação
+</code></pre>
+<h3 id="5-trate-erros-adequadamente">5. Trate Erros Adequadamente<a class="headerlink" href="#5-trate-erros-adequadamente" title="Permanent link">&para;</a></h3>
+<pre><code class="language-javascript">// ✅ BOM
+try {
+    await operacao();
+    Feedback.success('Sucesso!', 'Operação concluída');
+} catch (error) {
+    Feedback.error('Erro', error.message || 'Algo deu errado');
+}
+
+// ❌ EVITAR
+await operacao();  // Sem tratamento de erro
+Feedback.success('Sucesso!', 'Operação concluída');
+</code></pre>
+<hr />
+<h2 id="troubleshooting">🐛 Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="toast-nao-aparece">Toast não aparece<a class="headerlink" href="#toast-nao-aparece" title="Permanent link">&para;</a></h3>
+<p><strong>Problema:</strong> O toast não é exibido após chamar Feedback.success()</p>
+<p><strong>Soluções:</strong>
+1. Verificar se <code>feedback.js</code> está carregado:
+   <code>javascript
+   console.log(window.Feedback);  // Deve exibir o objeto</code></p>
+<ol>
+<li>
+<p>Verificar erros no console do navegador</p>
+</li>
+<li>
+<p>Verificar se o CSS está carregado:
+   <code>javascript
+   const hasCSS = document.querySelector('link[href*="toast-notifications.css"]');
+   console.log(hasCSS);</code></p>
+</li>
+</ol>
+<h3 id="flash-messages-nao-convertendo">Flash messages não convertendo<a class="headerlink" href="#flash-messages-nao-convertendo" title="Permanent link">&para;</a></h3>
+<p><strong>Problema:</strong> Mensagens flash do Flask aparecem como alerts antigos</p>
+<p><strong>Soluções:</strong>
+1. Verificar se <code>flash-to-toast-adapter.js</code> está carregado
+2. Verificar ordem de scripts no <code>base.html</code>:
+   - <code>feedback.js</code> deve carregar antes do adapter
+3. Verificar console para erros</p>
+<h3 id="progress-bar-nao-anima">Progress bar não anima<a class="headerlink" href="#progress-bar-nao-anima" title="Permanent link">&para;</a></h3>
+<p><strong>Problema:</strong> A barra de progresso não se move</p>
+<p><strong>Solução:</strong></p>
+<pre><code class="language-css">/* Verificar se a animação está definida no CSS */
+@keyframes progressBar {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+</code></pre>
+<h3 id="toasts-nao-fecham-automaticamente">Toasts não fecham automaticamente<a class="headerlink" href="#toasts-nao-fecham-automaticamente" title="Permanent link">&para;</a></h3>
+<p><strong>Problema:</strong> Toasts ficam visíveis indefinidamente</p>
+<p><strong>Solução:</strong>
+Verificar se a duração está sendo passada:</p>
+<pre><code class="language-javascript">// Com duração
+Feedback.success('Título', 'Mensagem', { duration: 4000 });
+
+// Sem duração (não fecha automaticamente)
+Feedback.success('Título', 'Mensagem', { duration: 0 });
+</code></pre>
+<h3 id="multiplos-toasts-sobrepostos">Múltiplos toasts sobrepostos<a class="headerlink" href="#multiplos-toasts-sobrepostos" title="Permanent link">&para;</a></h3>
+<p><strong>Problema:</strong> Toasts aparecem uns sobre os outros</p>
+<p><strong>Solução:</strong>
+Verificar CSS do container:</p>
+<pre><code class="language-css">.toast-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+</code></pre>
+<hr />
+<h2 id="suporte">📞 Suporte<a class="headerlink" href="#suporte" title="Permanent link">&para;</a></h2>
+<p>Para questões ou problemas:
+1. Consultar esta documentação
+2. Verificar <code>ANALISE_SISTEMA_NOTIFICACOES.md</code>
+3. Verificar <code>SISTEMA_NOTIFICACOES_IMPLEMENTADO.md</code>
+4. Contatar equipe de desenvolvimento</p>
+<hr />
+<p><em>Última atualização: 22 de Outubro de 2025</em></p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Construído com <a href="https://www.mkdocs.org/">MkDocs</a> usando <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provido por <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versões">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../javascripts/extra.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

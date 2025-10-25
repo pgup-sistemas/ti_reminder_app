@@ -1,12 +1,115 @@
 {% extends 'base.html' %}
-{% block title %}Lista de Tarefas | TI OSN System {% endblock %}
+{% block title %}Atividades & Projetos | TI OSN System {% endblock %}
 {% block content %}
+<style>
+    .tasks-page .table thead th {
+        position: sticky;
+        top: 0;
+        background-color: var(--bs-gray-100);
+        z-index: 5;
+    }
 
+    [data-theme="dark"] .tasks-page .table thead th {
+        background-color: var(--bs-gray-800);
+        color: var(--bs-gray-100);
+    }
+
+    [data-theme="dark"] .tasks-page .card,
+    [data-theme="dark"] .tasks-page .card-body,
+    [data-theme="dark"] .tasks-page .card-header,
+    [data-theme="dark"] .tasks-page .card-footer {
+        background-color: var(--bs-gray-900) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        color: var(--bs-gray-100);
+    }
+
+    [data-theme="dark"] .tasks-page .card-header.bg-light {
+        background-color: var(--bs-gray-800) !important;
+        color: var(--bs-gray-100);
+    }
+
+    [data-theme="dark"] .tasks-page .text-muted,
+    [data-theme="dark"] .tasks-page .table td,
+    [data-theme="dark"] .tasks-page .table th,
+    [data-theme="dark"] .tasks-page label,
+    [data-theme="dark"] .tasks-page small {
+        color: var(--bs-gray-300) !important;
+    }
+
+    [data-theme="dark"] .tasks-page .table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    [data-theme="dark"] .tasks-page .table tbody tr.table-success {
+        --bs-table-bg: rgba(25, 135, 84, 0.2);
+    }
+
+    [data-theme="dark"] .tasks-page .table tbody tr.table-danger {
+        --bs-table-bg: rgba(220, 53, 69, 0.2);
+    }
+
+    [data-theme="dark"] .tasks-page .table tbody tr.table-warning {
+        --bs-table-bg: rgba(255, 193, 7, 0.2);
+    }
+
+    [data-theme="dark"] .tasks-page .badge.bg-light {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: var(--bs-gray-100) !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
+    }
+
+    [data-theme="dark"] .tasks-page .badge[class*="bg-"][class*="-opacity-10"] {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        color: var(--bs-gray-100) !important;
+        border-color: rgba(255, 255, 255, 0.18) !important;
+    }
+
+    [data-theme="dark"] .tasks-page .form-select,
+    [data-theme="dark"] .tasks-page .form-control,
+    [data-theme="dark"] .tasks-page .btn-outline-secondary {
+        background-color: var(--bs-gray-900);
+        border-color: var(--bs-gray-700);
+        color: var(--bs-gray-100);
+    }
+
+    [data-theme="dark"] .tasks-page .btn-outline-secondary:hover {
+        background-color: var(--bs-gray-800);
+        color: var(--bs-gray-100);
+    }
+
+    [data-theme="dark"] .tasks-page .table th i {
+        color: var(--bs-primary-light) !important;
+    }
+
+    [data-theme="dark"] .tasks-page .badge.bg-primary,
+    [data-theme="dark"] .tasks-page .badge.bg-primary.fs-6 {
+        background-color: var(--bs-primary) !important;
+    }
+
+    [data-theme="dark"] .tasks-page .table tbody tr .text-dark {
+        color: var(--bs-gray-100) !important;
+    }
+
+    [data-theme="dark"] .tasks-page .table tbody tr .text-secondary {
+        color: var(--bs-gray-400) !important;
+    }
+
+    [data-theme="dark"] .tasks-page .table tbody tr .text-muted {
+        color: var(--bs-gray-500) !important;
+    }
+
+    [data-theme="dark"] .tasks-page .opacity-75 {
+        opacity: 0.65 !important;
+    }
+
+</style>
+
+<div class="tasks-page">
 <!-- Header da Página -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="text-primary mb-0"><i class="fas fa-tasks me-2"></i>Gerenciar Tarefas</h4>
+    <h4 class="text-primary mb-0"><i class="fas fa-clipboard-check me-2"></i>Atividades & Projetos</h4>
     <div class="badge bg-primary fs-6">
-        {{ tasks|length }} tarefa{{ 's' if tasks|length != 1 }}
+        {{ tasks|length }} atividade{{ 's' if tasks|length != 1 }}
     </div>
 </div>
 
@@ -54,10 +157,10 @@
     <div class="card-header bg-light border-0 py-3">
         <h6 class="mb-0 text-secondary">
             <i class="fas fa-plus-circle me-2"></i>
-            {% if edit_id %}Editar{% else %}Nova{% endif %} Tarefa
+            {% if edit_id %}Editar{% else %}Nova{% endif %} Atividade
             {% if edit_id %}
                 <small class="text-warning ms-2">
-                    <i class="fas fa-edit me-1"></i>Editando tarefa
+                    <i class="fas fa-edit me-1"></i>Editando atividade
                     <a href="{{ url_for('main.tasks') }}" class="text-warning text-decoration-none ms-2">
                         <i class="fas fa-times me-1"></i>Cancelar
                     </a>
@@ -70,8 +173,8 @@
             {{ form.hidden_tag() }}
             <div class="row g-3">
                 <div class="col-xl-5 col-lg-6">
-                    <label class="form-label small text-muted mb-1">Descrição da Tarefa</label>
-                    {{ form.description(class_='form-control form-control-sm', placeholder='Descreva a tarefa...') }}
+                    <label class="form-label small text-muted mb-1">Descrição da Atividade</label>
+                    {{ form.description(class_='form-control form-control-sm', placeholder='Descreva a atividade...') }}
                     {% for error in form.description.errors %}
                         <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
                     {% endfor %}
@@ -126,11 +229,11 @@
     </div>
 </div>
 
-<!-- Card de Lista de Tarefas -->
+<!-- Card de Lista de Atividades -->
 <div class="card shadow-sm border-0">
     <div class="card-header bg-light border-0 py-3">
         <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-0 text-secondary"><i class="fas fa-list-check me-2"></i>Lista de Tarefas</h6>
+            <h6 class="mb-0 text-secondary"><i class="fas fa-list-check me-2"></i>Lista de Atividades</h6>
             <!-- Legenda de Status -->
             <div class="d-flex gap-2 flex-wrap">
                 <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
@@ -284,7 +387,7 @@
                 </li>
             {% else %}
                 <li class="page-item disabled">
-                    <span class="page-link">Próxima<i class="fas fa-chevron-right ms-1"></i></span>
+                    <span class="page-link text-dark bg-light border border-dark border-opacity-25">Próxima<i class="fas fa-chevron-right ms-1"></i></span>
                 </li>
             {% endif %}
         </ul>

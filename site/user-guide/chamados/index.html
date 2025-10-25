@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Oézios Normando - Equipe TI OSN" /><link rel="canonical" href="http://192.168.1.86:5000/docs/user-guide/chamados/" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Chamados - TI OSN System - Documentação Oficial</title>
+    <title>Tickets & Suporte - TI OSN System - Documentação Oficial</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -13,7 +13,7 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Chamados";
+        var mkdocs_page_name = "Tickets \u0026 Suporte";
         var mkdocs_page_input_path = "user-guide\\chamados.md";
         var mkdocs_page_url = "/docs/user-guide/chamados/";
       </script>
@@ -34,12 +34,12 @@
           <a href="../.." class="icon icon-home"> TI OSN System - Documentação Oficial
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" title="Digite o termo a ser buscado aqui" />
   </form>
 </div>
       </div>
 
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
               <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../..">Início</a>
                 </li>
@@ -48,21 +48,25 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../overview/">Visão Geral</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../reminders/">Lembretes</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../security/">Segurança</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Chamados</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../tasks/">Atividades & Projetos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../reminders/">Notificações Programadas</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Tickets & Suporte</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#visao-geral">🎯 Visão Geral</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#abrindo-um-novo-chamado">📝 Abrindo um Novo Chamado</a>
+    <li class="toctree-l2"><a class="reference internal" href="#abrindo-um-novo-ticket">📝 Abrindo um Novo Ticket</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#passo-a-passo">Passo a Passo</a>
     </li>
         </ul>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#acompanhamento-de-chamados">🔄 Acompanhamento de Chamados</a>
+    <li class="toctree-l2"><a class="reference internal" href="#acompanhamento-de-tickets">🔄 Acompanhamento de Tickets</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#status-do-chamado">Status do Chamado</a>
+    <li class="toctree-l3"><a class="reference internal" href="#status-do-ticket">Status do Ticket</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#como-acompanhar">Como Acompanhar</a>
     </li>
@@ -120,9 +124,9 @@
     </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../tasks/">Tarefas</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../equipment/">Gestão de Ativos</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../tutorials/">Tutoriais</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../tutorials/">Base de Conhecimento</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../equipment/">Equipamentos</a>
                   </li>
@@ -139,6 +143,8 @@
               </ul>
               <p class="caption"><span class="caption-text">Guia do Administrador</span></p>
               <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/security-admin/">Gerenciamento de Segurança</a>
+                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/equipment-admin/">Equipamentos</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/performance-admin/">Performance</a>
@@ -150,12 +156,17 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/certifications-admin/">Certificações</a>
                   </li>
               </ul>
+              <p class="caption"><span class="caption-text">Guia do Desenvolvedor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev-guide/security-implementation/">Implementação de Segurança</a>
+                  </li>
+              </ul>
       </div>
     </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+      <nav class="wy-nav-top" role="navigation" aria-label="Menu de navegação em dispositivo móvel">
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../..">TI OSN System - Documentação Oficial</a>
         
@@ -163,9 +174,9 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+    <li><a href="../.." class="icon icon-home" aria-label="Documentos"></a></li>
           <li class="breadcrumb-item">Guia do Usuário</li>
-      <li class="breadcrumb-item active">Chamados</li>
+      <li class="breadcrumb-item active">Tickets & Suporte</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -174,21 +185,21 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="sistema-de-chamados">Sistema de Chamados<a class="headerlink" href="#sistema-de-chamados" title="Permanent link">&para;</a></h1>
-<p>O sistema de chamados permite solicitar suporte técnico de forma organizada e acompanhar o andamento das solicitações até sua resolução completa.</p>
+                <h1 id="tickets-suporte">Tickets &amp; Suporte<a class="headerlink" href="#tickets-suporte" title="Permanent link">&para;</a></h1>
+<p>O sistema de tickets &amp; suporte permite abrir solicitações de atendimento de forma profissional e acompanhar o andamento até a resolução completa.</p>
 <h2 id="visao-geral">🎯 Visão Geral<a class="headerlink" href="#visao-geral" title="Permanent link">&para;</a></h2>
-<p>O módulo de chamados oferece uma interface completa para:
+<p>A central de atendimento oferece uma interface completa para:
 - ✅ <strong>Solicitar suporte técnico</strong>
 - ✅ <strong>Acompanhar andamento</strong> em tempo real
 - ✅ <strong>Comunicar com a equipe de TI</strong>
 - ✅ <strong>Receber notificações</strong> de atualizações
 - ✅ <strong>Consultar histórico</strong> completo</p>
-<h2 id="abrindo-um-novo-chamado">📝 Abrindo um Novo Chamado<a class="headerlink" href="#abrindo-um-novo-chamado" title="Permanent link">&para;</a></h2>
+<h2 id="abrindo-um-novo-ticket">📝 Abrindo um Novo Ticket<a class="headerlink" href="#abrindo-um-novo-ticket" title="Permanent link">&para;</a></h2>
 <h3 id="passo-a-passo">Passo a Passo<a class="headerlink" href="#passo-a-passo" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>Acesse o módulo</strong>:</li>
-<li>Menu principal → <strong>"Chamados"</strong></li>
-<li>Clique em <strong>"Abrir Novo Chamado"</strong></li>
+<li>Menu principal → <strong>"Tickets &amp; Suporte"</strong></li>
+<li>Clique em <strong>"Abrir Novo Ticket"</strong></li>
 <li>
 <p>URL direta: <code>http://192.168.1.86:5000/chamados/abrir</code></p>
 </li>
@@ -215,10 +226,10 @@
 </li>
 <li>Sistema envia e-mail para equipe de TI</li>
 <li>Você recebe confirmação automática</li>
-<li>Chamado aparece imediatamente na sua lista</li>
+<li>Ticket aparece imediatamente na sua lista</li>
 </ol>
-<h2 id="acompanhamento-de-chamados">🔄 Acompanhamento de Chamados<a class="headerlink" href="#acompanhamento-de-chamados" title="Permanent link">&para;</a></h2>
-<h3 id="status-do-chamado">Status do Chamado<a class="headerlink" href="#status-do-chamado" title="Permanent link">&para;</a></h3>
+<h2 id="acompanhamento-de-tickets">🔄 Acompanhamento de Tickets<a class="headerlink" href="#acompanhamento-de-tickets" title="Permanent link">&para;</a></h2>
+<h3 id="status-do-ticket">Status do Ticket<a class="headerlink" href="#status-do-ticket" title="Permanent link">&para;</a></h3>
 <div class="grid cards" markdown>
 
 -   :material-circle-outline:
@@ -226,7 +237,7 @@
 
     ---
 
-    Chamado criado aguardando atendimento da TI
+    Ticket criado aguardando atendimento da TI
 
 -   :material-progress-clock:
     **Em Andamento**
@@ -247,7 +258,7 @@
 
     ---
 
-    Chamado finalizado e arquivado
+    Ticket finalizado e arquivado
 
 </div>
 
@@ -413,9 +424,9 @@
               
             </div>
           </div><footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../reminders/" class="btn btn-neutral float-left" title="Lembretes"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../tasks/" class="btn btn-neutral float-right" title="Tarefas">Next <span class="icon icon-circle-arrow-right"></span></a>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Navegação no rodapé">
+        <a href="../reminders/" class="btn btn-neutral float-left" title="Notificações Programadas"><span class="icon icon-circle-arrow-left"></span> Anterior</a>
+        <a href="../equipment/" class="btn btn-neutral float-right" title="Gestão de Ativos">Seguinte <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -424,7 +435,7 @@
     <!-- Copyright etc -->
   </div>
 
-  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Construído com <a href="https://www.mkdocs.org/">MkDocs</a> usando <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provido por <a href="https://readthedocs.org">Read the Docs</a>.
 </footer>
           
         </div>
@@ -434,14 +445,14 @@
 
   </div>
 
-  <div class="rst-versions" role="note" aria-label="Versions">
+  <div class="rst-versions" role="note" aria-label="Versões">
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../reminders/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../reminders/" style="color: #fcfcfc">&laquo; Anterior</a></span>
     
     
-      <span><a href="../tasks/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../equipment/" style="color: #fcfcfc">Seguinte &raquo;</a></span>
     
   </span>
 </div>

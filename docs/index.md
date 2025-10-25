@@ -9,7 +9,7 @@
 
 ## 🎯 Sobre o Sistema
 
-O **TI OSN System** é uma solução completa e profissional para gerenciamento de atividades de TI, desenvolvida especificamente para facilitar a organização e o acompanhamento de tarefas diárias, lembretes recorrentes, solicitações de suporte técnico, tutoriais e gestão de equipamentos.
+O **TI OSN System** é uma solução completa e profissional para gerenciamento de atividades de TI, desenvolvida especificamente para facilitar a organização e o acompanhamento de atividades & projetos, notificações programadas, tickets de suporte, base de conhecimento e gestão de ativos.
 
 ### ✨ Características Principais
 
@@ -54,11 +54,11 @@ O **TI OSN System** é uma solução completa e profissional para gerenciamento 
 ### 👤 Guia do Usuário
 - **[Visão Geral](user-guide/overview.md)** - Documentação completa para usuários finais
 - **[🔐 Segurança e Login](user-guide/security.md)** - Autenticação, senhas fortes e proteção de conta
-- **[Lembretes](user-guide/reminders.md)** - Criação e gerenciamento de lembretes recorrentes
-- **[Chamados](user-guide/chamados.md)** - Abrir, acompanhar e gerenciar chamados de suporte
-- **[Tarefas](user-guide/tasks.md)** - Gestão de tarefas pontuais com controle de prazos
-- **[Tutoriais](user-guide/tutorials.md)** - Base de conhecimento e tutoriais
-- **[Equipamentos](user-guide/equipment.md)** - Solicitação e gestão de equipamentos
+- **[Notificações Programadas](user-guide/reminders.md)** - Criação e gerenciamento de alertas automáticos
+- **[Tickets & Suporte](user-guide/chamados.md)** - Central de atendimento e gestão de tickets
+- **[Atividades & Projetos](user-guide/tasks.md)** - Gestão de workflows e controle de prazos
+- **[Base de Conhecimento](user-guide/tutorials.md)** - Artigos e documentação técnica
+- **[Gestão de Ativos](user-guide/equipment.md)** - Solicitação e gerenciamento de ativos
 - **[Dashboard](user-guide/dashboard.md)** - Visão geral e métricas do sistema
 
 ### 🆕 Novas Funcionalidades

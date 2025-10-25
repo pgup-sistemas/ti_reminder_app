@@ -34,12 +34,12 @@
           <a href="../.." class="icon icon-home"> TI OSN System - Documentação Oficial
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" title="Digite o termo a ser buscado aqui" />
   </form>
 </div>
       </div>
 
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
               <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../..">Início</a>
                 </li>
@@ -64,11 +64,15 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#navegacao-principal">🧭 Navegação Principal</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#lembretes">📅 Lembretes</a>
+    <li class="toctree-l3"><a class="reference internal" href="#notificacoes-programadas">🔔 Notificações Programadas</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#chamados">🎫 Chamados</a>
+    <li class="toctree-l3"><a class="reference internal" href="#tickets-suporte">🎫 Tickets &amp; Suporte</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#tutoriais">📚 Tutoriais</a>
+    <li class="toctree-l3"><a class="reference internal" href="#atividades-projetos">📊 Atividades &amp; Projetos</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#base-de-conhecimento">📚 Base de Conhecimento</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#gestao-de-ativos">📦 Gestão de Ativos</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#equipamentos">🖥️ Equipamentos</a>
     </li>
@@ -102,13 +106,17 @@
     </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../reminders/">Lembretes</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../security/">Segurança</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../chamados/">Chamados</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../tasks/">Atividades & Projetos</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../tasks/">Tarefas</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../reminders/">Notificações Programadas</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../tutorials/">Tutoriais</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../chamados/">Tickets & Suporte</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../equipment/">Gestão de Ativos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tutorials/">Base de Conhecimento</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../equipment/">Equipamentos</a>
                   </li>
@@ -125,6 +133,8 @@
               </ul>
               <p class="caption"><span class="caption-text">Guia do Administrador</span></p>
               <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/security-admin/">Gerenciamento de Segurança</a>
+                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/equipment-admin/">Equipamentos</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/performance-admin/">Performance</a>
@@ -136,12 +146,17 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/certifications-admin/">Certificações</a>
                   </li>
               </ul>
+              <p class="caption"><span class="caption-text">Guia do Desenvolvedor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev-guide/security-implementation/">Implementação de Segurança</a>
+                  </li>
+              </ul>
       </div>
     </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+      <nav class="wy-nav-top" role="navigation" aria-label="Menu de navegação em dispositivo móvel">
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../..">TI OSN System - Documentação Oficial</a>
         
@@ -149,7 +164,7 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+    <li><a href="../.." class="icon icon-home" aria-label="Documentos"></a></li>
           <li class="breadcrumb-item">Guia do Usuário</li>
       <li class="breadcrumb-item active">Visão Geral</li>
     <li class="wy-breadcrumbs-aside">
@@ -166,7 +181,7 @@
 <p>Este documento foi criado para fornecer instruções claras e práticas sobre como utilizar o sistema TI OSN, desde as funcionalidades básicas até recursos avançados.</p>
 <h2 id="publico-alvo">👤 Público Alvo<a class="headerlink" href="#publico-alvo" title="Permanent link">&para;</a></h2>
 <p>Este guia é destinado a:
-- <strong>Usuários finais</strong> que precisam gerenciar lembretes, tarefas e chamados
+- <strong>Usuários finais</strong> que precisam gerenciar notificações, atividades e tickets
 - <strong>Funcionários</strong> que utilizam o sistema no dia a dia
 - <strong>Novos usuários</strong> que estão conhecendo o sistema</p>
 <h2 id="pre-requisitos">📋 Pré-requisitos<a class="headerlink" href="#pre-requisitos" title="Permanent link">&para;</a></h2>
@@ -193,23 +208,35 @@
 </ol>
 <h2 id="navegacao-principal">🧭 Navegação Principal<a class="headerlink" href="#navegacao-principal" title="Permanent link">&para;</a></h2>
 <p>O sistema está organizado em módulos principais:</p>
-<h3 id="lembretes">📅 <strong>Lembretes</strong><a class="headerlink" href="#lembretes" title="Permanent link">&para;</a></h3>
+<h3 id="notificacoes-programadas">🔔 <strong>Notificações Programadas</strong><a class="headerlink" href="#notificacoes-programadas" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Criar lembretes recorrentes</li>
-<li>Gerenciar tarefas diárias</li>
-<li>Configurar notificações automáticas</li>
+<li>Criar alertas recorrentes automáticos</li>
+<li>Gerenciar notificações inteligentes</li>
+<li>Configurar lembretes programados</li>
 </ul>
-<h3 id="chamados">🎫 <strong>Chamados</strong><a class="headerlink" href="#chamados" title="Permanent link">&para;</a></h3>
+<h3 id="tickets-suporte">🎫 <strong>Tickets &amp; Suporte</strong><a class="headerlink" href="#tickets-suporte" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Abrir solicitações de suporte técnico</li>
-<li>Acompanhar andamento dos chamados</li>
-<li>Receber notificações de atualizações</li>
+<li>Abrir tickets de atendimento</li>
+<li>Acompanhar status em tempo real</li>
+<li>Receber atualizações automáticas</li>
 </ul>
-<h3 id="tutoriais">📚 <strong>Tutoriais</strong><a class="headerlink" href="#tutoriais" title="Permanent link">&para;</a></h3>
+<h3 id="atividades-projetos">📊 <strong>Atividades &amp; Projetos</strong><a class="headerlink" href="#atividades-projetos" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Consultar guias e manuais</li>
-<li>Deixar feedback sobre tutoriais</li>
-<li>Baixar tutoriais em PDF</li>
+<li>Gerenciar workflows e tarefas</li>
+<li>Controlar prazos e entregas</li>
+<li>Acompanhar progressão</li>
+</ul>
+<h3 id="base-de-conhecimento">📚 <strong>Base de Conhecimento</strong><a class="headerlink" href="#base-de-conhecimento" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Consultar artigos e guias</li>
+<li>Deixar feedback e comentários</li>
+<li>Exportar documentação em PDF</li>
+</ul>
+<h3 id="gestao-de-ativos">📦 <strong>Gestão de Ativos</strong><a class="headerlink" href="#gestao-de-ativos" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Solicitar equipamentos</li>
+<li>Gerenciar empréstimos</li>
+<li>Acompanhar reservas</li>
 </ul>
 <h3 id="equipamentos">🖥️ <strong>Equipamentos</strong><a class="headerlink" href="#equipamentos" title="Permanent link">&para;</a></h3>
 <ul>
@@ -276,9 +303,9 @@
               
             </div>
           </div><footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../.." class="btn btn-neutral float-left" title="Início"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../reminders/" class="btn btn-neutral float-right" title="Lembretes">Next <span class="icon icon-circle-arrow-right"></span></a>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Navegação no rodapé">
+        <a href="../.." class="btn btn-neutral float-left" title="Início"><span class="icon icon-circle-arrow-left"></span> Anterior</a>
+        <a href="../security/" class="btn btn-neutral float-right" title="Segurança">Seguinte <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -287,7 +314,7 @@
     <!-- Copyright etc -->
   </div>
 
-  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Construído com <a href="https://www.mkdocs.org/">MkDocs</a> usando <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provido por <a href="https://readthedocs.org">Read the Docs</a>.
 </footer>
           
         </div>
@@ -297,14 +324,14 @@
 
   </div>
 
-  <div class="rst-versions" role="note" aria-label="Versions">
+  <div class="rst-versions" role="note" aria-label="Versões">
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../.." style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../.." style="color: #fcfcfc">&laquo; Anterior</a></span>
     
     
-      <span><a href="../reminders/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../security/" style="color: #fcfcfc">Seguinte &raquo;</a></span>
     
   </span>
 </div>

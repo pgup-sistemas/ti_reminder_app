@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt_BR" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Oézios Normando - Equipe TI OSN" /><link rel="canonical" href="http://192.168.1.86:5000/docs/user-guide/security/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Segurança - TI OSN System - Documentação Oficial</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Seguran\u00e7a";
+        var mkdocs_page_input_path = "user-guide\\security.md";
+        var mkdocs_page_url = "/docs/user-guide/security/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> TI OSN System - Documentação Oficial
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" title="Digite o termo a ser buscado aqui" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Início</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Usuário</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">Visão Geral</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Segurança</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#visao-geral">Visão Geral</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sistema-de-login">🔑 Sistema de Login</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#acessando-o-sistema">Acessando o Sistema</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#requisitos-de-senha-forte">Requisitos de Senha Forte</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#senhas-proibidas">Senhas Proibidas</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#protecao-de-conta">🛡️ Proteção de Conta</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#bloqueio-automatico">Bloqueio Automático</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#limite-de-requisicoes">Limite de Requisições</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#recuperacao-de-senha">🔄 Recuperação de Senha</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#como-redefinir-sua-senha">Como Redefinir sua Senha</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#criando-uma-conta">👤 Criando uma Conta</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#cadastro-de-novo-usuario">Cadastro de Novo Usuário</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#requisitos-do-nome-de-usuario">Requisitos do Nome de Usuário</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#sessoes-e-logout">🔒 Sessões e Logout</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#gerenciamento-de-sessao">Gerenciamento de Sessão</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#como-fazer-logout">Como Fazer Logout</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#boas-praticas-de-seguranca">🔐 Boas Práticas de Segurança</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#para-proteger-sua-conta">Para Proteger sua Conta</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#problemas-comuns">⚠️ Problemas Comuns</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#usuario-ou-senha-invalidos">"Usuário ou senha inválidos"</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#conta-temporariamente-bloqueada">"Conta temporariamente bloqueada"</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#link-de-redefinicao-invalido-ou-expirado">"Link de redefinição inválido ou expirado"</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#esta-senha-e-muito-comum">"Esta senha é muito comum"</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#suporte">📞 Suporte</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#precisa-de-ajuda">Precisa de Ajuda?</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#status-de-seguranca">🏆 Status de Segurança</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tasks/">Atividades & Projetos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../reminders/">Notificações Programadas</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../chamados/">Tickets & Suporte</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../equipment/">Gestão de Ativos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tutorials/">Base de Conhecimento</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../equipment/">Equipamentos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../dashboard/">Dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../rfid/">Sistema RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../satisfaction/">Avaliação de Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../certifications/">Certificações</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../performance/">Performance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Administrador</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/security-admin/">Gerenciamento de Segurança</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/equipment-admin/">Equipamentos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/performance-admin/">Performance</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/rfid-admin/">RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/satisfaction-admin/">Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/certifications-admin/">Certificações</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Desenvolvedor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev-guide/security-implementation/">Implementação de Segurança</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Menu de navegação em dispositivo móvel">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">TI OSN System - Documentação Oficial</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Documentos"></a></li>
+          <li class="breadcrumb-item">Guia do Usuário</li>
+      <li class="breadcrumb-item active">Segurança</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="seguranca-e-autenticacao">🔐 Segurança e Autenticação<a class="headerlink" href="#seguranca-e-autenticacao" title="Permanent link">&para;</a></h1>
+<h2 id="visao-geral">Visão Geral<a class="headerlink" href="#visao-geral" title="Permanent link">&para;</a></h2>
+<p>O TI OSN System v2.0 implementa as mais modernas práticas de segurança para proteger seus dados e garantir acesso seguro ao sistema.</p>
+<hr />
+<h2 id="sistema-de-login">🔑 Sistema de Login<a class="headerlink" href="#sistema-de-login" title="Permanent link">&para;</a></h2>
+<h3 id="acessando-o-sistema">Acessando o Sistema<a class="headerlink" href="#acessando-o-sistema" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>URL de Acesso</strong>: <code>http://[servidor]:5000/auth/login</code></li>
+<li><strong>Credenciais</strong>: Use seu usuário e senha fornecidos pelo administrador</li>
+<li><strong>Lembrar-me</strong>: Marque para manter sessão ativa por 24 horas</li>
+</ol>
+<h3 id="requisitos-de-senha-forte">Requisitos de Senha Forte<a class="headerlink" href="#requisitos-de-senha-forte" title="Permanent link">&para;</a></h3>
+<p>Para garantir a segurança da sua conta, todas as senhas devem atender aos seguintes critérios:</p>
+<div class="admonition warning">
+<p class="admonition-title">Requisitos Obrigatórios</p>
+<ul>
+<li>✅ <strong>Mínimo 8 caracteres</strong></li>
+<li>✅ <strong>Pelo menos 1 letra MAIÚSCULA</strong> (A-Z)</li>
+<li>✅ <strong>Pelo menos 1 letra minúscula</strong> (a-z)</li>
+<li>✅ <strong>Pelo menos 1 número</strong> (0-9)</li>
+<li>✅ <strong>Pelo menos 1 caractere especial</strong> (!@#$%^&amp;*)</li>
+</ul>
+</div>
+<p><strong>Exemplos:</strong>
+- ❌ <code>senha123</code> - Muito simples
+- ❌ <code>Senha123</code> - Falta caractere especial
+- ✅ <code>S3nh@Fort3!</code> - Senha forte e válida
+- ✅ <code>M1nh@S3nh@2025!</code> - Excelente senha</p>
+<h3 id="senhas-proibidas">Senhas Proibidas<a class="headerlink" href="#senhas-proibidas" title="Permanent link">&para;</a></h3>
+<p>O sistema bloqueia senhas comuns para sua segurança:</p>
+<ul>
+<li>❌ password, password123, 12345678</li>
+<li>❌ qwerty, abc123, admin</li>
+<li>❌ Admin123, Senha123, Teste123</li>
+</ul>
+<hr />
+<h2 id="protecao-de-conta">🛡️ Proteção de Conta<a class="headerlink" href="#protecao-de-conta" title="Permanent link">&para;</a></h2>
+<h3 id="bloqueio-automatico">Bloqueio Automático<a class="headerlink" href="#bloqueio-automatico" title="Permanent link">&para;</a></h3>
+<p>Para proteger contra ataques de força bruta:</p>
+<div class="admonition danger">
+<p class="admonition-title">Atenção: Tentativas de Login</p>
+<ul>
+<li><strong>1ª a 2ª tentativa falha</strong>: Acesso normal</li>
+<li><strong>3ª tentativa falha</strong>: Aviso de 2 tentativas restantes</li>
+<li><strong>4ª tentativa falha</strong>: Aviso de 1 tentativa restante</li>
+<li><strong>5ª tentativa falha</strong>: <strong>Conta bloqueada por 15 minutos</strong></li>
+</ul>
+</div>
+<p><strong>Se sua conta for bloqueada:</strong>
+1. Aguarde 15 minutos para desbloqueio automático
+2. OU use a opção <strong>"Esqueceu a senha?"</strong> para reset imediato</p>
+<h3 id="limite-de-requisicoes">Limite de Requisições<a class="headerlink" href="#limite-de-requisicoes" title="Permanent link">&para;</a></h3>
+<p>O sistema limita requisições para prevenir abuso:</p>
+<table>
+<thead>
+<tr>
+<th>Ação</th>
+<th>Limite</th>
+<th>Período</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Login</strong></td>
+<td>5 tentativas</td>
+<td>Por minuto</td>
+</tr>
+<tr>
+<td><strong>Registro</strong></td>
+<td>3 cadastros</td>
+<td>Por hora</td>
+</tr>
+<tr>
+<td><strong>Reset de senha</strong></td>
+<td>3 solicitações</td>
+<td>Por hora</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">Proteção Automática</p>
+<p>Se você atingir o limite, aguarde alguns minutos antes de tentar novamente.</p>
+</div>
+<hr />
+<h2 id="recuperacao-de-senha">🔄 Recuperação de Senha<a class="headerlink" href="#recuperacao-de-senha" title="Permanent link">&para;</a></h2>
+<h3 id="como-redefinir-sua-senha">Como Redefinir sua Senha<a class="headerlink" href="#como-redefinir-sua-senha" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Acesse</strong> a página de login</li>
+<li><strong>Clique</strong> em "Esqueceu sua senha?"</li>
+<li><strong>Informe</strong> seu e-mail cadastrado</li>
+<li><strong>Verifique</strong> seu e-mail (cheque spam/lixo eletrônico)</li>
+<li><strong>Clique</strong> no link recebido (válido por 1 hora)</li>
+<li><strong>Defina</strong> uma nova senha forte</li>
+<li><strong>Confirme</strong> a senha</li>
+<li><strong>Faça login</strong> com a nova senha</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Link de Reset</p>
+<ul>
+<li>⏱️ Válido por <strong>1 hora</strong></li>
+<li>🔐 Uso único (expira após uso)</li>
+<li>📧 Enviado para o e-mail cadastrado</li>
+</ul>
+</div>
+<hr />
+<h2 id="criando-uma-conta">👤 Criando uma Conta<a class="headerlink" href="#criando-uma-conta" title="Permanent link">&para;</a></h2>
+<h3 id="cadastro-de-novo-usuario">Cadastro de Novo Usuário<a class="headerlink" href="#cadastro-de-novo-usuario" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Acesse</strong>: <code>/auth/register</code></li>
+<li><strong>Preencha</strong>:</li>
+<li>Nome de usuário (mínimo 3 caracteres)</li>
+<li>E-mail válido</li>
+<li>Senha forte (veja requisitos acima)</li>
+<li>Confirmação de senha</li>
+<li><strong>Clique</strong> em "Cadastrar"</li>
+<li><strong>Aguarde</strong> aprovação do administrador (se necessário)</li>
+<li><strong>Faça login</strong> com suas credenciais</li>
+</ol>
+<h3 id="requisitos-do-nome-de-usuario">Requisitos do Nome de Usuário<a class="headerlink" href="#requisitos-do-nome-de-usuario" title="Permanent link">&para;</a></h3>
+<ul>
+<li>✅ Mínimo 3 caracteres</li>
+<li>✅ Apenas letras, números, underscore (_) e hífen (-)</li>
+<li>✅ Não pode começar com número</li>
+<li>❌ Sem espaços ou caracteres especiais</li>
+</ul>
+<p><strong>Exemplos:</strong>
+- ✅ <code>joao_silva</code>
+- ✅ <code>maria-santos</code>
+- ✅ <code>usuario123</code>
+- ❌ <code>123usuario</code> (começa com número)
+- ❌ <code>joão@silva</code> (caracteres inválidos)</p>
+<hr />
+<h2 id="sessoes-e-logout">🔒 Sessões e Logout<a class="headerlink" href="#sessoes-e-logout" title="Permanent link">&para;</a></h2>
+<h3 id="gerenciamento-de-sessao">Gerenciamento de Sessão<a class="headerlink" href="#gerenciamento-de-sessao" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Duração</strong>: 24 horas de inatividade</li>
+<li><strong>Cookies Seguros</strong>: Protegidos contra XSS</li>
+<li><strong>Logout automático</strong>: Após 24 horas sem atividade</li>
+</ul>
+<h3 id="como-fazer-logout">Como Fazer Logout<a class="headerlink" href="#como-fazer-logout" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Clique</strong> no menu do usuário (canto superior direito)</li>
+<li><strong>Selecione</strong> "Sair" ou "Logout"</li>
+<li><strong>Confirme</strong> se solicitado</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Boa Prática</p>
+<p>Sempre faça logout ao usar computadores compartilhados!</p>
+</div>
+<hr />
+<h2 id="boas-praticas-de-seguranca">🔐 Boas Práticas de Segurança<a class="headerlink" href="#boas-praticas-de-seguranca" title="Permanent link">&para;</a></h2>
+<h3 id="para-proteger-sua-conta">Para Proteger sua Conta<a class="headerlink" href="#para-proteger-sua-conta" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>✅ Use senha forte e única</strong></li>
+<li>Não reutilize senhas de outros sites</li>
+<li>
+<p>Use gerenciador de senhas (LastPass, Bitwarden)</p>
+</li>
+<li>
+<p><strong>✅ Mantenha seu e-mail seguro</strong></p>
+</li>
+<li>Seu e-mail é a chave de recuperação</li>
+<li>
+<p>Use autenticação de dois fatores no e-mail</p>
+</li>
+<li>
+<p><strong>✅ Cuidado com phishing</strong></p>
+</li>
+<li>Verifique o URL do site</li>
+<li>
+<p>Não clique em links suspeitos por e-mail</p>
+</li>
+<li>
+<p><strong>✅ Faça logout em computadores compartilhados</strong></p>
+</li>
+<li>Sempre saia do sistema após uso</li>
+<li>
+<p>Não marque "Lembrar-me" em PCs públicos</p>
+</li>
+<li>
+<p><strong>✅ Atualize sua senha regularmente</strong></p>
+</li>
+<li>Recomendado a cada 3-6 meses</li>
+<li>Altere imediatamente se suspeitar de comprometimento</li>
+</ol>
+<hr />
+<h2 id="problemas-comuns">⚠️ Problemas Comuns<a class="headerlink" href="#problemas-comuns" title="Permanent link">&para;</a></h2>
+<h3 id="usuario-ou-senha-invalidos">"Usuário ou senha inválidos"<a class="headerlink" href="#usuario-ou-senha-invalidos" title="Permanent link">&para;</a></h3>
+<p><strong>Causas possíveis:</strong>
+- ❌ Usuário digitado incorretamente
+- ❌ Senha incorreta
+- ❌ Caps Lock ativado
+- ❌ Conta desativada pelo administrador</p>
+<p><strong>Soluções:</strong>
+1. Verifique se Caps Lock está desativado
+2. Confirme o nome de usuário correto
+3. Use "Esqueceu a senha?" se necessário
+4. Entre em contato com o administrador</p>
+<h3 id="conta-temporariamente-bloqueada">"Conta temporariamente bloqueada"<a class="headerlink" href="#conta-temporariamente-bloqueada" title="Permanent link">&para;</a></h3>
+<p><strong>Causa:</strong>
+- 5 tentativas de login falhas consecutivas</p>
+<p><strong>Solução:</strong>
+1. <strong>Opção 1</strong>: Aguarde 15 minutos para desbloqueio automático
+2. <strong>Opção 2</strong>: Use "Esqueceu a senha?" para reset imediato</p>
+<h3 id="link-de-redefinicao-invalido-ou-expirado">"Link de redefinição inválido ou expirado"<a class="headerlink" href="#link-de-redefinicao-invalido-ou-expirado" title="Permanent link">&para;</a></h3>
+<p><strong>Causas:</strong>
+- Link usado há mais de 1 hora
+- Link já foi utilizado
+- Token inválido</p>
+<p><strong>Solução:</strong>
+1. Solicite um novo link de reset
+2. Use o link dentro de 1 hora</p>
+<h3 id="esta-senha-e-muito-comum">"Esta senha é muito comum"<a class="headerlink" href="#esta-senha-e-muito-comum" title="Permanent link">&para;</a></h3>
+<p><strong>Causa:</strong>
+- Senha na lista de senhas proibidas</p>
+<p><strong>Solução:</strong>
+- Crie uma senha mais complexa e única
+- Combine letras, números e símbolos de forma criativa</p>
+<hr />
+<h2 id="suporte">📞 Suporte<a class="headerlink" href="#suporte" title="Permanent link">&para;</a></h2>
+<h3 id="precisa-de-ajuda">Precisa de Ajuda?<a class="headerlink" href="#precisa-de-ajuda" title="Permanent link">&para;</a></h3>
+<p><strong>Conta bloqueada ou problemas de acesso:</strong>
+- 📧 Email: suporte@ti-osn.com
+- 🎫 Abra um chamado (se conseguir acessar)
+- 👤 Contate o administrador do sistema</p>
+<p><strong>Esqueceu seu nome de usuário:</strong>
+- Entre em contato com o administrador
+- Informe seu e-mail cadastrado</p>
+<p><strong>Conta desativada:</strong>
+- Verifique com o administrador
+- Pode ser política de inatividade ou término de contrato</p>
+<hr />
+<h2 id="status-de-seguranca">🏆 Status de Segurança<a class="headerlink" href="#status-de-seguranca" title="Permanent link">&para;</a></h2>
+<p>O TI OSN System v2.0 atende aos mais altos padrões de segurança:</p>
+<ul>
+<li>✅ <strong>OWASP Top 10</strong> - Proteção contra vulnerabilidades críticas</li>
+<li>✅ <strong>Rate Limiting</strong> - Proteção contra ataques automatizados</li>
+<li>✅ <strong>Senhas Seguras</strong> - Validação forte obrigatória</li>
+<li>✅ <strong>Sessões Protegidas</strong> - Cookies HttpOnly e Secure</li>
+<li>✅ <strong>CSRF Protection</strong> - Proteção contra falsificação de requisições</li>
+<li>✅ <strong>Logging Completo</strong> - Auditoria de todas ações de segurança</li>
+<li>✅ <strong>Headers HTTP Seguros</strong> - HSTS, CSP, X-Frame-Options</li>
+</ul>
+<div class="admonition success">
+<p class="admonition-title">Sistema Certificado</p>
+<p><strong>Score de Segurança: 9.3/10</strong> - Sistema pronto para ambiente corporativo</p>
+</div>
+<hr />
+<p><strong>Última atualização:</strong> Janeiro 2025<br />
+<strong>Versão:</strong> 2.0 - Sistema de Segurança Completo</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Navegação no rodapé">
+        <a href="../overview/" class="btn btn-neutral float-left" title="Visão Geral"><span class="icon icon-circle-arrow-left"></span> Anterior</a>
+        <a href="../tasks/" class="btn btn-neutral float-right" title="Atividades & Projetos">Seguinte <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Construído com <a href="https://www.mkdocs.org/">MkDocs</a> usando <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provido por <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versões">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../overview/" style="color: #fcfcfc">&laquo; Anterior</a></span>
+    
+    
+      <span><a href="../tasks/" style="color: #fcfcfc">Seguinte &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../javascripts/extra.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

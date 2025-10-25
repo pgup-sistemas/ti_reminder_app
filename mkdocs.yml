@@ -18,11 +18,12 @@ nav:
   - Início: index.md
   - Guia do Usuário:
     - Visão Geral: user-guide/overview.md
-    - Segurança e Login: user-guide/security.md
-    - Lembretes: user-guide/reminders.md
-    - Chamados: user-guide/chamados.md
-    - Tarefas: user-guide/tasks.md
-    - Tutoriais: user-guide/tutorials.md
+    - Segurança: user-guide/security.md
+    - Atividades & Projetos: user-guide/tasks.md
+    - Notificações Programadas: user-guide/reminders.md
+    - Tickets & Suporte: user-guide/chamados.md
+    - Gestão de Ativos: user-guide/equipment.md
+    - Base de Conhecimento: user-guide/tutorials.md
     - Equipamentos: user-guide/equipment.md
     - Dashboard: user-guide/dashboard.md
     - Sistema RFID: user-guide/rfid.md

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt_BR" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Oézios Normando - Equipe TI OSN" /><link rel="canonical" href="http://192.168.1.86:5000/docs/PADR%C3%83O_VISUAL_AUTH/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>🎨 Padrão Visual - Telas de Autenticação - TI OSN System - Documentação Oficial</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "\ud83c\udfa8 Padr\u00e3o Visual - Telas de Autentica\u00e7\u00e3o";
+        var mkdocs_page_input_path = "PADR\u00c3O_VISUAL_AUTH.md";
+        var mkdocs_page_url = "/docs/PADR%C3%83O_VISUAL_AUTH/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> TI OSN System - Documentação Oficial
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" title="Digite o termo a ser buscado aqui" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Início</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Usuário</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/overview/">Visão Geral</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/security/">Segurança</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/tasks/">Atividades & Projetos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/reminders/">Notificações Programadas</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/chamados/">Tickets & Suporte</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/equipment/">Gestão de Ativos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/tutorials/">Base de Conhecimento</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/equipment/">Equipamentos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/dashboard/">Dashboard</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/rfid/">Sistema RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/satisfaction/">Avaliação de Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/certifications/">Certificações</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/performance/">Performance</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Administrador</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/security-admin/">Gerenciamento de Segurança</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/equipment-admin/">Equipamentos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/performance-admin/">Performance</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/rfid-admin/">RFID</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/satisfaction-admin/">Satisfação</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../admin-guide/certifications-admin/">Certificações</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Guia do Desenvolvedor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../dev-guide/security-implementation/">Implementação de Segurança</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Menu de navegação em dispositivo móvel">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">TI OSN System - Documentação Oficial</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Documentos"></a></li>
+      <li class="breadcrumb-item active">🎨 Padrão Visual - Telas de Autenticação</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="padrao-visual-telas-de-autenticacao">🎨 Padrão Visual - Telas de Autenticação<a class="headerlink" href="#padrao-visual-telas-de-autenticacao" title="Permanent link">&para;</a></h1>
+<h2 id="resumo-das-melhorias-aplicadas">📋 Resumo das Melhorias Aplicadas<a class="headerlink" href="#resumo-das-melhorias-aplicadas" title="Permanent link">&para;</a></h2>
+<h3 id="mudancas-implementadas">✅ Mudanças Implementadas<a class="headerlink" href="#mudancas-implementadas" title="Permanent link">&para;</a></h3>
+<h4 id="1-unificacao-do-design">1. <strong>Unificação do Design</strong><a class="headerlink" href="#1-unificacao-do-design" title="Permanent link">&para;</a></h4>
+<p>Todas as telas de autenticação agora seguem o mesmo padrão visual:
+- Login
+- Cadastro (Register)
+- Recuperação de Senha (Reset Password Request)
+- Redefinição de Senha (Reset Password)</p>
+<h4 id="2-correcao-de-placeholders-sobrepostos">2. <strong>Correção de Placeholders Sobrepostos</strong><a class="headerlink" href="#2-correcao-de-placeholders-sobrepostos" title="Permanent link">&para;</a></h4>
+<p><strong>Problema anterior:</strong> Labels e placeholders se sobrepunham visualmente</p>
+<p><strong>Solução:</strong> Implementação de <code>form-floating</code> do Bootstrap 5
+- Os placeholders agora funcionam como labels flutuantes
+- Animação suave ao focar no campo
+- Sem sobreposição visual
+- Melhor experiência do usuário</p>
+<h4 id="3-consistencia-visual">3. <strong>Consistência Visual</strong><a class="headerlink" href="#3-consistencia-visual" title="Permanent link">&para;</a></h4>
+<h5 id="cores-padronizadas">Cores Padronizadas<a class="headerlink" href="#cores-padronizadas" title="Permanent link">&para;</a></h5>
+<pre><code class="language-css">background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)
+</code></pre>
+<ul>
+<li>Header dos cards</li>
+<li>Botões principais</li>
+<li>Efeito degradê roxo/azul</li>
+</ul>
+<h5 id="icones-nos-labels">Ícones nos Labels<a class="headerlink" href="#icones-nos-labels" title="Permanent link">&para;</a></h5>
+<p>Todos os campos agora têm ícones consistentes:
+- 👤 <code>fa-user</code> - Usuário
+- 📧 <code>fa-envelope</code> - E-mail<br />
+- 🔒 <code>fa-lock</code> - Senha
+- 🔑 <code>fa-key</code> - Redefinir senha</p>
+<h5 id="estrutura-de-cards">Estrutura de Cards<a class="headerlink" href="#estrutura-de-cards" title="Permanent link">&para;</a></h5>
+<pre><code>┌─────────────────────────────┐
+│ 🎨 Header com gradiente     │
+├─────────────────────────────┤
+│                             │
+│   Formulário com            │
+│   form-floating             │
+│                             │
+│   Botões com gradiente      │
+│                             │
+├─────────────────────────────┤
+│ Footer com versão           │
+└─────────────────────────────┘
+</code></pre>
+<h2 id="padrao-de-campos-de-formulario">🎯 Padrão de Campos de Formulário<a class="headerlink" href="#padrao-de-campos-de-formulario" title="Permanent link">&para;</a></h2>
+<h3 id="form-floating-campos-simples">Form-Floating (Campos Simples)<a class="headerlink" href="#form-floating-campos-simples" title="Permanent link">&para;</a></h3>
+<pre><code class="language-html">&lt;div class=&quot;form-floating mb-3&quot;&gt;
+  {{ form.campo(class_='form-control', placeholder='Placeholder', autocomplete='off') }}
+  &lt;label for=&quot;{{ form.campo.id }}&quot;&gt;
+    &lt;i class=&quot;fas fa-icon me-2&quot;&gt;&lt;/i&gt;Label do Campo
+  &lt;/label&gt;
+  {% for error in form.campo.errors %}
+    &lt;div class=&quot;text-danger small mt-1&quot;&gt;{{ error }}&lt;/div&gt;
+  {% endfor %}
+&lt;/div&gt;
+</code></pre>
+<h3 id="form-floating-com-toggle-campos-de-senha">Form-Floating com Toggle (Campos de Senha)<a class="headerlink" href="#form-floating-com-toggle-campos-de-senha" title="Permanent link">&para;</a></h3>
+<pre><code class="language-html">&lt;div class=&quot;mb-3&quot;&gt;
+  &lt;div class=&quot;input-group&quot;&gt;
+    &lt;div class=&quot;form-floating flex-grow-1&quot;&gt;
+      {{ form.senha(class_='form-control', placeholder='Senha', id='senha-field') }}
+      &lt;label for=&quot;{{ form.senha.id }}&quot;&gt;
+        &lt;i class=&quot;fas fa-lock me-2&quot;&gt;&lt;/i&gt;Senha
+      &lt;/label&gt;
+    &lt;/div&gt;
+    &lt;button class=&quot;btn btn-outline-secondary&quot; type=&quot;button&quot; id=&quot;toggle-senha&quot;&gt;
+      &lt;i class=&quot;fas fa-eye-slash&quot; id=&quot;toggle-icon&quot;&gt;&lt;/i&gt;
+    &lt;/button&gt;
+  &lt;/div&gt;
+  {% for error in form.senha.errors %}
+    &lt;div class=&quot;text-danger small mt-1&quot;&gt;{{ error }}&lt;/div&gt;
+  {% endfor %}
+&lt;/div&gt;
+</code></pre>
+<h2 id="componentes-padronizados">🔧 Componentes Padronizados<a class="headerlink" href="#componentes-padronizados" title="Permanent link">&para;</a></h2>
+<h3 id="botao-principal">Botão Principal<a class="headerlink" href="#botao-principal" title="Permanent link">&para;</a></h3>
+<pre><code class="language-html">&lt;button type=&quot;submit&quot; class=&quot;btn w-100 fw-bold py-3&quot; 
+        style=&quot;background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+               border: none; 
+               color: white;&quot;&gt;
+  &lt;i class=&quot;fas fa-icon me-2&quot;&gt;&lt;/i&gt;Texto do Botão
+&lt;/button&gt;
+</code></pre>
+<h3 id="botao-secundario">Botão Secundário<a class="headerlink" href="#botao-secundario" title="Permanent link">&para;</a></h3>
+<pre><code class="language-html">&lt;a href=&quot;#&quot; class=&quot;btn btn-outline-secondary&quot;&gt;
+  &lt;i class=&quot;fas fa-arrow-left me-2&quot;&gt;&lt;/i&gt;Voltar
+&lt;/a&gt;
+</code></pre>
+<h3 id="alertas-informativos">Alertas Informativos<a class="headerlink" href="#alertas-informativos" title="Permanent link">&para;</a></h3>
+<pre><code class="language-html">&lt;div class=&quot;alert alert-info&quot;&gt;
+  &lt;i class=&quot;fas fa-info-circle me-2&quot;&gt;&lt;/i&gt;
+  Mensagem informativa
+&lt;/div&gt;
+</code></pre>
+<pre><code class="language-html">&lt;div class=&quot;alert alert-warning&quot;&gt;
+  &lt;i class=&quot;fas fa-exclamation-triangle me-2&quot;&gt;&lt;/i&gt;
+  &lt;strong&gt;Atenção:&lt;/strong&gt; Mensagem de aviso
+&lt;/div&gt;
+</code></pre>
+<h2 id="responsividade">📱 Responsividade<a class="headerlink" href="#responsividade" title="Permanent link">&para;</a></h2>
+<p>Todas as telas são responsivas:</p>
+<pre><code class="language-html">&lt;div class=&quot;col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4&quot;&gt;
+</code></pre>
+<p><strong>Breakpoints:</strong>
+- Mobile (xs): 100% largura
+- Tablet (sm): 83% largura
+- Desktop (md): 66% largura
+- Desktop HD (lg): 50% largura
+- Desktop Full HD (xl): 33% largura</p>
+<h2 id="paleta-de-cores">🎨 Paleta de Cores<a class="headerlink" href="#paleta-de-cores" title="Permanent link">&para;</a></h2>
+<h3 id="cores-principais">Cores Principais<a class="headerlink" href="#cores-principais" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Gradiente Primário:</strong> <code>#667eea</code> → <code>#764ba2</code></li>
+<li><strong>Fundo:</strong> <code>bg-light</code> (#f8f9fa)</li>
+<li><strong>Card:</strong> <code>white</code> com <code>shadow</code></li>
+<li><strong>Texto:</strong> <code>text-dark</code> (padrão)</li>
+<li><strong>Texto Muted:</strong> <code>text-muted</code> (#6c757d)</li>
+</ul>
+<h3 id="cores-de-estado">Cores de Estado<a class="headerlink" href="#cores-de-estado" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Sucesso:</strong> <code>text-success</code> / <code>btn-success</code></li>
+<li><strong>Erro:</strong> <code>text-danger</code> / <code>alert-danger</code></li>
+<li><strong>Aviso:</strong> <code>alert-warning</code></li>
+<li><strong>Info:</strong> <code>alert-info</code></li>
+</ul>
+<h2 id="checklist-de-implementacao">✅ Checklist de Implementação<a class="headerlink" href="#checklist-de-implementacao" title="Permanent link">&para;</a></h2>
+<p>Ao criar/editar telas de autenticação:</p>
+<ul>
+<li>[ ] Usar <code>form-floating</code> para campos de input</li>
+<li>[ ] Adicionar ícones nos labels</li>
+<li>[ ] Aplicar gradiente no header e botão principal</li>
+<li>[ ] Incluir card-footer com versão</li>
+<li>[ ] Adicionar alertas informativos quando necessário</li>
+<li>[ ] Testar responsividade em todos os breakpoints</li>
+<li>[ ] Validar acessibilidade (aria-labels, roles)</li>
+<li>[ ] Verificar autocomplete nos campos</li>
+</ul>
+<h2 id="beneficios">🚀 Benefícios<a class="headerlink" href="#beneficios" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>UX Melhorada:</strong> Placeholders não sobrepõem labels</li>
+<li><strong>Consistência:</strong> Todas as páginas seguem o mesmo padrão</li>
+<li><strong>Acessibilidade:</strong> Ícones + textos para melhor compreensão</li>
+<li><strong>Modernidade:</strong> Design atual com gradientes e animações</li>
+<li><strong>Responsividade:</strong> Funciona em todos os dispositivos</li>
+</ol>
+<hr />
+<p><strong>Data de Atualização:</strong> 24/10/2025<br />
+<strong>Versão:</strong> 2.0<br />
+<strong>Autor:</strong> PageUp Sistemas</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Construído com <a href="https://www.mkdocs.org/">MkDocs</a> usando <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provido por <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versões">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../javascripts/extra.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

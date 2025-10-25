@@ -1,34 +1,34 @@
-# Sistema de Tutoriais
+# Base de Conhecimento
 
-Acesse guias, manuais e documentações técnicas para utilizar o sistema de forma eficiente e resolver dúvidas comuns.
+Acesse artigos, guias e documentações técnicas para utilizar o sistema de forma eficiente e resolver dúvidas comuns.
 
 ## 🎯 Visão Geral
 
-O sistema de tutoriais oferece:
+A base de conhecimento oferece:
 - ✅ **Documentação técnica** completa
 - ✅ **Guias passo a passo** para todas as funcionalidades
 - ✅ **Sistema de feedback** para avaliar qualidade
 - ✅ **Comentários** para tirar dúvidas
 - ✅ **Exportação em PDF** para uso offline
 
-## 📚 Acessando Tutoriais
+## 📚 Acessando a Base de Conhecimento
 
-### Como Encontrar Tutoriais
+### Como Encontrar Artigos
 
 1. **Menu Principal**:
-   - Clique em **"Tutoriais"** no menu superior
+   - Clique em **"Base de Conhecimento"** no menu superior
    - URL: `http://192.168.1.86:5000/tutoriais`
 
 2. **Navegação**:
-   - **Lista completa**: Veja todos os tutoriais disponíveis
+   - **Lista completa**: Veja todos os artigos disponíveis
    - **Busca**: Use o campo de pesquisa para encontrar específicos
    - **Categorias**: Filtre por assuntos (em desenvolvimento)
 
-## 📖 Usando os Tutoriais
+## 📖 Usando os Artigos
 
-### Visualizando um Tutorial
+### Visualizando um Artigo
 
-1. **Clique no título** do tutorial desejado
+1. **Clique no título** do artigo desejado
 2. **Leia o conteúdo** completo com formatação rica
 3. **Siga as instruções** passo a passo
 4. **Use os recursos interativos**:
@@ -45,16 +45,16 @@ O sistema de tutoriais oferece:
 
 === "Como Avaliar"
 
-    1. **Role até o final** do tutorial
+    1. **Role até o final** do artigo
     2. **Encontre a seção "Feedback"**
     3. **Clique em "Útil"** 👍 ou "Não útil" 👎
     4. **Envio automático** e imediato
 
 === "Benefícios do Feedback"
 
-    - 📊 **Melhoria contínua** da qualidade dos tutoriais
+    - 📊 **Melhoria contínua** da qualidade dos artigos
     - 🎯 **Identificação** de conteúdo que precisa de ajustes
-    - 📈 **Métricas** para equipe de TI priorizar novos tutoriais
+    - 📈 **Métricas** para equipe de TI priorizar novos artigos
     - 💡 **Sugestões** para melhorias baseadas no uso real
 
 ## 💬 Sistema de Comentários

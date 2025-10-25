@@ -170,16 +170,6 @@
     
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
-        <!-- Visão Geral -->
-        <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" 
-           href="{{ url_for('main.index') }}"
-           aria-current="{% if request.endpoint == 'main.index' %}page{% else %}false{% endif %}">
-            <i class="fas fa-chart-pie me-2" aria-hidden="true"></i> 
-            <span>Visão Geral</span>
-          </a>
-        </li>
-        
         <!-- Dropdown Atividades -->
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.tasks', 'main.reminders'] %}active{% endif %}" 
@@ -189,14 +179,14 @@
            aria-expanded="false"
            aria-haspopup="true"
            id="atividadesDropdown">
-            <i class="fas fa-clipboard-list me-2" aria-hidden="true"></i> 
-            <span>Atividades</span>
+            <i class="fas fa-project-diagram me-2" aria-hidden="true"></i> 
+            <span>Atividades & Projetos</span>
           </a>
           <ul class="dropdown-menu py-2" aria-labelledby="atividadesDropdown" style="min-width: 220px;">
             <li class="mb-1">
-              <h2 class="visually-hidden">Menu de Atividades</h2>
+              <h2 class="visually-hidden">Menu de Atividades & Projetos</h2>
               <h6 class="dropdown-header px-3 py-2 mb-1">
-                <i class="fas fa-clipboard-list me-2 text-primary" aria-hidden="true"></i>Gerenciar Atividades
+                <i class="fas fa-project-diagram me-2 text-primary" aria-hidden="true"></i>Gestão de Trabalho
               </h6>
             </li>
             <li class="mb-1"><hr class="dropdown-divider mx-2 my-1" role="separator" aria-label="Separador de seção"></li>
@@ -204,14 +194,14 @@
               <a class="dropdown-item px-3 py-2 d-flex align-items-center {% if request.endpoint == 'main.tasks' %}active{% endif %}" 
                  href="{{ url_for('main.tasks') }}"
                  role="menuitem">
-                <i class="fas fa-tasks me-2 text-primary" aria-hidden="true"></i> Tarefas
+                <i class="fas fa-clipboard-check me-2 text-primary" aria-hidden="true"></i> Atividades & Projetos
               </a>
             </li>
             <li>
               <a class="dropdown-item px-3 py-2 d-flex align-items-center {% if request.endpoint == 'main.reminders' %}active{% endif %}" 
                  href="{{ url_for('main.reminders') }}"
                  role="menuitem">
-                <i class="fas fa-bell me-2 text-primary" aria-hidden="true"></i> Lembretes
+                <i class="fas fa-bell-concierge me-2 text-primary" aria-hidden="true"></i> Notificações Programadas
               </a>
             </li>
           </ul>
@@ -225,15 +215,15 @@
            data-bs-toggle="dropdown" 
            aria-expanded="false"
            aria-haspopup="true"
-           id="suporteDropdown">
-            <i class="fas fa-headset me-2" aria-hidden="true"></i> 
-            <span>Suporte</span>
+           id="ticketsDropdown">
+            <i class="fas fa-ticket-alt me-2" aria-hidden="true"></i> 
+            <span>Tickets & Suporte</span>
           </a>
-          <ul class="dropdown-menu py-2" aria-labelledby="suporteDropdown" style="min-width: 220px;">
+          <ul class="dropdown-menu py-2" aria-labelledby="ticketsDropdown" style="min-width: 220px;">
             <li class="mb-1">
-              <h2 class="visually-hidden">Menu de Suporte</h2>
+              <h2 class="visually-hidden">Menu de Tickets & Suporte</h2>
               <h6 class="dropdown-header px-3 py-2 mb-1">
-                <i class="fas fa-headset me-2 text-info" aria-hidden="true"></i>Central de Suporte
+                <i class="fas fa-life-ring me-2 text-info" aria-hidden="true"></i>Central de Atendimento
               </h6>
             </li>
             <li class="mb-1"><hr class="dropdown-divider mx-2 my-1" role="separator" aria-label="Separador de seção"></li>
@@ -241,14 +231,14 @@
               <a class="dropdown-item px-3 py-2 d-flex align-items-center" 
                  href="{{ url_for('main.abrir_chamado') }}"
                  role="menuitem">
-                <i class="fas fa-plus-circle me-2 text-info" aria-hidden="true"></i> Abrir Chamado
+                <i class="fas fa-plus-circle me-2 text-info" aria-hidden="true"></i> Abrir Ticket
               </a>
             </li>
             <li>
               <a class="dropdown-item px-3 py-2 d-flex align-items-center {% if request.endpoint == 'main.listar_chamados' %}active{% endif %}" 
                  href="{{ url_for('main.listar_chamados') }}"
                  role="menuitem">
-                <i class="fas fa-ticket-alt me-2 text-info" aria-hidden="true"></i> Meus Chamados
+                <i class="fas fa-inbox me-2 text-info" aria-hidden="true"></i> Meus Tickets
               </a>
             </li>
           </ul>
@@ -262,13 +252,13 @@
            data-bs-toggle="dropdown"
            aria-expanded="false"
            aria-haspopup="true"
-           id="equipamentosDropdown">
-            <i class="fas fa-laptop me-2" aria-hidden="true"></i>
-            <span>Equipamentos</span>
+           id="ativosDropdown">
+            <i class="fas fa-boxes me-2" aria-hidden="true"></i>
+            <span>Gestão de Ativos</span>
           </a>
-          <ul class="dropdown-menu py-2" aria-labelledby="equipamentosDropdown" style="min-width: 300px;">
+          <ul class="dropdown-menu py-2" aria-labelledby="ativosDropdown" style="min-width: 300px;">
             <li class="mb-1">
-              <h2 class="visually-hidden">Menu de Equipamentos</h2>
+              <h2 class="visually-hidden">Menu de Gestão de Ativos</h2>
             </li>
           
             <li>
@@ -276,7 +266,7 @@
                  href="{{ url_for('equipment_v2.index') }}"
                  role="menuitem">
                 <i class="fas fa-tachometer-alt me-2 text-primary" aria-hidden="true"></i> 
-                <strong>Dashboard de Equipamentos</strong>
+                <strong>Dashboard de Ativos</strong>
               </a>
             </li>
             
@@ -289,7 +279,7 @@
               <a class="dropdown-item {% if request.endpoint == 'equipment_v2.catalog' %}active{% endif %}"
                  href="{{ url_for('equipment_v2.catalog') }}"
                  role="menuitem">
-                <i class="fas fa-calendar-alt me-2 text-success" aria-hidden="true"></i> Solicitar Equipamento
+                <i class="fas fa-calendar-alt me-2 text-success" aria-hidden="true"></i> Solicitar Ativo
               </a>
             </li>
             <li>
@@ -316,7 +306,7 @@
               <a class="dropdown-item {% if request.endpoint == 'equipment_v2.admin_equipment' %}active{% endif %}"
                  href="{{ url_for('equipment_v2.admin_equipment') }}"
                  role="menuitem">
-                <i class="fas fa-chart-line me-2 text-warning" aria-hidden="true"></i> Gerenciar Equipamentos
+                <i class="fas fa-server me-2 text-warning" aria-hidden="true"></i> Gerenciar Ativos
               </a>
             </li>
             <li>
@@ -351,19 +341,19 @@
            data-bs-toggle="dropdown"
            aria-expanded="false"
            aria-haspopup="true"
-           id="recursosDropdown">
-            <i class="fas fa-cube me-2" aria-hidden="true"></i>
-            <span>Recursos</span>
+           id="conhecimentoDropdown">
+            <i class="fas fa-graduation-cap me-2" aria-hidden="true"></i>
+            <span>Conhecimento</span>
           </a>
-          <ul class="dropdown-menu" aria-labelledby="recursosDropdown">
-            <li><h2 class="visually-hidden">Menu de Recursos</h2></li>
-            <li><h6 class="dropdown-header"><i class="fas fa-cube me-2 text-secondary" aria-hidden="true"></i>Recursos e Conhecimento</h6></li>
+          <ul class="dropdown-menu" aria-labelledby="conhecimentoDropdown">
+            <li><h2 class="visually-hidden">Menu de Conhecimento</h2></li>
+            <li><h6 class="dropdown-header"><i class="fas fa-book-reader me-2 text-secondary" aria-hidden="true"></i>Centro de Aprendizado</h6></li>
             <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>
             <li>
               <a class="dropdown-item {% if request.endpoint == 'main.listar_tutoriais' %}active{% endif %}"
                  href="{{ url_for('main.listar_tutoriais') }}"
                  role="menuitem">
-                <i class="fas fa-book me-2 text-secondary" aria-hidden="true"></i> Tutoriais
+                <i class="fas fa-database me-2 text-secondary" aria-hidden="true"></i> Base de Conhecimento
               </a>
             </li>
           </ul>
@@ -425,13 +415,13 @@
         </li>
         {% endif %}
         
-        <!-- Análises e SLA -->
+        <!-- Business Intelligence -->
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}"
            href="{{ url_for('main.dashboard') }}"
            aria-current="{% if request.endpoint == 'main.dashboard' %}page{% else %}false{% endif %}">
             <i class="fas fa-chart-bar me-2" aria-hidden="true"></i>
-            <span>Análises e SLA</span>
+            <span>Business Intelligence</span>
           </a>
         </li>
 
@@ -604,7 +594,7 @@
               <a class="dropdown-item" 
                  href="{{ url_for('main.index') }}"
                  role="menuitem">
-                <i class="fas fa-chart-pie me-2" aria-hidden="true"></i> Visão Geral
+                <i class="fas fa-th-large me-2" aria-hidden="true"></i> Meu Workspace
               </a>
             </li>
             {% if current_user.is_admin %}
@@ -612,7 +602,7 @@
               <a class="dropdown-item"
                  href="{{ url_for('main.dashboard') }}"
                  role="menuitem">
-                <i class="fas fa-chart-bar me-2" aria-hidden="true"></i> Análises e SLA
+                <i class="fas fa-chart-line me-2" aria-hidden="true"></i> Business Intelligence
               </a>
             </li>
             <li><hr class="dropdown-divider" role="separator" aria-label="Separador de seção"></li>

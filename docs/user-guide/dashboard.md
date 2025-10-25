@@ -1,53 +1,53 @@
-# Dashboard e Relatórios
+# Business Intelligence
 
-O dashboard oferece uma visão consolidada de todas as atividades do sistema com métricas em tempo real e ferramentas avançadas de análise.
+O painel de Business Intelligence oferece uma visão estratégica consolidada de todas as atividades do sistema com métricas em tempo real e ferramentas avançadas de análise.
 
-## 🎯 Visão Geral
+## Visão Geral
 
-O dashboard é o centro de controle do sistema, fornecendo:
-- ✅ **Métricas em tempo real** de todas as atividades
-- ✅ **Gráficos interativos** para análise visual
-- ✅ **Filtros avançados** para dados específicos
-- ✅ **Exportação profissional** em Excel e PDF
-- ✅ **Alertas visuais** para situações críticas
+O Business Intelligence é o centro de controle estratégico do sistema, fornecendo:
+- **Métricas em tempo real** de todas as atividades
+- **Gráficos interativos** para análise visual
+- **Filtros avançados** para dados específicos
+- **Exportação profissional** em Excel e PDF
+- **Alertas visuais** para situações críticas
 
-## 📊 Acessando o Dashboard
+## Acessando o Business Intelligence
 
 ### Como Acessar
 
 1. **Menu Principal**:
-   - Clique em **"Dashboard"** no menu superior
+   - Clique em **"Business Intelligence"** no menu superior
    - URL: `http://192.168.1.86:5000/dashboard`
 
-2. **Página Inicial**:
-   - Dashboard também é exibido na página inicial após login
+2. **Análises Estratégicas**:
+   - Painel BI disponibiliza métricas de desempenho e SLA
 
-## 📈 Métricas Disponíveis
+## Métricas Disponíveis
 
 ### Contadores em Tempo Real
 
 <div class="grid cards" markdown>
 
 -   :material-bell-ring:
-    **Lembretes Pendentes**
+    **Notificações Programadas**
 
     ---
 
-    Lembretes ativos que precisam de atenção hoje
+    Alertas automáticos que precisam de atenção hoje
 
 -   :material-clipboard-list:
-    **Tarefas Ativas**
+    **Atividades & Projetos**
 
     ---
 
-    Tarefas pendentes e em andamento
+    Workflows pendentes e em andamento
 
 -   :material-ticket-alt:
-    **Chamados Abertos**
+    **Tickets Abertos**
 
     ---
 
-    Chamados aguardando atendimento ou resolução
+    Tickets aguardando atendimento ou resolução
 
 -   :material-laptop:
     **Equipamentos Solicitados**

@@ -137,6 +137,8 @@ def authenticated_client(client, admin_user):
     with client.session_transaction() as sess:
         sess['user_id'] = admin_user.id
         sess['_fresh'] = True
+        sess['is_admin'] = True
+        sess['is_ti'] = True
     return client
 
 
@@ -146,6 +148,19 @@ def user_authenticated_client(client, regular_user):
     with client.session_transaction() as sess:
         sess['user_id'] = regular_user.id
         sess['_fresh'] = True
+        sess['is_admin'] = False
+        sess['is_ti'] = False
+    return client
+
+
+@pytest.fixture
+def ti_authenticated_client(client, ti_user):
+    """Cliente autenticado como usuário da equipe de TI"""
+    with client.session_transaction() as sess:
+        sess['user_id'] = ti_user.id
+        sess['_fresh'] = True
+        sess['is_admin'] = False
+        sess['is_ti'] = True
     return client
 
 

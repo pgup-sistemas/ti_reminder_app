@@ -1,15 +1,38 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard RFID - Sistema TI OSN{% endblock %}
+{% block title %}Controle RFID | TI OSN System{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb breadcrumb-sm mb-1">
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('main.index') }}" class="d-inline-flex align-items-center gap-2">
+                    <i class="fas fa-th-large text-primary"></i>
+                    <span>Meu Workspace</span>
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('equipment_v2.index') }}" class="d-inline-flex align-items-center gap-2">
+                    <i class="fas fa-boxes text-primary"></i>
+                    <span>Gestão de Ativos</span>
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <span class="d-inline-flex align-items-center gap-2">
+                    <i class="fas fa-wifi text-primary"></i>
+                    <span>Controle RFID</span>
+                </span>
+            </li>
+        </ol>
+    </nav>
+    <div class="border-bottom mb-4" style="border-color: var(--bs-gray-200) !important;"></div>
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-gradient-success text-white">
                     <h3 class="card-title mb-0">
-                        <i class="fas fa-wifi"></i> Dashboard RFID - Rastreamento de Equipamentos
+                        <i class="fas fa-wifi"></i> Controle RFID - Rastreamento Inteligente
                     </h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-light btn-sm" onclick="location.href='{{ url_for('main.bulk_assign_rfid') }}'">

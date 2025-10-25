@@ -41,6 +41,27 @@ def admin_required(f):
     return decorated_function
 
 
+def admin_or_ti_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not (session.get("is_admin") or session.get("is_ti")):
+            flash_error("Acesso restrito a administradores e equipe de TI.")
+            return redirect(url_for("main.index"))
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
+def admin_or_ti_required_json(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not (session.get("is_admin") or session.get("is_ti")):
+            return jsonify({'error': 'Sem permissão'}), 403
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
 bp = Blueprint("main", __name__)
 
 
@@ -2892,7 +2913,7 @@ def abrir_chamado():
     return render_template(
         "abrir_chamado.html",
         form=form,
-        title="Abrir Novo Chamado",
+        title="Abrir Novo Ticket",
         setor_usuario=setor_usuario,
     )
 
@@ -3580,6 +3601,7 @@ def exportar_tutorial_pdf(tutorial_id):
 
 @bp.route("/rfid/scan", methods=["POST"])
 @login_required
+@admin_or_ti_required_json
 def rfid_scan():
     """Endpoint para leitura RFID - chamado pelos leitores"""
     data = request.get_json()
@@ -3607,7 +3629,7 @@ def rfid_scan():
 
 @bp.route("/rfid/simulate/<rfid_tag>/<reader_id>", methods=["POST"])
 @login_required
-@admin_required
+@admin_or_ti_required
 def simulate_rfid_scan(rfid_tag, reader_id):
     """Simular leitura RFID para testes (apenas admin)"""
     result = RFIDService.simulate_rfid_scan(rfid_tag, reader_id)
@@ -3622,7 +3644,7 @@ def simulate_rfid_scan(rfid_tag, reader_id):
 
 @bp.route("/rfid/assign/<int:equipment_id>", methods=["POST"])
 @login_required
-@admin_required
+@admin_or_ti_required
 def assign_rfid_tag(equipment_id):
     """Atribuir tag RFID a um equipamento"""
     rfid_tag = request.form.get("rfid_tag", "").strip()
@@ -3643,7 +3665,7 @@ def assign_rfid_tag(equipment_id):
 
 @bp.route("/rfid/remove/<int:equipment_id>", methods=["POST"])
 @login_required
-@admin_required
+@admin_or_ti_required
 def remove_rfid_tag(equipment_id):
     """Remover tag RFID de um equipamento"""
     result = RFIDService.remove_rfid_tag(equipment_id)
@@ -3658,6 +3680,7 @@ def remove_rfid_tag(equipment_id):
 
 @bp.route("/rfid/location/<int:equipment_id>")
 @login_required
+@admin_or_ti_required_json
 def get_equipment_location(equipment_id):
     """Obter localização atual de um equipamento via RFID"""
     result = RFIDService.get_equipment_location(equipment_id)
@@ -3666,7 +3689,7 @@ def get_equipment_location(equipment_id):
 
 @bp.route("/rfid/dashboard")
 @login_required
-@admin_required
+@admin_or_ti_required
 def rfid_dashboard():
     """Dashboard de monitoramento RFID"""
     # Obter equipamentos com RFID ativo
@@ -3698,7 +3721,7 @@ def rfid_dashboard():
 
 @bp.route("/rfid/bulk-assign", methods=["GET", "POST"])
 @login_required
-@admin_required
+@admin_or_ti_required
 def bulk_assign_rfid():
     """Atribuição em lote de tags RFID"""
     if request.method == "POST":
@@ -3737,6 +3760,7 @@ def bulk_assign_rfid():
 
 @bp.route("/api/rfid/status")
 @login_required
+@admin_or_ti_required_json
 def rfid_status_api():
     """API para status RFID em tempo real"""
     reader_status = RFIDService.get_reader_status()
@@ -3803,7 +3827,7 @@ def satisfaction_survey(chamado_id):
 
 @bp.route("/satisfaction/dashboard")
 @login_required
-@admin_required
+@admin_or_ti_required
 def satisfaction_dashboard():
     """Dashboard de métricas de satisfação"""
     # Estatísticas gerais
@@ -3831,7 +3855,7 @@ def satisfaction_dashboard():
 
 @bp.route("/satisfaction/send-survey/<int:chamado_id>", methods=["POST"])
 @login_required
-@admin_required
+@admin_or_ti_required
 def send_satisfaction_survey(chamado_id):
     """Enviar pesquisa de satisfação manualmente"""
     result = SatisfactionService.send_satisfaction_survey(chamado_id)
@@ -3865,6 +3889,7 @@ def satisfaction_stats_api():
 
 @bp.route("/certifications/dashboard")
 @login_required
+@admin_or_ti_required
 def certifications_dashboard():
     """Dashboard de certificações e leaderboard"""
     # Obter dados para o template com tratamento de erro
@@ -3942,6 +3967,7 @@ def award_certification(user_id):
 
 @bp.route("/api/certifications/leaderboard")
 @login_required
+@admin_or_ti_required_json
 def certifications_leaderboard_api():
     """API para leaderboard em tempo real"""
     leaderboard = CertificationService.get_leaderboard(10)
@@ -3958,7 +3984,7 @@ def certifications_leaderboard_api():
 
 @bp.route("/performance/dashboard")
 @login_required
-@admin_required
+@admin_or_ti_required
 def performance_dashboard():
     """Dashboard de monitoramento de performance"""
     # Métricas do sistema
@@ -3980,7 +4006,7 @@ def performance_dashboard():
 
 @bp.route("/performance/optimize")
 @login_required
-@admin_required
+@admin_or_ti_required
 def optimize_performance():
     """Executa otimizações de performance"""
     results = {}
@@ -4004,7 +4030,7 @@ def optimize_performance():
 
 @bp.route("/api/performance/metrics")
 @login_required
-@admin_required
+@admin_or_ti_required_json
 def performance_metrics_api():
     """API para métricas de performance em tempo real"""
     metrics = PerformanceService.get_performance_metrics()
@@ -4019,7 +4045,7 @@ def performance_metrics_api():
 
 @bp.route("/performance/report")
 @login_required
-@admin_required
+@admin_or_ti_required
 def performance_report():
     """Gera relatório de performance em PDF"""
     from flask import make_response
@@ -4264,13 +4290,10 @@ def api_notifications():
 
 @bp.route("/api/analytics/dashboard-kpis")
 @login_required
+@admin_or_ti_required_json
 def api_dashboard_kpis():
     """Retorna KPIs principais para o dashboard"""
     from .services.analytics.analytics_service import AnalyticsService
-    
-    # Apenas admin e TI podem acessar
-    if not session.get("is_admin") and not session.get("is_ti"):
-        return jsonify({'error': 'Sem permissão'}), 403
     
     try:
         kpis = AnalyticsService.get_dashboard_kpis()
@@ -4282,6 +4305,7 @@ def api_dashboard_kpis():
 
 @bp.route("/api/analytics/chamados-periodo")
 @login_required
+@admin_or_ti_required_json
 def api_chamados_periodo():
     """Retorna chamados agrupados por período"""
     from .services.analytics.analytics_service import AnalyticsService
@@ -4316,6 +4340,7 @@ def api_chamados_periodo():
 
 @bp.route("/api/analytics/chamados-prioridade")
 @login_required
+@admin_or_ti_required_json
 def api_chamados_prioridade():
     """Retorna distribuição de chamados por prioridade"""
     from .services.analytics.analytics_service import AnalyticsService
@@ -4343,6 +4368,7 @@ def api_chamados_prioridade():
 
 @bp.route("/api/analytics/performance-tecnico")
 @login_required
+@admin_or_ti_required_json
 def api_performance_tecnico():
     """Retorna performance de cada técnico"""
     from .services.analytics.analytics_service import AnalyticsService
@@ -4375,6 +4401,7 @@ def api_performance_tecnico():
 
 @bp.route("/api/analytics/chamados-setor")
 @login_required
+@admin_or_ti_required_json
 def api_chamados_setor():
     """Retorna distribuição de chamados por setor"""
     from .services.analytics.analytics_service import AnalyticsService
@@ -4402,6 +4429,7 @@ def api_chamados_setor():
 
 @bp.route("/api/analytics/tutoriais-categoria")
 @login_required
+@admin_or_ti_required_json
 def api_tutoriais_categoria():
     """Retorna distribuição de tutoriais por categoria"""
     from .services.analytics.analytics_service import AnalyticsService
@@ -4424,6 +4452,7 @@ def api_tutoriais_categoria():
 
 @bp.route("/api/analytics/tutoriais-mais-visualizados")
 @login_required
+@admin_or_ti_required_json
 def api_tutoriais_mais_visualizados():
     """Retorna tutoriais mais visualizados"""
     from .services.analytics.analytics_service import AnalyticsService
@@ -4447,6 +4476,7 @@ def api_tutoriais_mais_visualizados():
 
 @bp.route("/api/analytics/tasks-periodo")
 @login_required
+@admin_or_ti_required_json
 def api_tasks_periodo():
     """Retorna tarefas agrupadas por período"""
     from .services.analytics.analytics_service import AnalyticsService
@@ -4484,11 +4514,7 @@ def api_tasks_periodo():
 
 @bp.route("/analytics")
 @login_required
+@admin_or_ti_required
 def analytics_dashboard():
     """Página do dashboard de analytics"""
-    # Apenas admin e TI podem acessar
-    if not session.get("is_admin") and not session.get("is_ti"):
-        flash_error("Acesso restrito a administradores e equipe de TI.")
-        return redirect(url_for("main.index"))
-    
     return render_template("analytics/dashboard.html")

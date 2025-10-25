@@ -34,12 +34,12 @@
           <a href="../.." class="icon icon-home"> TI OSN System - Documentação Oficial
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" title="Digite o termo a ser buscado aqui" />
   </form>
 </div>
       </div>
 
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
               <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../..">Início</a>
                 </li>
@@ -48,27 +48,31 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../overview/">Visão Geral</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../reminders/">Lembretes</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../security/">Segurança</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../chamados/">Chamados</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../tasks/">Atividades & Projetos</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../tasks/">Tarefas</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../reminders/">Notificações Programadas</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../tutorials/">Tutoriais</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../chamados/">Tickets & Suporte</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../equipment/">Gestão de Ativos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tutorials/">Base de Conhecimento</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../equipment/">Equipamentos</a>
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="./">Dashboard</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#visao-geral">🎯 Visão Geral</a>
+    <li class="toctree-l2"><a class="reference internal" href="#visao-geral">Visão Geral</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#acessando-o-dashboard">📊 Acessando o Dashboard</a>
+    <li class="toctree-l2"><a class="reference internal" href="#acessando-o-business-intelligence">Acessando o Business Intelligence</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#como-acessar">Como Acessar</a>
     </li>
         </ul>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#metricas-disponiveis">📈 Métricas Disponíveis</a>
+    <li class="toctree-l2"><a class="reference internal" href="#metricas-disponiveis">Métricas Disponíveis</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#contadores-em-tempo-real">Contadores em Tempo Real</a>
     </li>
@@ -169,6 +173,8 @@
               </ul>
               <p class="caption"><span class="caption-text">Guia do Administrador</span></p>
               <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/security-admin/">Gerenciamento de Segurança</a>
+                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/equipment-admin/">Equipamentos</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/performance-admin/">Performance</a>
@@ -180,12 +186,17 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/certifications-admin/">Certificações</a>
                   </li>
               </ul>
+              <p class="caption"><span class="caption-text">Guia do Desenvolvedor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev-guide/security-implementation/">Implementação de Segurança</a>
+                  </li>
+              </ul>
       </div>
     </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+      <nav class="wy-nav-top" role="navigation" aria-label="Menu de navegação em dispositivo móvel">
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../..">TI OSN System - Documentação Oficial</a>
         
@@ -193,7 +204,7 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+    <li><a href="../.." class="icon icon-home" aria-label="Documentos"></a></li>
           <li class="breadcrumb-item">Guia do Usuário</li>
       <li class="breadcrumb-item active">Dashboard</li>
     <li class="wy-breadcrumbs-aside">
@@ -204,52 +215,52 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="dashboard-e-relatorios">Dashboard e Relatórios<a class="headerlink" href="#dashboard-e-relatorios" title="Permanent link">&para;</a></h1>
-<p>O dashboard oferece uma visão consolidada de todas as atividades do sistema com métricas em tempo real e ferramentas avançadas de análise.</p>
-<h2 id="visao-geral">🎯 Visão Geral<a class="headerlink" href="#visao-geral" title="Permanent link">&para;</a></h2>
-<p>O dashboard é o centro de controle do sistema, fornecendo:
-- ✅ <strong>Métricas em tempo real</strong> de todas as atividades
-- ✅ <strong>Gráficos interativos</strong> para análise visual
-- ✅ <strong>Filtros avançados</strong> para dados específicos
-- ✅ <strong>Exportação profissional</strong> em Excel e PDF
-- ✅ <strong>Alertas visuais</strong> para situações críticas</p>
-<h2 id="acessando-o-dashboard">📊 Acessando o Dashboard<a class="headerlink" href="#acessando-o-dashboard" title="Permanent link">&para;</a></h2>
+                <h1 id="business-intelligence">Business Intelligence<a class="headerlink" href="#business-intelligence" title="Permanent link">&para;</a></h1>
+<p>O painel de Business Intelligence oferece uma visão estratégica consolidada de todas as atividades do sistema com métricas em tempo real e ferramentas avançadas de análise.</p>
+<h2 id="visao-geral">Visão Geral<a class="headerlink" href="#visao-geral" title="Permanent link">&para;</a></h2>
+<p>O Business Intelligence é o centro de controle estratégico do sistema, fornecendo:
+- <strong>Métricas em tempo real</strong> de todas as atividades
+- <strong>Gráficos interativos</strong> para análise visual
+- <strong>Filtros avançados</strong> para dados específicos
+- <strong>Exportação profissional</strong> em Excel e PDF
+- <strong>Alertas visuais</strong> para situações críticas</p>
+<h2 id="acessando-o-business-intelligence">Acessando o Business Intelligence<a class="headerlink" href="#acessando-o-business-intelligence" title="Permanent link">&para;</a></h2>
 <h3 id="como-acessar">Como Acessar<a class="headerlink" href="#como-acessar" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>Menu Principal</strong>:</li>
-<li>Clique em <strong>"Dashboard"</strong> no menu superior</li>
+<li>Clique em <strong>"Business Intelligence"</strong> no menu superior</li>
 <li>
 <p>URL: <code>http://192.168.1.86:5000/dashboard</code></p>
 </li>
 <li>
-<p><strong>Página Inicial</strong>:</p>
+<p><strong>Análises Estratégicas</strong>:</p>
 </li>
-<li>Dashboard também é exibido na página inicial após login</li>
+<li>Painel BI disponibiliza métricas de desempenho e SLA</li>
 </ol>
-<h2 id="metricas-disponiveis">📈 Métricas Disponíveis<a class="headerlink" href="#metricas-disponiveis" title="Permanent link">&para;</a></h2>
+<h2 id="metricas-disponiveis">Métricas Disponíveis<a class="headerlink" href="#metricas-disponiveis" title="Permanent link">&para;</a></h2>
 <h3 id="contadores-em-tempo-real">Contadores em Tempo Real<a class="headerlink" href="#contadores-em-tempo-real" title="Permanent link">&para;</a></h3>
 <div class="grid cards" markdown>
 
 -   :material-bell-ring:
-    **Lembretes Pendentes**
+    **Notificações Programadas**
 
     ---
 
-    Lembretes ativos que precisam de atenção hoje
+    Alertas automáticos que precisam de atenção hoje
 
 -   :material-clipboard-list:
-    **Tarefas Ativas**
+    **Atividades & Projetos**
 
     ---
 
-    Tarefas pendentes e em andamento
+    Workflows pendentes e em andamento
 
 -   :material-ticket-alt:
-    **Chamados Abertos**
+    **Tickets Abertos**
 
     ---
 
-    Chamados aguardando atendimento ou resolução
+    Tickets aguardando atendimento ou resolução
 
 -   :material-laptop:
     **Equipamentos Solicitados**
@@ -458,9 +469,9 @@
               
             </div>
           </div><footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../equipment/" class="btn btn-neutral float-left" title="Equipamentos"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../rfid/" class="btn btn-neutral float-right" title="Sistema RFID">Next <span class="icon icon-circle-arrow-right"></span></a>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Navegação no rodapé">
+        <a href="../equipment/" class="btn btn-neutral float-left" title="Equipamentos"><span class="icon icon-circle-arrow-left"></span> Anterior</a>
+        <a href="../rfid/" class="btn btn-neutral float-right" title="Sistema RFID">Seguinte <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -469,7 +480,7 @@
     <!-- Copyright etc -->
   </div>
 
-  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Construído com <a href="https://www.mkdocs.org/">MkDocs</a> usando <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provido por <a href="https://readthedocs.org">Read the Docs</a>.
 </footer>
           
         </div>
@@ -479,14 +490,14 @@
 
   </div>
 
-  <div class="rst-versions" role="note" aria-label="Versions">
+  <div class="rst-versions" role="note" aria-label="Versões">
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../equipment/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../equipment/" style="color: #fcfcfc">&laquo; Anterior</a></span>
     
     
-      <span><a href="../rfid/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../rfid/" style="color: #fcfcfc">Seguinte &raquo;</a></span>
     
   </span>
 </div>

@@ -34,12 +34,12 @@
           <a href="../.." class="icon icon-home"> TI OSN System - Documentação Oficial
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Buscar documentos" aria-label="Buscar documentos" title="Digite o termo a ser buscado aqui" />
   </form>
 </div>
       </div>
 
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
               <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../..">Início</a>
                 </li>
@@ -48,19 +48,23 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../overview/">Visão Geral</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../reminders/">Lembretes</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../security/">Segurança</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../chamados/">Chamados</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../tasks/">Atividades & Projetos</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../tasks/">Tarefas</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../reminders/">Notificações Programadas</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../tutorials/">Tutoriais</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../chamados/">Tickets & Suporte</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="./">Gestão de Ativos</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tutorials/">Base de Conhecimento</a>
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="./">Equipamentos</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#visao-geral">🎯 Visão Geral</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#catalogo-de-equipamentos">🛒 Catálogo de Equipamentos</a>
+    <li class="toctree-l2"><a class="reference internal" href="#catalogo-de-ativos">🛒 Catálogo de Ativos</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#navegando-pelo-inventario">Navegando pelo Inventário</a>
     </li>
@@ -169,6 +173,8 @@
               </ul>
               <p class="caption"><span class="caption-text">Guia do Administrador</span></p>
               <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/security-admin/">Gerenciamento de Segurança</a>
+                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/equipment-admin/">Equipamentos</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/performance-admin/">Performance</a>
@@ -180,12 +186,17 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../admin-guide/certifications-admin/">Certificações</a>
                   </li>
               </ul>
+              <p class="caption"><span class="caption-text">Guia do Desenvolvedor</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev-guide/security-implementation/">Implementação de Segurança</a>
+                  </li>
+              </ul>
       </div>
     </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+      <nav class="wy-nav-top" role="navigation" aria-label="Menu de navegação em dispositivo móvel">
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../..">TI OSN System - Documentação Oficial</a>
         
@@ -193,7 +204,7 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+    <li><a href="../.." class="icon icon-home" aria-label="Documentos"></a></li>
           <li class="breadcrumb-item">Guia do Usuário</li>
       <li class="breadcrumb-item active">Equipamentos</li>
     <li class="wy-breadcrumbs-aside">
@@ -204,26 +215,26 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="gestao-de-equipamentos">Gestão de Equipamentos<a class="headerlink" href="#gestao-de-equipamentos" title="Permanent link">&para;</a></h1>
+                <h1 id="gestao-de-ativos">Gestão de Ativos<a class="headerlink" href="#gestao-de-ativos" title="Permanent link">&para;</a></h1>
 <p>Sistema profissional de gestão de ativos de TI com inventário central, reservas automáticas e controle completo do ciclo de vida.</p>
 <h2 id="visao-geral">🎯 Visão Geral<a class="headerlink" href="#visao-geral" title="Permanent link">&para;</a></h2>
-<p>O novo sistema de equipamentos oferece controle profissional do parque de TI:
+<p>O sistema de gestão de ativos oferece controle profissional do parque de TI:
 - ✅ <strong>Inventário Central</strong> com catálogo completo
 - ✅ <strong>Sistema de Reservas</strong> com calendário de disponibilidade
 - ✅ <strong>Aprovação Automática</strong> baseada em regras de negócio
 - ✅ <strong>Controle de SLA</strong> para empréstimos
 - ✅ <strong>Alertas Inteligentes</strong> de manutenção e devolução
 - ✅ <strong>API REST</strong> para integrações</p>
-<h2 id="catalogo-de-equipamentos">🛒 Catálogo de Equipamentos<a class="headerlink" href="#catalogo-de-equipamentos" title="Permanent link">&para;</a></h2>
+<h2 id="catalogo-de-ativos">🛒 Catálogo de Ativos<a class="headerlink" href="#catalogo-de-ativos" title="Permanent link">&para;</a></h2>
 <h3 id="navegando-pelo-inventario">Navegando pelo Inventário<a class="headerlink" href="#navegando-pelo-inventario" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>Acesse o catálogo</strong>:</li>
-<li>Menu principal → <strong>"Equipamentos"</strong> → <strong>"Catálogo"</strong></li>
+<li>Menu principal → <strong>"Gestão de Ativos"</strong> → <strong>"Catálogo"</strong></li>
 <li>
 <p>URL: <code>http://192.168.1.86:5000/equipment/catalog</code></p>
 </li>
 <li>
-<p><strong>Explore equipamentos disponíveis</strong>:</p>
+<p><strong>Explore ativos disponíveis</strong>:</p>
 </li>
 <li><strong>Filtros inteligentes</strong>: Por categoria, marca, localização</li>
 <li><strong>Busca avançada</strong>: Nome, patrimônio, especificações</li>
@@ -234,27 +245,28 @@
 <p><strong>Verifique disponibilidade</strong>:</p>
 </li>
 <li><strong>Calendário visual</strong> de reservas existentes</li>
-<li><strong>Verificação automática</strong> de conflitos</li>
+<li><strong>Sistema verifica</strong> disponibilidade automaticamente</li>
 <li><strong>Datas sugeridas</strong> de disponibilidade</li>
 </ol>
 <h2 id="sistema-de-reservas">📅 Sistema de Reservas<a class="headerlink" href="#sistema-de-reservas" title="Permanent link">&para;</a></h2>
 <h3 id="fazendo-uma-reserva">Fazendo uma Reserva<a class="headerlink" href="#fazendo-uma-reserva" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Selecione equipamento</strong> no catálogo</li>
+<li><strong>Selecione ativo</strong> no catálogo</li>
 <li><strong>Escolha período</strong> de empréstimo</li>
 <li><strong>Sistema verifica</strong> disponibilidade automaticamente</li>
 <li><strong>Confirmação instantânea</strong> (alguns equipamentos)</li>
 </ol>
 <h3 id="regras-de-aprovacao">Regras de Aprovação<a class="headerlink" href="#regras-de-aprovacao" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>🟢 Auto-aprovado</strong>: Equipamentos de baixo risco, empréstimos curtos</li>
-<li><strong>🟡 Pendente</strong>: Equipamentos de alto valor, períodos longos</li>
+<li><strong>🟢 Auto-aprovado</strong>: Ativos de baixo risco, empréstimos curtos</li>
+<li><strong>🟡 Pendente</strong>: Ativos de alto valor, períodos longos</li>
 <li><strong>🔴 Rejeitado</strong>: Violação de políticas ou restrições</li>
 </ul>
 <h3 id="beneficios-do-sistema">Benefícios do Sistema<a class="headerlink" href="#beneficios-do-sistema" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>⏰ Reserva 24/7</strong> sem depender de aprovação manual</li>
 <li><strong>📊 Transparência</strong> total na disponibilidade</li>
+<li><strong>⏱️ Processamento rápido</strong> de solicitações simples</li>
 <li><strong>⚡ Processamento rápido</strong> de solicitações simples</li>
 <li><strong>🔄 Auto-renovação</strong> quando disponível</li>
 </ul>
@@ -267,7 +279,7 @@
 
     ---
 
-    Equipamento reservado no sistema, aguardando aprovação automática
+    Ativo reservado no sistema, aguardando aprovação automática
 
 -   :material-clock-outline:
     **Pendente**
@@ -545,9 +557,9 @@ GET  /api/v1/stats              # Estatísticas
               
             </div>
           </div><footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../tutorials/" class="btn btn-neutral float-left" title="Tutoriais"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../dashboard/" class="btn btn-neutral float-right" title="Dashboard">Next <span class="icon icon-circle-arrow-right"></span></a>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Navegação no rodapé">
+        <a href="../tutorials/" class="btn btn-neutral float-left" title="Base de Conhecimento"><span class="icon icon-circle-arrow-left"></span> Anterior</a>
+        <a href="../dashboard/" class="btn btn-neutral float-right" title="Dashboard">Seguinte <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -556,7 +568,7 @@ GET  /api/v1/stats              # Estatísticas
     <!-- Copyright etc -->
   </div>
 
-  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Construído com <a href="https://www.mkdocs.org/">MkDocs</a> usando <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provido por <a href="https://readthedocs.org">Read the Docs</a>.
 </footer>
           
         </div>
@@ -566,14 +578,14 @@ GET  /api/v1/stats              # Estatísticas
 
   </div>
 
-  <div class="rst-versions" role="note" aria-label="Versions">
+  <div class="rst-versions" role="note" aria-label="Versões">
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../tutorials/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../tutorials/" style="color: #fcfcfc">&laquo; Anterior</a></span>
     
     
-      <span><a href="../dashboard/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../dashboard/" style="color: #fcfcfc">Seguinte &raquo;</a></span>
     
   </span>
 </div>

@@ -1,20 +1,20 @@
-# Gestão de Lembretes
+# Notificações Programadas
 
-Os lembretes são ferramentas poderosas para organizar tarefas recorrentes e garantir que nenhuma atividade importante seja esquecida.
+As notificações programadas são ferramentas profissionais para gerenciar alertas recorrentes e garantir que nenhuma atividade importante seja esquecida.
 
 ## 🎯 Visão Geral
 
-O sistema de lembretes permite criar tarefas recorrentes automáticas que se repetem em intervalos definidos, com controle inteligente de status e notificações automáticas.
+O sistema de notificações programadas permite criar alertas automáticos que se repetem em intervalos definidos, com controle inteligente de status e notificações em tempo real.
 
-## 📝 Criando um Lembrete
+## 📝 Criando uma Notificação Programada
 
 ### Passo a Passo
 
 1. **Acesse o módulo**:
-   - Clique em **"Lembretes"** no menu principal
+   - Clique em **"Notificações Programadas"** no menu principal
    - Ou acesse diretamente: `http://192.168.1.86:5000/reminders`
 
-2. **Clique em "Novo Lembrete"**:
+2. **Clique em "Nova Notificação"**:
    - Botão localizado no canto superior direito
 
 3. **Preencha o formulário**:
@@ -23,7 +23,7 @@ O sistema de lembretes permite criar tarefas recorrentes automáticas que se rep
 
         | Campo | Descrição | Exemplo |
         |-------|-----------|---------|
-        | **Nome** | Descrição clara do lembrete | "Backup mensal do servidor" |
+        | **Nome** | Descrição clara da notificação | "Backup mensal do servidor" |
         | **Tipo** | Categoria para organização | "Manutenção", "Backup", "Auditoria" |
         | **Vencimento** | Data limite para execução | Selecione no calendário |
         | **Responsável** | Quem deve executar a tarefa | "João Silva", "Equipe TI" |
@@ -37,7 +37,7 @@ O sistema de lembretes permite criar tarefas recorrentes automáticas que se rep
         | **Pausar até** | Data para pausar temporariamente | Data específica |
         | **Data de fim** | Quando a recorrência deve parar | Última ocorrência |
 
-4. **Clique em "Salvar"** para criar o lembrete
+4. **Clique em "Salvar"** para criar a notificação
 
 ## 🔄 Recorrência Automática
 
@@ -52,13 +52,13 @@ O sistema de lembretes permite criar tarefas recorrentes automáticas que se rep
 
 ### Como Funciona
 
-1. **Criação Automática**: O sistema cria automaticamente o próximo lembrete quando um é concluído
+1. **Criação Automática**: O sistema cria automaticamente a próxima notificação quando uma é concluída
 2. **Controle Inteligente**: Respeita as configurações de pausa e fim de recorrência
 3. **Status Visual**: Mostra claramente se está ativo, pausado ou concluído
 
 ## 🎮 Controles Disponíveis
 
-### Status dos Lembretes
+### Status das Notificações
 
 <div class="grid cards" markdown>
 
@@ -67,7 +67,7 @@ O sistema de lembretes permite criar tarefas recorrentes automáticas que se rep
 
     ---
 
-    Lembrete funcionando normalmente e gerando notificações
+    Notificação ativa e gerando alertas automáticos
 
 -   :material-pause-circle:
     **Pausado**
@@ -107,9 +107,9 @@ O sistema de lembretes permite criar tarefas recorrentes automáticas que se rep
 ### Regras Inteligentes
 
 - **🔔 Aparecem**: 7 dias antes do vencimento
-- **⏰ Frequência**: Máximo 1x por dia por lembrete
+- **⏰ Frequência**: Máximo 1x por dia por notificação
 - **✅ Param**: Quando concluído ou passa de 7 dias do vencimento
-- **🎯 Público**: Apenas o responsável pelo lembrete
+- **🎯 Público**: Apenas o responsável pela notificação
 
 ### Como Ativar
 
@@ -117,7 +117,7 @@ O sistema de lembretes permite criar tarefas recorrentes automáticas que se rep
 2. **Configurações**: Permita notificações nas configurações do navegador
 3. **Teste**: Clique em "Testar Notificação" para verificar
 
-## 📊 Visualizando Lembretes
+## 📊 Visualizando Notificações
 
 ### Filtros Disponíveis
 
@@ -129,8 +129,8 @@ O sistema de lembretes permite criar tarefas recorrentes automáticas que se rep
 
 ### Visualização em Lista
 
-Cada lembrete mostra:
-- ✅ **Nome** e **tipo** do lembrete
+Cada notificação mostra:
+- ✅ **Nome** e **tipo** da notificação
 - 📅 **Data de vencimento**
 - 👤 **Responsável** pela execução
 - 🏢 **Setor** responsável
@@ -141,7 +141,7 @@ Cada lembrete mostra:
 
 ### Dados Disponíveis
 
-- 📊 **Lista completa** de lembretes
+- 📊 **Lista completa** de notificações
 - 📅 **Por período** específico
 - 👥 **Por responsável**
 - 🏢 **Por setor**
@@ -158,7 +158,7 @@ Cada lembrete mostra:
 ### Organização Eficiente
 
 1. **📝 Nomes Descritivos**: Use nomes claros e específicos
-2. **🏷️ Categorização**: Utilize tipos para agrupar lembretes similares
+2. **🏷️ Categorização**: Utilize tipos para agrupar notificações similares
 3. **📅 Prazos Realistas**: Defina datas alcançáveis
 4. **👥 Responsabilidades Claras**: Atribua sempre um responsável
 
@@ -173,15 +173,15 @@ Cada lembrete mostra:
 
 ### Problemas Comuns
 
-**❓ Lembrete não aparece na lista**
+**❓ Notificação não aparece na lista**
 - ✅ Verifique os filtros aplicados
-- ✅ Confirme se não está concluído ou cancelado
+- ✅ Confirme se não está concluída ou cancelada
 - ✅ Verifique as permissões de acesso
 
 **❓ Não recebo notificações**
 - ✅ Verifique se estão ativadas no navegador
-- ✅ Confirme se o lembrete está ativo
-- ✅ Teste as notificações na página de lembretes
+- ✅ Confirme se a notificação está ativa
+- ✅ Teste as notificações na página de notificações programadas
 
 **❓ Recorrência não funciona**
 - ✅ Verifique se há data de fim configurada
@@ -190,13 +190,13 @@ Cada lembrete mostra:
 
 ## 📚 Recursos Adicionais
 
-- **🎫 Sistema de Chamados**: Para suporte técnico
-- **📚 Tutoriais**: Guias detalhados de uso
+- **🎫 Tickets & Suporte**: Para atendimento técnico
+- **📚 Base de Conhecimento**: Guias detalhados de uso
 - **❓ FAQ**: Perguntas frequentes
 - **📖 Documentação Completa**: Guias avançados
 
 ---
 
 <div class="info">
-    **Dica**: Use lembretes recorrentes para tarefas que se repetem regularmente, como backups, auditorias e revisões periódicas.
+    **Dica**: Use notificações programadas para tarefas que se repetem regularmente, como backups, auditorias e revisões periódicas.
 </div>

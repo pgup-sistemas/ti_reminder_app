@@ -469,3 +469,9 @@ Method: GET
 is_authenticated: False
 session keys: ['_fresh', 'csrf_token']
 _user_id: None
+
+[2025-10-25 06:48:49.650288] ANTES LOGIN_USER
+session antes: {'_fresh': False, 'csrf_token': '8c4536451f7b88cefda6033b0170f76c421684ca'}
+DEPOIS LOGIN_USER
+session depois: {'_fresh': True, 'csrf_token': '8c4536451f7b88cefda6033b0170f76c421684ca', '_user_id': '4', '_id': '0980cb955c02cf72541345fb3d49d314c17aa9d6661947a0a8e321327765faf2d71b69ccc2aa5affe4d076fb5942bb9e96999cb6f1e182ab07f499d85479af69'}
+current_user.is_authenticated: True

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Gestão de Lembretes | TI OSN System {% endblock %}
+{% block title %}Notificações Programadas | TI OSN System {% endblock %}
 
 {% block content %}
 <style>
@@ -159,8 +159,121 @@
     .table thead th {
         position: sticky;
         top: 0;
-        background-color: #f8f9fa;
+        background-color: var(--bs-gray-100);
         z-index: 10;
+    }
+    
+    [data-theme="dark"] .table thead th {
+        background-color: var(--bs-gray-800);
+        color: var(--bs-gray-100);
+    }
+    
+    [data-theme="dark"] .card-header.bg-light {
+        background-color: var(--bs-gray-800) !important;
+        border-color: var(--bs-gray-700) !important;
+        color: var(--bs-gray-100);
+    }
+    
+    [data-theme="dark"] .card-footer,
+    [data-theme="dark"] .card-body,
+    [data-theme="dark"] .card {
+        background-color: var(--bs-gray-900) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        color: var(--bs-gray-100);
+    }
+    
+    [data-theme="dark"] .table tbody tr {
+        background-color: transparent;
+    }
+    
+    [data-theme="dark"] .table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    [data-theme="dark"] .table tbody tr.table-success {
+        --bs-table-bg: rgba(25, 135, 84, 0.2);
+        color: var(--bs-gray-100);
+    }
+    
+    [data-theme="dark"] .table tbody tr.table-danger {
+        --bs-table-bg: rgba(220, 53, 69, 0.2);
+        color: var(--bs-gray-100);
+    }
+    
+    [data-theme="dark"] .table tbody tr.table-warning {
+        --bs-table-bg: rgba(255, 193, 7, 0.2);
+        color: var(--bs-gray-100);
+    }
+    
+    [data-theme="dark"] .badge.bg-light {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: var(--bs-gray-100) !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
+    }
+    
+    [data-theme="dark"] .badge.bg-primary {
+        background-color: #0dcaf0 !important;
+        color: white !important;
+        border-color: #0dcaf0 !important;
+    }
+    
+    [data-theme="dark"] .badge.bg-success {
+        background-color: #198754 !important;
+        color: white !important;
+        border-color: #198754 !important;
+    }
+    
+    [data-theme="dark"] .badge.bg-info {
+        background-color: #0dcaf0 !important;
+        color: white !important;
+        border-color: #0dcaf0 !important;
+    }
+    
+    [data-theme="dark"] .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: white !important;
+        border-color: #ffc107 !important;
+    }
+    
+    [data-theme="dark"] .badge.bg-danger {
+        background-color: #dc3545 !important;
+        color: white !important;
+        border-color: #dc3545 !important;
+    }
+    
+    [data-theme="dark"] .form-select,
+    [data-theme="dark"] .form-control,
+    [data-theme="dark"] .btn-outline-secondary {
+        background-color: var(--bs-gray-900);
+        border-color: var(--bs-gray-700);
+        color: var(--bs-gray-100);
+    }
+    
+    [data-theme="dark"] .btn-outline-secondary:hover {
+        background-color: var(--bs-gray-800);
+        color: var(--bs-gray-100);
+    }
+    
+    [data-theme="dark"] .text-muted,
+    [data-theme="dark"] .table td,
+    [data-theme="dark"] .table th {
+        color: var(--bs-gray-300) !important;
+    }
+    
+    [data-theme="dark"] .table th i {
+        color: var(--bs-primary-light) !important;
+    }
+    
+    [data-theme="dark"] .pagination .page-link {
+        background-color: var(--bs-gray-900);
+        border-color: var(--bs-gray-700);
+        color: var(--bs-gray-100);
+    }
+
+    [data-theme="dark"] .pagination .page-item.active .page-link {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+        color: #fff;
     }
     
     /* Melhorias no modal para telas pequenas */
@@ -175,11 +288,12 @@
     }
 </style>
 
+<div class="reminders-page">
 <!-- Header da Página -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h4 class="text-primary mb-0"><i class="fas fa-bell me-2"></i>Gerenciar Lembretes</h4>
-        <small class="text-muted">Clique no nome de um lembrete ou no ícone de olho para ver mais detalhes</small>
+        <h4 class="text-primary mb-0"><i class="fas fa-bell-concierge me-2"></i>Notificações Programadas</h4>
+        <small class="text-muted">Clique no nome de uma notificação ou no ícone de olho para ver mais detalhes</small>
     </div>
     <div class="d-flex align-items-center gap-3">
         <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#helpModal">
@@ -197,16 +311,16 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="helpModalLabel">
-                    <i class="fas fa-question-circle me-2"></i>Ajuda - Gerenciamento de Lembretes
+                    <i class="fas fa-question-circle me-2"></i>Ajuda - Notificações Programadas
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
                 <h6 class="text-primary">Como usar:</h6>
                 <ul class="mb-4">
-                    <li>Clique no <strong>nome do lembrete</strong> ou no botão <i class="fas fa-eye text-info"></i> para ver os detalhes completos</li>
+                    <li>Clique no <strong>nome da notificação</strong> ou no botão <i class="fas fa-eye text-info"></i> para ver os detalhes completos</li>
                     <li>Use os ícones de ação para <i class="fas fa-edit text-warning"></i> editar, <i class="fas fa-check text-success"></i> finalizar, <i class="fas fa-pause text-secondary"></i> pausar ou <i class="fas fa-trash-alt text-danger"></i> excluir</li>
-                    <li>As cores dos indicadores de prioridade mostram a urgência de cada lembrete</li>
+                    <li>As cores dos indicadores de prioridade mostram a urgência de cada notificação</li>
                 </ul>
                 
                 <h6 class="text-primary">Legenda de Prioridades:</h6>
@@ -251,10 +365,10 @@
     <div class="card-header bg-light border-0 py-3">
         <h6 class="mb-0 text-secondary">
             <i class="fas fa-plus-circle me-2"></i>
-            {% if edit_id %}Editar{% else %}Novo{% endif %} Lembrete
+            {% if edit_id %}Editar{% else %}Nova{% endif %} Notificação
             {% if edit_id %}
                 <small class="text-warning ms-2">
-                    <i class="fas fa-edit me-1"></i>Editando lembrete
+                    <i class="fas fa-edit me-1"></i>Editando notificação
                     <a href="{{ url_for('main.reminders') }}" class="text-warning text-decoration-none ms-2">
                         <i class="fas fa-times me-1"></i>Cancelar
                     </a>
@@ -405,11 +519,11 @@
     </div>
 </div>
 
-<!-- Card de Lista de Lembretes -->
+<!-- Card de Lista de Notificações -->
 <div class="card shadow-sm border-0">
     <div class="card-header bg-light border-0 py-3">
         <div class="d-flex justify-content-between align-items-center">
-            <h6 class="mb-0 text-secondary"><i class="fas fa-list-check me-2"></i>Lista de Lembretes</h6>
+            <h6 class="mb-0 text-secondary"><i class="fas fa-list-check me-2"></i>Lista de Notificações</h6>
             <div class="d-flex gap-2 align-items-center">
                 <!-- Ordenação -->
                 <select class="form-select form-select-sm" onchange="location.href = this.value" style="width: auto;">

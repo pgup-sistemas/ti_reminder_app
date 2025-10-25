@@ -1,23 +1,23 @@
-# Sistema de Chamados
+# Tickets & Suporte
 
-O sistema de chamados permite solicitar suporte técnico de forma organizada e acompanhar o andamento das solicitações até sua resolução completa.
+O sistema de tickets & suporte permite abrir solicitações de atendimento de forma profissional e acompanhar o andamento até a resolução completa.
 
 ## 🎯 Visão Geral
 
-O módulo de chamados oferece uma interface completa para:
+A central de atendimento oferece uma interface completa para:
 - ✅ **Solicitar suporte técnico**
 - ✅ **Acompanhar andamento** em tempo real
 - ✅ **Comunicar com a equipe de TI**
 - ✅ **Receber notificações** de atualizações
 - ✅ **Consultar histórico** completo
 
-## 📝 Abrindo um Novo Chamado
+## 📝 Abrindo um Novo Ticket
 
 ### Passo a Passo
 
 1. **Acesse o módulo**:
-   - Menu principal → **"Chamados"**
-   - Clique em **"Abrir Novo Chamado"**
+   - Menu principal → **"Tickets & Suporte"**
+   - Clique em **"Abrir Novo Ticket"**
    - URL direta: `http://192.168.1.86:5000/chamados/abrir`
 
 2. **Preencha o formulário**:
@@ -42,11 +42,11 @@ O módulo de chamados oferece uma interface completa para:
 3. **Envio automático**:
    - Sistema envia e-mail para equipe de TI
    - Você recebe confirmação automática
-   - Chamado aparece imediatamente na sua lista
+   - Ticket aparece imediatamente na sua lista
 
-## 🔄 Acompanhamento de Chamados
+## 🔄 Acompanhamento de Tickets
 
-### Status do Chamado
+### Status do Ticket
 
 <div class="grid cards" markdown>
 
@@ -55,7 +55,7 @@ O módulo de chamados oferece uma interface completa para:
 
     ---
 
-    Chamado criado aguardando atendimento da TI
+    Ticket criado aguardando atendimento da TI
 
 -   :material-progress-clock:
     **Em Andamento**
@@ -76,7 +76,7 @@ O módulo de chamados oferece uma interface completa para:
 
     ---
 
-    Chamado finalizado e arquivado
+    Ticket finalizado e arquivado
 
 </div>
 

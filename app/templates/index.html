@@ -1,19 +1,24 @@
 {% extends "base.html" %}
-{% block title %}Visão Geral | TI OSN System{% endblock %}
+{% block title %}Meu Workspace | TI OSN System{% endblock %}
 
 {% block content %}
 
-<!-- Hero Section - Personalizado -->
+<!-- Hero Section - Meu Workspace -->
 <div class="hero-section mb-5">
     <div class="row align-items-center">
         <div class="col-lg-8">
-            <div class="d-flex align-items-center mb-3">
-                <div class="user-avatar me-3">
-                    <i class="fas fa-user-circle fa-3x text-primary"></i>
-                </div>
-                <div>
-                    <h2 class="mb-1 fw-bold">Olá, {{ session['username'] }}! 👋</h2>
-                    <p class="text-muted mb-0">Aqui está o resumo das suas atividades</p>
+            <div class="mb-3">
+                <h4 class="text-primary mb-2 fw-bold">
+                    <i class="fas fa-th-large me-2"></i>Meu Workspace
+                </h4>
+                <div class="d-flex align-items-center">
+                    <div class="user-avatar me-3">
+                        <i class="fas fa-user-circle fa-2x text-primary"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Olá, {{ session['username'] }}! 👋</h5>
+                        <p class="text-muted mb-0">Aqui está o resumo das suas atividades</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -39,12 +44,12 @@
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start justify-content-between mb-3">
                         <div class="metric-icon bg-primary bg-opacity-10">
-                            <i class="fas fa-bell text-primary"></i>
+                            <i class="fas fa-bell-concierge text-primary"></i>
                         </div>
                         <span class="badge bg-primary bg-opacity-10 text-primary">Ativo</span>
                     </div>
                     <h2 class="fw-bold mb-2 text-dark">{{ lembretes_count or 0 }}</h2>
-                    <p class="text-muted mb-1 fw-medium">Lembretes Ativos</p>
+                    <p class="text-muted mb-1 fw-medium">Notificações Programadas</p>
                     <small class="text-muted">Próximos vencimentos</small>
                     <div class="metric-arrow mt-2">
                         <i class="fas fa-arrow-right text-primary"></i>
@@ -61,12 +66,12 @@
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start justify-content-between mb-3">
                         <div class="metric-icon bg-success bg-opacity-10">
-                            <i class="fas fa-tasks text-success"></i>
+                            <i class="fas fa-clipboard-check text-success"></i>
                         </div>
                         <span class="badge bg-success bg-opacity-10 text-success">Pendente</span>
                     </div>
                     <h2 class="fw-bold mb-2 text-dark">{{ tasks_count or 0 }}</h2>
-                    <p class="text-muted mb-1 fw-medium">Tarefas Pendentes</p>
+                    <p class="text-muted mb-1 fw-medium">Atividades Pendentes</p>
                     <small class="text-muted">Para hoje</small>
                     <div class="metric-arrow mt-2">
                         <i class="fas fa-arrow-right text-success"></i>
@@ -88,7 +93,7 @@
                         <span class="badge bg-warning bg-opacity-10 text-warning">Em Andamento</span>
                     </div>
                     <h2 class="fw-bold mb-2 text-dark">{{ chamados_count or 0 }}</h2>
-                    <p class="text-muted mb-1 fw-medium">Chamados Abertos</p>
+                    <p class="text-muted mb-1 fw-medium">Tickets Abertos</p>
                     <small class="text-muted">Aguardando solução</small>
                     <div class="metric-arrow mt-2">
                         <i class="fas fa-arrow-right text-warning"></i>
@@ -110,7 +115,7 @@
                         <span class="badge bg-info bg-opacity-10 text-info">Disponível</span>
                     </div>
                     <h2 class="fw-bold mb-2 text-dark">{{ equipamentos_count or 0 }}</h2>
-                    <p class="text-muted mb-1 fw-medium">Equipamentos</p>
+                    <p class="text-muted mb-1 fw-medium">Gestão de Ativos</p>
                     <small class="text-muted">Solicitações ativas</small>
                     <div class="metric-arrow mt-2">
                         <i class="fas fa-arrow-right text-info"></i>
@@ -148,7 +153,7 @@
                     </div>
                     <h2 class="fw-bold mb-2 text-danger">{{ sla_vencidos or 0 }}</h2>
                     <p class="text-muted mb-1 fw-medium">SLA Vencido</p>
-                    <small class="text-muted">Chamados fora do prazo</small>
+                    <small class="text-muted">Tickets fora do prazo</small>
                 </div>
             </div>
         </div>

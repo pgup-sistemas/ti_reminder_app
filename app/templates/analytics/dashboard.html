@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard Analytics - TI OSN System{% endblock %}
+{% block title %}Business Intelligence | TI OSN System{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -32,15 +32,32 @@
 
 {% block content %}
 <div class="container-fluid py-4" id="analytics-content">
-    
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb breadcrumb-sm mb-1">
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('main.index') }}" class="d-inline-flex align-items-center gap-2">
+                    <i class="fas fa-th-large text-primary"></i>
+                    <span>Meu Workspace</span>
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <span class="d-inline-flex align-items-center gap-2">
+                    <i class="fas fa-chart-line text-primary"></i>
+                    <span>Business Intelligence</span>
+                </span>
+            </li>
+        </ol>
+    </nav>
+    <div class="border-bottom mb-4" style="border-color: var(--bs-gray-200) !important;"></div>
+
     <!-- Header -->
     <div class="analytics-header mb-4">
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <h2 class="mb-2">
-                    <i class="fas fa-chart-line me-2"></i>Dashboard Analytics
+                    <i class="fas fa-chart-line me-2"></i>Business Intelligence
                 </h2>
-                <p class="mb-0 opacity-90">Métricas e indicadores de performance em tempo real</p>
+                <p class="mb-0 opacity-90">Métricas corporativas, indicadores de SLA e performance operacional</p>
             </div>
             <div class="d-flex gap-2">
                 <div class="btn-group" role="group">

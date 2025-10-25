@@ -6,37 +6,52 @@
 class BreadcrumbManager {
     constructor() {
         this.routes = {
-            '/': { title: 'Dashboard', icon: 'fas fa-home' },
-            '/dashboard': { title: 'Relatórios', icon: 'fas fa-chart-bar', parent: '/' },
-            
-            // Atividades
-            '/tasks': { title: 'Tarefas', icon: 'fas fa-tasks', parent: '/' },
-            '/reminders': { title: 'Lembretes', icon: 'fas fa-bell', parent: '/' },
-            
-            // Suporte
-            '/chamados': { title: 'Chamados', icon: 'fas fa-headset', parent: '/' },
-            '/chamados/abrir': { title: 'Abrir Chamado', icon: 'fas fa-plus', parent: '/chamados' },
-            '/chamados/\\d+': { title: 'Detalhes do Chamado', icon: 'fas fa-eye', parent: '/chamados', regex: true },
-            
-            // Equipamentos
-            '/equipment': { title: 'Equipamentos', icon: 'fas fa-laptop', parent: '/' },
-            '/equipment/list': { title: 'Lista de Equipamentos', icon: 'fas fa-list', parent: '/' },
-            '/equipment/new': { title: 'Nova Solicitação', icon: 'fas fa-plus', parent: '/equipment/list' },
-            '/equipment/\\d+': { title: 'Detalhes do Equipamento', icon: 'fas fa-eye', parent: '/equipment/list', regex: true },
-            '/equipment/\\d+/edit': { title: 'Editar Equipamento', icon: 'fas fa-edit', parent: '/equipment/list', regex: true },
-            
-            '/tutoriais': { title: 'Tutoriais', icon: 'fas fa-book', parent: '/' },
-            '/tutoriais/novo': { title: 'Novo Tutorial', icon: 'fas fa-plus', parent: '/tutoriais' },
-            '/tutoriais/\\d+': { title: 'Tutorial', icon: 'fas fa-eye', parent: '/tutoriais', regex: true },
-            '/tutoriais/\\d+/editar': { title: 'Editar Tutorial', icon: 'fas fa-edit', parent: '/tutoriais', regex: true },
-            
+            // Workspace & inteligência
+            '/': { title: 'Meu Workspace', icon: 'fas fa-house' },
+            '/dashboard': { title: 'Business Intelligence', icon: 'fas fa-chart-line', parent: '/' },
+
+            // Atividades & notificações
+            '/tasks': { title: 'Atividades & Projetos', icon: 'fas fa-clipboard-check', parent: '/' },
+            '/tasks/\\d+/edit': { title: 'Editar Atividade', icon: 'fas fa-pen-to-square', parent: '/tasks', regex: true },
+            '/reminders': { title: 'Notificações Programadas', icon: 'fas fa-bell-concierge', parent: '/' },
+            '/reminders/novo': { title: 'Nova Notificação', icon: 'fas fa-square-plus', parent: '/reminders' },
+            '/reminders/\\d+/edit': { title: 'Editar Notificação', icon: 'fas fa-pen', parent: '/reminders', regex: true },
+
+            // Service Desk
+            '/chamados': { title: 'Tickets & Suporte', icon: 'fas fa-ticket-alt', parent: '/' },
+            '/chamados/abrir': { title: 'Abrir Ticket', icon: 'fas fa-plus-circle', parent: '/chamados' },
+            '/chamados/\\d+': { title: 'Detalhes do Ticket', icon: 'fas fa-eye', parent: '/chamados', regex: true },
+            '/chamados/\\d+/editar': { title: 'Editar Ticket', icon: 'fas fa-pen-to-square', parent: '/chamados', regex: true },
+            '/chamados/\\d+/admin': { title: 'Gestão Avançada', icon: 'fas fa-user-shield', parent: '/chamados', regex: true },
+
+            // Gestão de Ativos (equipment_v2)
+            '/equipment': { title: 'Gestão de Ativos', icon: 'fas fa-boxes-stacked', parent: '/' },
+            '/equipment/': { title: 'Gestão de Ativos', icon: 'fas fa-boxes-stacked', parent: '/' },
+            '/equipment/catalog': { title: 'Catálogo de Ativos', icon: 'fas fa-list', parent: '/equipment' },
+            '/equipment/request/\\d+': { title: 'Solicitar Ativo', icon: 'fas fa-paper-plane', parent: '/equipment/catalog', regex: true },
+            '/equipment/my-requests': { title: 'Minhas Solicitações', icon: 'fas fa-file-signature', parent: '/equipment' },
+            '/equipment/my-loans': { title: 'Meus Empréstimos', icon: 'fas fa-handshake', parent: '/equipment' },
+            '/equipment/admin/pending': { title: 'Aprovações Pendentes', icon: 'fas fa-inbox', parent: '/equipment' },
+            '/equipment/admin/loans': { title: 'Empréstimos Ativos', icon: 'fas fa-arrows-spin', parent: '/equipment' },
+            '/equipment/admin/equipment': { title: 'Inventário de Ativos', icon: 'fas fa-database', parent: '/equipment' },
+            '/equipment/admin/equipment/new': { title: 'Novo Ativo', icon: 'fas fa-plus', parent: '/equipment/admin/equipment' },
+            '/equipment/admin/equipment/edit/\\d+': { title: 'Editar Ativo', icon: 'fas fa-pen', parent: '/equipment/admin/equipment', regex: true },
+
+            // Base de Conhecimento
+            '/tutoriais': { title: 'Base de Conhecimento', icon: 'fas fa-graduation-cap', parent: '/' },
+            '/tutoriais/novo': { title: 'Novo Artigo', icon: 'fas fa-square-plus', parent: '/tutoriais' },
+            '/tutoriais/\\d+': { title: 'Artigo', icon: 'fas fa-file-lines', parent: '/tutoriais', regex: true },
+            '/tutoriais/\\d+/editar': { title: 'Editar Artigo', icon: 'fas fa-pen-to-square', parent: '/tutoriais', regex: true },
+
             // Administração
-            '/users': { title: 'Usuários', icon: 'fas fa-users', parent: '/' },
-            '/users/\\d+/edit': { title: 'Editar Usuário', icon: 'fas fa-user-edit', parent: '/users', regex: true },
-            '/register-admin': { title: 'Cadastrar Admin', icon: 'fas fa-user-plus', parent: '/users' },
-            
-            // Ajuda
-            '/help': { title: 'Ajuda', icon: 'fas fa-question-circle', parent: '/' }
+            '/admin/users': { title: 'Gestão de Usuários', icon: 'fas fa-users-gear', parent: '/' },
+            '/admin/users/edit/\\d+': { title: 'Editar Usuário', icon: 'fas fa-user-pen', parent: '/admin/users', regex: true },
+            '/admin/users/reset_password/\\d+': { title: 'Resetar Senha', icon: 'fas fa-key', parent: '/admin/users', regex: true },
+            '/admin/users/history/\\d+': { title: 'Histórico do Usuário', icon: 'fas fa-clock-rotate-left', parent: '/admin/users', regex: true },
+            '/register-admin': { title: 'Cadastrar Administrador', icon: 'fas fa-user-plus', parent: '/admin/users' },
+
+            // Outros módulos
+            '/help': { title: 'Central de Ajuda', icon: 'fas fa-circle-question', parent: '/' }
         };
         
         this.init();
@@ -139,7 +154,7 @@ class BreadcrumbManager {
 
     buildBreadcrumbPath(currentPath) {
         const breadcrumbs = [];
-        let path = currentPath;
+        let path = this.normalizePath(currentPath);
         
         // Construir caminho de breadcrumbs
         while (path) {
@@ -160,22 +175,39 @@ class BreadcrumbManager {
     }
 
     findRoute(path) {
+        const normalized = this.normalizePath(path);
+
         // Busca exata primeiro
-        if (this.routes[path]) {
-            return this.routes[path];
+        if (this.routes[normalized]) {
+            return this.routes[normalized];
         }
-        
+
         // Busca por regex
         for (const [pattern, route] of Object.entries(this.routes)) {
             if (route.regex) {
                 const regex = new RegExp(`^${pattern}$`);
-                if (regex.test(path)) {
+                if (regex.test(normalized)) {
                     return route;
                 }
             }
         }
-        
+
         return null;
+    }
+
+    normalizePath(path) {
+        if (!path) return '/';
+        let normalized = path;
+
+        // Remover query string e hash se presentes
+        normalized = normalized.split('?')[0].split('#')[0];
+
+        // Remover trailing slash (exceto raiz)
+        if (normalized.length > 1 && normalized.endsWith('/')) {
+            normalized = normalized.slice(0, -1);
+        }
+
+        return normalized || '/';
     }
 
     // Método para adicionar rotas dinamicamente
