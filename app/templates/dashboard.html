@@ -346,6 +346,7 @@ window.dashboardChartData = {
       </div>
     </div>
 
+    {% if can_view_inventory %}
     <!-- Inventário de Equipamentos -->
     <div class="col-xl-3 col-lg-4 col-md-6">
       <div class="card service-card border-0 h-100 shadow-hover">
@@ -390,6 +391,7 @@ window.dashboardChartData = {
         </div>
       </div>
     </div>
+    {% endif %}
 
     <!-- Tutoriais -->
     <div class="col-xl-3 col-lg-4 col-md-6">

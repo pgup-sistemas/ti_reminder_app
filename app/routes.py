@@ -1184,6 +1184,13 @@ def dashboard():
 
     # Obter permissões do usuário
     permissions = PermissionManager.get_user_permissions()
+    is_admin = permissions.get('is_admin', False)
+    is_ti = permissions.get('is_ti', False)
+    can_view_all = permissions.get('can_view_all', False)
+
+    def apply_permissions(query, model_name):
+        """Aplica filtro de permissões conforme o perfil atual."""
+        return PermissionManager.filter_query_by_permissions(query, model_name, permissions)
 
     # Processar filtros da requisição
     filters = {
@@ -1197,7 +1204,7 @@ def dashboard():
         'sla_page': request.args.get("sla_page", 1, type=int),
         'sla_per_page': request.args.get("sla_per_page", 10, type=int),
         # Escopo global: estatísticas de todo o sistema (sem restrições por usuário)
-        'global': True,
+        'global': can_view_all,
     }
 
     # Converter datas com validação
@@ -1220,6 +1227,21 @@ def dashboard():
     dashboard_data = DashboardService.get_filtered_data(filters, permissions)
 
     # Preparar dados para o template
+    if can_view_all:
+        inventory_total = Equipment.query.count()
+        inventory_disponiveis = Equipment.query.filter_by(status='disponivel').count()
+        inventory_emprestados = Equipment.query.filter_by(status='emprestado').count()
+        inventory_manutencao = Equipment.query.filter_by(status='manutencao').count()
+        inventory_danificados = Equipment.query.filter_by(status='danificado').count()
+        inventory_perdidos = Equipment.query.filter_by(status='perdido').count()
+    else:
+        inventory_total = 0
+        inventory_disponiveis = 0
+        inventory_emprestados = 0
+        inventory_manutencao = 0
+        inventory_danificados = 0
+        inventory_perdidos = 0
+
     template_data = {
         # Estatísticas de tarefas
         'tasks_total': dashboard_data['stats']['tasks']['total'],
@@ -1284,12 +1306,13 @@ def dashboard():
         'overall_performance': dashboard_data['performance'],
 
         # Inventário de equipamentos (globais)
-        'inventory_total': Equipment.query.count(),
-        'inventory_disponiveis': Equipment.query.filter_by(status='disponivel').count(),
-        'inventory_emprestados': Equipment.query.filter_by(status='emprestado').count(),
-        'inventory_manutencao': Equipment.query.filter_by(status='manutencao').count(),
-        'inventory_danificados': Equipment.query.filter_by(status='danificado').count(),
-        'inventory_perdidos': Equipment.query.filter_by(status='perdido').count(),
+        'inventory_total': inventory_total,
+        'inventory_disponiveis': inventory_disponiveis,
+        'inventory_emprestados': inventory_emprestados,
+        'inventory_manutencao': inventory_manutencao,
+        'inventory_danificados': inventory_danificados,
+        'inventory_perdidos': inventory_perdidos,
+        'can_view_inventory': can_view_all,
 
         # Dados para filtros
         'sectors': Sector.query.order_by(Sector.name).all(),
@@ -1320,9 +1343,13 @@ def dashboard():
     
     # --- SLA DE EQUIPAMENTOS ---
     # Calcular tempo médio de aprovação (de Solicitado para Aprovado)
-    equipamentos_aprovados = EquipmentRequest.query.filter(
+    equipamentos_aprovados_query = EquipmentRequest.query.filter(
         EquipmentRequest.status.in_(['Aprovado', 'Entregue', 'Devolvido']),
         EquipmentRequest.approval_date.isnot(None)
+    )
+    equipamentos_aprovados = apply_permissions(
+        equipamentos_aprovados_query,
+        'EquipmentRequest'
     ).all()
     
     if equipamentos_aprovados:
@@ -1351,10 +1378,14 @@ def dashboard():
         template_data['equipamento_sla_aprovacao_percent'] = 0
     
     # Calcular tempo médio de entrega (de Aprovado para Entregue)
-    equipamentos_entregues_list = EquipmentRequest.query.filter(
+    equipamentos_entregues_query = EquipmentRequest.query.filter(
         EquipmentRequest.status.in_(['Entregue', 'Devolvido']),
         EquipmentRequest.approval_date.isnot(None),
         EquipmentRequest.delivery_date.isnot(None)
+    )
+    equipamentos_entregues_list = apply_permissions(
+        equipamentos_entregues_query,
+        'EquipmentRequest'
     ).all()
     
     if equipamentos_entregues_list:
@@ -1381,18 +1412,29 @@ def dashboard():
         template_data['equipamento_sla_entrega_percent'] = 0
     
     # Equipamentos pendentes de aprovação
-    template_data['equipamentos_pendentes_aprovacao'] = EquipmentRequest.query.filter_by(status='Solicitado').count()
+    equipamentos_pendentes_query = apply_permissions(
+        EquipmentRequest.query.filter_by(status='Solicitado'),
+        'EquipmentRequest'
+    )
+    template_data['equipamentos_pendentes_aprovacao'] = equipamentos_pendentes_query.count()
     
     # Equipamentos com atraso na entrega (aprovados há mais de 48h mas ainda não entregues)
     data_limite_entrega = datetime.now() - timedelta(hours=48)
-    template_data['equipamentos_atraso_entrega'] = EquipmentRequest.query.filter(
+    equipamentos_atraso_query = EquipmentRequest.query.filter(
         EquipmentRequest.status == 'Aprovado',
         EquipmentRequest.approval_date < data_limite_entrega
+    )
+    template_data['equipamentos_atraso_entrega'] = apply_permissions(
+        equipamentos_atraso_query,
+        'EquipmentRequest'
     ).count()
     
     # --- SLA DE TAREFAS ---
     # Taxa de conclusão no prazo
-    tarefas_concluidas = Task.query.filter_by(completed=True).all()
+    tarefas_concluidas = apply_permissions(
+        Task.query.filter_by(completed=True),
+        'Task'
+    ).all()
     
     if tarefas_concluidas:
         # Consideramos "no prazo" se foi concluída no mesmo dia ou antes da data de criação + prazo razoável
@@ -1416,7 +1458,10 @@ def dashboard():
     
     # --- SLA DE LEMBRETES ---
     # Taxa de realização no prazo (lembretes concluídos antes ou na data de vencimento)
-    lembretes_concluidos = Reminder.query.filter_by(completed=True).all()
+    lembretes_concluidos = apply_permissions(
+        Reminder.query.filter_by(completed=True),
+        'Reminder'
+    ).all()
     
     if lembretes_concluidos:
         # Consideramos "no prazo" todos os concluídos (simplificado)
@@ -1426,10 +1471,14 @@ def dashboard():
     
     # Lembretes vencendo hoje
     hoje = datetime.now().date()
-    template_data['lembretes_vencendo_hoje'] = Reminder.query.filter(
+    lembretes_vencendo_hoje_query = Reminder.query.filter(
         Reminder.due_date == hoje,
         Reminder.completed == False,
         Reminder.status == 'ativo'
+    )
+    template_data['lembretes_vencendo_hoje'] = apply_permissions(
+        lembretes_vencendo_hoje_query,
+        'Reminder'
     ).count()
 
     # ============================================
@@ -1444,6 +1493,7 @@ def dashboard():
     equipamentos_query = EquipmentRequest.query.filter(
         EquipmentRequest.status.in_(['Solicitado', 'Aprovado', 'Entregue'])
     ).order_by(EquipmentRequest.request_date.desc())
+    equipamentos_query = apply_permissions(equipamentos_query, 'EquipmentRequest')
     
     equipamentos_sla_pagination = equipamentos_query.paginate(
         page=equipamentos_page,
@@ -1494,6 +1544,7 @@ def dashboard():
     
     # Query de tarefas (todas as tarefas)
     tarefas_query = Task.query.order_by(Task.date.desc(), Task.completed.asc())
+    tarefas_query = apply_permissions(tarefas_query, 'Task')
     
     tarefas_sla_pagination = tarefas_query.paginate(
         page=tarefas_page,
@@ -1537,6 +1588,7 @@ def dashboard():
     lembretes_query = Reminder.query.filter(
         Reminder.status == 'ativo'
     ).order_by(Reminder.due_date.asc(), Reminder.completed.asc())
+    lembretes_query = apply_permissions(lembretes_query, 'Reminder')
     
     lembretes_sla_pagination = lembretes_query.paginate(
         page=lembretes_page,
