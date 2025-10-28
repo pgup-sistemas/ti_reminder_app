@@ -481,3 +481,27 @@ session antes: {'_fresh': False, 'csrf_token': '9a9181fcedc2cc8028c01724b1c1c0b2
 DEPOIS LOGIN_USER
 session depois: {'_fresh': True, 'csrf_token': '9a9181fcedc2cc8028c01724b1c1c0b2e595b048', '_user_id': '6', '_id': '0980cb955c02cf72541345fb3d49d314c17aa9d6661947a0a8e321327765faf2d71b69ccc2aa5affe4d076fb5942bb9e96999cb6f1e182ab07f499d85479af69', '_remember': 'set'}
 current_user.is_authenticated: True
+
+[2025-10-27 08:57:58.926458] ANTES LOGIN_USER
+session antes: {'_fresh': False, 'csrf_token': '854e6a21526ac3ce2f7bbcbf02a6645054adf8fd'}
+DEPOIS LOGIN_USER
+session depois: {'_fresh': True, 'csrf_token': '854e6a21526ac3ce2f7bbcbf02a6645054adf8fd', '_user_id': '6', '_id': '0980cb955c02cf72541345fb3d49d314c17aa9d6661947a0a8e321327765faf2d71b69ccc2aa5affe4d076fb5942bb9e96999cb6f1e182ab07f499d85479af69'}
+current_user.is_authenticated: True
+
+[2025-10-28 16:33:24.153797] ANTES LOGIN_USER
+session antes: {'csrf_token': '8b0a45e62bf2840f5e761ea8860eccdac8a45e76', '_fresh': False}
+DEPOIS LOGIN_USER
+session depois: {'csrf_token': '8b0a45e62bf2840f5e761ea8860eccdac8a45e76', '_fresh': True, '_user_id': '3', '_id': 'c9c89623faa19dcfda9154f12b33c1dd7d0efdb920e4aa9eec818d1b31b85912dff54c3df32f0a82cf0a4cf675bd44e20a8e752472adf1e2128e7945fc063379'}
+current_user.is_authenticated: True
+
+[2025-10-28 16:34:01.938958] ANTES LOGIN_USER
+session antes: {'csrf_token': '1660dfd8d62416caaa9b9a8223a071462c8d84fa', '_fresh': False}
+DEPOIS LOGIN_USER
+session depois: {'csrf_token': '1660dfd8d62416caaa9b9a8223a071462c8d84fa', '_fresh': True, '_user_id': '4', '_id': '0980cb955c02cf72541345fb3d49d314c17aa9d6661947a0a8e321327765faf2d71b69ccc2aa5affe4d076fb5942bb9e96999cb6f1e182ab07f499d85479af69'}
+current_user.is_authenticated: True
+
+[2025-10-28 16:38:48.472722] ANTES LOGIN_USER
+session antes: {'_fresh': False, 'csrf_token': '3ae6c9f319efc7d2148e57846ab5a950982fb84a'}
+DEPOIS LOGIN_USER
+session depois: {'_fresh': True, 'csrf_token': '3ae6c9f319efc7d2148e57846ab5a950982fb84a', '_user_id': '4', '_id': 'ba94ab5aad906882cc63cdf510f8538078a4f55c50c85ac3bdd7821734ce5fdd146af4cfff7ad30492988ad83e1370b4f62b6c6c7d93a91606ecefb11fbe12b9'}
+current_user.is_authenticated: True

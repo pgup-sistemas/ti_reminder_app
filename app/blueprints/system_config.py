@@ -1918,11 +1918,12 @@ def performance_optimization():
 
     from datetime import datetime
     now = datetime.now()
-
+    
     return render_template("system_config/performance_optimization.html",
                           system_stats=system_stats,
                           optimization_tools=optimization_tools,
-                          settings=settings)
+                          settings=settings,
+                          now=now)
 
 @system_config.route("/performance/alertas", methods=["GET", "POST"])
 @login_required
