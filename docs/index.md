@@ -189,7 +189,8 @@ O sistema utiliza **Material Design** com:
 
 ### Canais de Comunicação
 
-- **📧 E-mail**: suporte@ti-osn.com
+- **📧 E-mail**: pageupsistemas@gmail.com
+- **<i class="fab fa-github"></i> GitHub**: [ti_reminder_app](https://github.com/pgup-sistemas/ti_reminder_app.git)
 - **🎫 Chamados**: Sistema interno de chamados (recomendado)
 - **📚 Tutoriais**: Base de conhecimento com busca integrada
 - **🔔 Notificações**: Alertas automáticos de atualizações

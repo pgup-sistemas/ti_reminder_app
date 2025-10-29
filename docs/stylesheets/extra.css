@@ -99,6 +99,67 @@
     font-size: 1.1em;
 }
 
+/* Controlar tamanho de emojis e ícones inline */
+.rst-content p img.emoji,
+.rst-content li img.emoji,
+.rst-content a img.emoji {
+    display: inline-block;
+    height: 1.2em;
+    width: 1.2em;
+    vertical-align: text-bottom;
+    margin: 0 0.1em;
+}
+
+/* Ajuste específico para links com ícones (GitHub, etc) */
+.rst-content a[href*="github"] img,
+.rst-content a img.twemoji {
+    height: 1.1em !important;
+    width: 1.1em !important;
+    vertical-align: middle;
+    margin-right: 0.3em;
+}
+
+/* Ícones em listas */
+.rst-content li a img {
+    height: 1em !important;
+    width: 1em !important;
+}
+
+/* SVG emojis */
+.rst-content svg.twemoji {
+    display: inline-block;
+    height: 1.2em;
+    width: 1.2em;
+    vertical-align: text-bottom;
+}
+
+/* Para strong/bold com ícones */
+.rst-content strong img,
+.rst-content b img {
+    height: 1.1em !important;
+    width: 1.1em !important;
+}
+
+/* Ícones Font Awesome inline */
+.rst-content i.fab,
+.rst-content i.fas,
+.rst-content i.far {
+    font-size: 1em;
+    margin-right: 0.3em;
+    vertical-align: middle;
+}
+
+/* Ícone GitHub especificamente */
+.rst-content i.fa-github {
+    font-size: 1.1em;
+    color: #333;
+}
+
+/* Dark mode para ícone GitHub */
+[data-md-color-scheme="slate"] .rst-content i.fa-github {
+    color: #fff;
+}
+
 /* Hero section styling */
 .hero {
     background: linear-gradient(135deg, #a5e3ff 0%, #005aa3 100%);

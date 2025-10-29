@@ -28,11 +28,18 @@ def send_email(subject, recipients, body, html_body=None):
 
 def send_chamado_aberto_email(chamado):
     user_email = chamado.solicitante.email
-    # Define TI email recipient(s) - maybe from config or a specific group
-    ti_recipients = [
-        current_app.config.get("TI_EMAIL_GROUP", "ti@example.com")
-    ]  # Example
+    
+    # Obter email do grupo TI da configuração
+    ti_email = current_app.config.get("TI_EMAIL_GROUP")
+    
+    # Validar que o email TI está configurado e não é um domínio de exemplo
+    if not ti_email or 'example.com' in ti_email.lower():
+        print(f"AVISO: TI_EMAIL_GROUP não está configurado corretamente. Email TI não será enviado.")
+        ti_recipients = []
+    else:
+        ti_recipients = [ti_email]
 
+    # Enviar email para o solicitante
     subject_user = f"Chamado #{chamado.id} Aberto: {chamado.titulo}"
     body_user = f"""Olá {chamado.solicitante.username},
 
@@ -48,10 +55,12 @@ Sistema de Chamados TI"""
     # Potentially add HTML version
     send_email(subject_user, [user_email], body_user)
 
-    subject_ti = f"Novo Chamado #{chamado.id} Aberto por {chamado.solicitante.username} ({chamado.setor.name}): {chamado.titulo}"
-    body_ti = f"Um novo chamado foi aberto:\n\nID: {chamado.id}\nTítulo: {chamado.titulo}\nSolicitante: {chamado.solicitante.username} ({chamado.solicitante.email})\nSetor: {chamado.setor.name}\nPrioridade: {chamado.prioridade}\nStatus: {chamado.status}\nDescrição:\n{chamado.descricao}\n\nAcesse o sistema para mais detalhes e atribuição."
-    # Potentially add HTML version
-    send_email(subject_ti, ti_recipients, body_ti)
+    # Enviar email para o grupo TI apenas se houver destinatários válidos
+    if ti_recipients:
+        subject_ti = f"Novo Chamado #{chamado.id} Aberto por {chamado.solicitante.username} ({chamado.setor.name}): {chamado.titulo}"
+        body_ti = f"Um novo chamado foi aberto:\n\nID: {chamado.id}\nTítulo: {chamado.titulo}\nSolicitante: {chamado.solicitante.username} ({chamado.solicitante.email})\nSetor: {chamado.setor.name}\nPrioridade: {chamado.prioridade}\nStatus: {chamado.status}\nDescrição:\n{chamado.descricao}\n\nAcesse o sistema para mais detalhes e atribuição."
+        # Potentially add HTML version
+        send_email(subject_ti, ti_recipients, body_ti)
 
 
 def send_password_reset_email(user, token):

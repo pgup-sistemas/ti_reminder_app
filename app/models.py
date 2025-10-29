@@ -297,6 +297,145 @@ class Chamado(db.Model):
     def __repr__(self):
         return f"<Chamado {self.id}: {self.titulo}>"
 
+    @property
+    def tempo_aberto(self):
+        """
+        Retorna o tempo que o chamado está/esteve aberto.
+        Para chamados abertos: tempo desde abertura até agora
+        Para chamados fechados: tempo desde abertura até fechamento
+        
+        Returns:
+            timedelta: Diferença de tempo
+        """
+        if self.data_fechamento:
+            # Chamado fechado: calcular duração total
+            diferenca = self.data_fechamento - self.data_abertura
+        else:
+            # Chamado aberto: calcular tempo desde abertura
+            agora = get_current_time_for_db()
+            diferenca = agora - self.data_abertura
+        
+        return diferenca
+    
+    @property
+    def tempo_aberto_formatado(self):
+        """
+        Retorna tempo aberto em formato legível e amigável.
+        Ex: "2h 30m", "3 dias", "1 semana"
+        
+        Returns:
+            str: Tempo formatado
+        """
+        delta = self.tempo_aberto
+        
+        dias = delta.days
+        horas = delta.seconds // 3600
+        minutos = (delta.seconds % 3600) // 60
+        
+        if dias > 0:
+            if dias == 1:
+                return "1 dia"
+            elif dias < 7:
+                return f"{dias} dias"
+            elif dias < 30:
+                semanas = dias // 7
+                dias_resto = dias % 7
+                if dias_resto > 0:
+                    return f"{semanas}sem {dias_resto}d"
+                return f"{semanas} semana{'s' if semanas > 1 else ''}"
+            else:
+                meses = dias // 30
+                return f"{meses} m{'eses' if meses > 1 else 'ês'}"
+        elif horas > 0:
+            if minutos > 0:
+                return f"{horas}h {minutos}m"
+            return f"{horas}h"
+        else:
+            return f"{minutos}m" if minutos > 0 else "< 1m"
+    
+    @property
+    def indicador_tempo(self):
+        """
+        Retorna indicador visual baseado no tempo aberto.
+        Para chamados abertos: cor baseada em urgência por tempo
+        Para chamados fechados: performance (rápido/normal/lento)
+        
+        Returns:
+            dict: {'classe': str, 'icone': str, 'texto': str}
+        """
+        delta = self.tempo_aberto
+        horas_totais = delta.total_seconds() / 3600
+        
+        if self.status in ['Fechado', 'Resolvido']:
+            # Indicadores para chamados fechados (performance)
+            if horas_totais < 4:
+                return {
+                    'classe': 'success',
+                    'icone': 'bolt',
+                    'texto': 'Rápido'
+                }
+            elif horas_totais < 24:
+                return {
+                    'classe': 'info',
+                    'icone': 'check-circle',
+                    'texto': 'Normal'
+                }
+            else:
+                return {
+                    'classe': 'secondary',
+                    'icone': 'clock',
+                    'texto': 'Lento'
+                }
+        else:
+            # Indicadores para chamados abertos (urgência por tempo)
+            if horas_totais < 24:
+                return {
+                    'classe': 'success',
+                    'icone': 'clock',
+                    'texto': 'Recente'
+                }
+            elif horas_totais < 72:
+                return {
+                    'classe': 'warning',
+                    'icone': 'exclamation-triangle',
+                    'texto': 'Atenção'
+                }
+            elif horas_totais < 168:  # 7 dias
+                return {
+                    'classe': 'danger',
+                    'icone': 'exclamation-circle',
+                    'texto': 'Antigo'
+                }
+            else:
+                return {
+                    'classe': 'danger',
+                    'icone': 'fire',
+                    'texto': 'Crítico'
+                }
+
+    @staticmethod
+    def count_open_tickets(user=None):
+        """
+        Conta tickets abertos (para badge de notificação).
+        
+        Args:
+            user: Objeto User ou None. Se None ou Admin/TI, conta todos os tickets.
+                  Se usuário normal, conta apenas tickets do próprio usuário.
+        
+        Returns:
+            int: Quantidade de tickets abertos
+        """
+        # Query base: tickets com status "Aberto" ou "Em Andamento"
+        query = Chamado.query.filter(
+            Chamado.status.in_(['Aberto', 'Em Andamento'])
+        )
+        
+        # Se for usuário específico E não for admin/TI, filtrar apenas seus tickets
+        if user and not (user.is_admin or user.is_ti):
+            query = query.filter(Chamado.solicitante_id == user.id)
+        
+        return query.count()
+
 
 class ComentarioChamado(db.Model):
     id = db.Column(db.Integer, primary_key=True)

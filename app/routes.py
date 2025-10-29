@@ -2518,6 +2518,8 @@ def help_page():
             content = content.replace('href="search/', 'href="/docs/search/')
             content = content.replace('src="search/', 'src="/docs/search/')
             content = content.replace('href="api_documentation/', 'href="/docs/api_documentation/')
+            content = content.replace('href="apresentacao/', 'href="/docs/apresentacao/')
+            content = content.replace('href="RESUMO_EXECUTIVO/', 'href="/docs/RESUMO_EXECUTIVO/')
             
             # Caminhos especiais
             content = content.replace('href="."', 'href="/help"')
@@ -2589,6 +2591,8 @@ def docs_static(filename):
                 content = content.replace('href="../user-guide/', 'href="/docs/user-guide/')
                 content = content.replace('href="../admin-guide/', 'href="/docs/admin-guide/')
                 content = content.replace('href="../api_documentation/', 'href="/docs/api_documentation/')
+                content = content.replace('href="../apresentacao/', 'href="/docs/apresentacao/')
+                content = content.replace('href="../RESUMO_EXECUTIVO/', 'href="/docs/RESUMO_EXECUTIVO/')
                 content = content.replace('href=".."', 'href="/help"')
                 content = content.replace('href="../"', 'href="/help"')
                 

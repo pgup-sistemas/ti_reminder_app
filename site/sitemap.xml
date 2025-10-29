@@ -2,127 +2,137 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>http://192.168.1.86:5000/docs/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/MODAL_GUIDE/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/NOTIFICATION_SYSTEM/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/PADR%C3%83O_VISUAL_AUTH/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/PAGINAS_DE_ERRO/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>http://192.168.1.86:5000/docs/RESUMO_EXECUTIVO/</loc>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/api_documentation/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>http://192.168.1.86:5000/docs/apresentacao/</loc>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/admin-guide/certifications-admin/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/admin-guide/equipment-admin/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/admin-guide/performance-admin/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/admin-guide/rfid-admin/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/admin-guide/satisfaction-admin/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/admin-guide/security-admin/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/dev-guide/security-implementation/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/user-guide/certifications/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/user-guide/chamados/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/user-guide/dashboard/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/user-guide/equipment/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/user-guide/overview/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/user-guide/performance/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/user-guide/reminders/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/user-guide/rfid/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/user-guide/satisfaction/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/user-guide/security/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/user-guide/tasks/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://192.168.1.86:5000/docs/user-guide/tutorials/</loc>
-         <lastmod>2025-10-25</lastmod>
+         <lastmod>2025-10-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>

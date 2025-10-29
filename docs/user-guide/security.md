@@ -219,7 +219,8 @@ O sistema limita requisições para prevenir abuso:
 ### Precisa de Ajuda?
 
 **Conta bloqueada ou problemas de acesso:**
-- 📧 Email: suporte@ti-osn.com
+- 📧 Email: pageupsistemas@gmail.com
+- <i class="fab fa-github"></i> GitHub: [ti_reminder_app](https://github.com/pgup-sistemas/ti_reminder_app.git)
 - 🎫 Abra um chamado (se conseguir acessar)
 - 👤 Contate o administrador do sistema
 

@@ -169,6 +169,7 @@
                         <th><i class="fas fa-user me-2 text-muted"></i>Solicitante</th>
                         <th><i class="fas fa-sitemap me-2 text-muted"></i>Setor</th>
                         <th><i class="fas fa-calendar-alt me-2 text-muted"></i>Abertura</th>
+                        <th class="text-center"><i class="fas fa-hourglass-half me-2 text-muted"></i>Duração</th>
                         <th class="text-center pe-3"><i class="fas fa-cogs me-2 text-muted"></i>Ações</th>
                     </tr>
                 </thead>
@@ -237,6 +238,22 @@
                         <td>
                             <small class="text-muted">{{ chamado.data_abertura|local_datetime }}</small>
                         </td>
+                        <td class="text-center">
+                            {% set indicador = chamado.indicador_tempo %}
+                            <div class="d-flex flex-column align-items-center gap-1">
+                                <span class="badge bg-{{ indicador.classe }} bg-opacity-10 text-{{ indicador.classe }} border border-{{ indicador.classe }} border-opacity-25 d-inline-flex align-items-center gap-1">
+                                    <i class="fas fa-{{ indicador.icone }}"></i>
+                                    {{ chamado.tempo_aberto_formatado }}
+                                </span>
+                                <small class="text-muted" style="font-size: 0.7rem;">
+                                    {% if chamado.status in ['Fechado', 'Resolvido'] %}
+                                        {{ indicador.texto }}
+                                    {% else %}
+                                        Aberto há
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </td>
                         <td class="text-center pe-3">
                             <div class="d-flex gap-1 justify-content-center">
                                 <a href="{{ url_for('main.detalhe_chamado', id=chamado.id) }}" class="btn btn-sm btn-outline-primary" title="Visualizar">
@@ -252,7 +269,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="9" class="text-center py-4 text-muted">
+                        <td colspan="10" class="text-center py-4 text-muted">
                             <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
                             Nenhum chamado encontrado
                         </td>
@@ -327,7 +344,24 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Duração</small>
+                                    {% set indicador = chamado.indicador_tempo %}
+                                    <span class="badge bg-{{ indicador.classe }}">
+                                        <i class="fas fa-{{ indicador.icone }}"></i> 
+                                        {{ chamado.tempo_aberto_formatado }}
+                                    </span>
+                                    <br>
+                                    <small class="text-muted" style="font-size: 0.65rem;">
+                                        {% if chamado.status in ['Fechado', 'Resolvido'] %}
+                                            {{ indicador.texto }}
+                                        {% else %}
+                                            Aberto há
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
                             <div class="d-grid gap-2">
                                 <a href="{{ url_for('main.detalhe_chamado', id=chamado.id) }}" class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-eye me-1"></i>Visualizar

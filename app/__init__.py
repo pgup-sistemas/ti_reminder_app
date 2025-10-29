@@ -188,19 +188,33 @@ def create_app():
     def inject_pending_approvals():
         from flask_login import current_user
         from .services.equipment_service import EquipmentService
+        from .models import Chamado
         
-        # Inicializa com valor padrão
+        # Inicializa com valores padrão
         pending_count = 0
+        chamados_abertos_count = 0
         
-        # Verifica se o usuário está autenticado e tem permissão
-        if current_user.is_authenticated and (current_user.is_admin or current_user.is_ti):
+        # Verifica se o usuário está autenticado
+        if current_user.is_authenticated:
+            # Contagem de equipamentos pendentes (apenas Admin/TI)
+            if current_user.is_admin or current_user.is_ti:
+                try:
+                    pending_count = EquipmentService.count_pending_approvals()
+                except Exception as e:
+                    app.logger.error(f"Erro ao contar aprovações pendentes: {str(e)}")
+                    pending_count = 0
+            
+            # Contagem de chamados abertos (todos os usuários)
             try:
-                pending_count = EquipmentService.count_pending_approvals()
+                chamados_abertos_count = Chamado.count_open_tickets(current_user)
             except Exception as e:
-                app.logger.error(f"Erro ao contar aprovações pendentes: {str(e)}")
-                pending_count = 0
+                app.logger.error(f"Erro ao contar chamados abertos: {str(e)}")
+                chamados_abertos_count = 0
         
-        return {'pending_approvals_count': pending_count}
+        return {
+            'pending_approvals_count': pending_count,
+            'chamados_abertos_count': chamados_abertos_count
+        }
 
     # Error handlers customizados
     @app.errorhandler(400)

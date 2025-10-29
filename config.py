@@ -45,6 +45,9 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'pageupsistemas@gmail.com')
+    
+    # Email do grupo TI para receber notificações de chamados
+    TI_EMAIL_GROUP = os.environ.get('TI_EMAIL_GROUP', 'ti@alphaclin.net.br')
 
     # Criptografia de segredos de configurações
     CONFIG_SECRET_KEY = os.environ.get('CONFIG_SECRET_KEY')

@@ -122,7 +122,8 @@ O sistema se adapta automaticamente a diferentes tamanhos de tela:
 ### Contato
 
 Para suporte técnico:
-- 📧 **E-mail**: suporte@ti-osn.com
+- 📧 **E-mail**: pageupsistemas@gmail.com
+- <i class="fab fa-github"></i> **GitHub**: [ti_reminder_app](https://github.com/pgup-sistemas/ti_reminder_app.git)
 - 🎫 **Chamados**: Sistema interno de chamados
 - 📞 **Telefone**: Entre em contato com a equipe de TI
 

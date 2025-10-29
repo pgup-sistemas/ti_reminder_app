@@ -16,6 +16,8 @@ plugins:
 # Navegação
 nav:
   - Início: index.md
+  - Apresentação do Sistema: apresentacao.md
+  - Resumo Executivo: RESUMO_EXECUTIVO.md
   - Guia do Usuário:
     - Visão Geral: user-guide/overview.md
     - Segurança: user-guide/security.md
@@ -49,9 +51,13 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 # CSS personalizado
 extra_css:
+  - https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css
   - stylesheets/extra.css
 
 # JavaScript personalizado

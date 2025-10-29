@@ -215,6 +215,7 @@ ALERT_THRESHOLDS = {
 - **Cache**: Limpeza de cache
 
 ### Suporte Técnico
-- **Documentação**: docs/satisfaction-admin.md
-- **Equipe de TI**: chamados@empresa.com
-- **Fornecedor**: suporte@satisfaction-provider.com
+- **📚 Documentação**: docs/satisfaction-admin.md
+- **📧 E-mail**: pageupsistemas@gmail.com
+- **<i class="fab fa-github"></i> GitHub**: [ti_reminder_app](https://github.com/pgup-sistemas/ti_reminder_app.git)
+- **🎫 Sistema de chamados**: Abra um ticket interno

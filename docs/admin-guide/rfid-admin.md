@@ -174,6 +174,7 @@ GET /rfid/history/{equipment_id}?period=30d
 ## Suporte e Contato
 
 Para suporte técnico do sistema RFID, entre em contato com:
-- **Equipe de TI**: chamados@empresa.com
-- **Fornecedor RFID**: suporte@rfid-provider.com
-- **Documentação**: docs/ rfid-admin.md
+- **📧 E-mail**: pageupsistemas@gmail.com
+- **<i class="fab fa-github"></i> GitHub**: [ti_reminder_app](https://github.com/pgup-sistemas/ti_reminder_app.git)
+- **🎫 Sistema de chamados**: Abra um ticket interno
+- **📚 Documentação**: docs/rfid-admin.md

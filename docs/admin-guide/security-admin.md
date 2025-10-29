@@ -437,12 +437,13 @@ python scripts/security_report.py
 ## 📞 Contatos de Emergência
 
 **Incidente de Segurança:**
-- 🚨 Email: security@ti-osn.com
+- 🚨 Email: pageupsistemas@gmail.com
+- <i class="fab fa-github"></i> GitHub: [ti_reminder_app](https://github.com/pgup-sistemas/ti_reminder_app.git)
 - 📱 Telefone: (xx) xxxx-xxxx
 - 💬 Slack: #security-incidents
 
 **Suporte Técnico:**
-- 📧 Email: suporte@ti-osn.com
+- 📧 Email: pageupsistemas@gmail.com
 - 🎫 Sistema de chamados interno
 
 ---

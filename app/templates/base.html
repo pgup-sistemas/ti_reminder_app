@@ -235,10 +235,16 @@
               </a>
             </li>
             <li>
-              <a class="dropdown-item px-3 py-2 d-flex align-items-center {% if request.endpoint == 'main.listar_chamados' %}active{% endif %}" 
+              <a class="dropdown-item px-3 py-2 d-flex align-items-center position-relative {% if request.endpoint == 'main.listar_chamados' %}active{% endif %}" 
                  href="{{ url_for('main.listar_chamados') }}"
                  role="menuitem">
                 <i class="fas fa-inbox me-2 text-info" aria-hidden="true"></i> Meus Tickets
+                {% if chamados_abertos_count and chamados_abertos_count > 0 %}
+                <span class="badge rounded-pill bg-danger position-absolute top-10 start-100 translate-middle">
+                  {{ chamados_abertos_count }}
+                  <span class="visually-hidden">chamados abertos</span>
+                </span>
+                {% endif %}
               </a>
             </li>
           </ul>
