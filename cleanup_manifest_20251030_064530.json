@@ -1,0 +1,410 @@
+[
+  {
+    "type": "move",
+    "source": "test_com_auth.py",
+    "destination": "archive/test_scripts/test_com_auth.py",
+    "timestamp": "2025-10-30T06:45:30.170949"
+  },
+  {
+    "type": "move",
+    "source": "test_com_senha.py",
+    "destination": "archive/test_scripts/test_com_senha.py",
+    "timestamp": "2025-10-30T06:45:30.173578"
+  },
+  {
+    "type": "move",
+    "source": "test_edit_completo.py",
+    "destination": "archive/test_scripts/test_edit_completo.py",
+    "timestamp": "2025-10-30T06:45:30.176275"
+  },
+  {
+    "type": "move",
+    "source": "test_edit_final.py",
+    "destination": "archive/test_scripts/test_edit_final.py",
+    "timestamp": "2025-10-30T06:45:30.180059"
+  },
+  {
+    "type": "move",
+    "source": "test_edit_request.py",
+    "destination": "archive/test_scripts/test_edit_request.py",
+    "timestamp": "2025-10-30T06:45:30.182305"
+  },
+  {
+    "type": "move",
+    "source": "test_post_direto.py",
+    "destination": "archive/test_scripts/test_post_direto.py",
+    "timestamp": "2025-10-30T06:45:30.184939"
+  },
+  {
+    "type": "move",
+    "source": "test_user_edit.py",
+    "destination": "archive/test_scripts/test_user_edit.py",
+    "timestamp": "2025-10-30T06:45:30.186860"
+  },
+  {
+    "type": "move",
+    "source": "test_user_edit_direct.py",
+    "destination": "archive/test_scripts/test_user_edit_direct.py",
+    "timestamp": "2025-10-30T06:45:30.189053"
+  },
+  {
+    "type": "move",
+    "source": "test_analytics_api.py",
+    "destination": "archive/test_scripts/test_analytics_api.py",
+    "timestamp": "2025-10-30T06:45:30.191546"
+  },
+  {
+    "type": "move",
+    "source": "test_email_connection.py",
+    "destination": "archive/test_scripts/test_email_connection.py",
+    "timestamp": "2025-10-30T06:45:30.194132"
+  },
+  {
+    "type": "move",
+    "source": "test_export_route.py",
+    "destination": "archive/test_scripts/test_export_route.py",
+    "timestamp": "2025-10-30T06:45:30.196347"
+  },
+  {
+    "type": "move",
+    "source": "test_import.py",
+    "destination": "archive/test_scripts/test_import.py",
+    "timestamp": "2025-10-30T06:45:30.198672"
+  },
+  {
+    "type": "move",
+    "source": "test_reset_password_email.py",
+    "destination": "archive/test_scripts/test_reset_password_email.py",
+    "timestamp": "2025-10-30T06:45:30.200805"
+  },
+  {
+    "type": "delete",
+    "source": "debug_flask_mail_config.py",
+    "destination": null,
+    "timestamp": "2025-10-30T06:45:30.203364"
+  },
+  {
+    "type": "delete",
+    "source": "debug_login.txt",
+    "destination": null,
+    "timestamp": "2025-10-30T06:45:30.204788"
+  },
+  {
+    "type": "delete",
+    "source": "tmp_debug_system_config.py",
+    "destination": null,
+    "timestamp": "2025-10-30T06:45:30.205731"
+  },
+  {
+    "type": "delete",
+    "source": "check_analytics_routes.py",
+    "destination": null,
+    "timestamp": "2025-10-30T06:45:30.206684"
+  },
+  {
+    "type": "delete",
+    "source": "check_config.py",
+    "destination": null,
+    "timestamp": "2025-10-30T06:45:30.207650"
+  },
+  {
+    "type": "delete",
+    "source": "check_routes.py",
+    "destination": null,
+    "timestamp": "2025-10-30T06:45:30.208659"
+  },
+  {
+    "type": "delete",
+    "source": "clear_cache.py",
+    "destination": null,
+    "timestamp": "2025-10-30T06:45:30.209966"
+  },
+  {
+    "type": "move",
+    "source": "apply_config_migration.py",
+    "destination": "archive/migration_scripts/apply_config_migration.py",
+    "timestamp": "2025-10-30T06:45:30.214860"
+  },
+  {
+    "type": "move",
+    "source": "fix_env_mail_tls.py",
+    "destination": "archive/migration_scripts/fix_env_mail_tls.py",
+    "timestamp": "2025-10-30T06:45:30.216706"
+  },
+  {
+    "type": "move",
+    "source": "reverter_senha.py",
+    "destination": "archive/migration_scripts/reverter_senha.py",
+    "timestamp": "2025-10-30T06:45:30.219201"
+  },
+  {
+    "type": "move",
+    "source": "verify_email_config.py",
+    "destination": "archive/migration_scripts/verify_email_config.py",
+    "timestamp": "2025-10-30T06:45:30.221348"
+  },
+  {
+    "type": "move",
+    "source": "verify_security_fields.py",
+    "destination": "archive/migration_scripts/verify_security_fields.py",
+    "timestamp": "2025-10-30T06:45:30.223269"
+  },
+  {
+    "type": "move",
+    "source": "create_env.py",
+    "destination": "archive/migration_scripts/create_env.py",
+    "timestamp": "2025-10-30T06:45:30.224540"
+  },
+  {
+    "type": "move",
+    "source": "generate_keys.py",
+    "destination": "archive/migration_scripts/generate_keys.py",
+    "timestamp": "2025-10-30T06:45:30.228025"
+  },
+  {
+    "type": "move",
+    "source": "init_db.py",
+    "destination": "archive/migration_scripts/init_db.py",
+    "timestamp": "2025-10-30T06:45:30.230148"
+  },
+  {
+    "type": "move",
+    "source": "list_all_routes.py",
+    "destination": "archive/migration_scripts/list_all_routes.py",
+    "timestamp": "2025-10-30T06:45:30.232163"
+  },
+  {
+    "type": "move",
+    "source": "IMPLEMENTACAO_BADGE_CHAMADOS.md",
+    "destination": "archive/implementation_reports/IMPLEMENTACAO_BADGE_CHAMADOS.md",
+    "timestamp": "2025-10-30T06:45:30.235633"
+  },
+  {
+    "type": "move",
+    "source": "IMPLEMENTACAO_COMPLETA.md",
+    "destination": "archive/implementation_reports/IMPLEMENTACAO_COMPLETA.md",
+    "timestamp": "2025-10-30T06:45:30.238464"
+  },
+  {
+    "type": "move",
+    "source": "IMPLEMENTACAO_DURACAO_CHAMADOS.md",
+    "destination": "archive/implementation_reports/IMPLEMENTACAO_DURACAO_CHAMADOS.md",
+    "timestamp": "2025-10-30T06:45:30.240463"
+  },
+  {
+    "type": "move",
+    "source": "IMPLEMENTATION_REPORT.md",
+    "destination": "archive/implementation_reports/IMPLEMENTATION_REPORT.md",
+    "timestamp": "2025-10-30T06:45:30.242365"
+  },
+  {
+    "type": "move",
+    "source": "CONCLUSAO_IMPLEMENTACAO_ANALYTICS.md",
+    "destination": "archive/implementation_reports/CONCLUSAO_IMPLEMENTACAO_ANALYTICS.md",
+    "timestamp": "2025-10-30T06:45:30.244985"
+  },
+  {
+    "type": "move",
+    "source": "SISTEMA_MODAIS_IMPLEMENTADO.md",
+    "destination": "archive/implementation_reports/SISTEMA_MODAIS_IMPLEMENTADO.md",
+    "timestamp": "2025-10-30T06:45:30.248123"
+  },
+  {
+    "type": "move",
+    "source": "GESTAO_USUARIOS_COMPLETA.md",
+    "destination": "archive/implementation_reports/GESTAO_USUARIOS_COMPLETA.md",
+    "timestamp": "2025-10-30T06:45:30.250652"
+  },
+  {
+    "type": "move",
+    "source": "DOCUMENTACAO_MKDOCS_CONCLUIDA.md",
+    "destination": "archive/implementation_reports/DOCUMENTACAO_MKDOCS_CONCLUIDA.md",
+    "timestamp": "2025-10-30T06:45:30.252358"
+  },
+  {
+    "type": "move",
+    "source": "FOOTER_DARK_MODE_IMPLEMENTATION.md",
+    "destination": "archive/implementation_reports/FOOTER_DARK_MODE_IMPLEMENTATION.md",
+    "timestamp": "2025-10-30T06:45:30.254170"
+  },
+  {
+    "type": "move",
+    "source": "DARK_MODE_CONSOLIDATION.md",
+    "destination": "archive/implementation_reports/DARK_MODE_CONSOLIDATION.md",
+    "timestamp": "2025-10-30T06:45:30.256399"
+  },
+  {
+    "type": "move",
+    "source": "MODULO_BACKUP_REAL.md",
+    "destination": "archive/implementation_reports/MODULO_BACKUP_REAL.md",
+    "timestamp": "2025-10-30T06:45:30.261914"
+  },
+  {
+    "type": "move",
+    "source": "MODULO_SEGURANCA_COMPLETO.md",
+    "destination": "archive/implementation_reports/MODULO_SEGURANCA_COMPLETO.md",
+    "timestamp": "2025-10-30T06:45:30.263844"
+  },
+  {
+    "type": "move",
+    "source": "DIAGNOSTICO_ANALYTICS.md",
+    "destination": "archive/analysis/DIAGNOSTICO_ANALYTICS.md",
+    "timestamp": "2025-10-30T06:45:30.266801"
+  },
+  {
+    "type": "move",
+    "source": "DIAGNOSTICO_SISTEMA_CONFIGURACOES.md",
+    "destination": "archive/analysis/DIAGNOSTICO_SISTEMA_CONFIGURACOES.md",
+    "timestamp": "2025-10-30T06:45:30.269088"
+  },
+  {
+    "type": "move",
+    "source": "ANALISE_TEMPO_CHAMADOS.md",
+    "destination": "archive/analysis/ANALISE_TEMPO_CHAMADOS.md",
+    "timestamp": "2025-10-30T06:45:30.271447"
+  },
+  {
+    "type": "move",
+    "source": "ANALISE_NOMENCLATURA_FRONTEND.md",
+    "destination": "archive/analysis/ANALISE_NOMENCLATURA_FRONTEND.md",
+    "timestamp": "2025-10-30T06:45:30.275768"
+  },
+  {
+    "type": "move",
+    "source": "ANALISE_COMERCIAL_2025.md",
+    "destination": "archive/analysis/ANALISE_COMERCIAL_2025.md",
+    "timestamp": "2025-10-30T06:45:30.278170"
+  },
+  {
+    "type": "move",
+    "source": "TESTE_ANALYTICS_CORRIGIDO.md",
+    "destination": "archive/analysis/TESTE_ANALYTICS_CORRIGIDO.md",
+    "timestamp": "2025-10-30T06:45:30.280827"
+  },
+  {
+    "type": "move",
+    "source": "PLANO_ACAO_CONFIGURACOES.md",
+    "destination": "archive/planning/PLANO_ACAO_CONFIGURACOES.md",
+    "timestamp": "2025-10-30T06:45:30.283425"
+  },
+  {
+    "type": "move",
+    "source": "PLANO_ACAO_IMEDIATO.md",
+    "destination": "archive/planning/PLANO_ACAO_IMEDIATO.md",
+    "timestamp": "2025-10-30T06:45:30.285472"
+  },
+  {
+    "type": "move",
+    "source": "MODAL_SYSTEM_PLAN.md",
+    "destination": "archive/planning/MODAL_SYSTEM_PLAN.md",
+    "timestamp": "2025-10-30T06:45:30.287416"
+  },
+  {
+    "type": "move",
+    "source": "ROADMAP_COMERCIAL_2025.md",
+    "destination": "archive/planning/ROADMAP_COMERCIAL_2025.md",
+    "timestamp": "2025-10-30T06:45:30.291323"
+  },
+  {
+    "type": "move",
+    "source": "ROTEIRO_TESTES_NOTIFICACOES.md",
+    "destination": "archive/planning/ROTEIRO_TESTES_NOTIFICACOES.md",
+    "timestamp": "2025-10-30T06:45:30.294072"
+  },
+  {
+    "type": "move",
+    "source": "PLANO_LIMPEZA_PROJETO.md",
+    "destination": "archive/planning/PLANO_LIMPEZA_PROJETO.md",
+    "timestamp": "2025-10-30T06:45:30.296372"
+  },
+  {
+    "type": "move",
+    "source": "CORRECAO_EDICAO_USUARIOS.md",
+    "destination": "archive/fixes/CORRECAO_EDICAO_USUARIOS.md",
+    "timestamp": "2025-10-30T06:45:30.299124"
+  },
+  {
+    "type": "move",
+    "source": "APLICAR_CORRECOES_EMAIL.md",
+    "destination": "archive/fixes/APLICAR_CORRECOES_EMAIL.md",
+    "timestamp": "2025-10-30T06:45:30.300931"
+  },
+  {
+    "type": "move",
+    "source": "FLUXO_EMAILS.md",
+    "destination": "archive/fixes/FLUXO_EMAILS.md",
+    "timestamp": "2025-10-30T06:45:30.302825"
+  },
+  {
+    "type": "move",
+    "source": "REMINDER_IMPROVEMENTS.md",
+    "destination": "archive/fixes/REMINDER_IMPROVEMENTS.md",
+    "timestamp": "2025-10-30T06:45:30.304810"
+  },
+  {
+    "type": "move",
+    "source": "SECURITY_IMPROVEMENTS.md",
+    "destination": "archive/fixes/SECURITY_IMPROVEMENTS.md",
+    "timestamp": "2025-10-30T06:45:30.306574"
+  },
+  {
+    "type": "move",
+    "source": "STATUS_IMPLEMENTACAO_ANALYTICS.md",
+    "destination": "archive/status_reports/STATUS_IMPLEMENTACAO_ANALYTICS.md",
+    "timestamp": "2025-10-30T06:45:30.309942"
+  },
+  {
+    "type": "move",
+    "source": "ANALYTICS_CHECKLIST_FINAL.md",
+    "destination": "archive/status_reports/ANALYTICS_CHECKLIST_FINAL.md",
+    "timestamp": "2025-10-30T06:45:30.311622"
+  },
+  {
+    "type": "move",
+    "source": "RESUMO_EXECUTIVO_IMPLEMENTACAO.md",
+    "destination": "archive/status_reports/RESUMO_EXECUTIVO_IMPLEMENTACAO.md",
+    "timestamp": "2025-10-30T06:45:30.313513"
+  },
+  {
+    "type": "move",
+    "source": "RESUMO_BADGE_CHAMADOS.md",
+    "destination": "archive/status_reports/RESUMO_BADGE_CHAMADOS.md",
+    "timestamp": "2025-10-30T06:45:30.315199"
+  },
+  {
+    "type": "move",
+    "source": "RESUMO_NOMENCLATURA.md",
+    "destination": "archive/status_reports/RESUMO_NOMENCLATURA.md",
+    "timestamp": "2025-10-30T06:45:30.316850"
+  },
+  {
+    "type": "move",
+    "source": "DIA1_COMPLETO.md",
+    "destination": "archive/status_reports/DIA1_COMPLETO.md",
+    "timestamp": "2025-10-30T06:45:30.318634"
+  },
+  {
+    "type": "move",
+    "source": "EXEMPLOS_ANTES_DEPOIS.md",
+    "destination": "archive/guides/EXEMPLOS_ANTES_DEPOIS.md",
+    "timestamp": "2025-10-30T06:45:30.320844"
+  },
+  {
+    "type": "move",
+    "source": "INDICE_MODERNIZACAO.md",
+    "destination": "archive/guides/INDICE_MODERNIZACAO.md",
+    "timestamp": "2025-10-30T06:45:30.323600"
+  },
+  {
+    "type": "move",
+    "source": "FASE3_NOTIFICACOES_LOGS.md",
+    "destination": "archive/guides/FASE3_NOTIFICACOES_LOGS.md",
+    "timestamp": "2025-10-30T06:45:30.325881"
+  },
+  {
+    "type": "move",
+    "source": "MIGRATION_EXAMPLES.md",
+    "destination": "archive/guides/MIGRATION_EXAMPLES.md",
+    "timestamp": "2025-10-30T06:45:30.327734"
+  }
+]
