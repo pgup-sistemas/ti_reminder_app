@@ -152,8 +152,8 @@
                         </div>
                     </div>
                     <h2 class="fw-bold mb-2 text-danger">{{ sla_vencidos or 0 }}</h2>
-                    <p class="text-muted mb-1 fw-medium">SLA Vencido</p>
-                    <small class="text-muted">Tickets fora do prazo</small>
+                    <p class="text-muted mb-1 fw-medium">SLA Vencido (Global)</p>
+                    <small class="text-muted">Tickets fora do prazo em todo o sistema</small>
                 </div>
             </div>
         </div>
@@ -168,8 +168,8 @@
                         </div>
                     </div>
                     <h2 class="fw-bold mb-2 text-warning">{{ sla_criticos or 0 }}</h2>
-                    <p class="text-muted mb-1 fw-medium">SLA Crítico</p>
-                    <small class="text-muted">Próximos ao vencimento</small>
+                    <p class="text-muted mb-1 fw-medium">SLA Crítico (Global)</p>
+                    <small class="text-muted">Tickets próximos ao vencimento em todo o sistema</small>
                 </div>
             </div>
         </div>
@@ -184,8 +184,8 @@
                         </div>
                     </div>
                     <h2 class="fw-bold mb-2 text-success">{{ sla_ok or 0 }}</h2>
-                    <p class="text-muted mb-1 fw-medium">SLA OK</p>
-                    <small class="text-muted">Dentro do prazo</small>
+                    <p class="text-muted mb-1 fw-medium">SLA OK (Global)</p>
+                    <small class="text-muted">Tickets dentro do prazo em todo o sistema</small>
                 </div>
             </div>
         </div>
@@ -200,8 +200,8 @@
                         </div>
                     </div>
                     <h2 class="fw-bold mb-2 text-white">{{ performance_sla or 0 }}%</h2>
-                    <p class="text-white-50 mb-1 fw-medium">Performance SLA</p>
-                    <small class="text-white-50">Taxa de atendimento</small>
+                    <p class="text-white-50 mb-1 fw-medium">Performance SLA Global</p>
+                    <small class="text-white-50">Taxa de atendimento dos tickets fechados (últimos 30 dias)</small>
                 </div>
             </div>
         </div>

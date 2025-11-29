@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Empréstimo | TI OSN System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h2>
+            <i class="fas fa-id-card me-2 text-primary"></i>
+            {{ loan.equipment.name }}
+          </h2>
+          <p class="text-muted mb-0">Visão 360º do empréstimo</p>
+        </div>
+        <a href="{{ url_for('equipment_v2.admin_loans') if current_user.is_admin or current_user.is_ti else url_for('equipment_v2.my_loans') }}" class="btn btn-outline-secondary">
+          <i class="fas fa-arrow-left me-2"></i>Voltar
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center mb-3">
+            <span class="badge {{ 'bg-success' if loan.status=='ativo' else 'bg-secondary' }} me-2">{{ loan.status|capitalize }}</span>
+            <strong class="me-2">Usuário:</strong>
+            <span class="me-3">{{ loan.user.username }}</span>
+            {% if loan.user.sector %}
+            <span class="text-muted">({{ loan.user.sector.name }})</span>
+            {% endif %}
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <small class="text-muted d-block">Empréstimo em</small>
+              <strong>{{ loan.loan_date.strftime('%d/%m/%Y %H:%M') }}</strong>
+            </div>
+            <div class="col-md-4">
+              <small class="text-muted d-block">Devolução prevista</small>
+              <strong>{{ loan.expected_return_date.strftime('%d/%m/%Y') }}{% if loan.expected_return_time %} {{ loan.expected_return_time.strftime('%H:%M') }}{% endif %}</strong>
+            </div>
+            <div class="col-md-4">
+              <small class="text-muted d-block">Devolvido em</small>
+              <strong>{% if loan.actual_return_date %}{{ loan.actual_return_date.strftime('%d/%m/%Y %H:%M') }}{% else %}-{% endif %}</strong>
+            </div>
+          </div>
+
+          <hr>
+
+          <h5 class="text-secondary mb-3"><i class="fas fa-shipping-fast me-2"></i>Entrega</h5>
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <small class="text-muted d-block">Entregue por</small>
+              <strong>{% if loan.delivered_by %}{{ loan.delivered_by.username }}{% else %}-{% endif %}</strong>
+            </div>
+            <div class="col-md-4">
+              <small class="text-muted d-block">Condição</small>
+              <strong>{{ loan.condition_at_loan or '-' }}</strong>
+            </div>
+            <div class="col-md-4">
+              <small class="text-muted d-block">Notas</small>
+              <small class="d-block">{{ loan.delivery_notes or '-' }}</small>
+            </div>
+          </div>
+          {% if delivery_photos %}
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            {% for url in delivery_photos %}
+            <img src="{{ url }}" alt="Entrega" class="img-thumbnail" style="max-height: 140px;">
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <hr>
+
+          <h5 class="text-secondary mb-3"><i class="fas fa-clipboard-check me-2"></i>Aprovação</h5>
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <small class="text-muted d-block">Aprovado por</small>
+              <strong>{% if reservation and reservation.approved_by %}{{ reservation.approved_by.username }}{% else %}-{% endif %}</strong>
+            </div>
+            <div class="col-md-4">
+              <small class="text-muted d-block">Data</small>
+              <strong>{% if reservation and reservation.approval_date %}{{ reservation.approval_date.strftime('%d/%m/%Y %H:%M') }}{% else %}-{% endif %}</strong>
+            </div>
+            <div class="col-md-4">
+              <small class="text-muted d-block">Notas</small>
+              <small class="d-block">{% if reservation and reservation.approval_notes %}{{ reservation.approval_notes }}{% else %}-{% endif %}</small>
+            </div>
+          </div>
+
+          <hr>
+
+          <h5 class="text-secondary mb-3"><i class="fas fa-undo me-2"></i>Devolução</h5>
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <small class="text-muted d-block">Recebido por</small>
+              <strong>{% if loan.received_by %}{{ loan.received_by.username }}{% else %}-{% endif %}</strong>
+            </div>
+            <div class="col-md-4">
+              <small class="text-muted d-block">Condição</small>
+              <strong>{{ loan.condition_at_return or '-' }}</strong>
+            </div>
+            <div class="col-md-4">
+              <small class="text-muted d-block">Notas</small>
+              <small class="d-block">{{ loan.return_notes or '-' }}</small>
+            </div>
+          </div>
+          {% if return_photos %}
+          <div class="d-flex flex-wrap gap-2">
+            {% for url in return_photos %}
+            <img src="{{ url }}" alt="Devolução" class="img-thumbnail" style="max-height: 140px;">
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h5 class="text-secondary mb-3"><i class="fas fa-info-circle me-2"></i>Resumo</h5>
+          <ul class="list-unstyled mb-0">
+            <li class="mb-2"><strong>Patrimônio:</strong> <span class="text-muted">{{ loan.equipment.patrimony or '-' }}</span></li>
+            <li class="mb-2"><strong>Categoria:</strong> <span class="text-muted">{{ loan.equipment.category or '-' }}</span></li>
+            <li class="mb-2"><strong>Localização:</strong> <span class="text-muted">{{ loan.equipment.location or '-' }}</span></li>
+            <li class="mb-2"><strong>Condição atual:</strong> <span class="text-muted">{{ loan.equipment.condition or '-' }}</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -21,6 +21,7 @@ except (ImportError, AttributeError):
     pass
 
 from flask import Flask
+from config import get_config
 from flask_apscheduler import APScheduler
 from flask_bootstrap import Bootstrap
 from flask_jwt_extended import JWTManager
@@ -50,7 +51,9 @@ def create_app():
     import logging.config
 
     app = Flask(__name__)
-    app.config.from_object("config.Config")
+    config_class = get_config()
+    config_obj = config_class()
+    app.config.from_object(config_obj)
     
     # Configuração de logging
     logging.config.dictConfig(app.config.get('LOGGING_CONFIG', {}))
@@ -173,7 +176,7 @@ def create_app():
                 "notifications=(self)",
                 "push=(self)",
                 "microphone=()",
-                "camera=()",
+                "camera=(self)",
                 "magnetometer=()",
                 "gyroscope=()",
                 "fullscreen=(self)",

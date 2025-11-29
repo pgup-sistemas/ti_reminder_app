@@ -83,7 +83,10 @@
                         {% endif %}
                     </td>
                     <td>
-                        <small>{{ req.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                        <small>
+                            {{ req.start_date.strftime('%d/%m/%Y') }}
+                            {% if req.start_time %} às {{ req.start_time.strftime('%H:%M') }}{% endif %}
+                        </small>
                     </td>
                     <td>
                         {% if req.status == 'confirmada' %}

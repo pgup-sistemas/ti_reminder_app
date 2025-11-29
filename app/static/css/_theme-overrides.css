@@ -480,6 +480,18 @@ form[action*="reset"] .btn:active {
   text-decoration: none;
 }
 
+/* Responsividade do menu principal em telas de notebook
+   Permite que os itens do menu quebrem linha para evitar scroll horizontal */
+@media (max-width: 1400px) {
+  .navbar .container-fluid {
+    flex-wrap: wrap;
+  }
+
+  .navbar-nav.me-auto {
+    flex-wrap: wrap;
+  }
+}
+
 /* Dropdowns */
 .dropdown-menu {
   background-color: var(--bg-surface);

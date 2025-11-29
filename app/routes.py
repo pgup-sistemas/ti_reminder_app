@@ -69,7 +69,7 @@ bp = Blueprint("main", __name__)
 @login_required
 def index():
     # Importação local para evitar dependência circular se outros módulos importarem main.py diretamente
-    from .models import Chamado, EquipmentRequest
+    from .models import Chamado, EquipmentReservation
 
     search = request.args.get("search", "").strip().lower()
     status = request.args.get("status", "").strip().lower()
@@ -100,8 +100,8 @@ def index():
             .limit(10)
             .all()
         )  # Limita a 10 chamados mais recentes
-        # Buscar equipamentos
-        equipamentos_count = EquipmentRequest.query.count()
+        # Buscar equipamentos (fluxo novo equipment_v2 - reservas globais)
+        equipamentos_count = EquipmentReservation.query.count()
     else:
         reminders_count = Reminder.query.filter_by(user_id=user_id).count()
         reminders_today = Reminder.query.filter(
@@ -137,12 +137,14 @@ def index():
             .all()
         )  # Limita a 10 chamados mais recentes
 
-        # Buscar equipamentos do usuário - apenas campos existentes no banco
+        # Buscar equipamentos do usuário (fluxo novo equipment_v2)
         if is_ti:
-            equipamentos_count = EquipmentRequest.query.count()
+            # TI vê todas as reservas
+            equipamentos_count = EquipmentReservation.query.count()
         else:
-            equipamentos_count = EquipmentRequest.query.filter_by(
-                requester_id=user_id
+            # Usuário comum vê apenas suas reservas
+            equipamentos_count = EquipmentReservation.query.filter_by(
+                user_id=user_id
             ).count()
 
     # --- FILTRO E BUSCA LEMBRETES ---
@@ -1180,7 +1182,7 @@ def dashboard():
     Dashboard principal do sistema - versão refatorada usando serviços
     """
     from flask import request, flash
-    from datetime import datetime
+    from datetime import datetime, date
 
     # Obter permissões do usuário
     permissions = PermissionManager.get_user_permissions()
@@ -1223,8 +1225,38 @@ def dashboard():
         except ValueError:
             flash_warning("Data final inválida.")
 
-    # Obter dados filtrados usando o serviço
+    # Obter dados filtrados usando o serviço (para gráficos, SLA etc.)
     dashboard_data = DashboardService.get_filtered_data(filters, permissions)
+
+    # ======================================================
+    # ESTATÍSTICAS GLOBAIS (SEM FILTRO POR USUÁRIO/SETOR)
+    # Usadas pelos cards principais do topo do dashboard
+    # ======================================================
+    from app.models import Task, Reminder, Chamado
+
+    # Atividades & Projetos (Task)
+    tasks_total_global = Task.query.count()
+    tasks_done_global = Task.query.filter_by(completed=True).count()
+    tasks_pending_global = Task.query.filter(
+        Task.completed == False,  # noqa: E712
+        Task.date >= date.today()
+    ).count()
+    tasks_expired_global = Task.query.filter(
+        Task.completed == False,  # noqa: E712
+        Task.date < date.today()
+    ).count()
+
+    # Notificações Programadas (Reminder)
+    reminders_total_global = Reminder.query.count()
+    reminders_done_global = Reminder.query.filter_by(completed=True).count()
+    reminders_pending_global = Reminder.query.filter_by(completed=False).count()
+
+    # Tickets & Suporte (Chamado)
+    chamados_total_global = Chamado.query.count()
+    chamados_aberto_global = Chamado.query.filter_by(status='Aberto').count()
+    chamados_em_andamento_global = Chamado.query.filter_by(status='Em Andamento').count()
+    chamados_resolvido_global = Chamado.query.filter_by(status='Resolvido').count()
+    chamados_fechado_global = Chamado.query.filter_by(status='Fechado').count()
 
     # Preparar dados para o template
     if can_view_all:
@@ -1242,32 +1274,40 @@ def dashboard():
         inventory_danificados = 0
         inventory_perdidos = 0
 
+    # Estatísticas de equipamentos para o card "Gestão de Ativos" (fluxo equipment_v2)
+    # Sempre globais: somam todas as solicitações/empréstimos do sistema
+    from app.models import EquipmentReservation, EquipmentLoan
+    equipamentos_total = EquipmentReservation.query.count()
+    equipamentos_solicitados = EquipmentReservation.query.filter_by(status='pendente').count()
+    equipamentos_negados = EquipmentReservation.query.filter_by(status='rejeitada').count()
+    equipamentos_entregues = EquipmentLoan.query.count()
+
     template_data = {
-        # Estatísticas de tarefas
-        'tasks_total': dashboard_data['stats']['tasks']['total'],
-        'tasks_done': dashboard_data['stats']['tasks']['done'],
-        'tasks_pending': dashboard_data['stats']['tasks']['pending'],
-        'tasks_expired': dashboard_data['stats']['tasks']['expired'],
+        # Estatísticas de tarefas (globais para o card de Atividades & Projetos)
+        'tasks_total': tasks_total_global,
+        'tasks_done': tasks_done_global,
+        'tasks_pending': tasks_pending_global,
+        'tasks_expired': tasks_expired_global,
 
-        # Estatísticas de lembretes
-        'reminders_total': dashboard_data['stats']['reminders']['total'],
-        'reminders_done': dashboard_data['stats']['reminders']['done'],
-        'reminders_pending': dashboard_data['stats']['reminders']['pending'],
+        # Estatísticas de lembretes (globais para o card de Notificações Programadas)
+        'reminders_total': reminders_total_global,
+        'reminders_done': reminders_done_global,
+        'reminders_pending': reminders_pending_global,
 
-        # Estatísticas de chamados
-        'chamados_total': dashboard_data['stats']['chamados']['total'],
-        'chamados_aberto': dashboard_data['stats']['chamados']['aberto'],
-        'chamados_em_andamento': dashboard_data['stats']['chamados']['em_andamento'],
-        'chamados_resolvido': dashboard_data['stats']['chamados']['resolvido'],
-        'chamados_fechado': dashboard_data['stats']['chamados']['fechado'],
+        # Estatísticas de chamados (globais para o card de Tickets & Suporte)
+        'chamados_total': chamados_total_global,
+        'chamados_aberto': chamados_aberto_global,
+        'chamados_em_andamento': chamados_em_andamento_global,
+        'chamados_resolvido': chamados_resolvido_global,
+        'chamados_fechado': chamados_fechado_global,
 
-        # Estatísticas de equipamentos
-        'equipamentos_total': dashboard_data['stats']['equipamentos']['total'],
-        'equipamentos_solicitados': dashboard_data['stats']['equipamentos']['solicitados'],
+        # Estatísticas de equipamentos (novo fluxo equipment_v2)
+        'equipamentos_total': equipamentos_total,
+        'equipamentos_solicitados': equipamentos_solicitados,
         'equipamentos_aprovados': dashboard_data['stats']['equipamentos']['aprovados'],
-        'equipamentos_entregues': dashboard_data['stats']['equipamentos']['entregues'],
+        'equipamentos_entregues': equipamentos_entregues,
         'equipamentos_devolvidos': dashboard_data['stats']['equipamentos']['devolvidos'],
-        'equipamentos_negados': dashboard_data['stats']['equipamentos']['negados'],
+        'equipamentos_negados': equipamentos_negados,
 
         # Dados para gráficos de evolução
         'meses_labels': dashboard_data['chart_data']['evolution']['labels'],

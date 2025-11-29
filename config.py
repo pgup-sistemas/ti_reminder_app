@@ -2,13 +2,17 @@ import os
 import secrets
 from datetime import timezone, timedelta
 
+def _env_bool(name, default):
+    val = os.environ.get(name, default)
+    return str(val).lower() in ("1", "true", "t", "yes", "y")
+
 class Config:
     """Configuração base da aplicação."""
     
     # Ambiente
     # FLASK_ENV está deprecado no Flask 2.3+, usar apenas DEBUG
-    DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
-    TESTING = os.environ.get('TESTING', 'False').lower() == 'true'
+    DEBUG = _env_bool('DEBUG', 'True')
+    TESTING = _env_bool('TESTING', 'False')
     
     # Segurança
     SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
@@ -41,13 +45,20 @@ class Config:
     # Email
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
-    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True').lower() == 'true'
+    MAIL_USE_TLS = _env_bool('MAIL_USE_TLS', 'True')
+    MAIL_USE_SSL = _env_bool('MAIL_USE_SSL', 'False')
+    MAIL_SUPPRESS_SEND = _env_bool('MAIL_SUPPRESS_SEND', 'False')
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'pageupsistemas@gmail.com')
+    MAIL_USERNAME = MAIL_USERNAME.strip() if MAIL_USERNAME else None
+    MAIL_PASSWORD = MAIL_PASSWORD.replace(' ', '') if MAIL_PASSWORD else None
     
     # Email do grupo TI para receber notificações de chamados
     TI_EMAIL_GROUP = os.environ.get('TI_EMAIL_GROUP', 'ti@alphaclin.net.br')
+
+    # Base URL usada em links externos nos e-mails (reset de senha, chamados)
+    BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000')
 
     # Criptografia de segredos de configurações
     CONFIG_SECRET_KEY = os.environ.get('CONFIG_SECRET_KEY')
@@ -102,6 +113,13 @@ class Config:
     
     # Scheduler
     SCHEDULER_API_ENABLED = os.environ.get('SCHEDULER_API_ENABLED', 'True').lower() == 'true'
+
+    # Uploads de imagens (profissional)
+    ALLOWED_IMAGE_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.webp'}
+    MAX_IMAGE_UPLOAD_MB = int(os.environ.get('MAX_IMAGE_UPLOAD_MB', 3))
+    IMAGE_MAX_WIDTH = int(os.environ.get('IMAGE_MAX_WIDTH', 1600))
+    IMAGE_MAX_HEIGHT = int(os.environ.get('IMAGE_MAX_HEIGHT', 1200))
+    IMAGE_JPEG_QUALITY = int(os.environ.get('IMAGE_JPEG_QUALITY', 85))
 
 
 class DevelopmentConfig(Config):

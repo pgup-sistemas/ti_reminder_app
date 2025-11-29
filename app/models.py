@@ -850,22 +850,28 @@ class EquipmentLoan(db.Model):
         return f"<EquipmentLoan {self.id}: {self.equipment.name} para {self.user.username}>"
 
     def is_overdue(self):
-        """Verifica se o empréstimo está atrasado considerando data e hora"""
+        """Verifica se o empréstimo está atrasado considerando data e hora (horário local)"""
         if self.status != "ativo":
             return False
-            
-        now = datetime.utcnow()
-        expected_return = datetime.combine(self.expected_return_date, self.expected_return_time or time(23, 59))
-        
+
+        now = datetime.now()
+        expected_return = datetime.combine(
+            self.expected_return_date,
+            self.expected_return_time or time(23, 59)
+        )
+
         return now > expected_return
 
     def days_overdue(self):
         """Retorna quantos dias de atraso"""
         if not self.is_overdue():
             return 0
-            
-        now = datetime.utcnow()
-        expected_return = datetime.combine(self.expected_return_date, self.expected_return_time or time(23, 59))
+
+        now = datetime.now()
+        expected_return = datetime.combine(
+            self.expected_return_date,
+            self.expected_return_time or time(23, 59)
+        )
         delta = now - expected_return
         
         # Retorna o número de dias completos de atraso
@@ -906,7 +912,7 @@ class EquipmentLoan(db.Model):
         if not self.sla_deadline:
             return
 
-        now = get_current_time_for_db()
+        now = datetime.now()
 
         if self.status == "devolvido":
             self.sla_status = "cumprido"

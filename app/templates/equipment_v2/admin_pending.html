@@ -92,29 +92,57 @@
                             <i class="fas fa-clock text-secondary me-2 mt-1"></i>
                             <div>
                                 <small class="text-muted d-block">Solicitado em</small>
-                                <small>{{ req.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                <small>
+                                    {{ req.start_date.strftime('%d/%m/%Y') }}
+                                    {% if req.start_time %} às {{ req.start_time.strftime('%H:%M') }}{% endif %}
+                                </small>
                             </div>
                         </div>
                     </div>
 
                     <hr class="my-3">
 
-                    <div class="mb-3">
-                        <label class="form-label fw-medium small">
-                            <i class="fas fa-pencil-alt me-1"></i>Observações (opcional)
-                        </label>
-                        <textarea class="form-control form-control-sm" id="notes-{{ req.id }}" rows="2" 
-                                  placeholder="Adicione observações sobre a aprovação/rejeição..."></textarea>
-                    </div>
-                    
-                    <div class="d-flex gap-2 pt-2">
-                        <button class="btn btn-success flex-fill" onclick="approveRequest({{ req.id }})">
-                            <i class="fas fa-check me-1"></i>Aprovar
-                        </button>
-                        <button class="btn btn-danger flex-fill" onclick="rejectRequest({{ req.id }})">
-                            <i class="fas fa-times me-1"></i>Rejeitar
-                        </button>
-                    </div>
+                    <form id="approve-form-{{ req.id }}" method="POST" action="{{ url_for('equipment_v2.admin_approve', reservation_id=req.id) }}" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium small">
+                                <i class="fas fa-pencil-alt me-1"></i>Observações (opcional)
+                            </label>
+                            <textarea class="form-control form-control-sm" id="notes-{{ req.id }}" name="notes" rows="2" placeholder="Adicione observações sobre a aprovação/rejeição..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium small">
+                                <i class="fas fa-camera me-1"></i>Fotos da entrega (máximo 3)
+                            </label>
+                            <input class="form-control form-control-sm" type="file" accept="image/*" capture="environment" name="delivery_photos" id="delivery_photos-{{ req.id }}" multiple>
+                            <small class="text-muted">Adicionar registro fotográfico do estado ao entregar.</small>
+                            <div class="d-grid mt-2">
+                                <button type="button" class="btn btn-outline-dark btn-sm" onclick="openCamera('delivery', {{ req.id }})">
+                                    <i class="fas fa-camera me-1"></i>Abrir câmera
+                                </button>
+                            </div>
+                            <div id="camera-container-delivery-{{ req.id }}" class="mt-2" style="display:none;">
+                                <div class="ratio ratio-4x3 mb-2">
+                                    <video id="camera-video-delivery-{{ req.id }}" playsinline autoplay muted></video>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-dark btn-sm" onclick="capturePhoto('delivery', {{ req.id }})">
+                                        <i class="fas fa-circle me-1"></i>Capturar
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeCamera('delivery', {{ req.id }})">
+                                        <i class="fas fa-stop me-1"></i>Fechar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 pt-2">
+                            <button type="button" class="btn btn-success flex-fill" onclick="approveRequest({{ req.id }})">
+                                <i class="fas fa-check me-1"></i>Aprovar
+                            </button>
+                            <button type="button" class="btn btn-danger flex-fill" onclick="rejectRequest({{ req.id }})">
+                                <i class="fas fa-times me-1"></i>Rejeitar
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -156,17 +184,12 @@ async function approveRequest(id) {
     });
     
     if (confirmed.action === 'confirm') {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/equipment/admin/approve/' + id;
-        
-        const notesInput = document.createElement('input');
-        notesInput.type = 'hidden';
-        notesInput.name = 'notes';
-        notesInput.value = notes;
-        form.appendChild(notesInput);
-        
-        document.body.appendChild(form);
+        const form = document.getElementById('approve-form-' + id);
+        const photosInput = document.getElementById('delivery_photos-' + id);
+        if (photosInput && photosInput.files && photosInput.files.length > 3) {
+            await showWarning('Selecione no máximo 3 fotos.', 'Limite de fotos');
+            return;
+        }
         form.submit();
     }
 }
@@ -216,6 +239,45 @@ async function rejectRequest(id) {
         document.body.appendChild(form);
         form.submit();
     }
+}
+</script>
+<script>
+const _streams = {};
+function openCamera(kind, id){
+    const video = document.getElementById(`camera-video-${kind}-${id}`);
+    const container = document.getElementById(`camera-container-${kind}-${id}`);
+    const constraints = { video: { facingMode: 'environment' }, audio: false };
+    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+        _streams[`${kind}-${id}`] = stream;
+        video.srcObject = stream;
+        container.style.display = 'block';
+    }).catch(()=>{});
+}
+function closeCamera(kind, id){
+    const key = `${kind}-${id}`;
+    const container = document.getElementById(`camera-container-${kind}-${id}`);
+    container.style.display = 'none';
+    const s = _streams[key];
+    if(s){ s.getTracks().forEach(t=>t.stop()); delete _streams[key]; }
+}
+function capturePhoto(kind, id){
+    const video = document.getElementById(`camera-video-${kind}-${id}`);
+    const input = document.getElementById(`${kind}_photos-${id}`);
+    const canvas = document.createElement('canvas');
+    const w = video.videoWidth; const h = video.videoHeight;
+    if(!w || !h) return;
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, w, h);
+    canvas.toBlob(blob => {
+        if(!blob) return;
+        const dt = new DataTransfer();
+        for(let i=0;i<input.files.length;i++){ dt.items.add(input.files[i]); }
+        if(dt.files.length >= 3) return;
+        const file = new File([blob], `captured_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        dt.items.add(file);
+        input.files = dt.files;
+    }, 'image/jpeg', 0.85);
 }
 </script>
 {% endblock %}

@@ -11,6 +11,8 @@ FLUXO:
 """
 
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify, current_app
+import os
+from werkzeug.utils import secure_filename
 from app.utils import flash_success, flash_error, flash_info
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
@@ -151,12 +153,33 @@ def my_requests():
 @bp.route('/my-loans')
 @login_required
 def my_loans():
-    """Meus empréstimos ativos"""
     loans = EquipmentLoan.query.filter_by(
         user_id=current_user.id
     ).order_by(EquipmentLoan.loan_date.desc()).all()
-    
-    return render_template('equipment_v2/my_loans.html', loans=loans)
+
+    delivery_map = {}
+    return_map = {}
+    for loan in loans:
+        base_delivery = os.path.join(current_app.root_path, 'static', 'uploads', 'equipment_loans', str(loan.id), 'delivery')
+        base_return = os.path.join(current_app.root_path, 'static', 'uploads', 'equipment_loans', str(loan.id), 'return')
+        urls_delivery = []
+        urls_return = []
+        try:
+            if os.path.isdir(base_delivery):
+                for name in sorted(os.listdir(base_delivery)):
+                    urls_delivery.append(url_for('static', filename=f"uploads/equipment_loans/{loan.id}/delivery/{name}"))
+        except Exception:
+            pass
+        try:
+            if os.path.isdir(base_return):
+                for name in sorted(os.listdir(base_return)):
+                    urls_return.append(url_for('static', filename=f"uploads/equipment_loans/{loan.id}/return/{name}"))
+        except Exception:
+            pass
+        delivery_map[loan.id] = urls_delivery
+        return_map[loan.id] = urls_return
+
+    return render_template('equipment_v2/my_loans.html', loans=loans, delivery_photos_map=delivery_map, return_photos_map=return_map)
 
 
 # ==================== APROVAÇÕES (TI/ADMIN) ====================
@@ -213,6 +236,7 @@ def admin_approve(reservation_id):
         
         db.session.add(loan)
         db.session.commit()
+        _process_and_save_images(request.files.getlist('delivery_photos'), loan.id, 'delivery')
         
         flash_success(f'Solicitação aprovada! Empréstimo criado com sucesso.')
         
@@ -263,8 +287,76 @@ def admin_loans():
     loans = EquipmentLoan.query.filter_by(
         status='ativo'
     ).order_by(EquipmentLoan.loan_date.desc()).all()
+
+    # Mapas de fotos para visualização
+    delivery_map = {}
+    return_map = {}
+    for loan in loans:
+        base_delivery = os.path.join(current_app.root_path, 'static', 'uploads', 'equipment_loans', str(loan.id), 'delivery')
+        base_return = os.path.join(current_app.root_path, 'static', 'uploads', 'equipment_loans', str(loan.id), 'return')
+        urls_delivery = []
+        urls_return = []
+        try:
+            if os.path.isdir(base_delivery):
+                for name in sorted(os.listdir(base_delivery)):
+                    urls_delivery.append(url_for('static', filename=f"uploads/equipment_loans/{loan.id}/delivery/{name}"))
+        except Exception:
+            pass
+        try:
+            if os.path.isdir(base_return):
+                for name in sorted(os.listdir(base_return)):
+                    urls_return.append(url_for('static', filename=f"uploads/equipment_loans/{loan.id}/return/{name}"))
+        except Exception:
+            pass
+        delivery_map[loan.id] = urls_delivery
+        return_map[loan.id] = urls_return
+
+    # Dicionário vazio para empréstimos com solicitação de devolução
+    return_requested_map = {}
     
-    return render_template('equipment_v2/admin_loans.html', loans=loans)
+    return render_template('equipment_v2/admin_loans.html', 
+                         loans=loans, 
+                         delivery_photos_map=delivery_map, 
+                         return_photos_map=return_map,
+                         return_requested_map=return_requested_map)
+
+
+@bp.route('/loan/<int:loan_id>')
+@login_required
+def loan_detail(loan_id):
+    loan = EquipmentLoan.query.get_or_404(loan_id)
+    if not (current_user.is_ti or current_user.is_admin or loan.user_id == current_user.id):
+        flash_error('Acesso negado!')
+        return redirect(url_for('equipment_v2.index'))
+
+    delivery_urls = []
+    return_urls = []
+    base_delivery = os.path.join(current_app.root_path, 'static', 'uploads', 'equipment_loans', str(loan.id), 'delivery')
+    base_return = os.path.join(current_app.root_path, 'static', 'uploads', 'equipment_loans', str(loan.id), 'return')
+    try:
+        if os.path.isdir(base_delivery):
+            for name in sorted(os.listdir(base_delivery)):
+                delivery_urls.append(url_for('static', filename=f"uploads/equipment_loans/{loan.id}/delivery/{name}"))
+    except Exception:
+        pass
+    try:
+        if os.path.isdir(base_return):
+            for name in sorted(os.listdir(base_return)):
+                return_urls.append(url_for('static', filename=f"uploads/equipment_loans/{loan.id}/return/{name}"))
+    except Exception:
+        pass
+
+    reservation = None
+    if loan.reservation_id:
+        reservation = EquipmentReservation.query.get(loan.reservation_id)
+
+    return render_template(
+        'equipment_v2/loan_detail.html',
+        loan=loan,
+        reservation=reservation,
+        delivery_photos=delivery_urls,
+        return_photos=return_urls,
+    )
 
 
 @bp.route('/admin/return/<int:loan_id>', methods=['POST'])
@@ -290,6 +382,7 @@ def admin_return(loan_id):
         equipment.status = 'disponivel'
         
         db.session.commit()
+        _process_and_save_images(request.files.getlist('return_photos'), loan.id, 'return')
         
         flash_success('Devolução confirmada! Equipamento disponível novamente.')
         
@@ -384,3 +477,69 @@ def admin_equipment_edit(equipment_id):
             flash_error(f'Erro ao atualizar: {str(e)}')
     
     return render_template('equipment_v2/admin_equipment_form.html', equipment=equipment)
+def _process_and_save_images(files, loan_id, kind):
+    """Processa e salva até 3 imagens com validações e compressão.
+    kind: 'delivery' ou 'return'
+    """
+    from PIL import Image
+
+    saved_files = []
+    if not files:
+        return saved_files
+
+    base_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'equipment_loans', str(loan_id), kind)
+    os.makedirs(base_dir, exist_ok=True)
+
+    allowed_exts = current_app.config.get('ALLOWED_IMAGE_EXTENSIONS', {'.png', '.jpg', '.jpeg', '.webp'})
+    max_mb = current_app.config.get('MAX_IMAGE_UPLOAD_MB', 3)
+    max_w = current_app.config.get('IMAGE_MAX_WIDTH', 1600)
+    max_h = current_app.config.get('IMAGE_MAX_HEIGHT', 1200)
+    jpeg_quality = current_app.config.get('IMAGE_JPEG_QUALITY', 85)
+
+    count = 0
+    for f in files:
+        if count >= 3:
+            break
+        if not f or f.filename == '':
+            continue
+
+        ext = os.path.splitext(f.filename)[1].lower()
+        if ext not in allowed_exts:
+            continue
+
+        try:
+            # Tamanho do arquivo
+            try:
+                f.stream.seek(0, os.SEEK_END)
+                size_bytes = f.stream.tell()
+                f.stream.seek(0)
+            except Exception:
+                size_bytes = None
+            if size_bytes is not None and size_bytes > max_mb * 1024 * 1024:
+                continue
+
+            # Processar imagem
+            img = Image.open(f.stream)
+            img = img.convert('RGB') if ext in ('.jpg', '.jpeg') else img
+            img.thumbnail((max_w, max_h))
+
+            # Nome seguro
+            filename = secure_filename(f"{kind}_{count + 1}_{datetime.now().strftime('%Y%m%d%H%M%S')}{ext if ext in ('.png', '.webp') else '.jpg'}")
+            save_path = os.path.join(base_dir, filename)
+
+            # Salvar com compressão
+            if filename.endswith('.jpg'):
+                img.save(save_path, format='JPEG', quality=jpeg_quality, optimize=True)
+            elif filename.endswith('.png'):
+                img.save(save_path, format='PNG', optimize=True)
+            elif filename.endswith('.webp'):
+                img.save(save_path, format='WEBP', quality=jpeg_quality)
+            else:
+                img.save(save_path)
+
+            saved_files.append(filename)
+            count += 1
+        except Exception as e:
+            current_app.logger.warning(f"Falha ao processar imagem ({f.filename}): {e}")
+
+    return saved_files

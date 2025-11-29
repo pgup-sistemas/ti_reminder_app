@@ -64,8 +64,16 @@
                         <span class="badge bg-success">
                             <i class="fas fa-check-circle me-1"></i>Ativo
                         </span>
+                        {% if return_requested_map is defined and return_requested_map.get(loan.id) %}
+                        <span class="badge bg-warning ms-2">
+                            <i class="fas fa-hand-paper me-1"></i>Devolução solicitada
+                        </span>
+                        {% endif %}
                     </td>
                     <td>
+                        <a class="btn btn-sm btn-outline-secondary me-2" href="{{ url_for('equipment_v2.loan_detail', loan_id=loan.id) }}">
+                            <i class="fas fa-eye me-1"></i>Ver detalhes
+                        </a>
                         <button class="btn btn-sm btn-primary" 
                                 data-bs-toggle="modal" 
                                 data-bs-target="#returnModal{{ loan.id }}">
@@ -91,7 +99,7 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
-                <form method="POST" action="{{ url_for('equipment_v2.admin_return', loan_id=loan.id) }}">
+                <form method="POST" action="{{ url_for('equipment_v2.admin_return', loan_id=loan.id) }}" enctype="multipart/form-data">
                     <div class="modal-body px-4 py-3">
                         <!-- Informações do Empréstimo -->
                         <div class="border rounded p-3 mb-3 bg-light bg-opacity-50">
@@ -111,13 +119,56 @@
                             </div>
                         </div>
 
-                        <!-- Campo de Observações -->
+                        {% set delivery_list = delivery_photos_map.get(loan.id, []) %}
+                        {% if delivery_list %}
                         <div class="mb-3">
-                            <label for="notes{{ loan.id }}" class="form-label text-dark">
-                                Observações sobre a devolução
-                            </label>
-                            <textarea class="form-control" id="notes{{ loan.id }}" name="notes" rows="3" 
-                                      placeholder="Estado do equipamento, observações, etc..."></textarea>
+                            <label class="form-label text-dark">Registro fotográfico da entrega</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for url in delivery_list %}
+                                <img src="{{ url }}" alt="Foto entrega" class="img-thumbnail" style="max-height: 120px;">
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% set return_list = return_photos_map.get(loan.id, []) %}
+                        {% if return_list %}
+                        <div class="mb-3">
+                            <label class="form-label text-dark">Registro fotográfico de devoluções anteriores</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for url in return_list %}
+                                <img src="{{ url }}" alt="Foto devolução" class="img-thumbnail" style="max-height: 120px;">
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="notes{{ loan.id }}" class="form-label text-dark">Observações sobre a devolução</label>
+                            <textarea class="form-control" id="notes{{ loan.id }}" name="notes" rows="3" placeholder="Estado do equipamento, observações, etc..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-dark">Fotos da devolução (máximo 3)</label>
+                            <input class="form-control" type="file" accept="image/*" capture="environment" name="return_photos" id="return_photos{{ loan.id }}" multiple>
+                            <small class="text-muted">Registrar o estado do equipamento ao devolver.</small>
+                            <div class="d-grid mt-2">
+                                <button type="button" class="btn btn-outline-dark btn-sm" onclick="openCameraReturn({{ loan.id }})">
+                                    <i class="fas fa-camera me-1"></i>Abrir câmera
+                                </button>
+                            </div>
+                            <div id="camera-container-return-{{ loan.id }}" class="mt-2" style="display:none;">
+                                <div class="ratio ratio-4x3 mb-2">
+                                    <video id="camera-video-return-{{ loan.id }}" playsinline autoplay muted></video>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-dark btn-sm" onclick="capturePhotoReturn({{ loan.id }})">
+                                        <i class="fas fa-circle me-1"></i>Capturar
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeCameraReturn({{ loan.id }})">
+                                        <i class="fas fa-stop me-1"></i>Fechar
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Alerta -->
@@ -139,8 +190,8 @@
                 </form>
             </div>
         </div>
-    </div>
-    {% endfor %}
+</div>
+{% endfor %}
 
     {% else %}
     <div class="alert alert-info">
@@ -150,3 +201,41 @@
     {% endif %}
 </div>
 {% endblock %}
+<script>
+const _streamsReturn = {};
+function openCameraReturn(id){
+    const video = document.getElementById(`camera-video-return-${id}`);
+    const container = document.getElementById(`camera-container-return-${id}`);
+    const constraints = { video: { facingMode: 'environment' }, audio: false };
+    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+        _streamsReturn[id] = stream;
+        video.srcObject = stream;
+        container.style.display = 'block';
+    }).catch(()=>{});
+}
+function closeCameraReturn(id){
+    const container = document.getElementById(`camera-container-return-${id}`);
+    container.style.display = 'none';
+    const s = _streamsReturn[id];
+    if(s){ s.getTracks().forEach(t=>t.stop()); delete _streamsReturn[id]; }
+}
+function capturePhotoReturn(id){
+    const video = document.getElementById(`camera-video-return-${id}`);
+    const input = document.getElementById(`return_photos${id}`);
+    const canvas = document.createElement('canvas');
+    const w = video.videoWidth; const h = video.videoHeight;
+    if(!w || !h) return;
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, w, h);
+    canvas.toBlob(blob => {
+        if(!blob) return;
+        const dt = new DataTransfer();
+        for(let i=0;i<input.files.length;i++){ dt.items.add(input.files[i]); }
+        if(dt.files.length >= 3) return;
+        const file = new File([blob], `captured_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        dt.items.add(file);
+        input.files = dt.files;
+    }, 'image/jpeg', 0.85);
+}
+</script>
