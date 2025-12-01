@@ -52,3 +52,63 @@ session antes: {'csrf_token': '24c229a7c5c7a5065a4bc540b682c8e0effbd5f8', '_fres
 DEPOIS LOGIN_USER
 session depois: {'csrf_token': '24c229a7c5c7a5065a4bc540b682c8e0effbd5f8', '_fresh': True, '_user_id': '3', '_id': 'cc5e51ebff14afe4c54409ace60523aa3dc25339f8d485f98f124dcbe44f077a41cb6baface9aa0f15f8ea451dc1c42e659ee7370b7631bc03c4a1b8ef7b82cb'}
 current_user.is_authenticated: True
+
+[2025-11-28 22:05:58.685526] ANTES LOGIN_USER
+session antes: {'csrf_token': '51f9edb2cf8e8fdf8a78fb62789cc7bbd6ec58c8', '_fresh': False}
+DEPOIS LOGIN_USER
+session depois: {'csrf_token': '51f9edb2cf8e8fdf8a78fb62789cc7bbd6ec58c8', '_fresh': True, '_user_id': '3', '_id': '1eebcf3ac69897e1b68ec9a95014e7d59f27de05cc4d03121a7cf6c63c0a01eed039b2a0120e5a9c9811778fbcff93882106528e4a730843c7ffa2ad3f917684'}
+current_user.is_authenticated: True
+
+[2025-11-29 03:51:38.337493] ANTES LOGIN_USER
+session antes: {'csrf_token': '775e063c91d4ab9702de8c559e5e5ae2c0d7c5a9', '_fresh': False}
+DEPOIS LOGIN_USER
+session depois: {'csrf_token': '775e063c91d4ab9702de8c559e5e5ae2c0d7c5a9', '_fresh': True, '_user_id': '6', '_id': '2397dd08add77a6e2316fb78609d03698937b3f08f0be8365846100532f006ae4910d1038db21939667db7abe6c0c07daf4514462cb157a1bb78a20ca3a48817'}
+current_user.is_authenticated: True
+
+[2025-11-29 03:52:52.763561] ANTES LOGIN_USER
+session antes: {'csrf_token': '51187e3a200f7e548b11cd2b3d4f9c58532b7f5b', '_fresh': False}
+DEPOIS LOGIN_USER
+session depois: {'csrf_token': '51187e3a200f7e548b11cd2b3d4f9c58532b7f5b', '_fresh': True, '_user_id': '6', '_id': '2397dd08add77a6e2316fb78609d03698937b3f08f0be8365846100532f006ae4910d1038db21939667db7abe6c0c07daf4514462cb157a1bb78a20ca3a48817'}
+current_user.is_authenticated: True
+
+[2025-11-29 03:52:58.984364] ANTES LOGIN_USER
+session antes: {'csrf_token': 'd8d53b02751c0f1862462b9676d6fca093d03a6a', '_fresh': False}
+DEPOIS LOGIN_USER
+session depois: {'csrf_token': 'd8d53b02751c0f1862462b9676d6fca093d03a6a', '_fresh': True, '_user_id': '6', '_id': '2397dd08add77a6e2316fb78609d03698937b3f08f0be8365846100532f006ae4910d1038db21939667db7abe6c0c07daf4514462cb157a1bb78a20ca3a48817'}
+current_user.is_authenticated: True
+
+[2025-11-29 03:55:23.592423] ANTES LOGIN_USER
+session antes: {'csrf_token': 'ab4ba744632c38951cef9a29d7279893da835d05', '_fresh': False}
+DEPOIS LOGIN_USER
+session depois: {'csrf_token': 'ab4ba744632c38951cef9a29d7279893da835d05', '_fresh': True, '_user_id': '6', '_id': '2397dd08add77a6e2316fb78609d03698937b3f08f0be8365846100532f006ae4910d1038db21939667db7abe6c0c07daf4514462cb157a1bb78a20ca3a48817'}
+current_user.is_authenticated: True
+
+[2025-11-29 10:05:28.020838] ANTES LOGIN_USER
+session antes: {'csrf_token': '09a502b9968fea7a73e43b39b7f8fed758ed343a', '_fresh': False}
+DEPOIS LOGIN_USER
+session depois: {'csrf_token': '09a502b9968fea7a73e43b39b7f8fed758ed343a', '_fresh': True, '_user_id': '3', '_id': '1eebcf3ac69897e1b68ec9a95014e7d59f27de05cc4d03121a7cf6c63c0a01eed039b2a0120e5a9c9811778fbcff93882106528e4a730843c7ffa2ad3f917684'}
+current_user.is_authenticated: True
+
+[2025-11-29 11:33:53.922795] ANTES LOGIN_USER
+session antes: {'_fresh': False, 'csrf_token': '11c8a571ba93d0cabf4b0095cfe69c1e4403ae59'}
+DEPOIS LOGIN_USER
+session depois: {'_fresh': True, 'csrf_token': '11c8a571ba93d0cabf4b0095cfe69c1e4403ae59', '_user_id': '3', '_id': '2924e530e602ff8aff55519d515d53ed4a0dfbefd5fb68fa4f684dc287b9ea6560f55b49a03c10caa2896024fc0fe8aac7de8ef1474fd2f8aba764c43b3681c8'}
+current_user.is_authenticated: True
+
+[2025-11-29 12:00:49.891937] ANTES LOGIN_USER
+session antes: {'_fresh': False, 'csrf_token': 'ececf610bb9592d7f4c5a2061676dd2365bcb669'}
+DEPOIS LOGIN_USER
+session depois: {'_fresh': True, 'csrf_token': 'ececf610bb9592d7f4c5a2061676dd2365bcb669', '_user_id': '3', '_id': '2924e530e602ff8aff55519d515d53ed4a0dfbefd5fb68fa4f684dc287b9ea6560f55b49a03c10caa2896024fc0fe8aac7de8ef1474fd2f8aba764c43b3681c8'}
+current_user.is_authenticated: True
+
+[2025-11-29 12:30:20.564117] ANTES LOGIN_USER
+session antes: {'_fresh': False, 'csrf_token': 'f9863b5bd8c2c547460e96ab6aa5470cb51c61d9'}
+DEPOIS LOGIN_USER
+session depois: {'_fresh': True, 'csrf_token': 'f9863b5bd8c2c547460e96ab6aa5470cb51c61d9', '_user_id': '3', '_id': '2924e530e602ff8aff55519d515d53ed4a0dfbefd5fb68fa4f684dc287b9ea6560f55b49a03c10caa2896024fc0fe8aac7de8ef1474fd2f8aba764c43b3681c8'}
+current_user.is_authenticated: True
+
+[2025-11-29 12:31:10.789020] ANTES LOGIN_USER
+session antes: {'_fresh': False, 'csrf_token': '737125c10c42d33227ac7290f500dd5c00fb2d5f'}
+DEPOIS LOGIN_USER
+session depois: {'_fresh': True, 'csrf_token': '737125c10c42d33227ac7290f500dd5c00fb2d5f', '_user_id': '3', '_id': '2924e530e602ff8aff55519d515d53ed4a0dfbefd5fb68fa4f684dc287b9ea6560f55b49a03c10caa2896024fc0fe8aac7de8ef1474fd2f8aba764c43b3681c8'}
+current_user.is_authenticated: True

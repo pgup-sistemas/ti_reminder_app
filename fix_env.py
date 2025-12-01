@@ -1,4 +1,7 @@
-APP_ENV=development
+#!/usr/bin/env python3
+"""Script para recriar o arquivo .env com encoding correto"""
+
+env_content = """APP_ENV=development
 DEBUG=True
 TESTING=False
 
@@ -17,7 +20,6 @@ LOG_LEVEL=INFO
 APP_ENV=development
 DEBUG=True
 TESTING=False
-SERVER_NAME=127.0.0.1:5000
 
 # SEGURANÇA (OBRIGATÓRIAS EM PRODUÇÃO)
 SECRET_KEY=your-secret-key-here-64-characters-minimum
@@ -57,3 +59,11 @@ SCHEDULER_API_ENABLED=True
 
 # CONFIGURAÇÃO SEGURA - CHAVE FERNET
 CONFIG_SECRET_KEY=FxBx2thNnf7SL1Nr6f6esaiBEV0RyiJHue8bE6_u61U=
+"""
+
+# Escrever arquivo com encoding UTF-8
+with open('.env', 'w', encoding='utf-8') as f:
+    f.write(env_content)
+
+print("Arquivo .env recriado com sucesso!")
+print("CONFIG_SECRET_KEY configurada:", "CONFIG_SECRET_KEY" in env_content)

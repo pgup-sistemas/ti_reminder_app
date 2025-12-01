@@ -3,15 +3,24 @@
 
 {% block content %}
 <style>
+    /* Prevenir scroll horizontal */
+    html, body, .reminders-page {
+        overflow-x: hidden;
+        width: 100%;
+    }
+    
     /* Estilo para a tabela */
     .table {
         font-size: 0.9rem;
+        margin-bottom: 0;
     }
     
     /* Estilo para as células da tabela */
     .table td, .table th {
         vertical-align: middle;
-        padding: 0.5rem 0.75rem;
+        padding: 0.5rem 0.5rem;
+        word-break: break-word;
+        overflow-wrap: break-word;
     }
     
     /* Estilo para os badges de prioridade */
@@ -19,6 +28,8 @@
         font-weight: 500;
         letter-spacing: 0.3px;
         padding: 0.35em 0.5em;
+        white-space: normal;
+        display: inline-block;
     }
     
     /* Estilo para os botões de ação */
@@ -30,8 +41,9 @@
         align-items: center;
         justify-content: center;
         border-radius: 4px;
-        margin: 0 2px;
+        margin: 0 1px;
         transition: all 0.2s ease;
+        flex-shrink: 0;
     }
     
     .btn-action i {
@@ -50,6 +62,14 @@
     /* Efeito hover nas linhas da tabela */
     .table-hover tbody tr:hover {
         background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    /* Table responsive wrapper */
+    .table-responsive {
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
     }
     
     /* Estilos padronizados para modais */
@@ -128,18 +148,93 @@
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     }
     
-    /* Melhorias na responsividade */
-    @media (max-width: 1200px) {
-        .table-responsive {
-            font-size: 0.85rem;
+    /* Melhorias na responsividade - Desktop */
+    @media (min-width: 1200px) {
+        .table {
+            font-size: 0.9rem;
+        }
+        .table td, .table th {
+            padding: 0.5rem 0.75rem;
+        }
+    }
+    
+    /* Tablet (768px - 1199px) */
+    @media (max-width: 1199px) and (min-width: 768px) {
+        .table {
+            font-size: 0.8rem;
+        }
+        .table td, .table th {
+            padding: 0.4rem 0.5rem;
+        }
+        .btn-action {
+            width: 28px;
+            height: 28px;
+            margin: 0 0.5px;
+        }
+        .btn-action i {
+            font-size: 0.75rem;
+        }
+        .badge {
+            font-size: 0.65rem;
+            padding: 0.25em 0.35em;
         }
         .btn-sm {
             padding: 0.15rem 0.4rem;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
+        }
+    }
+    
+    /* Mobile (< 768px) */
+    @media (max-width: 767px) {
+        .table {
+            font-size: 0.75rem;
+        }
+        .table td, .table th {
+            padding: 0.3rem 0.4rem;
+        }
+        .btn-action {
+            width: 24px;
+            height: 24px;
+            margin: 0 0.25px;
+        }
+        .btn-action i {
+            font-size: 0.65rem;
         }
         .badge {
+            font-size: 0.6rem;
+            padding: 0.2em 0.3em;
+        }
+        .btn-sm {
+            padding: 0.1rem 0.3rem;
+            font-size: 0.6rem;
+        }
+        /* Ocultar colunas menos importantes em mobile */
+        .hide-on-mobile {
+            display: none !important;
+        }
+    }
+    
+    /* Extra small (< 576px) */
+    @media (max-width: 575px) {
+        .reminders-page {
+            padding: 0.5rem;
+        }
+        .table {
             font-size: 0.7rem;
-            padding: 0.25em 0.4em;
+        }
+        .table td, .table th {
+            padding: 0.25rem 0.3rem;
+        }
+        .btn-action {
+            width: 22px;
+            height: 22px;
+        }
+        .btn-action i {
+            font-size: 0.6rem;
+        }
+        .badge {
+            font-size: 0.55rem;
+            padding: 0.15em 0.25em;
         }
     }
     
@@ -155,135 +250,40 @@
         color: white;
     }
     
-    /* Estilo para o cabeçalho fixo da tabela */
-    .table thead th {
-        position: sticky;
-        top: 0;
-        background-color: var(--bs-gray-100);
-        z-index: 10;
-    }
-    
-    [data-theme="dark"] .table thead th {
-        background-color: var(--bs-gray-800);
-        color: var(--bs-gray-100);
-    }
-    
-    [data-theme="dark"] .card-header.bg-light {
-        background-color: var(--bs-gray-800) !important;
-        border-color: var(--bs-gray-700) !important;
-        color: var(--bs-gray-100);
-    }
-    
-    [data-theme="dark"] .card-footer,
-    [data-theme="dark"] .card-body,
-    [data-theme="dark"] .card {
-        background-color: var(--bs-gray-900) !important;
-        border-color: rgba(255, 255, 255, 0.1) !important;
-        color: var(--bs-gray-100);
-    }
-    
-    [data-theme="dark"] .table tbody tr {
-        background-color: transparent;
-    }
-    
-    [data-theme="dark"] .table tbody tr:hover {
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-    
-    [data-theme="dark"] .table tbody tr.table-success {
-        --bs-table-bg: rgba(25, 135, 84, 0.2);
-        color: var(--bs-gray-100);
-    }
-    
-    [data-theme="dark"] .table tbody tr.table-danger {
-        --bs-table-bg: rgba(220, 53, 69, 0.2);
-        color: var(--bs-gray-100);
-    }
-    
-    [data-theme="dark"] .table tbody tr.table-warning {
-        --bs-table-bg: rgba(255, 193, 7, 0.2);
-        color: var(--bs-gray-100);
-    }
-    
-    [data-theme="dark"] .badge.bg-light {
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        color: var(--bs-gray-100) !important;
-        border-color: rgba(255, 255, 255, 0.15) !important;
-    }
-    
-    [data-theme="dark"] .badge.bg-primary {
-        background-color: #0dcaf0 !important;
-        color: white !important;
-        border-color: #0dcaf0 !important;
-    }
-    
-    [data-theme="dark"] .badge.bg-success {
-        background-color: #198754 !important;
-        color: white !important;
-        border-color: #198754 !important;
-    }
-    
-    [data-theme="dark"] .badge.bg-info {
-        background-color: #0dcaf0 !important;
-        color: white !important;
-        border-color: #0dcaf0 !important;
-    }
-    
-    [data-theme="dark"] .badge.bg-warning {
-        background-color: #ffc107 !important;
-        color: white !important;
-        border-color: #ffc107 !important;
-    }
-    
-    [data-theme="dark"] .badge.bg-danger {
-        background-color: #dc3545 !important;
-        color: white !important;
-        border-color: #dc3545 !important;
-    }
-    
-    [data-theme="dark"] .form-select,
-    [data-theme="dark"] .form-control,
-    [data-theme="dark"] .btn-outline-secondary {
-        background-color: var(--bs-gray-900);
-        border-color: var(--bs-gray-700);
-        color: var(--bs-gray-100);
-    }
-    
-    [data-theme="dark"] .btn-outline-secondary:hover {
-        background-color: var(--bs-gray-800);
-        color: var(--bs-gray-100);
-    }
-    
-    [data-theme="dark"] .text-muted,
-    [data-theme="dark"] .table td,
-    [data-theme="dark"] .table th {
-        color: var(--bs-gray-300) !important;
-    }
-    
-    [data-theme="dark"] .table th i {
-        color: var(--bs-primary-light) !important;
-    }
-    
-    [data-theme="dark"] .pagination .page-link {
-        background-color: var(--bs-gray-900);
-        border-color: var(--bs-gray-700);
-        color: var(--bs-gray-100);
-    }
-
-    [data-theme="dark"] .pagination .page-item.active .page-link {
-        background-color: var(--bs-primary);
-        border-color: var(--bs-primary);
-        color: #fff;
-    }
-    
     /* Melhorias no modal para telas pequenas */
     @media (max-width: 768px) {
         .modal-dialog {
             margin: 0.5rem;
+            max-width: calc(100% - 1rem);
         }
-        .btn {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.875rem;
+        .modal-body {
+            padding: 1rem;
+        }
+        .modal-body .row {
+            margin: 0;
+        }
+        .modal-body .col-md-6 {
+            margin-bottom: 1rem;
+        }
+    }
+    
+    /* Form responsiveness */
+    .row.g-3 {
+        margin: 0;
+    }
+    
+    .row.g-3 > [class*='col-'] {
+        padding-left: 0.375rem;
+        padding-right: 0.375rem;
+    }
+    
+    @media (max-width: 576px) {
+        .row.g-3 > [class*='col-'] {
+            min-width: 100%;
+        }
+        .col-xl-3, .col-lg-4, .col-md-6 {
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
         }
     }
 </style>

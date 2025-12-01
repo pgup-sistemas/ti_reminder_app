@@ -108,7 +108,7 @@
                                 <label for="smtp_server" class="form-label">Servidor SMTP</label>
                                 <div class="input-group">
                                     <input type="text" class="form-control" id="smtp_server" name="smtp_server"
-                                           value="smtp.gmail.com" required oninput="updatePreview()">
+                                           value="{{ settings.smtp_server or '' }}" required oninput="updatePreview()">
                                     <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                         <i class="fas fa-list"></i>
                                     </button>
@@ -126,7 +126,7 @@
                             <div class="mb-3">
                                 <label for="smtp_port" class="form-label">Porta</label>
                                 <input type="number" class="form-control" id="smtp_port" name="smtp_port"
-                                       value="587" min="1" max="65535" required oninput="updatePreview()">
+                                       value="{{ settings.smtp_port or 587 }}" min="1" max="65535" required oninput="updatePreview()">
                                 <small class="form-text text-muted">Porta padrão: 587 (TLS) ou 465 (SSL)</small>
                             </div>
                         </div>
@@ -134,7 +134,7 @@
                             <div class="mb-3">
                                 <label for="smtp_username" class="form-label">Usuário/Email</label>
                                 <input type="email" class="form-control" id="smtp_username" name="smtp_username"
-                                       value="your-email@gmail.com" required oninput="updatePreview()">
+                                       value="{{ settings.smtp_username or '' }}" required oninput="updatePreview()">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -142,7 +142,7 @@
                                 <label for="smtp_password" class="form-label">Senha/App Password</label>
                                 <div class="input-group">
                                     <input type="password" class="form-control" id="smtp_password" name="smtp_password"
-                                           value="••••••••••••••••" required>
+                                           value="{% if settings.smtp_password_exists %}••••••••••••••••{% else %}{% endif %}" required>
                                     <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
                                         <i class="fas fa-eye" id="toggleIcon"></i>
                                     </button>
@@ -167,7 +167,7 @@
                                         <div class="col-md-6">
                                             <div class="form-check form-switch mb-3">
                                                 <input class="form-check-input" type="checkbox" id="use_tls"
-                                                       name="use_tls" checked onchange="updateSecurityPreview()">
+                                                       name="smtp_use_tls" {{ 'checked' if settings.smtp_use_tls }} onchange="updateSecurityPreview()">
                                                 <label class="form-check-label" for="use_tls">
                                                     <strong>Usar TLS</strong>
                                                 </label>
@@ -177,7 +177,7 @@
                                             </div>
                                             <div class="form-check form-switch">
                                                 <input class="form-check-input" type="checkbox" id="use_ssl"
-                                                       name="use_ssl" onchange="updateSecurityPreview()">
+                                                       name="smtp_use_ssl" {{ 'checked' if settings.smtp_use_ssl }} onchange="updateSecurityPreview()">
                                                 <label class="form-check-label" for="use_ssl">
                                                     <strong>Usar SSL</strong>
                                                 </label>
@@ -212,15 +212,15 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="sender_name" class="form-label">Nome do Remetente</label>
-                                <input type="text" class="form-control" id="sender_name" name="sender_name"
-                                       value="TI OSN System" required oninput="updatePreview()">
+                                <input type="text" class="form-control" id="sender_name" name="from_name"
+                                       value="{{ settings.from_name or 'TI OSN System' }}" required oninput="updatePreview()">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="sender_email" class="form-label">Email do Remetente</label>
-                                <input type="email" class="form-control" id="sender_email" name="sender_email"
-                                       value="noreply@tiosn.com" required oninput="updatePreview()">
+                                <input type="email" class="form-control" id="sender_email" name="from_email"
+                                       value="{{ settings.from_email or '' }}" required oninput="updatePreview()">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -510,25 +510,66 @@ function testConnection() {
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Testando...';
 
-    // Simular teste de conexão
-    setTimeout(() => {
+    // Obter dados do formulário
+    const formData = new FormData(document.querySelector('form'));
+    
+    fetch('/configuracoes/integracoes/email/test-connection', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
         btn.disabled = false;
         btn.innerHTML = originalHTML;
 
         const statusCard = document.getElementById('connectionStatus');
+        if (data.success) {
+            statusCard.innerHTML = `
+                <div class="alert alert-success" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle me-2 fs-4"></i>
+                        <div>
+                            <strong>Conexão Ativa</strong>
+                            <p class="mb-0 small">${data.message}</p>
+                            <small class="text-muted">Último teste: há poucos segundos</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            statusCard.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-times-circle me-2 fs-4"></i>
+                        <div>
+                            <strong>Falha na Conexão</strong>
+                            <p class="mb-0 small">${data.message}</p>
+                            <small class="text-muted">Verifique as configurações e tente novamente</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        console.error('Erro:', error);
+        
+        const statusCard = document.getElementById('connectionStatus');
         statusCard.innerHTML = `
-            <div class="alert alert-success" role="alert">
+            <div class="alert alert-warning" role="alert">
                 <div class="d-flex align-items-center">
-                    <i class="fas fa-check-circle me-2 fs-4"></i>
+                    <i class="fas fa-exclamation-triangle me-2 fs-4"></i>
                     <div>
-                        <strong>Conexão Ativa</strong>
-                        <p class="mb-0 small">Servidor SMTP conectado e funcionando corretamente</p>
-                        <small class="text-muted">Último teste: há poucos segundos</small>
+                        <strong>Erro no Teste</strong>
+                        <p class="mb-0 small">Erro ao comunicar com o servidor</p>
+                        <small class="text-muted">Tente novamente mais tarde</small>
                     </div>
                 </div>
             </div>
         `;
-    }, 2000);
+    });
 }
 
 function sendTestEmail() {
@@ -538,11 +579,64 @@ function sendTestEmail() {
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enviando...';
 
-    setTimeout(() => {
+    fetch('/configuracoes/integracoes/email/send-test', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
         btn.disabled = false;
         btn.innerHTML = originalHTML;
-        Feedback.success('Sucesso', 'Email de teste enviado com sucesso!\n\nVerifique sua caixa de entrada.');
-    }, 3000);
+
+        if (data.success) {
+            // Usar o sistema de alertas do Bootstrap
+            const alertHtml = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Sucesso!</strong> ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Inserir alerta no topo do formulário
+            const form = document.querySelector('form');
+            form.insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // Remover alerta após 10 segundos
+            setTimeout(() => {
+                const alert = form.querySelector('.alert');
+                if (alert) {
+                    alert.remove();
+                }
+            }, 10000);
+        } else {
+            const alertHtml = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-times-circle me-2"></i>
+                    <strong>Erro!</strong> ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            const form = document.querySelector('form');
+            form.insertAdjacentHTML('afterbegin', alertHtml);
+        }
+    })
+    .catch(error => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        console.error('Erro:', error);
+        
+        const alertHtml = `
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Erro de Comunicação!</strong> Não foi possível comunicar com o servidor. Tente novamente.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        const form = document.querySelector('form');
+        form.insertAdjacentHTML('afterbegin', alertHtml);
+    });
 }
 
 function guidedSetup() {

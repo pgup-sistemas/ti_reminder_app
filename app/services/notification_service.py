@@ -19,26 +19,37 @@ class NotificationService:
 
     @staticmethod
     def send_email_notification(recipient_email, subject, template, **context):
-        """Envia notificação por email"""
+        """
+        Envia notificação por email
+        Funciona tanto em contexto de requisição quanto em tarefas agendadas
+        """
         try:
+            # Validar email
+            if not recipient_email or '@' not in recipient_email:
+                current_app.logger.warning(f"Email inválido para notificação: {recipient_email}")
+                return False
+            
+            # render_template requer um contexto de aplicação ativo
+            # Se estamos em uma tarefa agendada, current_app já está disponível
+            html_content = render_template(template, **context)
+            
             msg = Message(
                 subject=subject,
                 recipients=[recipient_email],
-                html=render_template(template, **context)
+                html=html_content
             )
             mail.send(msg)
+            current_app.logger.debug(f"Email enviado para {recipient_email}: {subject}")
             return True
+            
         except Exception as e:
-            current_app.logger.error("Erro ao enviar email")
+            current_app.logger.error(f"Erro ao enviar email para {recipient_email}: {str(e)}")
             return False
 
     @staticmethod
     def get_user_notification_settings(user_id, notification_type):
         """Obtém configurações de notificação do usuário"""
-        settings = NotificationSettings.query.filter_by(
-            user_id=user_id,
-            notification_type=notification_type
-        ).first()
+        settings = NotificationSettings.query.filter_by(user_id=user_id).first()
 
         if not settings:
             # Configurações padrão
@@ -49,11 +60,23 @@ class NotificationService:
                 'browser_enabled': True
             }
 
+        # Configurações baseadas no tipo de notificação
+        if 'reminder' in notification_type:
+            email_enabled = settings.email_reminders
+        elif 'task' in notification_type:
+            email_enabled = settings.email_tasks
+        elif 'chamado' in notification_type:
+            email_enabled = settings.email_chamados
+        elif 'equipment' in notification_type:
+            email_enabled = settings.email_equipment
+        else:
+            email_enabled = True
+
         return {
-            'enabled': settings.enabled,
-            'advance_hours': settings.advance_hours,
-            'email_enabled': settings.email_enabled,
-            'browser_enabled': settings.browser_enabled
+            'enabled': True,
+            'advance_hours': 24,
+            'email_enabled': email_enabled,
+            'browser_enabled': True
         }
 
     @staticmethod
@@ -71,34 +94,15 @@ class NotificationService:
 
             task_datetime = datetime.combine(task.date, datetime.strptime("00:00:00", "%H:%M:%S").time())
 
-            # Calcular SLA se não estiver definido
-            if not task.sla_deadline and task.priority:
-                sla_hours = TaskSlaConfig.get_sla_hours(task.priority)
-                task.sla_deadline = task.created_at + timedelta(hours=sla_hours)
-                db.session.commit()
-
             # Verificar notificações de vencimento (24h antes)
             notification_time = task_datetime - timedelta(hours=24)
 
             if (current_time >= notification_time and
-                current_time < task_datetime and
-                not task.notification_sent):
+                current_time < task_datetime):
 
                 # Enviar notificações para usuários relacionados
                 NotificationService._notify_task_due(task)
-                task.notification_sent = True
                 notifications_sent += 1
-
-            # Verificar SLA crítico (1h antes)
-            if task.sla_deadline:
-                sla_warning_time = task.sla_deadline - timedelta(hours=1)
-
-                if (current_time >= sla_warning_time and
-                    current_time < task.sla_deadline and
-                    not task.notification_sent):
-
-                    NotificationService._notify_task_sla_warning(task)
-                    notifications_sent += 1
 
         db.session.commit()
         return notifications_sent
@@ -165,18 +169,18 @@ class NotificationService:
     def _notify_task_due(task):
         """Notifica sobre tarefa próxima do vencimento"""
         # Notificar responsável da tarefa
-        if task.usuario and task.usuario.email:
+        if task.user and task.user.email:
             settings = NotificationService.get_user_notification_settings(
-                task.usuario.id, 'task_reminder'
+                task.user.id, 'task_reminder'
             )
 
             if settings['email_enabled']:
                 NotificationService.send_email_notification(
-                    task.usuario.email,
+                    task.user.email,
                     f"Tarefa próxima do vencimento: {task.description[:50]}",
                     "emails/task_due.html",
                     task=task,
-                    user=task.usuario
+                    user=task.user
                 )
 
         # Notificar administradores
@@ -201,8 +205,8 @@ class NotificationService:
         # Notificar responsável e administradores
         recipients = []
 
-        if task.usuario:
-            recipients.append(task.usuario)
+        if task.user:
+            recipients.append(task.user)
 
         admins = User.query.filter_by(is_admin=True, ativo=True).all()
         recipients.extend(admins)
@@ -359,13 +363,13 @@ class NotificationService:
                         priority_label = "primary"
                     
                     # Notificar responsável
-                    if reminder.usuario and reminder.usuario.email:
+                    if reminder.user and reminder.user.email:
                         NotificationService.send_email_notification(
-                            reminder.usuario.email,
+                            reminder.user.email,
                             f"[{urgency}] Lembrete vence em {days_before} dias: {reminder.name}",
                             "emails/reminder_upcoming.html",
                             reminder=reminder,
-                            user=reminder.usuario,
+                            user=reminder.user,
                             days_remaining=days_before,
                             urgency=urgency,
                             priority_label=priority_label

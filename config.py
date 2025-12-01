@@ -59,6 +59,13 @@ class Config:
 
     # Base URL usada em links externos nos e-mails (reset de senha, chamados)
     BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000')
+    
+    # Flask URL building (necessário para url_for fora de contexto de requisição)
+    # SERVER_NAME é usado pelo Flask para construir URLs fora de contexto de requisição
+    # Em desenvolvimento, usar 127.0.0.1 para evitar warnings
+    SERVER_NAME = os.environ.get('SERVER_NAME', '127.0.0.1:5000')
+    APPLICATION_ROOT = '/'
+    PREFERRED_URL_SCHEME = 'http'
 
     # Criptografia de segredos de configurações
     CONFIG_SECRET_KEY = os.environ.get('CONFIG_SECRET_KEY')

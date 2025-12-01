@@ -1,31 +1,192 @@
 {% extends 'system_config_base.html' %}
 {% block breadcrumb_title %}Otimização de Performance{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Abas responsivas: flex, wrap e truncamento */
+.config-tabs {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+#performanceTabs {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    border-bottom: 2px solid #dee2e6;
+    margin: 0;
+    padding: 0;
+}
+
+#performanceTabs .nav-item {
+    flex: 1 1 200px;
+    margin: 0;
+    padding: 0;
+}
+
+#performanceTabs .nav-link {
+    width: 100%;
+    text-align: center;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 12px 8px;
+    transition: all 0.2s ease;
+    border-radius: 8px 8px 0 0;
+    margin-bottom: -2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    display: block;
+}
+
+#performanceTabs .nav-link i {
+    display: inline-block;
+    margin-right: 6px;
+    font-size: 1rem;
+}
+
+#performanceTabs .nav-link:hover {
+    color: #007bff;
+    background-color: rgba(0, 123, 255, 0.08);
+    border-bottom-color: rgba(0, 123, 255, 0.25);
+}
+
+#performanceTabs .nav-link.active {
+    color: #007bff;
+    background-color: #fff;
+    border-bottom-color: #007bff;
+    font-weight: 600;
+}
+
+@media (min-width: 992px) {
+    #performanceTabs .nav-item { flex: 1 1 25%; }
+}
+
+@media (max-width: 576px) {
+    #performanceTabs .nav-link { padding: 10px 6px; font-size: 0.85rem; }
+}
+
+/* Cards de Métricas */
+.metric-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #007bff !important;
+}
+
+/* Cards de Ferramentas */
+.tool-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.tool-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.tool-icon {
+    transition: all 0.3s ease;
+}
+
+.tool-card:hover .tool-icon i {
+    transform: scale(1.1);
+}
+
+/* Cards de Cache */
+.cache-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.cache-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cache-icon {
+    transition: all 0.3s ease;
+}
+
+.cache-card:hover .cache-icon i {
+    transform: scale(1.1);
+}
+
+/* Animações */
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Badges */
+.badge {
+    font-size: 0.75em;
+    padding: 0.25em 0.5em;
+}
+
+/* Responsividade de Cards */
+@media (max-width: 576px) {
+    .metric-card h4 {
+        font-size: 1.25rem;
+    }
+    
+    .metric-card i.fa-2x {
+        font-size: 1.5rem;
+    }
+    
+    .tool-icon i.fa-3x {
+        font-size: 2rem;
+    }
+    
+    .cache-icon i.fa-3x {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}
+
 {% block config_content %}
-<!-- Abas de Navegação -->
+<!-- Abas de Navegação Responsivas -->
 <div class="config-tabs mb-4">
-    <ul class="nav nav-tabs" id="performanceTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
-                <i class="fas fa-tachometer-alt me-1"></i> Visão Geral
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="database-tab" data-bs-toggle="tab" data-bs-target="#database" type="button" role="tab">
-                <i class="fas fa-database me-1"></i> Banco de Dados
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="cache-tab" data-bs-toggle="tab" data-bs-target="#cache" type="button" role="tab">
-                <i class="fas fa-memory me-1"></i> Cache
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="monitoring-tab" data-bs-toggle="tab" data-bs-target="#monitoring" type="button" role="tab">
-                <i class="fas fa-eye me-1"></i> Monitoramento
-            </button>
-        </li>
-    </ul>
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-tabs nav-justified w-100 flex-wrap" id="performanceTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                        <i class="fas fa-tachometer-alt me-2"></i> Visão Geral
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="database-tab" data-bs-toggle="tab" data-bs-target="#database" type="button" role="tab">
+                        <i class="fas fa-database me-2"></i> Banco de Dados
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="cache-tab" data-bs-toggle="tab" data-bs-target="#cache" type="button" role="tab">
+                        <i class="fas fa-memory me-2"></i> Cache
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="monitoring-tab" data-bs-toggle="tab" data-bs-target="#monitoring" type="button" role="tab">
+                        <i class="fas fa-eye me-2"></i> Monitoramento
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
 </div>
 
 <div class="tab-content" id="performanceTabsContent">
@@ -68,565 +229,77 @@
                             </div>
                             <div class="card-body">
                                 <div class="row text-center">
-                                    <div class="col-md-3">
-                                        <div class="status-indicator">
+                                    <div class="col-6 col-md-3 mb-3">
+                                        <div class="metric-card p-3 border rounded h-100">
                                             <i class="fas fa-microchip fa-2x text-success mb-2"></i>
-                                            <h4 class="mb-0 text-success" id="cpuUsage">24%</h4>
+                                            <h4 class="mb-0 text-success" id="cpuUsage">{{ system_stats.cpu_usage }}</h4>
                                             <small class="text-muted">CPU</small>
                                             <div class="progress mt-2" style="height: 6px;">
                                                 <div class="progress-bar bg-success" id="cpuProgress" style="width: 24%"></div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="status-indicator">
+                                    <div class="col-6 col-md-3 mb-3">
+                                        <div class="metric-card p-3 border rounded h-100">
                                             <i class="fas fa-memory fa-2x text-info mb-2"></i>
-                                            <h4 class="mb-0 text-info" id="memoryUsage">1.2GB</h4>
+                                            <h4 class="mb-0 text-info" id="memoryUsage">{{ system_stats.memory_used }}</h4>
                                             <small class="text-muted">Memória</small>
                                             <div class="progress mt-2" style="height: 6px;">
                                                 <div class="progress-bar bg-info" id="memoryProgress" style="width: 60%"></div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="status-indicator">
+                                    <div class="col-6 col-md-3 mb-3">
+                                        <div class="metric-card p-3 border rounded h-100">
                                             <i class="fas fa-hdd fa-2x text-warning mb-2"></i>
-                                            <h4 class="mb-0 text-warning" id="diskUsage">45%</h4>
+                                            <h4 class="mb-0 text-warning" id="diskUsage">{{ system_stats.disk_io }}</h4>
                                             <small class="text-muted">Disco</small>
                                             <div class="progress mt-2" style="height: 6px;">
                                                 <div class="progress-bar bg-warning" id="diskProgress" style="width: 45%"></div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="status-indicator">
+                                    <div class="col-6 col-md-3 mb-3">
+                                        <div class="metric-card p-3 border rounded h-100">
                                             <i class="fas fa-clock fa-2x text-primary mb-2"></i>
-                                            <h4 class="mb-0 text-primary" id="responseTime">245ms</h4>
-                                            <small class="text-muted">Resposta</small>
+                                            <h4 class="mb-0 text-primary" id="responseTime">{{ system_stats.avg_response_time }}</h4>
+                                            <small class="text-muted">Tempo Resposta</small>
                                             <div class="progress mt-2" style="height: 6px;">
-                                                <div class="progress-bar bg-primary" id="responseProgress" style="width: 25%"></div>
+                                                <div class="progress-bar bg-primary" id="responseProgress" style="width: 30%"></div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row mt-3">
-                                    <div class="col-12">
-                                        <div class="d-flex justify-content-center">
-                                            <small class="text-muted">
-                                                <i class="fas fa-circle text-success me-1"></i>Atualizado há 5 segundos
-                                                <span class="mx-2">•</span>
-                                                <i class="fas fa-server me-1"></i>Servidor: Online
-                                                <span class="mx-2">•</span>
-                                                <i class="fas fa-users me-1"></i>Usuários Ativos: 12
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Gráfico de Performance Histórica -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-chart-area me-2"></i>
-                                    Performance nas Últimas 24 Horas
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="performanceChart" width="100%" height="200"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Ferramentas de Otimização -->
-                <div class="row mb-4">
+                <div class="row">
                     <div class="col-12">
                         <h5 class="mb-3">
                             <i class="fas fa-tools me-2"></i>
                             Ferramentas de Otimização
                         </h5>
-                    </div>
-                    <div class="col-12">
-                        <div class="row">
-                            <!-- Cache Management -->
-                            <div class="col-md-6 col-lg-4 mb-3">
-                                <div class="card h-100 optimization-tool" data-tool="cache">
-                                    <div class="card-header bg-primary text-white">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>
-                                                <i class="fas fa-memory me-2"></i>
-                                                Gerenciamento de Cache
-                                            </span>
-                                            <span class="badge bg-light text-primary">Ativo</span>
+                        <div class="row g-3">
+                            {% for tool in optimization_tools %}
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <div class="tool-card card h-100">
+                                    <div class="card-body text-center p-3">
+                                        <div class="tool-icon mb-3">
+                                            <i class="fas fa-{{ tool.icon }} fa-3x text-{{ tool.color }}"></i>
                                         </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="card-text text-muted small mb-3">
-                                            Limpa caches de sistema, templates e consultas para liberar memória
-                                        </p>
-                                        <div class="mb-2">
-                                            <strong>Status:</strong>
-                                            <span class="badge bg-success ms-2">Pronto</span>
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Última execução:</strong>
-                                            <small class="text-muted">há 2 horas</small>
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Impacto esperado:</strong>
-                                            <small class="text-muted">Liberação de ~150MB RAM</small>
-                                        </div>
-                                    </div>
-                                    <div class="card-footer bg-light">
-                                        <div class="btn-group w-100">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="clearCache()">
-                                                <i class="fas fa-play me-1"></i> Executar
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-info" onclick="viewCacheStats()">
-                                                <i class="fas fa-chart-bar me-1"></i> Estatísticas
-                                            </button>
-                                        </div>
+                                        <h6 class="card-title mb-2">{{ tool.title }}</h6>
+                                        <p class="card-text small text-muted mb-2">{{ tool.description }}</p>
+                                        <small class="text-muted d-block mb-3">Última execução: {{ tool.last_execution }}</small>
+                                        <button type="button" class="btn btn-{{ tool.color }} btn-sm w-100" onclick="executeTool('{{ tool.name }}')">
+                                            <i class="fas fa-play me-1"></i> Executar
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Database Optimization -->
-                            <div class="col-md-6 col-lg-4 mb-3">
-                                <div class="card h-100 optimization-tool" data-tool="database">
-                                    <div class="card-header bg-success text-white">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>
-                                                <i class="fas fa-database me-2"></i>
-                                                Otimização de Banco
-                                            </span>
-                                            <span class="badge bg-light text-success">Disponível</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="card-text text-muted small mb-3">
-                                            Reconstroi índices, otimiza queries e compacta tabelas
-                                        </p>
-                                        <div class="mb-2">
-                                            <strong>Status:</strong>
-                                            <span class="badge bg-success ms-2">Pronto</span>
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Última execução:</strong>
-                                            <small class="text-muted">há 1 dia</small>
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Impacto esperado:</strong>
-                                            <small class="text-muted">Melhoria de 40% em queries</small>
-                                        </div>
-                                    </div>
-                                    <div class="card-footer bg-light">
-                                        <div class="btn-group w-100">
-                                            <button type="button" class="btn btn-sm btn-outline-success" onclick="optimizeDatabase()">
-                                                <i class="fas fa-play me-1"></i> Executar
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-info" onclick="viewQueryStats()">
-                                                <i class="fas fa-chart-bar me-1"></i> Queries
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- System Cleanup -->
-                            <div class="col-md-6 col-lg-4 mb-3">
-                                <div class="card h-100 optimization-tool" data-tool="cleanup">
-                                    <div class="card-header bg-warning text-dark">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>
-                                                <i class="fas fa-broom me-2"></i>
-                                                Limpeza do Sistema
-                                            </span>
-                                            <span class="badge bg-light text-warning">Recomendado</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="card-text text-muted small mb-3">
-                                            Remove arquivos temporários, logs antigos e dados obsoletos
-                                        </p>
-                                        <div class="mb-2">
-                                            <strong>Status:</strong>
-                                            <span class="badge bg-warning text-dark ms-2">Aguardando</span>
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Última execução:</strong>
-                                            <small class="text-muted">há 3 dias</small>
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Impacto esperado:</strong>
-                                            <small class="text-muted">Liberação de ~2.3GB espaço</small>
-                                        </div>
-                                    </div>
-                                    <div class="card-footer bg-light">
-                                        <div class="btn-group w-100">
-                                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="systemCleanup()">
-                                                <i class="fas fa-play me-1"></i> Executar
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-info" onclick="viewCleanupStats()">
-                                                <i class="fas fa-chart-bar me-1"></i> Análise
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Memory Optimization -->
-                            <div class="col-md-6 col-lg-4 mb-3">
-                                <div class="card h-100 optimization-tool" data-tool="memory">
-                                    <div class="card-header bg-info text-white">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>
-                                                <i class="fas fa-brain me-2"></i>
-                                                Otimização de Memória
-                                            </span>
-                                            <span class="badge bg-light text-info">Automática</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="card-text text-muted small mb-3">
-                                            Gerencia alocação de memória e previne vazamentos
-                                        </p>
-                                        <div class="mb-2">
-                                            <strong>Status:</strong>
-                                            <span class="badge bg-success ms-2">Ativo</span>
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Última execução:</strong>
-                                            <small class="text-muted">há 30 min</small>
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Impacto esperado:</strong>
-                                            <small class="text-muted">Redução de 25% uso memória</small>
-                                        </div>
-                                    </div>
-                                    <div class="card-footer bg-light">
-                                        <div class="btn-group w-100">
-                                            <button type="button" class="btn btn-sm btn-outline-info" onclick="optimizeMemory()">
-                                                <i class="fas fa-play me-1"></i> Executar
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="viewMemoryStats()">
-                                                <i class="fas fa-chart-bar me-1"></i> Memória
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Connection Pooling -->
-                            <div class="col-md-6 col-lg-4 mb-3">
-                                <div class="card h-100 optimization-tool" data-tool="connections">
-                                    <div class="card-header bg-dark text-white">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>
-                                                <i class="fas fa-network-wired me-2"></i>
-                                                Pool de Conexões
-                                            </span>
-                                            <span class="badge bg-light text-dark">Configurado</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="card-text text-muted small mb-3">
-                                            Otimiza pool de conexões de banco e rede
-                                        </p>
-                                        <div class="mb-2">
-                                            <strong>Status:</strong>
-                                            <span class="badge bg-success ms-2">Otimizado</span>
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Última execução:</strong>
-                                            <small class="text-muted">há 1 hora</small>
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Impacto esperado:</strong>
-                                            <small class="text-muted">Redução de 60% latência</small>
-                                        </div>
-                                    </div>
-                                    <div class="card-footer bg-light">
-                                        <div class="btn-group w-100">
-                                            <button type="button" class="btn btn-sm btn-outline-dark" onclick="optimizeConnections()">
-                                                <i class="fas fa-play me-1"></i> Executar
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-info" onclick="viewConnectionStats()">
-                                                <i class="fas fa-chart-bar me-1"></i> Conexões
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- File System Optimization -->
-                            <div class="col-md-6 col-lg-4 mb-3">
-                                <div class="card h-100 optimization-tool" data-tool="filesystem">
-                                    <div class="card-header bg-secondary text-white">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>
-                                                <i class="fas fa-folder-open me-2"></i>
-                                                Sistema de Arquivos
-                                            </span>
-                                            <span class="badge bg-light text-secondary">Manual</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="card-text text-muted small mb-3">
-                                            Otimiza estrutura de arquivos e permissões
-                                        </p>
-                                        <div class="mb-2">
-                                            <strong>Status:</strong>
-                                            <span class="badge bg-secondary ms-2">Pendente</span>
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Última execução:</strong>
-                                            <small class="text-muted">há 1 semana</small>
-                                        </div>
-                                        <div class="mb-2">
-                                            <strong>Impacto esperado:</strong>
-                                            <small class="text-muted">Melhoria de 15% I/O</small>
-                                        </div>
-                                    </div>
-                                    <div class="card-footer bg-light">
-                                        <div class="btn-group w-100">
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="optimizeFilesystem()">
-                                                <i class="fas fa-play me-1"></i> Executar
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-info" onclick="viewFileStats()">
-                                                <i class="fas fa-chart-bar me-1"></i> Arquivos
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Aba Banco de Dados -->
-        <div class="tab-pane fade" id="database" role="tabpanel">
-            <div class="config-card">
-                <div class="config-card-header">
-                    <h3 class="mb-0">
-                        <i class="fas fa-database me-2"></i>
-                        Otimizações de Banco de Dados
-                    </h3>
-                    <p class="text-muted mb-0 mt-1">Ferramentas específicas para otimização do PostgreSQL</p>
-                </div>
-                <div class="config-card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h6 class="mb-0">Estatísticas do Banco</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="mb-2">
-                                        <strong>Tamanho do Banco:</strong> 2.4 GB
-                                    </div>
-                                    <div class="mb-2">
-                                        <strong>Conexões Ativas:</strong> 12/50
-                                    </div>
-                                    <div class="mb-2">
-                                        <strong>Queries por Segundo:</strong> 45.2
-                                    </div>
-                                    <div class="mb-2">
-                                        <strong>Cache Hit Ratio:</strong> 94.7%
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h6 class="mb-0">Queries Lentas (Top 5)</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm">
-                                            <thead>
-                                                <tr>
-                                                    <th>Query</th>
-                                                    <th>Tempo</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>SELECT equipment...</td>
-                                                    <td>2.3s</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>UPDATE tasks...</td>
-                                                    <td>1.8s</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="d-flex gap-2 flex-wrap">
-                                <button type="button" class="btn btn-success" onclick="rebuildIndexes()">
-                                    <i class="fas fa-wrench me-1"></i> Recriar Índices
-                                </button>
-                                <button type="button" class="btn btn-info" onclick="analyzeTables()">
-                                    <i class="fas fa-chart-bar me-1"></i> Analisar Tabelas
-                                </button>
-                                <button type="button" class="btn btn-warning" onclick="vacuumDatabase()">
-                                    <i class="fas fa-broom me-1"></i> Vacuum Database
-                                </button>
-                                <button type="button" class="btn btn-danger" onclick="reindexDatabase()">
-                                    <i class="fas fa-sync me-1"></i> Reindex Completo
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Aba Cache -->
-        <div class="tab-pane fade" id="cache" role="tabpanel">
-            <div class="config-card">
-                <div class="config-card-header">
-                    <h3 class="mb-0">
-                        <i class="fas fa-memory me-2"></i>
-                        Gerenciamento de Cache
-                    </h3>
-                    <p class="text-muted mb-0 mt-1">Configuração e monitoramento de sistemas de cache</p>
-                </div>
-                <div class="config-card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <i class="fas fa-layer-group fa-2x text-primary mb-2"></i>
-                                    <h5>Redis Cache</h5>
-                                    <p class="text-success">Conectado</p>
-                                    <small>Hit Rate: 89.2%</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <i class="fas fa-database fa-2x text-info mb-2"></i>
-                                    <h5>Query Cache</h5>
-                                    <p class="text-success">Ativo</p>
-                                    <small>Queries: 1,234</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <i class="fas fa-file-code fa-2x text-warning mb-2"></i>
-                                    <h5>Template Cache</h5>
-                                    <p class="text-success">Ativo</p>
-                                    <small>Templates: 45</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="d-flex gap-2 flex-wrap">
-                                <button type="button" class="btn btn-primary" onclick="clearRedisCache()">
-                                    <i class="fas fa-trash me-1"></i> Limpar Redis
-                                </button>
-                                <button type="button" class="btn btn-info" onclick="clearQueryCache()">
-                                    <i class="fas fa-database me-1"></i> Limpar Query Cache
-                                </button>
-                                <button type="button" class="btn btn-warning" onclick="clearTemplateCache()">
-                                    <i class="fas fa-file-code me-1"></i> Limpar Template Cache
-                                </button>
-                                <button type="button" class="btn btn-success" onclick="warmupCache()">
-                                    <i class="fas fa-fire me-1"></i> Aquecer Cache
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Aba Monitoramento -->
-        <div class="tab-pane fade" id="monitoring" role="tabpanel">
-            <div class="config-card">
-                <div class="config-card-header">
-                    <h3 class="mb-0">
-                        <i class="fas fa-eye me-2"></i>
-                        Monitoramento de Performance
-                    </h3>
-                    <p class="text-muted mb-0 mt-1">Monitoramento contínuo e alertas de performance</p>
-                </div>
-                <div class="config-card-body">
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Monitoramento Ativo:</strong> Sistema monitorando performance em tempo real com alertas automáticos.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h5>Thresholds de Alerta</h5>
-                            <div class="mb-3">
-                                <label>CPU > 80%</label>
-                                <input type="range" class="form-range" min="50" max="95" value="80">
-                            </div>
-                            <div class="mb-3">
-                                <label>Memória > 85%</label>
-                                <input type="range" class="form-range" min="60" max="95" value="85">
-                            </div>
-                            <div class="mb-3">
-                                <label>Resposta > 2s</label>
-                                <input type="range" class="form-range" min="500" max="5000" value="2000" step="100">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h5>Alertas Recentes</h5>
-                            <div class="alert alert-warning py-2">
-                                <small><i class="fas fa-clock me-1"></i> CPU alta detectada há 15 min</small>
-                            </div>
-                            <div class="alert alert-success py-2">
-                                <small><i class="fas fa-check me-1"></i> Otimização concluída há 2h</small>
-                            </div>
-                            <div class="alert alert-info py-2">
-                                <small><i class="fas fa-info me-1"></i> Backup automático realizado há 4h</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-success" onclick="startMonitoring()">
-                                    <i class="fas fa-play me-1"></i> Iniciar Monitoramento
-                                </button>
-                                <button type="button" class="btn btn-danger" onclick="stopMonitoring()">
-                                    <i class="fas fa-stop me-1"></i> Parar Monitoramento
-                                </button>
-                                <button type="button" class="btn btn-info" onclick="viewMonitoringLogs()">
-                                    <i class="fas fa-history me-1"></i> Ver Logs
-                                </button>
-                            </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -634,6 +307,266 @@
         </div>
     </div>
 
+    <!-- Aba Banco de Dados -->
+    <div class="tab-pane fade" id="database" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-database me-2"></i>
+                    Otimizações de Banco de Dados
+                </h3>
+                <p class="text-muted mb-0 mt-1">Ferramentas específicas para otimização do PostgreSQL</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row mb-4">
+                    <div class="col-12 col-lg-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-chart-bar me-2"></i>
+                                    Estatísticas do Banco
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6 mb-2">
+                                        <small class="text-muted">Tamanho</small>
+                                        <div class="fw-bold">2.4 GB</div>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <small class="text-muted">Conexões</small>
+                                        <div class="fw-bold">12/50</div>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <small class="text-muted">Queries/s</small>
+                                        <div class="fw-bold">45.2</div>
+                                    </div>
+                                    <div class="col-6 mb-2">
+                                        <small class="text-muted">Cache Hit</small>
+                                        <div class="fw-bold text-success">94.7%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-clock me-2"></i>
+                                    Queries Lentas (Top 5)
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Query</th>
+                                                <th>Tempo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><small>SELECT equipment...</small></td>
+                                                <td><span class="badge bg-danger">2.3s</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><small>UPDATE tasks...</small></td>
+                                                <td><span class="badge bg-warning">1.8s</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-grid gap-2 d-md-flex flex-wrap">
+                            <button type="button" class="btn btn-success" onclick="rebuildIndexes()">
+                                <i class="fas fa-wrench me-1"></i> Recriar Índices
+                            </button>
+                            <button type="button" class="btn btn-info" onclick="analyzeTables()">
+                                <i class="fas fa-chart-bar me-1"></i> Analisar Tabelas
+                            </button>
+                            <button type="button" class="btn btn-warning" onclick="vacuumDatabase()">
+                                <i class="fas fa-broom me-1"></i> Vacuum Database
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="reindexDatabase()">
+                                <i class="fas fa-sync me-1"></i> Reindex Completo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba Cache -->
+    <div class="tab-pane fade" id="cache" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-memory me-2"></i>
+                    Gerenciamento de Cache
+                </h3>
+                <p class="text-muted mb-0 mt-1">Configuração e monitoramento de sistemas de cache</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row mb-4">
+                    <div class="col-12 col-sm-6 col-lg-4 mb-3">
+                        <div class="cache-card card h-100">
+                            <div class="card-body text-center">
+                                <div class="cache-icon mb-3">
+                                    <i class="fas fa-layer-group fa-3x text-primary"></i>
+                                </div>
+                                <h5 class="card-title">Redis Cache</h5>
+                                <p class="text-success mb-1">Conectado</p>
+                                <small class="text-muted">Hit Rate: 89.2%</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-4 mb-3">
+                        <div class="cache-card card h-100">
+                            <div class="card-body text-center">
+                                <div class="cache-icon mb-3">
+                                    <i class="fas fa-database fa-3x text-info"></i>
+                                </div>
+                                <h5 class="card-title">Query Cache</h5>
+                                <p class="text-success mb-1">Ativo</p>
+                                <small class="text-muted">Queries: 1,234</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-4 mb-3">
+                        <div class="cache-card card h-100">
+                            <div class="card-body text-center">
+                                <div class="cache-icon mb-3">
+                                    <i class="fas fa-file-code fa-3x text-warning"></i>
+                                </div>
+                                <h5 class="card-title">Template Cache</h5>
+                                <p class="text-success mb-1">Ativo</p>
+                                <small class="text-muted">Templates: 45</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-grid gap-2 d-md-flex flex-wrap">
+                            <button type="button" class="btn btn-primary" onclick="clearRedisCache()">
+                                <i class="fas fa-trash me-1"></i> Limpar Redis
+                            </button>
+                            <button type="button" class="btn btn-info" onclick="clearQueryCache()">
+                                <i class="fas fa-database me-1"></i> Limpar Query Cache
+                            </button>
+                            <button type="button" class="btn btn-warning" onclick="clearTemplateCache()">
+                                <i class="fas fa-file-code me-1"></i> Limpar Template Cache
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="warmupCache()">
+                                <i class="fas fa-fire me-1"></i> Aquecer Cache
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aba Monitoramento -->
+    <div class="tab-pane fade" id="monitoring" role="tabpanel">
+        <div class="config-card">
+            <div class="config-card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-eye me-2"></i>
+                    Monitoramento de Performance
+                </h3>
+                <p class="text-muted mb-0 mt-1">Monitoramento contínuo e alertas de performance</p>
+            </div>
+            <div class="config-card-body">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Monitoramento Ativo:</strong> Sistema monitorando performance em tempo real com alertas automáticos.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-lg-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-sliders-h me-2"></i>
+                                    Thresholds de Alerta
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label small">CPU > 80%</label>
+                                    <input type="range" class="form-range" min="50" max="95" value="80">
+                                    <small class="text-muted">Alertar quando CPU exceder 80%</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small">Memória > 85%</label>
+                                    <input type="range" class="form-range" min="60" max="95" value="85">
+                                    <small class="text-muted">Alertar quando memória exceder 85%</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small">Resposta > 2s</label>
+                                    <input type="range" class="form-range" min="500" max="5000" value="2000" step="100">
+                                    <small class="text-muted">Alertar quando tempo > 2 segundos</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-bell me-2"></i>
+                                    Alertas Recentes
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-warning py-2 mb-2">
+                                    <small><i class="fas fa-clock me-1"></i> CPU alta detectada há 15 min</small>
+                                </div>
+                                <div class="alert alert-success py-2 mb-2">
+                                    <small><i class="fas fa-check me-1"></i> Otimização concluída há 2h</small>
+                                </div>
+                                <div class="alert alert-info py-2 mb-2">
+                                    <small><i class="fas fa-info me-1"></i> Backup automático realizado há 4h</small>
+                                </div>
+                                <div class="alert alert-secondary py-2">
+                                    <small><i class="fas fa-database me-1"></i> Vacuum executado há 6h</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="d-grid gap-2 d-md-flex flex-wrap">
+                            <button type="button" class="btn btn-success" onclick="startMonitoring()">
+                                <i class="fas fa-play me-1"></i> Iniciar Monitoramento
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="stopMonitoring()">
+                                <i class="fas fa-stop me-1"></i> Parar Monitoramento
+                            </button>
+                            <button type="button" class="btn btn-info" onclick="viewMonitoringLogs()">
+                                <i class="fas fa-history me-1"></i> Ver Logs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -1,6 +1,6 @@
 
 // Configuração da versão do cache
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.1.3';
 const CACHE_NAME = `ti-reminder-v${APP_VERSION}`;
 const OFFLINE_URL = '/static/offline.html';
 const CACHE_EXPIRATION_DAYS = 7;
@@ -19,7 +19,11 @@ const STATIC_ASSETS = [
     { url: '/static/js/components.min.js', type: CACHE_STRATEGIES.STATIC },
     { url: '/static/js/notifications.min.js', type: CACHE_STRATEGIES.STATIC },
     { url: '/static/manifest.json', type: CACHE_STRATEGIES.STATIC },
+    { url: '/static/favicon.ico', type: CACHE_STRATEGIES.IMAGE },
+    { url: '/static/icons/logo.svg', type: CACHE_STRATEGIES.IMAGE },
     { url: '/static/icons/icon-192x192.png', type: CACHE_STRATEGIES.IMAGE },
+    { url: '/static/icons/icon-180x180.png', type: CACHE_STRATEGIES.IMAGE },
+    { url: '/static/icons/icon-512x512.png', type: CACHE_STRATEGIES.IMAGE },
     { url: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css', type: CACHE_STRATEGIES.STATIC },
     { url: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js', type: CACHE_STRATEGIES.STATIC },
     { url: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', type: CACHE_STRATEGIES.STATIC },
@@ -127,7 +131,7 @@ self.addEventListener('activate', event => {
 // Determinar a estratégia de cache com base na URL
 const getCacheStrategy = (url) => {
     if (url.pathname.startsWith('/api/')) return CACHE_STRATEGIES.API;
-    if (url.pathname.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) return CACHE_STRATEGIES.IMAGE;
+    if (url.pathname.match(/\.(jpg|jpeg|png|webp|gif|svg|ico)$/i)) return CACHE_STRATEGIES.IMAGE;
     if (url.pathname.startsWith('/static/')) return CACHE_STRATEGIES.STATIC;
     return null;
 };
@@ -232,24 +236,6 @@ self.addEventListener('fetch', event => {
             })
         );
     }
-                        // Cache páginas importantes
-                        if (fetchResponse.status === 200) {
-                            const responseClone = fetchResponse.clone();
-                            caches.open(CACHE_NAME)
-                                .then(cache => {
-                                    cache.put(request, responseClone);
-                                });
-                        }
-                        return fetchResponse;
-                    })
-                    .catch(() => {
-                        // Página offline para navegação
-                        if (request.mode === 'navigate') {
-                            return caches.match(OFFLINE_URL);
-                        }
-                    });
-            })
-    );
 });
 
 // Background Sync para dados offline

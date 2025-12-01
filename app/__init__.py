@@ -32,6 +32,9 @@ from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
+from io import BytesIO
+from PIL import Image
+
 from .email_utils import mail_init_app
 
 mail = Mail()
@@ -139,6 +142,62 @@ def create_app():
     migrate.init_app(app, db)
     bootstrap.init_app(app)
     
+    def ensure_icons():
+        icons_dir = os.path.join(app.static_folder, 'icons')
+        svg_path = os.path.join(icons_dir, 'logo.svg')
+        if not os.path.exists(svg_path):
+            return
+        try:
+            import cairosvg  # opcional
+        except Exception:
+            cairosvg = None
+
+        def render_svg(size):
+            if not cairosvg:
+                return None
+            with open(svg_path, 'rb') as f:
+                data = f.read()
+            return cairosvg.svg2png(bytestring=data, output_width=size, output_height=size)
+
+        targets = [
+            (144, 'icon-144x144.png'),
+            (180, 'icon-180x180.png'),
+            (192, 'icon-192x192.png'),
+            (512, 'icon-512x512.png'),
+        ]
+        updated = False
+        for size, filename in targets:
+            out_path = os.path.join(icons_dir, filename)
+            if not os.path.exists(out_path) and render_svg(size):
+                png_bytes = render_svg(size)
+                if png_bytes:
+                    with open(out_path, 'wb') as w:
+                        w.write(png_bytes)
+                    updated = True
+
+        ico_path = os.path.join(app.static_folder, 'favicon.ico')
+        if not os.path.exists(ico_path):
+            png16 = render_svg(16)
+            png32 = render_svg(32)
+            if png16 and png32:
+                im32 = Image.open(BytesIO(png32)).convert('RGBA')
+                im32.save(ico_path, format='ICO', sizes=[(16, 16), (32, 32)])
+                updated = True
+            else:
+                png192_path = os.path.join(icons_dir, 'icon-192x192.png')
+                if os.path.exists(png192_path):
+                    im = Image.open(png192_path).convert('RGBA')
+                    im.save(ico_path, format='ICO', sizes=[(16, 16), (32, 32)])
+                    updated = True
+
+        if updated:
+            app.logger.info('Icon assets ensured/updated')
+
+    try:
+        ensure_icons()
+    except Exception as e:
+        app.logger.warning('Icon generation skipped: %s', e)
+
     # Configurar headers de segurança HTTP manualmente
     @app.after_request
     def set_security_headers(response):
@@ -198,7 +257,7 @@ def create_app():
         chamados_abertos_count = 0
         
         # Verifica se o usuário está autenticado
-        if current_user.is_authenticated:
+        if current_user and hasattr(current_user, 'is_authenticated') and current_user.is_authenticated:
             # Contagem de equipamentos pendentes (apenas Admin/TI)
             if current_user.is_admin or current_user.is_ti:
                 try:

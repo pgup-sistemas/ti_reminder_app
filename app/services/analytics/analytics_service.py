@@ -25,9 +25,24 @@ class AnalyticsService:
             Lista de dicionários com período e total
         """
         try:
-            # PostgreSQL date_trunc
+            # SQLite não tem date_trunc, usamos strftime
+            if group_by == 'day':
+                date_format = '%Y-%m-%d'
+                periodo_expr = func.strftime(date_format, Chamado.data_abertura).label('periodo')
+            elif group_by == 'week':
+                # Para semana, usamos o início da semana (SQLite calcula semana do ano)
+                date_format = '%Y-%W'
+                periodo_expr = func.strftime(date_format, Chamado.data_abertura).label('periodo')
+            elif group_by == 'month':
+                date_format = '%Y-%m'
+                periodo_expr = func.strftime(date_format, Chamado.data_abertura).label('periodo')
+            else:
+                # Default para dia
+                date_format = '%Y-%m-%d'
+                periodo_expr = func.strftime(date_format, Chamado.data_abertura).label('periodo')
+            
             query = db.session.query(
-                func.date_trunc(group_by, Chamado.data_abertura).label('periodo'),
+                periodo_expr,
                 func.count(Chamado.id).label('total')
             ).filter(
                 Chamado.data_abertura.between(start_date, end_date)
@@ -36,7 +51,7 @@ class AnalyticsService:
             results = query.all()
             return [
                 {
-                    'periodo': r.periodo.strftime('%Y-%m-%d') if r.periodo else '',
+                    'periodo': r.periodo or '',
                     'total': r.total
                 }
                 for r in results
@@ -150,10 +165,10 @@ class AnalyticsService:
                 {
                     'tecnico': r.username,
                     'email': r.email,
-                    'total': r.total_chamados,
+                    'total': r.total_chamados or 0,
                     'tempo_medio': round(r.tempo_medio or 0, 2),
                     'sla_cumprido': r.sla_cumprido or 0,
-                    'sla_taxa': round((r.sla_cumprido / r.total_chamados * 100) if r.total_chamados > 0 else 0, 1)
+                    'sla_taxa': round(((r.sla_cumprido or 0) / (r.total_chamados or 1) * 100), 1)
                 }
                 for r in query
             ]
@@ -323,8 +338,9 @@ class AnalyticsService:
             hoje = datetime.now().date()
             data_inicio = hoje - timedelta(days=meses * 30)
             
+            # SQLite não tem date_trunc, usamos strftime
             query = db.session.query(
-                func.date_trunc('month', Chamado.satisfaction_date).label('mes'),
+                func.strftime('%Y-%m', Chamado.satisfaction_date).label('mes'),
                 func.avg(Chamado.satisfaction_rating).label('media')
             ).filter(
                 Chamado.satisfaction_date >= data_inicio,
@@ -333,8 +349,8 @@ class AnalyticsService:
             
             return [
                 {
-                    'mes': r.mes.strftime('%Y-%m') if r.mes else '',
-                    'media': round(r.media, 1)
+                    'mes': r.mes or '',
+                    'media': round(r.media, 1) if r.media else 0
                 }
                 for r in query
             ]

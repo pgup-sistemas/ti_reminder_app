@@ -136,46 +136,6 @@ mark {
   color: var(--dark);
 }
 
-/* Layout Flexbox para Footer Fixo - Força Aplicação */
-body.d-flex.flex-column.min-vh-100 {
-  min-height: 100vh !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-body {
-  min-height: 100vh !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-main.flex-grow-1 {
-  flex: 1 !important;
-  flex-grow: 1 !important;
-}
-
-footer.footer.mt-auto {
-  margin-top: auto !important;
-  flex-shrink: 0 !important;
-  background: #f8f9fa !important;
-  border-top: 1px solid #dee2e6 !important;
-}
-
-.main-content {
-  flex: 1 !important;
-  flex-grow: 1 !important;
-}
-
-.footer.mt-auto {
-  flex-shrink: 0 !important;
-  margin-top: auto !important;
-}
-
-.footer {
-  flex-shrink: 0 !important;
-  margin-top: auto !important;
-}
-
 /* Classes de utilidade */
 .text-muted {
   color: var(--text-muted) !important;
@@ -194,27 +154,6 @@ footer.footer.mt-auto {
   transition: background-color var(--transition), 
               color var(--transition), 
               border-color var(--transition);
-}
-
-/* Força o layout correto em todas as situações */
-html, body {
-  height: 100% !important;
-  min-height: 100vh !important;
-}
-
-body {
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-main {
-  flex: 1 !important;
-  flex-grow: 1 !important;
-}
-
-footer {
-  flex-shrink: 0 !important;
-  margin-top: auto !important;
 }
 
 /* Ajustes de impressão */

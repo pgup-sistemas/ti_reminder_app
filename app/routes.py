@@ -5,7 +5,7 @@ from functools import wraps
 
 from dateutil.relativedelta import relativedelta
 from flask import (Blueprint, current_app, flash, jsonify, redirect,
-                   render_template, request, session, url_for)
+                   render_template, request, session, url_for, send_from_directory)
 from app.utils import flash_success, flash_error, flash_warning, flash_info
 from werkzeug.utils import secure_filename
 
@@ -63,6 +63,17 @@ def admin_or_ti_required_json(f):
 
 
 bp = Blueprint("main", __name__)
+
+@bp.route('/favicon.ico')
+def favicon():
+    """Serve favicon raiz: ICO se existir, caso contrário SVG."""
+    import os
+    static_dir = current_app.static_folder
+    ico_path = os.path.join(static_dir, 'favicon.ico')
+    if os.path.exists(ico_path):
+        return send_from_directory(static_dir, 'favicon.ico', mimetype='image/x-icon')
+    icons_dir = os.path.join(static_dir, 'icons')
+    return send_from_directory(icons_dir, 'logo.svg', mimetype='image/svg+xml')
 
 
 @bp.route("/")
@@ -2485,7 +2496,7 @@ def export_pdf():
     
     # Adicionar rodapé
     elements.append(Spacer(1, 1*cm))
-    footer_text = f'Documento gerado automaticamente pelo Sistema TI Reminder • {data_hora}'
+    footer_text = f'Documento gerado automaticamente pelo TI OSN System • {data_hora}'
     elements.append(Paragraph(footer_text, subtitle_style))
     
     # Construir PDF

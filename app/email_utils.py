@@ -10,20 +10,77 @@ def mail_init_app(app, mail_instance):
     mail.init_app(app)
 
 
+def configure_mail_from_settings():
+    """Configura Flask-Mail usando as configurações salvas do sistema"""
+    app = current_app
+    
+    # Mapear configurações do sistema para Flask-Mail
+    smtp_server = app.config.get('SMTP_SERVER')
+    smtp_port = app.config.get('SMTP_PORT', 587)
+    smtp_username = app.config.get('SMTP_USERNAME')
+    smtp_use_tls = app.config.get('SMTP_USE_TLS', True)
+    smtp_use_ssl = app.config.get('SMTP_USE_SSL', False)
+    from_email = app.config.get('FROM_EMAIL')
+    from_name = app.config.get('FROM_NAME', 'TI OSN System')
+    
+    # Configurar Flask-Mail
+    if smtp_server:
+        app.config['MAIL_SERVER'] = smtp_server
+        app.config['MAIL_PORT'] = smtp_port
+        app.config['MAIL_USE_TLS'] = smtp_use_tls
+        app.config['MAIL_USE_SSL'] = smtp_use_ssl
+        
+        if smtp_username:
+            app.config['MAIL_USERNAME'] = smtp_username
+            
+            # Obter senha do armazenamento seguro
+            try:
+                from app.services.secure_config_service import SecureConfigService
+                SecureConfigService.ensure_available()
+                smtp_password = SecureConfigService.get_secret("smtp_password")
+                if smtp_password:
+                    app.config['MAIL_PASSWORD'] = smtp_password
+            except Exception:
+                pass  # Senha não configurada
+        
+        # Configurar remetente
+        if from_email:
+            if from_name:
+                app.config['MAIL_DEFAULT_SENDER'] = f"{from_name} <{from_email}>"
+            else:
+                app.config['MAIL_DEFAULT_SENDER'] = from_email
+        
+        # Reconfigurar instância Mail se já existir
+        if hasattr(app, 'extensions') and 'mail' in app.extensions:
+            app.extensions['mail'] = Mail(app)
+        
+        return True
+    
+    return False
+
+
 def send_email(subject, recipients, body, html_body=None):
-    # Ensure we are using the mail instance initialized with the app context
-    # This might require passing 'mail' around or using current_app.extensions['mail']
-    # For simplicity, assuming 'mail' is globally accessible after init
+    """Envia email usando configurações dinâmicas"""
+    # Configurar mail antes de enviar
+    configure_mail_from_settings()
+    
     try:
         msg = Message(subject, recipients=recipients, body=body, html=html_body)
-        # Ensure sender is configured, fallback to default if needed
+        
+        # Garantir remetente
         if not msg.sender:
             msg.sender = current_app.config.get("MAIL_DEFAULT_SENDER")
-        mail.send(msg)
-        print(f"Email sent to {recipients} with subject: {subject}")  # Log success
+        
+        # Usar instância global ou do app
+        mail_instance = current_app.extensions.get('mail', mail)
+        mail_instance.send(msg)
+        
+        current_app.logger.info(f"Email enviado para {recipients} com assunto: {subject}")
+        return True
+        
     except Exception as e:
-        print(f"Error sending email: {e}")  # Log error
-        # Handle error appropriately (log, flash message, etc.)
+        current_app.logger.error(f"Erro ao enviar email: {e}")
+        return False
 
 
 def send_chamado_aberto_email(chamado):

@@ -110,7 +110,6 @@
                             <div class="col-12">
                                 <div class="form-floating">
                                     {{ form.current_password(class="form-control" + (" is-invalid" if form.current_password.errors else ""), placeholder="Senha atual") }}
-                                    {{ form.current_password.label(class="form-label") }}
                                     {% if form.current_password.errors %}
                                         <div class="invalid-feedback">
                                             {% for error in form.current_password.errors %}
@@ -124,7 +123,6 @@
                             <div class="col-12 col-sm-6">
                                 <div class="form-floating">
                                     {{ form.new_password(class="form-control" + (" is-invalid" if form.new_password.errors else ""), placeholder="Nova senha") }}
-                                    {{ form.new_password.label(class="form-label") }}
                                     {% if form.new_password.errors %}
                                         <div class="invalid-feedback">
                                             {% for error in form.new_password.errors %}
@@ -138,7 +136,6 @@
                             <div class="col-12 col-sm-6">
                                 <div class="form-floating">
                                     {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), placeholder="Confirmar nova senha") }}
-                                    {{ form.confirm_password.label(class="form-label") }}
                                     {% if form.confirm_password.errors %}
                                         <div class="invalid-feedback">
                                             {% for error in form.confirm_password.errors %}
